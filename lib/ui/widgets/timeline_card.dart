@@ -224,6 +224,7 @@ class _TimelineCardState extends State<TimelineCard> {
     adventure = widget.event;
     locked = adventure == null ? true : adventure.locked;
     saving = adventure == null ? false : adventure.saving;
+
   }
 
   @override
@@ -255,6 +256,7 @@ class _TimelineCardState extends State<TimelineCard> {
           print('synving end');
           setState(() {
             adventure = state.stories[state.folderID];
+            adventure.subEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
             locked = adventure.locked;
             saving = adventure.saving;
           });

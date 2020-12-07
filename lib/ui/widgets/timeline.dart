@@ -64,6 +64,10 @@ class _TimelineLayoutState extends State<TimelineLayout> {
         if (state.type == TimelineMessageType.updated_stories) {
           setState(() {
             _timelineData = state.stories;
+            _timelineData.forEach((key, story) {
+              story.subEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+            });
+
             loaded = true;
           });
         }

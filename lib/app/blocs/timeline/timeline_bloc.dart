@@ -328,7 +328,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     return completer.future;
   }
 
-  Future _createEventFolder(String parentId, int timestamp, bool mainEvent) async {
+  Future<EventContent> _createEventFolder(String parentId, int timestamp, bool mainEvent) async {
     try {
       var folderID =
           await GoogleDrive.createStory(driveApi, parentId, timestamp);
@@ -340,7 +340,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           subEvents: List(),
           images: Map());
       event.settingsID = await _uploadSettingsFile(folderID, event);
-      await _uploadSettingsFile(folderID, event);
 
       if (mainEvent) {
         TimelineData timelineEvent =
@@ -353,9 +352,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       if (mainEvent) {
         this.add(TimelineEvent(TimelineMessageType.updated_stories));
       }
+      return event;
     } catch (e) {
       print('error: $e');
     }
+
   }
 
   Future<String> _uploadSettingsFile(
@@ -468,10 +469,10 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       EventContent subEvent = localCopy.subEvents[i];
       EventContent cloudSubEvent;
       if (subEvent.folderID.startsWith("temp_")){
-        print('found local subevent');
-        cloudSubEvent = await _createEventFolder(subEvent.folderID, subEvent.timestamp, false);
+        cloudSubEvent = await _createEventFolder(eventFolderID, subEvent.timestamp, false);
         cloudCopy.subEvents.add(cloudSubEvent);
         subEvent.folderID = cloudSubEvent.folderID;
+        subEvent.settingsID = cloudSubEvent.settingsID;
       } else {
         cloudSubEvent = cloudCopy.subEvents
             .singleWhere((element) => element.folderID == subEvent.folderID);
