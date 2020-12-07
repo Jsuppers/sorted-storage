@@ -47,6 +47,7 @@ dependencies:
   url_launcher_web: ^0.1.0
   rxdart: ^0.24.1
   buy_me_a_coffee_widget: ^1.0.1
+  percent_indicator: ^2.1.8
 
 dev_dependencies:
   flutter_test:

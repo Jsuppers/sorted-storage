@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:web/app/models/user.dart';
 import 'package:web/app/services/storage_service.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
@@ -11,6 +12,7 @@ import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/avatar.dart';
+import 'package:web/ui/widgets/usageindicator.dart';
 
 class AvatarWithMenu extends StatelessWidget {
   final User user;
@@ -36,7 +38,8 @@ class AvatarWithMenu extends StatelessWidget {
             child: Column(
               children: [
                 FutureBuilder(
-                  future: GoogleStorageService.getStorageInformation(BlocProvider.of<DriveBloc>(context).state),
+                  future: GoogleStorageService.getStorageInformation(
+                      BlocProvider.of<DriveBloc>(context).state),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return Center(
@@ -48,15 +51,11 @@ class AvatarWithMenu extends StatelessWidget {
                       StorageInformation information = snapshot.data;
                       return MaterialButton(
                         onPressed: () {
-                          BlocProvider.of<NavigationBloc>(context).add(NavigateToUpgradeEvent());
+                          BlocProvider.of<NavigationBloc>(context)
+                              .add(NavigateToUpgradeEvent());
                         },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Balance:"),
-                            Text("${information.usage} / ${information.limit}"),
-                          ],
-                        ),
+                        child: UsageIndicator(
+                            usage: information.usage, limit: information.limit),
                       );
                     }
                     return CircularProgressIndicator();
@@ -70,7 +69,8 @@ class AvatarWithMenu extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0))),
                       onPressed: () {
-                        BlocProvider.of<NavigationBloc>(context).add(NavigateToChangeProfileEvent());
+                        BlocProvider.of<NavigationBloc>(context)
+                            .add(NavigateToChangeProfileEvent());
                       },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -93,8 +93,6 @@ class AvatarWithMenu extends StatelessWidget {
                     ),
                   ),
                 ),
-
-
               ],
             ),
           ),
