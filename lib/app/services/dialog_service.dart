@@ -32,10 +32,11 @@ class ShareWidget extends StatefulWidget {
 }
 
 class _ShareWidgetState extends State<ShareWidget> {
+  bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     bool shared = widget.shared;
-    print('rebuilding $shared');
     TextEditingController controller = new TextEditingController();
 
     if (shared) {
@@ -78,27 +79,12 @@ class _ShareWidgetState extends State<ShareWidget> {
                 child: Text(
                     "To make this event publicly visible click the share button."),
               ),
-        MaterialButton(
-          minWidth: 100,
-          onPressed: () async {
-            if (shared) {
-              BlocProvider.of<SharingBloc>(context).add(StopSharingEvent());
-            } else {
-              BlocProvider.of<SharingBloc>(context).add(StartSharingEvent());
-            }
-          },
-          child: Text(
-            shared ? "stop sharing" : "share",
-            style: myThemeData.textTheme.button,
-          ),
-          color: myThemeData.primaryColorDark,
-          textColor: Colors.white,
-        ),
+        ShareButton(key: Key(DateTime.now().millisecondsSinceEpoch.toString()), shared: shared, loading: false),
         Container(
           padding: EdgeInsets.all(20),
           child: shared
               ? Text(
-                  "Everyone with this link can see your content. Be careful who you give it to!")
+                  "Everyone with this link can see and comment on your content. Be careful who you give it to!")
               : Container(),
         ),
         Padding(
@@ -133,6 +119,50 @@ class _ShareWidgetState extends State<ShareWidget> {
     );
   }
 }
+
+class ShareButton extends StatefulWidget {
+  final bool shared;
+  final bool loading;
+
+  const ShareButton({Key key, this.shared, this.loading}) : super(key: key);
+  @override
+  _ShareButtonState createState() => _ShareButtonState();
+}
+
+class _ShareButtonState extends State<ShareButton> {
+  bool loading;
+
+  @override
+  void initState() {
+    super.initState();
+    loading = widget.loading;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return loading ? StaticLoadingLogo() : MaterialButton(
+      minWidth: 100,
+      onPressed: () async {
+        setState(() {
+          loading = true;
+        });
+        if (widget.shared) {
+          BlocProvider.of<SharingBloc>(context).add(StopSharingEvent());
+        } else {
+          BlocProvider.of<SharingBloc>(context).add(StartSharingEvent());
+        }
+
+      },
+      child: Text(
+        widget.shared ? "stop sharing" : "share",
+        style: myThemeData.textTheme.button,
+      ),
+      color: myThemeData.primaryColorDark,
+      textColor: Colors.white,
+    );
+  }
+}
+
 
 class DialogService {
   static cookieDialog(BuildContext context) {
@@ -203,7 +233,6 @@ class DialogService {
                 elevation: 1,
                 child:
                     BlocBuilder<SharingBloc, bool>(builder: (context, shared) {
-                      print(shared);
                   if (shared == null) {
                     return FullPageLoadingLogo(backgroundColor: Colors.white);
                   }
