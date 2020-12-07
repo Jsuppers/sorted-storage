@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:timeline_list/timeline.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
-import 'package:web/app/blocs/send_comment/send_comment_bloc.dart';
-import 'package:web/app/blocs/send_comment/send_comment_event.dart';
+import 'package:web/app/blocs/timeline/timeline_bloc.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/constants.dart';
@@ -18,6 +19,7 @@ class CommentWidget extends StatefulWidget {
   final double width;
   final double height;
   final usr.User user;
+  final String folderID;
 
   const CommentWidget(
       {Key key,
@@ -25,7 +27,8 @@ class CommentWidget extends StatefulWidget {
       this.comments,
       this.width,
       this.height,
-      this.user})
+      this.user,
+      this.folderID})
       : super(key: key);
 
   @override
@@ -33,12 +36,21 @@ class CommentWidget extends StatefulWidget {
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
+  List<AdventureComment> adventureComments = List();
+  bool uploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    adventureComments = widget.comments.comments;
+  }
+
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
     List<Widget> comments = List();
-    for (int i = 0; i < widget.comments.comments.length; i++) {
-      String user = widget.comments.comments[i].user;
+    for (int i = 0; i < adventureComments.length; i++) {
+      String user = adventureComments[i].user;
       if (user == null || user == "") {
         user = "Anonymous";
       }
@@ -51,16 +63,29 @@ class _CommentWidgetState extends State<CommentWidget> {
             ),
             SizedBox(width: 10),
             Text(
-              '${widget.comments.comments[i].comment}',
+              '${adventureComments[i].comment}',
               style: myThemeData.textTheme.bodyText1,
             ),
           ],
         ),
       ));
     }
-
-    return BlocProvider<SendCommentBloc>(
-      create: (BuildContext context) => SendCommentBloc(),
+    return BlocListener<TimelineBloc, TimelineState>(
+      listener: (context, state) {
+        if (state.type == TimelineMessageType.uploading_comments_start &&
+            state.folderID == widget.folderID) {
+          setState(() {
+            uploading = true;
+          });
+        }
+        if (state.type == TimelineMessageType.uploading_comments_finished &&
+            state.folderID == widget.folderID) {
+          setState(() {
+            adventureComments = state.comments;
+            uploading = false;
+          });
+        }
+      },
       child: Container(
         width: widget.width,
         child: Padding(
@@ -86,7 +111,10 @@ class _CommentWidgetState extends State<CommentWidget> {
                       backgroundColor: Colors.white,
                       textColor: Colors.black,
                       iconColor: Colors.black)
-                  : CommentSection(controller: controller, widget: widget)
+                  : CommentSection(
+                      controller: controller,
+                      widget: widget,
+                      uploading: uploading)
             ],
           ),
         ),
@@ -95,19 +123,26 @@ class _CommentWidgetState extends State<CommentWidget> {
   }
 }
 
-class CommentSection extends StatelessWidget {
+class CommentSection extends StatefulWidget {
+  final bool uploading;
+
   const CommentSection({
     Key key,
     @required this.controller,
     @required this.widget,
+    this.uploading,
   }) : super(key: key);
 
   final TextEditingController controller;
   final CommentWidget widget;
 
   @override
+  _CommentSectionState createState() => _CommentSectionState();
+}
+
+class _CommentSectionState extends State<CommentSection> {
+  @override
   Widget build(BuildContext context) {
-    BlocProvider.of<SendCommentBloc>(context).add(SendCommentDoneEvent());
     return Row(
       children: [
         Expanded(
@@ -119,36 +154,31 @@ class CommentSection extends StatelessWidget {
                   ),
                   errorMaxLines: 0,
                   hintText: 'add a comment'),
-              controller: controller,
+              controller: widget.controller,
               style: myThemeData.textTheme.bodyText1,
               minLines: 1,
               readOnly: false),
         ),
-        BlocBuilder<SendCommentBloc, bool>(builder: (context, adding) {
-          if (adding) {
-            return Container(width: 120, child: StaticLoadingLogo());
-          }
-          return Container(
-            padding: EdgeInsets.only(left: 20),
-            child: ButtonWithIcon(
-                text: "comment",
-                icon: Icons.send,
-                onPressed: () async {
-                  if (controller.text.length == 0) {
-                    return;
-                  }
-                  BlocProvider.of<SendCommentBloc>(context)
-                      .add(SendCommentNewEvent());
-                  await widget.sendComment(
-                      context, widget.user, controller.text);
-                  controller.text = "";
-                },
-                width: Constants.SMALL_WIDTH,
-                backgroundColor: Colors.white,
-                textColor: Colors.black,
-                iconColor: Colors.black),
-          );
-        })
+        widget.uploading
+            ? Container(width: 120, child: StaticLoadingLogo())
+            : Container(
+                padding: EdgeInsets.only(left: 20),
+                child: ButtonWithIcon(
+                    text: "comment",
+                    icon: Icons.send,
+                    onPressed: () async {
+                      if (widget.controller.text.length == 0) {
+                        return;
+                      }
+                      await widget.widget.sendComment(
+                          context, widget.widget.user, widget.controller.text);
+                      widget.controller.text = "";
+                    },
+                    width: Constants.SMALL_WIDTH,
+                    backgroundColor: Colors.white,
+                    textColor: Colors.black,
+                    iconColor: Colors.black),
+              )
       ],
     );
   }

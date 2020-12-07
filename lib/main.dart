@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/blocs/add_adventure/add_adventure_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/cookie/cookie_bloc.dart';
@@ -14,6 +13,7 @@ import 'package:web/app/blocs/media_cache/media_cache_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -76,9 +76,6 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<CookieBloc>(
           create: (BuildContext context) => CookieBloc(),
         ),
-        BlocProvider<AddAdventureBloc>(
-          create: (BuildContext context) => AddAdventureBloc(),
-        ),
         BlocProvider<MediaCacheBloc>(
           create: (BuildContext context) => _imagesBloc,
         )
@@ -92,7 +89,7 @@ class _MyAppState extends State<MyApp> {
           ),
           BlocListener<DriveBloc, DriveApi>(
             listener: (context, driveApi) {
-              _timelineBloc.add(TimelineInitializeEvent(driveApi));
+              _timelineBloc.add(TimelineEvent(TimelineMessageType.update_drive, driveApi: driveApi));
               _imagesBloc.add(MediaCacheUpdateDriveAPIEvent(driveApi));
             },
           ),

@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:web/app/blocs/add_adventure/add_adventure_bloc.dart';
-import 'package:web/app/blocs/add_adventure/add_adventure_event.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/update_adventure/update_adventure_bloc.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
@@ -28,66 +26,95 @@ class TimelineLayout extends StatefulWidget {
 }
 
 class _TimelineLayoutState extends State<TimelineLayout> {
+  Map<String, TimelineData> _timelineData;
+  bool loaded = true;
+
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<AddAdventureBloc>(context).add(AddAdventureDoneEvent());
+    var timelineState = BlocProvider.of<TimelineBloc>(context).state;
+    if (timelineState.type == TimelineMessageType.initial_state) {
+      loaded = false;
+    } else {
+      loaded = true;
+    }
+    _timelineData = timelineState.stories;
     List<Widget> eventDisplay = List();
     List<_TimeLineEventEntry> timeLineEvents = List();
-    Map<String, TimelineData> _timelineData =
-        BlocProvider.of<TimelineBloc>(context).state;
+
     _timelineData.forEach((folderId, event) {
-      Widget display = BlocProvider<UpdateAdventureBloc>(
-        create: (BuildContext context) => UpdateAdventureBloc(),
-        child: TimelineCard(
-          width: widget.width,
-          height: widget.height,
-          event: event,
-          folderId: folderId,
-          deleteCallback: () async {
-            BlocProvider.of<TimelineBloc>(context)
-                .add(TimelineDeleteAdventureEvent(folderId: folderId));
-          },
-        ),
+      Widget display = TimelineCard(
+        width: widget.width,
+        height: widget.height,
+        event: event,
+        folderId: folderId
       );
       _TimeLineEventEntry _timeLineEventEntry =
           _TimeLineEventEntry(event.mainEvent.timestamp, display);
       timeLineEvents.add(_timeLineEventEntry);
     });
+
     timeLineEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     timeLineEvents.forEach((element) {
       eventDisplay.add(element.event);
     });
-
-    return Column(
-      key: Key(_timelineData.length.toString()),
-      children: [
-        BlocBuilder<AddAdventureBloc, bool>(builder: (context, adding) {
-          if (adding) {
-            return StaticLoadingLogo();
-          }
-          return Container(
+    return BlocListener<TimelineBloc, TimelineState>(
+      listener: (context, state) {
+        if (state.type == TimelineMessageType.updated_stories) {
+          setState(() {
+            _timelineData = state.stories;
+            loaded = true;
+          });
+        }
+      },
+      child: !loaded ? StaticLoadingLogo() : Column(
+        children: [
+          Container(
+            key: Key(_timelineData.length.toString()),
             width: 150,
-            child: ButtonWithIcon(
-              icon: Icons.add,
-              text: "add adventure",
-              width: Constants.SMALL_WIDTH,
-              backgroundColor: Colors.white,
-              textColor: Colors.black,
-              iconColor: Colors.black,
-              onPressed: () async {
-                BlocProvider.of<AddAdventureBloc>(context)
-                    .add(AddAdventureNewEvent());
-                int timestamp = DateTime.now().millisecondsSinceEpoch;
-                BlocProvider.of<TimelineBloc>(context).add(
-                    TimelineCreateAdventureEvent(
-                        timestamp: timestamp, mainEvent: true));
-              },
-            ),
-          );
-        }),
-        SizedBox(height: 20),
-        ...eventDisplay,
-      ],
+            child: AddStoryButton(),
+          ),
+          SizedBox(height: 20),
+          ...eventDisplay,
+        ],
+      ),
     );
+  }
+}
+
+class AddStoryButton extends StatefulWidget {
+  const AddStoryButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  _AddStoryButtonState createState() => _AddStoryButtonState();
+}
+
+class _AddStoryButtonState extends State<AddStoryButton> {
+  bool addingStory;
+
+  @override
+  void initState() {
+    super.initState();
+    addingStory = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return addingStory ? StaticLoadingLogo() : ButtonWithIcon(
+        icon: Icons.add,
+        text: "add story",
+        width: Constants.SMALL_WIDTH,
+        backgroundColor: Colors.white,
+        textColor: Colors.black,
+        iconColor: Colors.black,
+        onPressed: () async {
+          int timestamp = DateTime.now().millisecondsSinceEpoch;
+          BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(TimelineMessageType.create_story, timestamp: timestamp, mainEvent: true));
+          setState(() {
+            addingStory = true;
+          });
+        },
+      );
   }
 }

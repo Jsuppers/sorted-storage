@@ -40,8 +40,7 @@ class _ViewPageState extends State<ViewPage> {
                 viewMode: true,
                 width: sizingInformation.screenSize.width,
                 event: null,
-                folderId: event,
-                deleteCallback: () async {}),
+                folderId: event),
           ),
         );
       },

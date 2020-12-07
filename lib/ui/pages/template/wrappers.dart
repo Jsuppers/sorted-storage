@@ -10,6 +10,7 @@ import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/footer/footer.dart';
@@ -45,9 +46,8 @@ class LayoutWrapper extends StatelessWidget {
               user: user,
               includeNavigation: includeNavigation);
         }
-        print('here: $user');
         if (!this.isViewMode) {
-          BlocProvider.of<TimelineBloc>(context).add(TimelineGetAllEvent());
+          BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(TimelineMessageType.retrieve_stories));
         }
           return Content(widget: widget, user: user, includeNavigation: includeNavigation);
       });
