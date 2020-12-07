@@ -45,6 +45,8 @@ dependencies:
   http_retry: ^0.1.1+3
   url_launcher_web: ^0.1.0
   rxdart: ^0.24.1
+  buy_me_a_coffee_widget: ^1.0.1
+  percent_indicator: ^2.1.8
   url_launcher: ^5.7.10
 
 dev_dependencies:
