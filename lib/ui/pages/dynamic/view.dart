@@ -36,9 +36,9 @@ class _ViewPageState extends State<ViewPage> {
     return BlocListener<TimelineBloc, TimelineState>(
       listener: (context, state) {
         if (state.type == TimelineMessageType.updated_stories) {
-          print('new updated story');
           setState(() {
             timelineData = state.stories[eventFolderID];
+            timelineData.subEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
           });
         }
       },
