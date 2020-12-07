@@ -11,7 +11,7 @@ class ClientWithAuthHeaders extends http.BaseClient {
 
   ClientWithAuthHeaders(this.headers) {
     client = RetryClient(http.Client(),
-        when: (r) => r.statusCode >= 400, retries: 5);
+        when: (r) => r.statusCode >= 400);
   }
 
   Future<http.StreamedResponse> send(http.BaseRequest request) async {

@@ -1,11 +1,9 @@
-import 'package:buy_me_a_coffee_widget/buy_me_a_coffee_widget.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:web/app/models/user.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/user.dart';
 import 'package:web/ui/navigation/drawer/drawer_item.dart';
 import 'package:web/ui/navigation/menu.dart';
 import 'package:web/ui/widgets/avatar.dart';

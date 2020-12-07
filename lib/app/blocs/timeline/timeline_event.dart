@@ -1,31 +1,27 @@
 import 'package:googleapis/drive/v3.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/models/adventure.dart';
 
-abstract class TimelineEvent {
-  const TimelineEvent();
-}
-
-class TimelineInitializeEvent extends TimelineEvent {
-  final DriveApi driveApi;
-
-  TimelineInitializeEvent(this.driveApi);
-}
-
-
-class TimelineGetAllEvent extends TimelineEvent{}
-
-
-class TimelineDeleteAdventureEvent extends TimelineEvent {
+class TimelineEvent {
   final String folderId;
-
-  TimelineDeleteAdventureEvent({this.folderId});
-}
-
-class TimelineUpdatedEvent extends TimelineEvent {}
-
-class TimelineCreateAdventureEvent extends TimelineEvent {
+  final TimelineMessageType type;
+  final AdventureComment comment;
   final String parentId;
   final int timestamp;
   final bool mainEvent;
+  final DriveApi driveApi;
+  final String imageKey;
+  final String text;
+  final Map<String, List<String>> uploadingImages;
 
-  TimelineCreateAdventureEvent({this.parentId, this.timestamp, this.mainEvent});
+  const TimelineEvent(this.type,
+      {this.uploadingImages,
+      this.text,
+      this.driveApi,
+      this.parentId,
+      this.imageKey,
+      this.timestamp,
+      this.mainEvent,
+      this.folderId,
+      this.comment});
 }

@@ -10,6 +10,7 @@ import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/footer/footer.dart';
@@ -38,22 +39,32 @@ class LayoutWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (this.requiresAuthentication || this.isViewMode) {
-      return BlocBuilder<AuthenticationBloc, usr.User>(builder: (context, user) {
+      return BlocBuilder<AuthenticationBloc, usr.User>(
+          builder: (context, user) {
         if (user == null && !this.isViewMode) {
           return Content(
               widget: LoginPage(targetRoute: targetRoute),
               user: user,
-              includeNavigation: includeNavigation);
+              includeNavigation: includeNavigation,
+              requiresAuthentication: requiresAuthentication);
         }
-        print('here: $user');
         if (!this.isViewMode) {
-          BlocProvider.of<TimelineBloc>(context).add(TimelineGetAllEvent());
+          BlocProvider.of<TimelineBloc>(context)
+              .add(TimelineEvent(TimelineMessageType.retrieve_stories));
         }
-          return Content(widget: widget, user: user, includeNavigation: includeNavigation);
+        return Content(
+            widget: widget,
+            user: user,
+            includeNavigation: includeNavigation,
+            requiresAuthentication: requiresAuthentication);
       });
     } else {
       return Content(
-          widget: widget, user: null, includeNavigation: includeNavigation);
+        widget: widget,
+        user: null,
+        includeNavigation: includeNavigation,
+        requiresAuthentication: requiresAuthentication,
+      );
     }
   }
 }
@@ -64,21 +75,24 @@ class Content extends StatefulWidget {
     @required this.widget,
     this.user,
     this.includeNavigation = true,
+    this.requiresAuthentication,
   }) : super(key: key);
 
   final Widget widget;
   final usr.User user;
   final bool includeNavigation;
+  final bool requiresAuthentication;
 
   @override
   _ContentState createState() => _ContentState();
 }
 
 class _ContentState extends State<Content> {
-
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<CookieBloc>(context).add(CookieShowEvent(context));
+    if (widget.requiresAuthentication == null || widget.requiresAuthentication == false) {
+      BlocProvider.of<CookieBloc>(context).add(CookieShowEvent(context));
+    }
     return Scaffold(
       drawer: NavigationDrawer(user: widget.user),
       body: ResponsiveBuilder(

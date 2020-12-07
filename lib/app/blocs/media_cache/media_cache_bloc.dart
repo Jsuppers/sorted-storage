@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:bloc/bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/media_cache/media_cache_event.dart';
+import 'package:web/app/services/url_service.dart';
 
 class MediaCacheBloc extends Bloc<MediaCacheEvent, Uint8List> {
   Map<String, Uint8List> images;
@@ -27,6 +28,7 @@ class MediaCacheBloc extends Bloc<MediaCacheEvent, Uint8List> {
     if (images.containsKey(key)) {
       return images[key];
     }
+    URLService.openURL("https://drive.google.com/file/d/" + key + "/view");
 
     Media mediaFile = await driveApi.files
         .get(key, downloadOptions: DownloadOptions.FullMedia);

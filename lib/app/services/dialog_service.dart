@@ -1,16 +1,11 @@
-import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web/app/blocs/cookie/cookie_bloc.dart';
 import 'package:web/app/blocs/cookie/cookie_event.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
-import 'package:web/app/blocs/media_cache/media_cache_bloc.dart';
-import 'package:web/app/blocs/media_cache/media_cache_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/blocs/sharing/sharing_bloc.dart';
@@ -37,10 +32,11 @@ class ShareWidget extends StatefulWidget {
 }
 
 class _ShareWidgetState extends State<ShareWidget> {
+  bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     bool shared = widget.shared;
-    print('rebuilding $shared');
     TextEditingController controller = new TextEditingController();
 
     if (shared) {
@@ -83,27 +79,12 @@ class _ShareWidgetState extends State<ShareWidget> {
                 child: Text(
                     "To make this event publicly visible click the share button."),
               ),
-        MaterialButton(
-          minWidth: 100,
-          onPressed: () async {
-            if (shared) {
-              BlocProvider.of<SharingBloc>(context).add(StopSharingEvent());
-            } else {
-              BlocProvider.of<SharingBloc>(context).add(StartSharingEvent());
-            }
-          },
-          child: Text(
-            shared ? "stop sharing" : "share",
-            style: myThemeData.textTheme.button,
-          ),
-          color: myThemeData.primaryColorDark,
-          textColor: Colors.white,
-        ),
+        ShareButton(key: Key(DateTime.now().millisecondsSinceEpoch.toString()), shared: shared, loading: false),
         Container(
           padding: EdgeInsets.all(20),
           child: shared
               ? Text(
-                  "Everyone with this link can see your content. Be careful who you give it to!")
+                  "Everyone with this link can see and comment on your content. Be careful who you give it to!")
               : Container(),
         ),
         Padding(
@@ -139,131 +120,49 @@ class _ShareWidgetState extends State<ShareWidget> {
   }
 }
 
-class CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final Function onPressed;
+class ShareButton extends StatefulWidget {
+  final bool shared;
+  final bool loading;
 
-  const CircleIconButton({Key key, this.icon, this.onPressed})
-      : super(key: key);
-
+  const ShareButton({Key key, this.shared, this.loading}) : super(key: key);
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 3, top: 3),
-      child: Container(
-        height: 48,
-        width: 48,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(40))),
-        child: IconButton(
-          iconSize: 18,
-          splashRadius: 18,
-          icon: Icon(
-            icon,
-            color: Colors.redAccent,
-            size: 18,
-          ),
-          onPressed: this.onPressed,
-        ),
-      ),
-    );
-  }
+  _ShareButtonState createState() => _ShareButtonState();
 }
 
-class MediaViewer extends StatefulWidget {
-  final List<String> mediaURLS;
-  final int index;
-
-  const MediaViewer({Key key, this.mediaURLS, this.index}) : super(key: key);
-
-  @override
-  _MediaViewerState createState() => _MediaViewerState();
-}
-
-class _MediaViewerState extends State<MediaViewer>
-    with SingleTickerProviderStateMixin {
-  int currentIndex;
-  bool loading = true;
+class _ShareButtonState extends State<ShareButton> {
+  bool loading;
 
   @override
   void initState() {
     super.initState();
-    currentIndex = widget.index;
-  }
-
-  Widget imageWidget(Uint8List bytes) {
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 1000),
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(child: child, opacity: animation);
-      },
-      child: GestureDetector(
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CircleIconButton(
-                    icon: Icons.clear,
-                    onPressed: () {
-                      BlocProvider.of<NavigationBloc>(context)
-                          .add(NavigatorPopEvent());
-                    }),
-              ],
-            ),
-            ResponsiveBuilder(
-              builder: (context, sizingInformation) => InteractiveViewer(
-                child: Container(
-                    decoration: new BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                      image: DecorationImage(image: MemoryImage(bytes)),
-                    ),
-                    child: Container(
-                      width: sizingInformation.screenSize.width,
-                      height: sizingInformation.screenSize.height - 180,
-                    )),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CircleIconButton(
-                    icon: Icons.arrow_left,
-                    onPressed: () {
-                      setState(() {
-                        currentIndex =
-                            (currentIndex - 1) % widget.mediaURLS.length;
-                      });
-                    }),
-                CircleIconButton(
-                    icon: Icons.arrow_right,
-                    onPressed: () {
-                      setState(() {
-                        currentIndex =
-                            (currentIndex + 1) % widget.mediaURLS.length;
-                      });
-                    }),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    loading = widget.loading;
   }
 
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<MediaCacheBloc>(context).add(MediaCacheGetImageEvent(widget.mediaURLS[currentIndex]));
-    return  BlocBuilder<MediaCacheBloc, Uint8List>(builder: (context, image) {
-      if (image == null) {
-        return FullPageLoadingLogo();
-      }
-      return imageWidget(image);
-    });
+    return loading ? StaticLoadingLogo() : MaterialButton(
+      minWidth: 100,
+      onPressed: () async {
+        setState(() {
+          loading = true;
+        });
+        if (widget.shared) {
+          BlocProvider.of<SharingBloc>(context).add(StopSharingEvent());
+        } else {
+          BlocProvider.of<SharingBloc>(context).add(StartSharingEvent());
+        }
+
+      },
+      child: Text(
+        widget.shared ? "stop sharing" : "share",
+        style: myThemeData.textTheme.button,
+      ),
+      color: myThemeData.primaryColorDark,
+      textColor: Colors.white,
+    );
   }
 }
+
 
 class DialogService {
   static cookieDialog(BuildContext context) {
@@ -317,23 +216,7 @@ class DialogService {
         });
   }
 
-  static mediaDialog(BuildContext context, List<String> keys, int currentKey) {
-    showDialog(
-        context: context,
-        barrierDismissible: true,
-        useRootNavigator: true,
-        builder: (BuildContext context) {
-          return Dialog(
-              backgroundColor: Colors.transparent,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4.0))),
-              elevation: 0,
-              child: MediaViewer(mediaURLS: keys, index: currentKey),
-            );
-        });
-  }
-
-  static shareDialog(BuildContext context, String folderID) {
+  static shareDialog(BuildContext context, String folderID, String commentsID) {
     showDialog(
         context: context,
         barrierDismissible: true,
@@ -342,14 +225,14 @@ class DialogService {
           return BlocProvider(
               create: (BuildContext context) => SharingBloc(
                   BlocProvider.of<DriveBloc>(context).state,
-                  folderID),
+                  folderID,
+                  commentsID),
               child: Dialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(4.0))),
                 elevation: 1,
                 child:
                     BlocBuilder<SharingBloc, bool>(builder: (context, shared) {
-                      print(shared);
                   if (shared == null) {
                     return FullPageLoadingLogo(backgroundColor: Colors.white);
                   }
@@ -357,58 +240,5 @@ class DialogService {
                 }),
               ));
         });
-  }
-
-  static popUpDialog(BuildContext context,
-      StreamController<DialogStreamContent> streamController) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      useRootNavigator: true,
-      builder: (BuildContext context) {
-        return simpleDialog(streamController);
-      },
-    );
-  }
-
-  static Widget simpleDialog(
-      StreamController<DialogStreamContent> streamController) {
-    int value = 0;
-    return Dialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(4.0))),
-      elevation: 1,
-      child: StreamBuilder(
-          stream: streamController.stream,
-          builder: (context, snapshot) {
-            String message = "";
-            if (snapshot.data != null) {
-              message = snapshot.data.text;
-              value += snapshot.data.value;
-            }
-
-            return Container(
-              width: 300,
-              height: 300,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(child: StaticLoadingLogo()),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 28.0),
-                    child: Column(
-                      children: [
-                        new Text("$message"),
-                        Visibility(
-                            visible: value > 0,
-                            child: Text("$value tasks to do")),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-    );
   }
 }
