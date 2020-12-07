@@ -64,6 +64,7 @@ class SubEvent {
 
 class EventContent {
   int timestamp;
+  String emoji;
   String title;
   Map<String, StoryMedia> images;
   String description;
@@ -77,6 +78,7 @@ class EventContent {
   EventContent(
       {this.timestamp,
       this.title = '',
+      this.emoji = '',
       this.images,
       this.description = '',
       this.folderID,
@@ -89,6 +91,7 @@ class EventContent {
       : this(
             timestamp: event.timestamp,
             title: event.title,
+            emoji: event.emoji,
             images: Map.from(event.images),
             description: event.description,
             settingsID: event.settingsID,
@@ -149,7 +152,10 @@ class _TimelineCardState extends State<TimelineCard> {
                     text: "share",
                     icon: Icons.share,
                     onPressed: () {
-                      DialogService.shareDialog(context, adventure.mainEvent.folderID, adventure.mainEvent.commentsID);
+                      DialogService.shareDialog(
+                          context,
+                          adventure.mainEvent.folderID,
+                          adventure.mainEvent.commentsID);
                     },
                     width: width,
                     backgroundColor: Colors.white,
@@ -215,7 +221,6 @@ class _TimelineCardState extends State<TimelineCard> {
   @override
   void initState() {
     super.initState();
-    print('new init state');
     adventure = widget.event;
     locked = adventure == null ? true : adventure.locked;
     saving = adventure == null ? false : adventure.saving;

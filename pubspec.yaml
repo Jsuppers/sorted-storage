@@ -38,7 +38,8 @@ dependencies:
   flutter_auth_buttons: ^0.10.0
   timeline_list: ^0.0.5
   flutter_material_pickers: ^1.8.0
-  date_field: ^0.3.2
+  date_field: ^0.3.3
+  emojis: ^0.9.3
   image: ^2.1.18
   sleek_circular_slider: ^1.1.0
   path_provider: ^1.6.21

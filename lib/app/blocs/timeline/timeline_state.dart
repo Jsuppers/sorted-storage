@@ -11,6 +11,7 @@ enum TimelineMessageType {
   delete_sub_story,
   edit_timestamp,
   edit_description,
+  edit_emoji,
   edit_title,
   delete_image,
   add_image,
@@ -31,5 +32,6 @@ class TimelineState {
   final TimelineMessageType type;
   final List<AdventureComment> comments;
   final Map<String, List<String>> uploadingImages;
-  const TimelineState(this.type, this.stories, {this.comments,this.folderID, this.uploadingImages});
+  final dynamic data;
+  const TimelineState(this.type, this.stories, {this.data, this.comments,this.folderID, this.uploadingImages});
 }

@@ -42,7 +42,6 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     List<_TimeLineEventEntry> timeLineEvents = List();
 
     _timelineData.forEach((folderId, event) {
-      print('t: ${event.mainEvent.timestamp}');
       Widget display = TimelineCard(
         width: widget.width,
         height: widget.height,
@@ -60,7 +59,6 @@ class _TimelineLayoutState extends State<TimelineLayout> {
       widgetKey = widgetKey + element.timestamp.toString() + "";
       eventDisplay.add(element.event);
     });
-    print(widgetKey);
     return BlocListener<TimelineBloc, TimelineState>(
       listener: (context, state) {
         if (state.type == TimelineMessageType.updated_stories) {

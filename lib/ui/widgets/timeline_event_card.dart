@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
 import 'package:web/app/blocs/timeline/timeline_state.dart';
-import 'package:web/app/services/timeline_service.dart';
+import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -63,10 +63,39 @@ class _TimelineEventCardState extends State<EventCard> {
     descriptionController.text = widget.event.description;
   }
 
+  Widget emoji() {
+    return AbsorbPointer(
+      absorbing: widget.locked,
+      child: MaterialButton(
+        minWidth: 40,
+        height: 40,
+        onPressed: () {
+          DialogService.pickEmoji(context,
+            parentID: widget.eventFolderID,
+            folderID: widget.event.folderID,
+          );
+        },
+        child: widget.event.emoji == ""
+            ? Text(
+                "📅",
+                style: TextStyle(
+                  height: 1.2,
+                ),
+              )
+            : Text(
+                widget.event.emoji,
+                style: TextStyle(
+                  height: 1.2,
+                ),
+              ),
+      ),
+    );
+  }
+
   Widget timeStamp() {
     return Container(
-      padding: EdgeInsets.all(0),
-      height: 30,
+      padding: EdgeInsets.zero,
+      height: 38,
       width: 130,
       child: DateTimeFormField(
         decoration: new InputDecoration(
@@ -77,7 +106,12 @@ class _TimelineEventCardState extends State<EventCard> {
             disabledBorder: InputBorder.none,
             contentPadding: EdgeInsets.zero),
         enabled: !widget.locked,
-        textStyle: myThemeData.textTheme.caption,
+        textStyle: TextStyle(
+          fontSize: 12.0,
+          fontFamily: 'Roboto',
+          fontWeight: FontWeight.normal,
+          color: myThemeData.primaryColorLight,
+        ),
         label: null,
         mode: DateFieldPickerMode.date,
         initialValue: selectedDate,
@@ -108,15 +142,18 @@ class _TimelineEventCardState extends State<EventCard> {
 
     return BlocListener<TimelineBloc, TimelineState>(
       listener: (context, state) {
+        if (state.type == TimelineMessageType.edit_emoji && state.folderID == widget.event.folderID){
+          setState(() {
+            widget.event.emoji = state.data;
+          });
+        }
+
         if (state.type == TimelineMessageType.syncing_story_state) {
-          print(widget.event.folderID);
-          print(state.uploadingImages.toString());
           if (!state.uploadingImages.containsKey(widget.event.folderID)) {
             return;
           }
           List<String> newUploadingImages =
               state.uploadingImages[widget.event.folderID];
-          print(newUploadingImages);
           setState(() {
             uploadingImages = newUploadingImages;
           });
@@ -132,7 +169,13 @@ class _TimelineEventCardState extends State<EventCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      timeStamp(),
+                      Row(
+                        children: [
+                          emoji(),
+                          SizedBox(width: 4),
+                          timeStamp(),
+                        ],
+                      ),
                       this.widget.controls,
                     ],
                   )
@@ -140,7 +183,13 @@ class _TimelineEventCardState extends State<EventCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      this.widget.controls,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          emoji(),
+                          this.widget.controls,
+                        ],
+                      ),
                       timeStamp(),
                     ],
                   ),
