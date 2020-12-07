@@ -49,13 +49,10 @@ class UsageIndicator extends StatelessWidget {
     String usageType = usage.substring(index + 1);
     //usage to kb
     if (usageType == 'KB') {
-      print('kb');
       usageInKB = double.parse(usage.substring(0, index));
     } else if (usageType == 'MB') {
-      print('mb');
       usageInKB = double.parse(usage.substring(0, index)) * 1024;
     } else {
-      print('gb');
       usageInKB = double.parse(usage.substring(0, index)) * 1024 * 1024;
     }
     //limit to kb

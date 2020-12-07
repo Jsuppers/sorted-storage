@@ -62,10 +62,11 @@ class AdventureComments {
 }
 
 class AdventureSettings {
+  String emoji;
   String title;
   String description;
 
-  AdventureSettings({this.title = "", this.description = ""});
+  AdventureSettings({this.title = "", this.description = "", this.emoji = ""});
 
   static AdventureSettings fromJson(Map<String, dynamic> json) {
     if (json == null) {
@@ -74,20 +75,26 @@ class AdventureSettings {
 
     String title = "";
     String description = "";
+    String emoji = "";
     if (json.containsKey('t')) {
       title = json['t'];
     }
     if (json.containsKey('d')) {
       description = json['d'];
     }
+    if (json.containsKey('e')) {
+      emoji = json['e'];
+    }
 
-    return new AdventureSettings(title: title, description: description);
+
+    return new AdventureSettings(title: title, description: description, emoji: emoji);
   }
 
   Map<String, dynamic> toJson() {
     return {
       't': title,
       'd': description,
+      'e': emoji
     };
   }
 }

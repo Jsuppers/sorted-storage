@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/page_content.dart';
+import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/pages/template/page_template.dart';
 
@@ -47,6 +48,12 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return MaterialButton(
+      onPressed: () {
+        DialogService.pickEmoji(context);
+      },
+      child: Text("🇳🇿"),
+    );
     return PageTemplate(content);
   }
 }

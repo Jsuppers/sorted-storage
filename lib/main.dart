@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
-import 'package:web/app/blocs/cookie/cookie_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/media_cache/media_cache_bloc.dart';
@@ -15,6 +14,7 @@ import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
 import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart' as usr;
+import 'package:web/app/services/cookie_service.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
 
@@ -72,9 +72,6 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<TimelineBloc>(
           create: (BuildContext context) => _timelineBloc,
-        ),
-        BlocProvider<CookieBloc>(
-          create: (BuildContext context) => CookieBloc(),
         ),
         BlocProvider<MediaCacheBloc>(
           create: (BuildContext context) => _imagesBloc,

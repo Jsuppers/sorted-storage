@@ -123,7 +123,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       case TimelineMessageType.edit_title:
         var eventData = TimelineService.getEventWithFolderID(event.parentId, event.folderId, localStories);
         eventData.title = event.text;
-        print(eventData.title);
         break;
       case TimelineMessageType.add_image:
         var eventContent = TimelineService.getEventWithFolderID(event.parentId, event.folderId, localStories);
@@ -161,7 +160,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       case TimelineMessageType.edit_timestamp:
         var eventData = TimelineService.getEventWithFolderID(event.parentId, event.folderId, localStories);
         eventData.timestamp = event.timestamp;
-        print(eventData.timestamp);
         break;
       case TimelineMessageType.syncing_story_state:
         yield TimelineState(TimelineMessageType.syncing_story_state, localStories,
@@ -169,6 +167,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         break;
       case TimelineMessageType.retrieve_story:
         _getStories(folderID: event.folderId);
+        break;
+      case TimelineMessageType.edit_emoji:
+        var eventData = TimelineService.getEventWithFolderID(event.parentId, event.folderId, localStories);
+        eventData.emoji = event.text;
+        yield TimelineState(TimelineMessageType.edit_emoji, localStories, folderID: event.folderId, data: event.text);
         break;
     }
   }
@@ -209,7 +212,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     }
     var timelineData = TimelineData(mainEvent: mainEvent, subEvents: subEvents);
     localStories.putIfAbsent(folderID, () => timelineData);
-    cloudStories.putIfAbsent(folderID, () => timelineData);
+    cloudStories.putIfAbsent(folderID, () => TimelineData.clone(timelineData));
 
     this.add(TimelineEvent(TimelineMessageType.updated_stories));
   }
@@ -248,7 +251,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           });
         }
       }
-
       await _waitUntil(() => cloudStories.length == folderIds.length,
           Duration(milliseconds: 500));
 
@@ -305,6 +307,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         title: settings.title,
         comments: comments,
         commentsID: commentsID,
+        emoji: settings.emoji,
         description: settings.description,
         subEvents: subEvents,
         settingsID: settingsID,
@@ -325,7 +328,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     return completer.future;
   }
 
-  Future _createEventFolder(String parentId, int timestamp, bool mainEvent) async {
+  Future<EventContent> _createEventFolder(String parentId, int timestamp, bool mainEvent) async {
     try {
       var folderID =
           await GoogleDrive.createStory(driveApi, parentId, timestamp);
@@ -337,7 +340,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           subEvents: List(),
           images: Map());
       event.settingsID = await _uploadSettingsFile(folderID, event);
-      await _uploadSettingsFile(folderID, event);
 
       if (mainEvent) {
         TimelineData timelineEvent =
@@ -350,15 +352,17 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       if (mainEvent) {
         this.add(TimelineEvent(TimelineMessageType.updated_stories));
       }
+      return event;
     } catch (e) {
       print('error: $e');
     }
+
   }
 
   Future<String> _uploadSettingsFile(
       String parentId, EventContent content) async {
     AdventureSettings settings = AdventureSettings(
-        title: content.title, description: content.description);
+        title: content.title, description: content.description, emoji: content.emoji);
     String jsonString = jsonEncode(settings);
     List<int> fileContent = utf8.encode(jsonString);
     final Stream<List<int>> mediaStream =
@@ -411,15 +415,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     return folderID;
   }
 
-  Future<String> _shareFile(String fileID, String type, String role) async {
-    Permission anyone = Permission();
-    anyone.type = type;
-    anyone.role = role;
-
-    Permission permission = await driveApi.permissions.create(anyone, fileID);
-    return permission.id;
-  }
-
   Future _sendComment(EventContent event, AdventureComment comment) async {
     AdventureComments comments = AdventureComments.fromJson(
         await GoogleDrive.getJsonFile(driveApi, event.commentsID));
@@ -463,8 +458,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     return folder.id;
   }
 
-
-
   _syncCopies(String eventFolderID) async {
     bool rebuildAllStories = false;
     var localCopy = localStories[eventFolderID];
@@ -476,10 +469,10 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       EventContent subEvent = localCopy.subEvents[i];
       EventContent cloudSubEvent;
       if (subEvent.folderID.startsWith("temp_")){
-        print('found local subevent');
-        cloudSubEvent = await _createEventFolder(subEvent.folderID, subEvent.timestamp, false);
+        cloudSubEvent = await _createEventFolder(eventFolderID, subEvent.timestamp, false);
         cloudCopy.subEvents.add(cloudSubEvent);
         subEvent.folderID = cloudSubEvent.folderID;
+        subEvent.settingsID = cloudSubEvent.settingsID;
       } else {
         cloudSubEvent = cloudCopy.subEvents
             .singleWhere((element) => element.folderID == subEvent.folderID);
@@ -509,7 +502,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
     await _syncContent(localCopy.mainEvent, cloudCopy.mainEvent);
     localCopy = TimelineData.clone(cloudCopy);
-    print(localCopy.mainEvent.images);
 
     this.add(TimelineEvent(TimelineMessageType.syncing_story_end,
         folderId: eventFolderID));
@@ -534,13 +526,15 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     }
 
     if (localCopy.title != cloudCopy.title ||
-        localCopy.description != cloudCopy.description) {
+        localCopy.description != cloudCopy.description ||
+    localCopy.emoji != cloudCopy.emoji) {
       print('updating settings storage');
       tasks.add(
           _uploadSettingsFile(cloudCopy.folderID, localCopy).then((settingsId) {
             cloudCopy.settingsID = settingsId;
             cloudCopy.title = localCopy.title;
             cloudCopy.description = localCopy.description;
+            cloudCopy.emoji = localCopy.emoji;
           }, onError: (error) {
             print('error $error');
           }));
