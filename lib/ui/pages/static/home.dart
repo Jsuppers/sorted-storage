@@ -48,12 +48,6 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialButton(
-      onPressed: () {
-        DialogService.pickEmoji(context);
-      },
-      child: Text("🇳🇿"),
-    );
     return PageTemplate(content);
   }
 }
