@@ -307,7 +307,9 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget createEditControls(String imageKey) {
     return Container(
-      color: uploadingImages.contains(imageKey) ? Colors.white.withOpacity(0.5) : null,
+      color: uploadingImages.contains(imageKey)
+          ? Colors.white.withOpacity(0.5)
+          : null,
       child: Column(
         children: [
           Align(
@@ -345,10 +347,12 @@ class _TimelineEventCardState extends State<EventCard> {
                   ),
                 ),
               )),
-          uploadingImages.contains(imageKey) ? Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: StaticLoadingLogo(),
-          ) : Container(),
+          uploadingImages.contains(imageKey)
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: StaticLoadingLogo(),
+                )
+              : Container(),
         ],
       ),
     );

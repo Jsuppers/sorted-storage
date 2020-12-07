@@ -119,39 +119,10 @@ class TimelineCard extends StatefulWidget {
 }
 
 class _TimelineCardState extends State<TimelineCard> {
-  @override
-  Widget build(BuildContext context) {
-    return TimelineAdventure(
-      viewMode: widget.viewMode,
-      folderId: widget.folderId,
-      width: widget.width,
-      height: widget.height,
-      adventure: widget.event,
-    );
-  }
-}
+  TimelineData adventure;
+  bool locked;
+  bool saving;
 
-class TimelineAdventure extends StatefulWidget {
-  final bool viewMode;
-  final String folderId;
-  final double width;
-  final double height;
-  final TimelineData adventure;
-
-  const TimelineAdventure(
-      {Key key,
-      this.viewMode,
-      this.folderId,
-      this.width,
-      this.height,
-      this.adventure})
-      : super(key: key);
-
-  @override
-  _TimelineAdventureState createState() => _TimelineAdventureState();
-}
-
-class _TimelineAdventureState extends State<TimelineAdventure> {
   Widget createHeader(double width, BuildContext context) {
     if (saving) {
       return Row(
@@ -178,7 +149,7 @@ class _TimelineAdventureState extends State<TimelineAdventure> {
                     text: "share",
                     icon: Icons.share,
                     onPressed: () {
-                      DialogService.shareDialog(context, widget.folderId);
+                      DialogService.shareDialog(context, adventure.mainEvent.folderID, adventure.mainEvent.commentsID);
                     },
                     width: width,
                     backgroundColor: Colors.white,
@@ -241,47 +212,42 @@ class _TimelineAdventureState extends State<TimelineAdventure> {
     );
   }
 
-  TimelineData adventure;
-  bool locked;
-  bool saving;
-
   @override
   void initState() {
     super.initState();
-    adventure = widget.adventure;
-    locked = adventure.locked;
-    saving = adventure.saving;
+    print('new init state');
+    adventure = widget.event;
+    locked = adventure == null ? true : adventure.locked;
+    saving = adventure == null ? false : adventure.saving;
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.viewMode) {
-      // TODO view event
-//      BlocProvider.of<AdventureBloc>(context)
-//          .add(AdventureGetViewEvent(widget.folderId));
+      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+          TimelineMessageType.retrieve_story,
+          folderId: widget.folderId));
     }
     if (adventure == null) {
       return FullPageLoadingLogo(backgroundColor: Colors.white);
     }
     return BlocListener<TimelineBloc, TimelineState>(
       listener: (context, state) {
-
         if (state.type == TimelineMessageType.syncing_story_start &&
             state.folderID == widget.folderId) {
           setState(() {
             saving = state.stories[state.folderID].saving;
             print('42 saving $saving');
           });
-        }
-        else if (state.type == TimelineMessageType.edit_story &&
+        } else if (state.type == TimelineMessageType.edit_story &&
             state.folderID == widget.folderId) {
           setState(() {
             locked = state.stories[state.folderID].locked;
           });
-        }
-        else if ((state.type == TimelineMessageType.cancel_story ||
-            state.type == TimelineMessageType.syncing_story_end) &&
+        } else if ((state.type == TimelineMessageType.cancel_story ||
+                state.type == TimelineMessageType.syncing_story_end) &&
             state.folderID == widget.folderId) {
+          print('synving end');
           setState(() {
             adventure = state.stories[state.folderID];
             locked = adventure.locked;
@@ -321,7 +287,10 @@ class _TimelineAdventureState extends State<TimelineAdventure> {
                             return;
                           }
                           BlocProvider.of<TimelineBloc>(context).add(
-                              TimelineEvent(TimelineMessageType.create_sub_story, parentId: adventure.mainEvent.folderID, folderId: widget.folderId));
+                              TimelineEvent(
+                                  TimelineMessageType.create_sub_story,
+                                  parentId: adventure.mainEvent.folderID,
+                                  folderId: widget.folderId));
                         },
                         width: Constants.SMALL_WIDTH,
                         backgroundColor: Colors.white,
@@ -363,8 +332,15 @@ class _TimelineAdventureState extends State<TimelineAdventure> {
                                           if (saving) {
                                             return;
                                           }
-                                          BlocProvider.of<TimelineBloc>(context).add(
-                                              TimelineEvent(TimelineMessageType.delete_sub_story, parentId: adventure.mainEvent.folderID, folderId: adventure.subEvents[index].folderID));
+                                          BlocProvider.of<TimelineBloc>(context)
+                                              .add(TimelineEvent(
+                                                  TimelineMessageType
+                                                      .delete_sub_story,
+                                                  parentId: adventure
+                                                      .mainEvent.folderID,
+                                                  folderId: adventure
+                                                      .subEvents[index]
+                                                      .folderID));
                                         },
                                       ),
                                     ),
@@ -375,30 +351,33 @@ class _TimelineAdventureState extends State<TimelineAdventure> {
                           event: adventure.subEvents[index])),
                 );
               }),
-              CommentWidget(
-                folderID: widget.folderId,
-                user: BlocProvider.of<AuthenticationBloc>(context).state,
-                width: widget.width,
-                height: widget.height,
-                comments: adventure.mainEvent.comments,
-                sendComment: (BuildContext context, usr.User currentUser,
-                    String comment) async {
-                  String user = "";
-                  if (currentUser != null) {
-                    user = currentUser.displayName;
-                    if (user == null || user == "") {
-                      user = currentUser.email;
+              BlocBuilder<AuthenticationBloc, usr.User>(
+                  builder: (context, user) {
+                return CommentWidget(
+                  folderID: widget.folderId,
+                  user: user,
+                  width: widget.width,
+                  height: widget.height,
+                  comments: adventure.mainEvent.comments,
+                  sendComment: (BuildContext context, usr.User currentUser,
+                      String comment) async {
+                    String user = "";
+                    if (currentUser != null) {
+                      user = currentUser.displayName;
+                      if (user == null || user == "") {
+                        user = currentUser.email;
+                      }
                     }
-                  }
 
-                  AdventureComment eventComment =
-                      AdventureComment(comment: comment, user: user);
-                  BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                      TimelineMessageType.uploading_comments_start,
-                      comment: eventComment,
-                      folderId: widget.folderId));
-                },
-              )
+                    AdventureComment eventComment =
+                        AdventureComment(comment: comment, user: user);
+                    BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                        TimelineMessageType.uploading_comments_start,
+                        comment: eventComment,
+                        folderId: widget.folderId));
+                  },
+                );
+              })
             ],
           ),
         ),

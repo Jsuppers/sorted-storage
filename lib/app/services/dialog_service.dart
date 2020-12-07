@@ -186,7 +186,7 @@ class DialogService {
         });
   }
 
-  static shareDialog(BuildContext context, String folderID) {
+  static shareDialog(BuildContext context, String folderID, String commentsID) {
     showDialog(
         context: context,
         barrierDismissible: true,
@@ -195,7 +195,8 @@ class DialogService {
           return BlocProvider(
               create: (BuildContext context) => SharingBloc(
                   BlocProvider.of<DriveBloc>(context).state,
-                  folderID),
+                  folderID,
+                  commentsID),
               child: Dialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(4.0))),

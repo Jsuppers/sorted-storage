@@ -43,9 +43,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         _createEventFolder(mediaFolderID, event.timestamp, event.mainEvent);
         break;
       case TimelineMessageType.delete_story:
-        yield TimelineState(
-            TimelineMessageType.syncing_story_start, localStories,
-            folderID: event.folderId);
+        yield TimelineState(TimelineMessageType.syncing_story_start, localStories, folderID: event.folderId);
         _deleteEvent(event.folderId);
         break;
       case TimelineMessageType.cancel_story:
@@ -169,20 +167,51 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         yield TimelineState(TimelineMessageType.syncing_story_state, localStories,
             folderID: event.folderId, uploadingImages: event.uploadingImages);
         break;
+      case TimelineMessageType.retrieve_story:
+        _getStories(folderID: event.folderId);
+        break;
     }
   }
 
-  _getStories() {
+  _getStories({String folderID}) {
     if (localStories == null) {
       localStories = Map();
     }
     if (cloudStories == null) {
       cloudStories = Map();
-      GoogleDrive.getMediaFolder(driveApi).then((value) {
-        mediaFolderID = value;
-        _getEventsFromFolder(mediaFolderID);
-      });
+
+      if (folderID != null) {
+        _getViewEvent(folderID);
+      } else {
+        GoogleDrive.getMediaFolder(driveApi).then((value) {
+          mediaFolderID = value;
+          _getEventsFromFolder(mediaFolderID);
+        });
+      }
     }
+  }
+
+  Future<TimelineData> _getViewEvent(String folderID) async {
+    var folder = await driveApi.files.get(folderID);
+    if (folder == null) {
+      return null;
+    }
+    int timestamp = int.tryParse(folder.name);
+    if (timestamp == null) {
+      return null;
+    }
+    var mainEvent = await _createEventFromFolder(folderID, timestamp);
+
+    List<EventContent> subEvents = List();
+    for (SubEvent subEvent in mainEvent.subEvents) {
+      subEvents
+          .add(await _createEventFromFolder(subEvent.id, subEvent.timestamp));
+    }
+    var timelineData = TimelineData(mainEvent: mainEvent, subEvents: subEvents);
+    localStories.putIfAbsent(folderID, () => timelineData);
+    cloudStories.putIfAbsent(folderID, () => timelineData);
+
+    this.add(TimelineEvent(TimelineMessageType.updated_stories));
   }
 
   Future _deleteEvent(fileId) async {
@@ -195,9 +224,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
   Future _getEventsFromFolder(String folderID) async {
     try {
+      print('getting event: $folderID');
       FileList eventList = await driveApi.files.list(
           q: "mimeType='application/vnd.google-apps.folder' and '$folderID' in parents and trashed=false");
       List<String> folderIds = [];
+      print('getting event: ${eventList.files}');
       for (File file in eventList.files) {
         int timestamp = int.tryParse(file.name);
 
@@ -312,7 +343,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         TimelineData timelineEvent =
             TimelineData(mainEvent: event, subEvents: []);
         cloudStories.putIfAbsent(folderID, () => timelineEvent);
-        localStories.putIfAbsent(folderID, () => timelineEvent);
+        localStories.putIfAbsent(folderID, () => TimelineData.clone(timelineEvent));
         await _uploadCommentsFile(event, null);
       }
 
@@ -369,7 +400,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       folderID = await GoogleDrive.uploadMedia(driveApi, event.folderID,
           Constants.COMMENTS_FILE, fileContent.length, mediaStream,
           mimeType: "application/json");
-      await _shareFile(folderID, "anyone", "writer");
     } else {
       var folder = await driveApi.files.update(null, event.commentsID,
           uploadMedia: Media(mediaStream, fileContent.length));

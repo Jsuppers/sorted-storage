@@ -5,6 +5,7 @@ enum TimelineMessageType {
   initial_state,
   update_drive,
   retrieve_stories,
+  retrieve_story,
   create_story,
   create_sub_story,
   delete_sub_story,
