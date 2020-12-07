@@ -258,8 +258,8 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget imageWidget(String imageKey,
       {Uint8List data, String imageURL, bool isImage}) {
-    return GestureDetector(
-      onTap: () {
+    return RawMaterialButton(
+      onPressed: () {
         if (widget.locked) {
           URLService.openDriveMedia(imageKey);
         }

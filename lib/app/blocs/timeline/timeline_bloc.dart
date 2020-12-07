@@ -466,9 +466,12 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
 
   _syncCopies(String eventFolderID) async {
-    print('1 save');
+    bool rebuildAllStories = false;
     var localCopy = localStories[eventFolderID];
     var cloudCopy = cloudStories[eventFolderID];
+    if (localCopy.mainEvent.timestamp != cloudCopy.mainEvent.timestamp) {
+      rebuildAllStories = true;
+    }
     for (int i = 0; i < localCopy.subEvents.length; i++) {
       EventContent subEvent = localCopy.subEvents[i];
       EventContent cloudSubEvent;
@@ -484,7 +487,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
       await _syncContent(subEvent, cloudSubEvent);
     }
-    print('2 save');
 
     List<EventContent> eventsToDelete = List();
     for (EventContent subEvent in cloudCopy.subEvents) {
@@ -500,7 +502,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         eventsToDelete.add(subEvent);
       }
     }
-    print('3 save');
 
     for (EventContent subEvent in eventsToDelete) {
       cloudCopy.subEvents.remove(subEvent);
@@ -510,10 +511,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     localCopy = TimelineData.clone(cloudCopy);
     print(localCopy.mainEvent.images);
 
-    print('4 save');
-
     this.add(TimelineEvent(TimelineMessageType.syncing_story_end,
         folderId: eventFolderID));
+    if (rebuildAllStories) {
+      this.add(TimelineEvent(TimelineMessageType.updated_stories));
+    }
   }
 
   Future _syncContent(EventContent localCopy, EventContent cloudCopy) async {
@@ -547,15 +549,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     Map<String, StoryMedia> imagesToAdd = Map();
     List<String> imagesToDelete = [];
     if (localCopy.images != null) {
-      print('uploading ${localCopy.images.length}');
 
       // TODO: progress bar and elegant way sending images
       int batchLength = 2;
       for (int i = 0; i < localCopy.images.length; i += batchLength) {
         for (int j = i; j < i + batchLength && j < localCopy.images.length; j++) {
-          print('whyy');
-          print(cloudCopy.images.length);
-          print(localCopy.images.length);
           MapEntry<String, StoryMedia> image = localCopy.images.entries.elementAt(j);
           if (!cloudCopy.images.containsKey(image.key)) {
             uploadingImages.update(localCopy.folderID, (value) {
@@ -566,8 +564,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
               list.add(image.key);
               return list;
             });
-            print('2 whyy');
-//
             this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
                 folderId: localCopy.folderID, uploadingImages: uploadingImages));
 
