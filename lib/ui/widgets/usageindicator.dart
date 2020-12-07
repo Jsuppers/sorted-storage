@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:web/ui/theme/theme.dart';
 
 class UsageIndicator extends StatelessWidget {
   final String limit;
@@ -17,43 +18,11 @@ class UsageIndicator extends StatelessWidget {
           children: [
             Text(
               usage,
-              style: TextStyle(
-                color: Colors.blue[800],
-                fontSize: 22.0,
-                fontWeight: FontWeight.bold,
-              ),
+              style: myThemeData.textTheme.bodyText1,
             ),
             Text(
               limit,
-              style: TextStyle(
-                color: Colors.black26,
-                fontSize: 22.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        //space
-        SizedBox(
-          height: 8.0,
-        ),
-        //
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Used",
-              style: TextStyle(
-                color: Colors.lightBlue[400],
-                fontSize: 15.0,
-              ),
-            ),
-            Text(
-              "Upgrade",
-              style: TextStyle(
-                color: Colors.blue[600],
-                fontSize: 15.0,
-              ),
+              style: myThemeData.textTheme.bodyText1,
             ),
           ],
         ),
@@ -64,10 +33,10 @@ class UsageIndicator extends StatelessWidget {
         //progress bar
         LinearPercentIndicator(
           // width: dou,
-          lineHeight: 14.0,
+          lineHeight: 12.0,
           percent: calculateDataPercentage(),
-          backgroundColor: Colors.grey,
-          progressColor: Colors.blue,
+          backgroundColor: Colors.grey[200],
+          progressColor: myThemeData.accentColor,
         ),
       ],
     );
