@@ -4,14 +4,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
 import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
+import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/event_comments.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
@@ -124,17 +127,7 @@ class _TimelineCardState extends State<TimelineCard> {
 
   Widget createHeader(double width, BuildContext context) {
     if (saving) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Container(
-            height: 30,
-            padding: EdgeInsets.zero,
-            alignment: Alignment.centerRight,
-            child: StaticLoadingLogo(),
-          ),
-        ],
-      );
+      return SavingIcon(folderID: adventure.mainEvent.folderID);
     }
     return Container(
       height: 30,
@@ -383,6 +376,63 @@ class _TimelineCardState extends State<TimelineCard> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SavingIcon extends StatefulWidget {
+  final String folderID;
+  const SavingIcon({
+    Key key, this.folderID,
+  }) : super(key: key);
+
+  @override
+  _SavingIconState createState() => _SavingIconState();
+}
+
+class _SavingIconState extends State<SavingIcon> {
+  double percent = 0;
+  String text = "0%";
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<TimelineBloc, TimelineState>(
+      listener: (context, state) {
+        if (state.type == TimelineMessageType.progress_upload &&
+            state.folderID == widget.folderID) {
+          MediaProgress progress = state.data;
+          setState(() {
+            // TODO this shows file loading progress not sending progress
+            var total = progress.total + 1; // we will be evil and never show 100%
+            var sent = progress.sent;
+            if (sent == 0) {
+              percent = 0;
+            } else {
+              percent = sent / total;
+            }
+            text = (percent * 100).toStringAsFixed(0) + "%";
+
+          });
+        }
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          CircularPercentIndicator(
+            radius: 48.0,
+            lineWidth: 8.0,
+            percent: percent,
+            center: new Text(
+              text,
+              style:
+              new TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
+            ),
+            circularStrokeCap: CircularStrokeCap.round,
+            progressColor: myThemeData.accentColor,
+            backgroundColor: Colors.grey[200],
+          ),
+        ],
       ),
     );
   }

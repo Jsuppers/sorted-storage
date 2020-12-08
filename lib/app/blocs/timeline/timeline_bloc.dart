@@ -10,6 +10,7 @@ import 'package:mime/mime.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
 import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
@@ -163,6 +164,9 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         var eventData = TimelineService.getEventWithFolderID(event.parentId, event.folderId, localStories);
         eventData.emoji = event.text;
         yield TimelineState(TimelineMessageType.edit_emoji, localStories, folderID: event.folderId, data: event.text);
+        break;
+      case TimelineMessageType.progress_upload:
+        yield TimelineState(TimelineMessageType.progress_upload, localStories, folderID: event.folderId, data: event.data);
         break;
     }
   }
@@ -527,38 +531,57 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           }));
     }
 
+    print('uploading misc files');
+    await Future.wait(tasks);
+    tasks = List();
+    print('starting on images');
+
     Map<String, StoryMedia> imagesToAdd = Map();
     List<String> imagesToDelete = [];
+    List<String> localImagesToDelete = [];
     if (localCopy.images != null) {
+      // inform the frontend which files need to upload
+      int totalSize = 0;
+      int sent = 0;
+      for (int i = 0; i < localCopy.images.length; i ++) {
+        MapEntry<String, StoryMedia> image = localCopy.images.entries.elementAt(i);
+        if (!cloudCopy.images.containsKey(image.key)) {
+          totalSize += image.value.size;
+          uploadingImages.update(localCopy.folderID, (value) {
+            value.add(image.key);
+            return value;
+          }, ifAbsent: () {
+            List<String> list = List();
+            list.add(image.key);
+            return list;
+          });
+        }
+      }
+      this.add(TimelineEvent(TimelineMessageType.progress_upload, folderId: localCopy.folderID, data: MediaProgress(totalSize, sent) ));
+      print('sending: $totalSize');
+      this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
+          folderId: localCopy.folderID, uploadingImages: uploadingImages));
 
-      // TODO: progress bar and elegant way sending images
-      int batchLength = 2;
-      for (int i = 0; i < localCopy.images.length; i += batchLength) {
-        for (int j = i; j < i + batchLength && j < localCopy.images.length; j++) {
-          MapEntry<String, StoryMedia> image = localCopy.images.entries.elementAt(j);
+
+      for (int i = 0; i < localCopy.images.length; i ++) {
+          MapEntry<String, StoryMedia> image = localCopy.images.entries.elementAt(i);
           if (!cloudCopy.images.containsKey(image.key)) {
+            var streamController = new StreamController<List<int>>();
 
-            uploadingImages.update(localCopy.folderID, (value) {
-              value.add(image.key);
-              return value;
-            }, ifAbsent: () {
-              List<String> list = List();
-              list.add(image.key);
-              return list;
+            image.value.stream.listen((event) {
+              sent += event.length;
+              this.add(TimelineEvent(TimelineMessageType.progress_upload, folderId: localCopy.folderID, data: MediaProgress(totalSize, sent) ));
+              streamController.add(event);
+            }, onDone: () {
+              streamController.close();
+            }, onError: (error) {
+              print('error: $error');
+              streamController.close();
             });
 
-            this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
-                folderId: localCopy.folderID, uploadingImages: uploadingImages));
-
-            tasks.add(GoogleDrive.uploadMediaToFolder(driveApi,
-                cloudCopy, image.key, image.value, 10)
+            await GoogleDrive.uploadMediaToFolder(driveApi,
+                cloudCopy, image.key, image.value, 10, streamController.stream)
                 .then((imageID) {
-
-              cloudCopy.images.putIfAbsent(imageID, () => image.value);
-              localCopy.images.putIfAbsent(imageID, () => image.value);
-              localCopy.images.remove(image.key);
-              getThumbnail(localCopy.folderID, imageID, localCopy.images);
-
               uploadingImages.update(localCopy.folderID, (value) {
                 value.remove(image.key);
                 return value;
@@ -568,18 +591,15 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
               if(imageID != null) {
                 imagesToAdd.putIfAbsent(imageID, () => image.value);
+                localImagesToDelete.add(image.key);
               } else {
                 print('imageID $imageID');
               }
-
               print('uploaded this image: ${image.key}');
             }, onError: (error) {
               print('error $error');
-            }));
-
-            print('created request $i');
+            });
           }
-        }
       }
 
       for (MapEntry<String, StoryMedia> image in cloudCopy.images.entries) {
@@ -597,7 +617,14 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
     return Future.wait(tasks).then((_) {
       cloudCopy.images.addAll(imagesToAdd);
+      localCopy.images.addAll(imagesToAdd);
       cloudCopy.images.removeWhere((key, value) => imagesToDelete.contains(key));
+      localCopy.images.removeWhere((key, value) => localImagesToDelete.contains(key));
+      imagesToAdd.forEach((key, value) {
+        getThumbnail(localCopy.folderID, key, localCopy.images, uploadingImages);
+      });
+      print(localCopy.images.toString());
+      print(cloudCopy.images.toString());
       checkNeedsRefreshing(localCopy.folderID, uploadingImages, localCopy);
     });
   }
@@ -606,20 +633,21 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     if (maxTries == 0) {
       return;
     }
+    print(maxTries);
     Future.delayed(Duration(seconds: 10), () async {
-      localCopy.images.forEach((key, media) {
-        if(media.imageURL == null) {
-          print("still waiting for a thumbnail: $key");
+      for (MapEntry entry in localCopy.images.entries) {
+        if(entry.value.imageURL == null) {
+          print("still waiting for a thumbnail: ${entry.key}");
           checkNeedsRefreshing(folderID, uploadingImages, localCopy, maxTries: maxTries - 1);
           return;
         }
-      });
+      }
       this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
           folderId: localCopy.folderID, uploadingImages: uploadingImages));
     });
   }
 
-  void getThumbnail(String folderID, String imageKey, Map<String, StoryMedia> images, {int maxTries = 10}) {
+  void getThumbnail(String folderID, String imageKey, Map<String, StoryMedia> images,  Map<String, List<String>> uploadingImages, {int maxTries = 10}) {
     int exp = 10;
     if (maxTries > exp) {
       maxTries = 10;
@@ -629,6 +657,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     }
     Future.delayed(Duration(seconds: (exp - maxTries) * 2), () async {
       if(images == null || !images.containsKey(imageKey)){
+        print('images $images');
         return;
       }
 
@@ -639,12 +668,14 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       if (mediaFile.hasThumbnail){
         print("thumbnail for image: $imageKey has been created! ${mediaFile.thumbnailLink}");
         images[imageKey].imageURL = mediaFile.thumbnailLink;
+        this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
+            folderId: folderID, uploadingImages: uploadingImages));
         return;
       }
 
 
       print("waiting for a thumbnail for image: $imageKey");
-      getThumbnail(folderID, imageKey, images, maxTries: maxTries - 1);
+      getThumbnail(folderID, imageKey, images, uploadingImages, maxTries: maxTries - 1);
     });
 
   }

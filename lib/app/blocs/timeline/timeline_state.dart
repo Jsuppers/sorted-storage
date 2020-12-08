@@ -7,6 +7,7 @@ enum TimelineMessageType {
   retrieve_stories,
   retrieve_story,
   create_story,
+  progress_upload,
   create_sub_story,
   delete_sub_story,
   edit_timestamp,

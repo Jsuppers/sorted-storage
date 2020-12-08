@@ -17,8 +17,8 @@ class ClientWithAuthHeaders extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     request.headers.remove("content-length");
     request.headers.remove("user-agent");
-    var baseRequest = request..headers.addAll(headers);
 
+    var baseRequest = request..headers.addAll(headers);
     return client.send(baseRequest);
   }
 }
