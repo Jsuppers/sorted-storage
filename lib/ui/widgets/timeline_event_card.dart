@@ -202,34 +202,37 @@ class _TimelineEventCardState extends State<EventCard> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                TextFormField(
-                    textAlign: TextAlign.center,
-                    autofocus: false,
-                    maxLines: null,
-                    style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'OpenSans',
-                        color: myThemeData.primaryColorDark),
-                    decoration: new InputDecoration(
-                        errorMaxLines: 0,
-                        errorBorder: InputBorder.none,
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        hintText: 'Enter a title'),
-                    readOnly: widget.locked || widget.saving,
-                    controller: titleController,
-                    onChanged: (string) {
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                          TimelineMessageType.edit_title,
-                          parentId: widget.eventFolderID,
-                          folderId: widget.event.folderID,
-                          text: string));
-                      //widget.event.title = string;
-                    }),
+                AbsorbPointer(
+                  absorbing: widget.locked || widget.saving,
+                  child: TextFormField(
+                      textAlign: TextAlign.center,
+                      autofocus: false,
+                      maxLines: null,
+                      style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'OpenSans',
+                          color: myThemeData.primaryColorDark),
+                      decoration: new InputDecoration(
+                          errorMaxLines: 0,
+                          errorBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          hintText: 'Enter a title'),
+                      readOnly: widget.locked || widget.saving,
+                      controller: titleController,
+                      onChanged: (string) {
+                        BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                            TimelineMessageType.edit_title,
+                            parentId: widget.eventFolderID,
+                            folderId: widget.event.folderID,
+                            text: string));
+                        //widget.event.title = string;
+                      }),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Wrap(
@@ -272,26 +275,29 @@ class _TimelineEventCardState extends State<EventCard> {
                     ),
                   ),
                 ),
-                TextFormField(
-                    textAlign: TextAlign.center,
-                    controller: descriptionController,
-                    style: TextStyle(
-                        fontSize: 14.0,
-                        fontFamily: 'OpenSans',
-                        color: myThemeData.primaryColorDark),
-                    decoration: new InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        hintText: 'Enter a description'),
-                    readOnly: widget.locked || widget.saving,
-                    onChanged: (string) {
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                          TimelineMessageType.edit_description,
-                          parentId: widget.eventFolderID,
-                          folderId: widget.event.folderID,
-                          text: string));
-                    },
-                    maxLines: null)
+                AbsorbPointer(
+                  absorbing: widget.locked || widget.saving,
+                  child: TextFormField(
+                      textAlign: TextAlign.center,
+                      controller: descriptionController,
+                      style: TextStyle(
+                          fontSize: 14.0,
+                          fontFamily: 'OpenSans',
+                          color: myThemeData.primaryColorDark),
+                      decoration: new InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          hintText: 'Enter a description'),
+                      readOnly: widget.locked || widget.saving,
+                      onChanged: (string) {
+                        BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                            TimelineMessageType.edit_description,
+                            parentId: widget.eventFolderID,
+                            folderId: widget.event.folderID,
+                            text: string));
+                      },
+                      maxLines: null),
+                )
               ],
             ),
           ]),
