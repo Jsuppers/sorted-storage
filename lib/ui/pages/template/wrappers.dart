@@ -82,11 +82,11 @@ class Content extends StatefulWidget {
 }
 
 class _ContentState extends State<Content> {
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => CookieService.showCookie(context));
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => CookieService.showCookie(context));
   }
 
   @override
@@ -98,17 +98,19 @@ class _ContentState extends State<Content> {
           width: sizingInformation.screenSize.width,
           height: sizingInformation.screenSize.height,
           decoration: myBackgroundDecoration,
-          child: SingleChildScrollView(
+          child: ListView(
             scrollDirection: Axis.vertical,
-            child: Column(
-              children: [
-                widget.includeNavigation
-                    ? NavigationBar(user: widget.user)
-                    : Container(),
-                widget.widget,
-                Footer(width: sizingInformation.screenSize.width)
-              ],
-            ),
+            children: [
+              Column(
+                children: [
+                  widget.includeNavigation
+                      ? NavigationBar(user: widget.user)
+                      : Container(),
+                  widget.widget,
+                  Footer(width: sizingInformation.screenSize.width)
+                ],
+              )
+            ],
           ),
         ),
       ),
