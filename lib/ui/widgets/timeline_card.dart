@@ -44,14 +44,17 @@ class TimelineData {
 class StoryMedia {
   String imageURL;
   bool isVideo;
+  bool isDocument;
   int size;
   Stream<List<int>> stream;
 
-  StoryMedia(
-      {this.imageURL,
-      this.stream,
-      this.isVideo = false,
-      this.size,});
+  StoryMedia({
+    this.imageURL,
+    this.stream,
+    this.isVideo = false,
+    this.isDocument = false,
+    this.size,
+  });
 }
 
 class SubEvent {
@@ -213,7 +216,6 @@ class _TimelineCardState extends State<TimelineCard> {
     adventure = widget.event;
     locked = adventure == null ? true : adventure.locked;
     saving = adventure == null ? false : adventure.saving;
-
   }
 
   @override
@@ -244,7 +246,8 @@ class _TimelineCardState extends State<TimelineCard> {
             state.folderID == widget.folderId) {
           setState(() {
             adventure = state.stories[state.folderID];
-            adventure.subEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+            adventure.subEvents
+                .sort((a, b) => b.timestamp.compareTo(a.timestamp));
             locked = adventure.locked;
             saving = adventure.saving;
           });
@@ -383,8 +386,10 @@ class _TimelineCardState extends State<TimelineCard> {
 
 class SavingIcon extends StatefulWidget {
   final String folderID;
+
   const SavingIcon({
-    Key key, this.folderID,
+    Key key,
+    this.folderID,
   }) : super(key: key);
 
   @override
@@ -404,7 +409,8 @@ class _SavingIconState extends State<SavingIcon> {
           MediaProgress progress = state.data;
           setState(() {
             // TODO this shows file loading progress not sending progress
-            var total = progress.total + 1; // we will be evil and never show 100%
+            var total =
+                progress.total + 1; // we will be evil and never show 100%
             var sent = progress.sent;
             if (sent == 0) {
               percent = 0;
@@ -412,7 +418,6 @@ class _SavingIconState extends State<SavingIcon> {
               percent = sent / total;
             }
             text = (percent * 100).toInt().toString() + "%";
-
           });
         }
       },
@@ -425,8 +430,7 @@ class _SavingIconState extends State<SavingIcon> {
             percent: percent,
             center: new Text(
               text,
-              style:
-              new TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
+              style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
             ),
             circularStrokeCap: CircularStrokeCap.round,
             progressColor: myThemeData.accentColor,

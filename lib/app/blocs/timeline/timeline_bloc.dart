@@ -144,7 +144,9 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           PlatformFile element = file.files[i];
           String mime = lookupMimeType(element.name);
             eventContent.images.putIfAbsent(element.name,
-                    () => StoryMedia(stream: element.readStream, size: element.size, isVideo: mime.startsWith("video/")));
+                    () => StoryMedia(stream: element.readStream, size: element.size,
+                        isVideo: mime.startsWith("video/"),
+                         isDocument: !mime.startsWith("video/") && !mime.startsWith("image/")));
         }
         yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
             folderID: event.folderId);
@@ -283,6 +285,13 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         if (timestamp != null) {
           subEvents.add(SubEvent(file.id, timestamp));
         }
+      } else {
+        StoryMedia media = StoryMedia();
+        media.isDocument = true;
+        if (file.hasThumbnail) {
+          media.imageURL = file.thumbnailLink;
+        }
+        images.putIfAbsent(file.id, () => media);
       }
     }
 

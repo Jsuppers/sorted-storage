@@ -329,13 +329,13 @@ class _TimelineEventCardState extends State<EventCard> {
         ),
         child: !widget.locked
             ? createEditControls(imageKey, showPlaceholder)
-            : createNonEditControls(imageKey, showPlaceholder, media.isVideo),
+            : createNonEditControls(imageKey, showPlaceholder, media),
       ),
     );
   }
 
   Widget createNonEditControls(
-      String imageKey, bool showPlaceholder, bool isVideo) {
+      String imageKey, bool showPlaceholder, StoryMedia media) {
     if (showPlaceholder) {
       return Container(
           child: Column(
@@ -346,7 +346,7 @@ class _TimelineEventCardState extends State<EventCard> {
             ],
           ),);
     }
-    if (!isVideo) {
+    if (!media.isVideo && !media.isDocument) {
       return Container();
     }
     return Align(
@@ -360,7 +360,7 @@ class _TimelineEventCardState extends State<EventCard> {
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(40))),
           child: Icon(
-            Icons.play_arrow,
+            media.isVideo ? Icons.play_arrow : Icons.insert_drive_file,
             color: Colors.black,
             size: 18,
           ),
