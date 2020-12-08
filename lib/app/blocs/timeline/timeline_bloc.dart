@@ -142,17 +142,8 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         for (int i = 0; i < file.files.length; i++) {
           PlatformFile element = file.files[i];
           String mime = lookupMimeType(element.name);
-          if (mime.startsWith("image/")) {
-            Uint8List bytes = await TimelineService.getBytes(element.readStream);
             eventContent.images.putIfAbsent(element.name,
-                    () => StoryMedia(bytes: bytes, isImage: true, size: element.size));
-          } else {
-            // TODO generate thumbnail
-            ByteData bytes = await rootBundle.load('assets/images/placeholder.png');
-            eventContent.images.putIfAbsent(element.name,
-                    () => StoryMedia(bytes: bytes.buffer.asUint8List(),
-                    stream: element.readStream, size: element.size, isImage: false));
-          }
+                    () => StoryMedia(stream: element.readStream, size: element.size, isVideo: mime.startsWith("video/")));
         }
         yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
             folderID: event.folderId);
@@ -262,7 +253,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
   Future<EventContent> _createEventFromFolder(
       String folderID, int timestamp) async {
-    FileList textFileList = await driveApi.files.list(
+    FileList filesInFolder = await driveApi.files.list(
         q: "'$folderID' in parents and trashed=false",
         $fields: 'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink)');
 
@@ -270,17 +261,13 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     String commentsID;
     Map<String, StoryMedia> images = Map();
     List<SubEvent> subEvents = List();
-    for (File file in textFileList.files) {
+    for (File file in filesInFolder.files) {
       if (file.mimeType.startsWith("image/") ||
           file.mimeType.startsWith("video/")) {
         StoryMedia media = StoryMedia();
-        media.isImage = file.mimeType.startsWith("image/");
+        media.isVideo = file.mimeType.startsWith("video/");
         if (file.hasThumbnail) {
           media.imageURL = file.thumbnailLink;
-        } else {
-          ByteData bytes =
-              await rootBundle.load('assets/images/placeholder.png');
-          media.bytes = bytes.buffer.asUint8List();
         }
         images.putIfAbsent(file.id, () => media);
       } else if (file.name == Constants.SETTINGS_FILE) {
@@ -550,6 +537,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         for (int j = i; j < i + batchLength && j < localCopy.images.length; j++) {
           MapEntry<String, StoryMedia> image = localCopy.images.entries.elementAt(j);
           if (!cloudCopy.images.containsKey(image.key)) {
+
             uploadingImages.update(localCopy.folderID, (value) {
               value.add(image.key);
               return value;
@@ -558,12 +546,19 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
               list.add(image.key);
               return list;
             });
+
             this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
                 folderId: localCopy.folderID, uploadingImages: uploadingImages));
 
             tasks.add(GoogleDrive.uploadMediaToFolder(driveApi,
                 cloudCopy, image.key, image.value, 10)
                 .then((imageID) {
+
+              cloudCopy.images.putIfAbsent(imageID, () => image.value);
+              localCopy.images.putIfAbsent(imageID, () => image.value);
+              localCopy.images.remove(image.key);
+              getThumbnail(localCopy.folderID, imageID, localCopy.images);
+
               uploadingImages.update(localCopy.folderID, (value) {
                 value.remove(image.key);
                 return value;
@@ -572,8 +567,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
                   folderId: localCopy.folderID, uploadingImages: uploadingImages));
 
               if(imageID != null) {
-                imagesToAdd.putIfAbsent(
-                    imageID, () => image.value);
+                imagesToAdd.putIfAbsent(imageID, () => image.value);
               } else {
                 print('imageID $imageID');
               }
@@ -606,6 +600,36 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       cloudCopy.images
           .removeWhere((key, value) => imagesToDelete.contains(key));
     });
+  }
+
+  void getThumbnail(String folderID, String imageKey, Map<String, StoryMedia> images, {int maxTries = 10}) {
+    int exp = 10;
+    if (maxTries > exp) {
+      maxTries = 10;
+    }
+    if (maxTries == 0) {
+      return;
+    }
+    Future.delayed(Duration(seconds: (exp - maxTries) * 2), () async {
+      if(images == null || !images.containsKey(imageKey)){
+        return;
+      }
+
+      File mediaFile = await driveApi.files.get(
+          imageKey,
+          $fields: 'id,hasThumbnail,thumbnailLink');
+
+      if (mediaFile.hasThumbnail){
+        print("thumbnail for image: $imageKey has been created! ${mediaFile.thumbnailLink}");
+        images[imageKey].imageURL = mediaFile.thumbnailLink;
+        return;
+      }
+
+
+      print("waiting for a thumbnail for image: $imageKey");
+      getThumbnail(folderID, imageKey, images, maxTries: maxTries - 1);
+    });
+
   }
 
 

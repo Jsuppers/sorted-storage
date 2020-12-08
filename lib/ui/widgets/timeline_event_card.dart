@@ -70,7 +70,8 @@ class _TimelineEventCardState extends State<EventCard> {
         minWidth: 40,
         height: 40,
         onPressed: () {
-          DialogService.pickEmoji(context,
+          DialogService.pickEmoji(
+            context,
             parentID: widget.eventFolderID,
             folderID: widget.event.folderID,
           );
@@ -136,19 +137,23 @@ class _TimelineEventCardState extends State<EventCard> {
     List<Widget> cards = [];
     if (widget.event.images != null) {
       for (MapEntry<String, StoryMedia> image in widget.event.images.entries) {
-        cards.add(ImageCard(image.key, image.value));
+        cards.add(imageWidget(image.key, image.value));
       }
     }
 
     return BlocListener<TimelineBloc, TimelineState>(
       listener: (context, state) {
-        if (state.type == TimelineMessageType.edit_emoji && state.folderID == widget.event.folderID){
+        if (state.type == TimelineMessageType.edit_emoji &&
+            state.folderID == widget.event.folderID) {
           setState(() {
             widget.event.emoji = state.data;
           });
         }
 
         if (state.type == TimelineMessageType.syncing_story_state) {
+          if(state.uploadingImages == null) {
+            return;
+          }
           if (!state.uploadingImages.containsKey(widget.event.folderID)) {
             return;
           }
@@ -295,18 +300,9 @@ class _TimelineEventCardState extends State<EventCard> {
     );
   }
 
-  Widget ImageCard(String key, StoryMedia image) {
-    bool isNetworkImage = image.bytes == null;
 
-    if (isNetworkImage) {
-      return imageWidget(key, imageURL: image.imageURL, isImage: image.isImage);
-    } else {
-      return imageWidget(key, data: image.bytes, isImage: image.isImage);
-    }
-  }
-
-  Widget imageWidget(String imageKey,
-      {Uint8List data, String imageURL, bool isImage}) {
+  Widget imageWidget(String imageKey, StoryMedia media) {
+    bool showPlaceholder = media.imageURL == null;
     return RawMaterialButton(
       onPressed: () {
         if (widget.locked) {
@@ -318,43 +314,56 @@ class _TimelineEventCardState extends State<EventCard> {
         width: 150.0,
         decoration: new BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(6)),
-          image: DecorationImage(
-            image: data != null
-                ? new MemoryImage(data)
-                : CachedNetworkImageProvider(imageURL),
-            fit: BoxFit.cover,
-          ),
+          image: showPlaceholder
+              ? null
+              : DecorationImage(
+                  image: CachedNetworkImageProvider(media.imageURL),
+                  fit: BoxFit.cover,
+                ),
         ),
         child: !widget.locked
-            ? createEditControls(imageKey)
-            : createNonEditControls(isImage),
+            ? createEditControls(imageKey, showPlaceholder)
+            : createNonEditControls(imageKey, showPlaceholder, media.isVideo),
       ),
     );
   }
 
-  Widget createNonEditControls(bool isImage) {
-    if (isImage) {
+  Widget createNonEditControls(
+      String imageKey, bool showPlaceholder, bool isVideo) {
+    if (showPlaceholder) {
+      return Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.insert_drive_file),
+              Center(child: Text(imageKey)),
+            ],
+          ),);
+    }
+    if (!isVideo) {
       return Container();
     }
     return Align(
-        alignment: Alignment.center,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 3, top: 3),
-          child: Container(
-              height: 34,
-              width: 34,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(40))),
-              child: Icon(
-                Icons.play_arrow,
-                color: Colors.black,
-                size: 18,
-              )),
-        ));
+      alignment: Alignment.center,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 3, top: 3),
+        child: Container(
+          height: 34,
+          width: 34,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(40))),
+          child: Icon(
+            Icons.play_arrow,
+            color: Colors.black,
+            size: 18,
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget createEditControls(String imageKey) {
+  Widget createEditControls(String imageKey, bool showplaceholder) {
     return Container(
       color: uploadingImages.contains(imageKey)
           ? Colors.white.withOpacity(0.5)
@@ -396,12 +405,25 @@ class _TimelineEventCardState extends State<EventCard> {
                   ),
                 ),
               )),
-          uploadingImages.contains(imageKey)
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: StaticLoadingLogo(),
-                )
-              : Container(),
+          Container(
+              child: Column(children: [
+            uploadingImages.contains(imageKey)
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: StaticLoadingLogo(),
+                  )
+                : Container(),
+            showplaceholder
+                ? Container(
+                    child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      widget.saving ? Container() : Icon(Icons.insert_drive_file),
+                      Center(child: Text(imageKey)),
+                    ],
+                  ))
+                : Container()
+          ]))
         ],
       ),
     );
