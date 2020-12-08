@@ -8,21 +8,14 @@ class GoogleDrive {
 
   static Future<String> uploadMediaToFolder(DriveApi driveApi, EventContent eventContent,
       String imageName, StoryMedia storyMedia, int delayMilliseconds) async {
-    print('converting to list');
-    Stream<List<int>> dataStream;
-    if (storyMedia.isImage) {
-      dataStream = Future.value(storyMedia.bytes.toList()).asStream();
-    }else {
-      dataStream = storyMedia.stream;
-    }
-
-    File originalFileToUpload = File();
-    originalFileToUpload.parents = [eventContent.folderID];
-    originalFileToUpload.name = imageName;
+    Stream<List<int>> dataStream = storyMedia.stream;
+    File mediaFile = File();
+    mediaFile.parents = [eventContent.folderID];
+    mediaFile.name = imageName;
     Media image = Media(dataStream, storyMedia.size);
 
     var uploadMedia = await driveApi.files
-        .create(originalFileToUpload, uploadMedia: image);
+        .create(mediaFile, uploadMedia: image);
 
     return uploadMedia.id;
   }

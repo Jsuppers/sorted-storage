@@ -18,23 +18,4 @@ class TimelineService {
     }
     return null;
   }
-
-  static List<String> getMediaThatAreUploading(EventContent content) {
-    List<String> mediaBeingUploaded = List();
-    for (MapEntry<String, StoryMedia> mediaEntry in content.images.entries) {
-      if (mediaEntry.value.needsToUpload) {
-        mediaBeingUploaded.add(mediaEntry.key);
-      }
-    }
-    return mediaBeingUploaded;
-  }
-
-  static Future<Uint8List> getBytes(Stream<List<int>> stream) async {
-    List<int> bytesList = List();
-    await for (List<int> bytes in stream) {
-      bytesList.addAll(bytes);
-    }
-    return Uint8List.fromList(bytesList);
-  }
-
 }

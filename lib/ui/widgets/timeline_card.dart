@@ -40,19 +40,15 @@ class TimelineData {
 
 class StoryMedia {
   String imageURL;
-  Uint8List bytes;
-  bool isImage;
-  bool needsToUpload;
+  bool isVideo;
   int size;
   Stream<List<int>> stream;
 
   StoryMedia(
       {this.imageURL,
-      this.bytes,
       this.stream,
-      this.isImage = false,
-      this.size,
-      this.needsToUpload = false});
+      this.isVideo = false,
+      this.size,});
 }
 
 class SubEvent {
@@ -253,7 +249,6 @@ class _TimelineCardState extends State<TimelineCard> {
         } else if ((state.type == TimelineMessageType.cancel_story ||
                 state.type == TimelineMessageType.syncing_story_end) &&
             state.folderID == widget.folderId) {
-          print('synving end');
           setState(() {
             adventure = state.stories[state.folderID];
             adventure.subEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
