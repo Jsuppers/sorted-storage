@@ -597,8 +597,25 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
 
     return Future.wait(tasks).then((_) {
       cloudCopy.images.addAll(imagesToAdd);
-      cloudCopy.images
-          .removeWhere((key, value) => imagesToDelete.contains(key));
+      cloudCopy.images.removeWhere((key, value) => imagesToDelete.contains(key));
+      checkNeedsRefreshing(localCopy.folderID, uploadingImages, localCopy);
+    });
+  }
+
+  void checkNeedsRefreshing(String folderID, Map<String, List<String>> uploadingImages, EventContent localCopy, {int maxTries = 60}) {
+    if (maxTries == 0) {
+      return;
+    }
+    Future.delayed(Duration(seconds: 10), () async {
+      localCopy.images.forEach((key, media) {
+        if(media.imageURL == null) {
+          print("still waiting for a thumbnail: $key");
+          checkNeedsRefreshing(folderID, uploadingImages, localCopy, maxTries: maxTries - 1);
+          return;
+        }
+      });
+      this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
+          folderId: localCopy.folderID, uploadingImages: uploadingImages));
     });
   }
 
