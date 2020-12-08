@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:googleapis/drive/v3.dart';
@@ -7,15 +8,19 @@ import 'package:web/ui/widgets/timeline_card.dart';
 class GoogleDrive {
 
   static Future<String> uploadMediaToFolder(DriveApi driveApi, EventContent eventContent,
-      String imageName, StoryMedia storyMedia, int delayMilliseconds) async {
-    Stream<List<int>> dataStream = storyMedia.stream;
+      String imageName, StoryMedia storyMedia, int delayMilliseconds, Stream<List<int>> dataStream) async {
     File mediaFile = File();
     mediaFile.parents = [eventContent.folderID];
     mediaFile.name = imageName;
-    Media image = Media(dataStream, storyMedia.size);
 
-    var uploadMedia = await driveApi.files
-        .create(mediaFile, uploadMedia: image);
+    Media image = Media(dataStream, storyMedia.size);
+    var uploadMedia;
+    try {
+      uploadMedia = await driveApi.files
+          .create(mediaFile, uploadMedia: image);
+    } catch (e){
+
+    }
 
     return uploadMedia.id;
   }

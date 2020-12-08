@@ -12,10 +12,12 @@ class TimelineEvent {
   final DriveApi driveApi;
   final String imageKey;
   final String text;
+  final dynamic data;
   final Map<String, List<String>> uploadingImages;
 
   const TimelineEvent(this.type,
-      {this.uploadingImages,
+      {this.data,
+      this.uploadingImages,
       this.text,
       this.driveApi,
       this.parentId,
