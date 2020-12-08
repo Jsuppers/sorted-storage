@@ -411,7 +411,7 @@ class _SavingIconState extends State<SavingIcon> {
             } else {
               percent = sent / total;
             }
-            text = (percent * 100).toStringAsFixed(0) + "%";
+            text = (percent * 100).toInt().toString() + "%";
 
           });
         }
