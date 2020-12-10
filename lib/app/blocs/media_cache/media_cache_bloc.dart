@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
@@ -16,7 +15,7 @@ class MediaCacheBloc extends Bloc<MediaCacheEvent, Uint8List> {
 
   @override
   Stream<Uint8List> mapEventToState(MediaCacheEvent event) async* {
-    if (event is MediaCacheGetImageEvent){
+    if (event is MediaCacheGetImageEvent) {
       yield await getImage(event.imageURL);
     }
     if (event is MediaCacheUpdateDriveAPIEvent) {
@@ -42,5 +41,4 @@ class MediaCacheBloc extends Bloc<MediaCacheEvent, Uint8List> {
     images.putIfAbsent(key, () => image);
     return image;
   }
-
 }

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class TimelineService {

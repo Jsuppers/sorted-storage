@@ -381,8 +381,7 @@ class EmojiPickerState extends State<EmojiPicker> {
                 parentId: widget.parentID,
                 folderId: widget.folderID,
                 text: element));
-            BlocProvider.of<NavigationBloc>(context)
-                .add(NavigatorPopEvent());
+            BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
           },
           child: Text(
             element,

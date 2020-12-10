@@ -6,9 +6,13 @@ import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class GoogleDrive {
-
-  static Future<String> uploadMediaToFolder(DriveApi driveApi, EventContent eventContent,
-      String imageName, StoryMedia storyMedia, int delayMilliseconds, Stream<List<int>> dataStream) async {
+  static Future<String> uploadMediaToFolder(
+      DriveApi driveApi,
+      EventContent eventContent,
+      String imageName,
+      StoryMedia storyMedia,
+      int delayMilliseconds,
+      Stream<List<int>> dataStream) async {
     File mediaFile = File();
     mediaFile.parents = [eventContent.folderID];
     mediaFile.name = imageName;
@@ -16,11 +20,8 @@ class GoogleDrive {
     Media image = Media(dataStream, storyMedia.size);
     var uploadMedia;
     try {
-      uploadMedia = await driveApi.files
-          .create(mediaFile, uploadMedia: image);
-    } catch (e){
-
-    }
+      uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
+    } catch (e) {}
 
     return uploadMedia.id;
   }
@@ -40,7 +41,8 @@ class GoogleDrive {
     return event;
   }
 
-  static Future<String> createStory(DriveApi driveApi, String parentID, int timestamp) async {
+  static Future<String> createStory(
+      DriveApi driveApi, String parentID, int timestamp) async {
     File eventToUpload = File();
     eventToUpload.parents = [parentID];
     eventToUpload.mimeType = "application/vnd.google-apps.folder";
@@ -50,16 +52,17 @@ class GoogleDrive {
     return folder.id;
   }
 
-
-  static Future<String> uploadMedia(DriveApi driveApi, String parentID, String name, int contentLength, Stream<List<int>> mediaStream, {String mimeType}) async {
+  static Future<String> uploadMedia(DriveApi driveApi, String parentID,
+      String name, int contentLength, Stream<List<int>> mediaStream,
+      {String mimeType}) async {
     File mediaFile = File();
     mediaFile.parents = [parentID];
     if (mimeType != null) {
       mediaFile.mimeType = mimeType;
     }
     mediaFile.name = name;
-    var folder = await driveApi.files.create(mediaFile,
-        uploadMedia: Media(mediaStream, contentLength));
+    var folder = await driveApi.files
+        .create(mediaFile, uploadMedia: Media(mediaStream, contentLength));
 
     return folder.id;
   }
@@ -125,5 +128,4 @@ class GoogleDrive {
       return e.toString();
     }
   }
-
 }

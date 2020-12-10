@@ -20,10 +20,8 @@ class DriveBloc extends Bloc<DriveEvent, DriveApi> {
   DriveApi _initialize(usr.User user) {
     http.Client client;
     if (user != null) {
-      print('1 here: $user');
       client = ClientWithAuthHeaders(user.headers);
     } else {
-      print('2 here: $user');
       client = ClientWithGoogleDriveKey();
     }
     return DriveApi(client);
