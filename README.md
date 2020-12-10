@@ -1,16 +1,15 @@
-# web
+# Sorted Storage
 
-A new Flutter project.
+This project provides users a sorted way to view their media and documents which are 
+saved in cloud storage. 
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+there are a few steps to get this project running locally: 
+1. Google sign in only allows port 5000 from localhost so we need to run flutter web as follows:
+```flutter run -d chrome --web-hostname localhost --web-port 5000```
+2. You will need to create your own google api key  e.g. go to 
+[Google credentials](https://console.cloud.google.com/apis/credentials) and 
+create credentials -> API Key. 
+Copy this API Key and replace ```GOOGLE_API_KEY``` in the constants.dart file
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.

@@ -7,6 +7,7 @@ class Constants {
   static const String COMMENTS_FILE = 'comments.json';
   static const String DONATE_URL = 'https://www.buymeacoffee.com/joris';
   static const String ACCEPTED_COOKIE_VARIABLE = 'ACCEPTED_COOKIE';
+  static const String GOOGLE_API_KEY = 'AIzaSyAqIRv5ZxTwthkOQQXvi4jpdn6k5Gx3afk';
 
   static const double SMALL_WIDTH = 600;
 }
