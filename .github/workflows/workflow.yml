@@ -17,6 +17,9 @@ jobs:
       - run: flutter config --enable-web
       - run: flutter pub get
       #     - run: flutter test
+      - run: mkdir env
+      - run: echo GOOGLE_API_KEY=AIzaSyAqIRv5ZxTwthkOQQXvi4jpdn6k5Gx3afk > env/.env
+      - run: flutter pub run build_runner build
       - run: flutter build web
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master

@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  envify: ^2.0.0
   mime: ^0.9.7
   bloc_test: ^7.1.0
   bloc: ^6.1.0
@@ -54,6 +55,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  envify_generator: any
+  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

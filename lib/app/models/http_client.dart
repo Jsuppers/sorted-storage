@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 import 'package:http_retry/http_retry.dart';
-import 'package:web/constants.dart';
+import 'package:web/env/env.dart';
 
 class ClientWithAuthHeaders extends http.BaseClient {
   final Map<String, String> headers;
@@ -35,7 +35,7 @@ class ClientWithGoogleDriveKey extends http.BaseClient {
     request.headers.remove("user-agent");
 
     Map<String, String> newParameters = Map.from(request.url.queryParameters);
-    newParameters.putIfAbsent("key", () => Constants.GOOGLE_API_KEY);
+    newParameters.putIfAbsent("key", () => Env.googleApiKey);
     Uri uri1 = request.url.replace(queryParameters: newParameters);
     http.BaseRequest baseRequest = http.Request(request.method, uri1);
     baseRequest.headers.addAll(request.headers);

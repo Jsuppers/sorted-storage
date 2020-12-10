@@ -14,7 +14,6 @@ import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
 import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart' as usr;
-import 'package:web/app/services/cookie_service.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
 
