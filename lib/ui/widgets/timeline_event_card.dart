@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_field/date_field.dart';
 import 'package:flutter/foundation.dart';
@@ -68,13 +67,11 @@ class _TimelineEventCardState extends State<EventCard> {
       child: MaterialButton(
         minWidth: 40,
         height: 40,
-        onPressed: () {
-          DialogService.pickEmoji(
-            context,
-            parentID: widget.eventFolderID,
-            folderID: widget.event.folderID,
-          );
-        },
+        onPressed: () => DialogService.pickEmoji(
+          context,
+          parentID: widget.eventFolderID,
+          folderID: widget.event.folderID,
+        ),
         child: widget.event.emoji == ""
             ? Text(
                 "📅",
@@ -119,13 +116,11 @@ class _TimelineEventCardState extends State<EventCard> {
           if (widget.saving) {
             return;
           }
-          setState(() {
-            BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                TimelineMessageType.edit_timestamp,
-                parentId: widget.eventFolderID,
-                folderId: widget.event.folderID,
-                timestamp: date.millisecondsSinceEpoch));
-          });
+          setState(() => BlocProvider.of<TimelineBloc>(context).add(
+              TimelineEvent(TimelineMessageType.edit_timestamp,
+                  parentId: widget.eventFolderID,
+                  folderId: widget.event.folderID,
+                  timestamp: date.millisecondsSinceEpoch)));
         },
       ),
     );
@@ -150,7 +145,7 @@ class _TimelineEventCardState extends State<EventCard> {
         }
 
         if (state.type == TimelineMessageType.syncing_story_state) {
-          if(state.uploadingImages == null) {
+          if (state.uploadingImages == null) {
             return;
           }
           if (!state.uploadingImages.containsKey(widget.event.folderID)) {
@@ -204,33 +199,32 @@ class _TimelineEventCardState extends State<EventCard> {
                 AbsorbPointer(
                   absorbing: widget.locked || widget.saving,
                   child: TextFormField(
-                      textAlign: TextAlign.center,
-                      autofocus: false,
-                      maxLines: null,
-                      style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'OpenSans',
-                          color: myThemeData.primaryColorDark),
-                      decoration: new InputDecoration(
-                          errorMaxLines: 0,
-                          errorBorder: InputBorder.none,
-                          border: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          hintText: 'Enter a title'),
-                      readOnly: widget.locked || widget.saving,
-                      controller: titleController,
-                      onChanged: (string) {
-                        BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                            TimelineMessageType.edit_title,
-                            parentId: widget.eventFolderID,
-                            folderId: widget.event.folderID,
-                            text: string));
-                        //widget.event.title = string;
-                      }),
+                    textAlign: TextAlign.center,
+                    autofocus: false,
+                    maxLines: null,
+                    style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'OpenSans',
+                        color: myThemeData.primaryColorDark),
+                    decoration: new InputDecoration(
+                        errorMaxLines: 0,
+                        errorBorder: InputBorder.none,
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        hintText: 'Enter a title'),
+                    readOnly: widget.locked || widget.saving,
+                    controller: titleController,
+                    onChanged: (string) =>
+                        BlocProvider.of<TimelineBloc>(context).add(
+                            TimelineEvent(TimelineMessageType.edit_title,
+                                parentId: widget.eventFolderID,
+                                folderId: widget.event.folderID,
+                                text: string)),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -289,11 +283,11 @@ class _TimelineEventCardState extends State<EventCard> {
                           hintText: 'Enter a description'),
                       readOnly: widget.locked || widget.saving,
                       onChanged: (string) {
-                        BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                            TimelineMessageType.edit_description,
-                            parentId: widget.eventFolderID,
-                            folderId: widget.event.folderID,
-                            text: string));
+                        BlocProvider.of<TimelineBloc>(context).add(
+                            TimelineEvent(TimelineMessageType.edit_description,
+                                parentId: widget.eventFolderID,
+                                folderId: widget.event.folderID,
+                                text: string));
                       },
                       maxLines: null),
                 )
@@ -304,7 +298,6 @@ class _TimelineEventCardState extends State<EventCard> {
       ),
     );
   }
-
 
   Widget imageWidget(String imageKey, StoryMedia media) {
     bool showPlaceholder = media.imageURL == null;
@@ -337,13 +330,14 @@ class _TimelineEventCardState extends State<EventCard> {
       String imageKey, bool showPlaceholder, StoryMedia media) {
     if (showPlaceholder) {
       return Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.insert_drive_file),
-              Center(child: Text(imageKey)),
-            ],
-          ),);
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.insert_drive_file),
+            Center(child: Text(imageKey)),
+          ],
+        ),
+      );
     }
     if (!media.isVideo && !media.isDocument) {
       return Container();
@@ -411,24 +405,27 @@ class _TimelineEventCardState extends State<EventCard> {
                 ),
               )),
           Container(
-              child: Column(children: [
-            uploadingImages.contains(imageKey)
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: StaticLoadingLogo(),
-                  )
-                : Container(),
-            showplaceholder
-                ? Container(
-                    child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      widget.saving ? Container() : Icon(Icons.insert_drive_file),
-                      Center(child: Text(imageKey)),
-                    ],
-                  ))
-                : Container()
-          ]))
+            child: Column(children: [
+              uploadingImages.contains(imageKey)
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: StaticLoadingLogo(),
+                    )
+                  : Container(),
+              showplaceholder
+                  ? Container(
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        widget.saving
+                            ? Container()
+                            : Icon(Icons.insert_drive_file),
+                        Center(child: Text(imageKey)),
+                      ],
+                    ))
+                  : Container()
+            ]),
+          )
         ],
       ),
     );

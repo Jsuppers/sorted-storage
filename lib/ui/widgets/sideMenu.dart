@@ -1,18 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:percent_indicator/percent_indicator.dart';
-import 'package:web/app/models/user.dart';
-import 'package:web/app/services/storage_service.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/user.dart';
+import 'package:web/app/services/storage_service.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/avatar.dart';
-import 'package:web/ui/widgets/usageindicator.dart';
+import 'package:web/ui/widgets/usage_indicator.dart';
 
 class AvatarWithMenu extends StatelessWidget {
   final User user;
@@ -100,16 +98,6 @@ class AvatarWithMenu extends StatelessWidget {
             enabled: false,
             child: Divider(),
           ),
-//          PopupMenuItem(
-//            enabled: false,
-//            child: Center(
-//              child: MaterialButton(
-//                minWidth: 190,
-//                onPressed: () {},
-//                child: Text("Support"),
-//              ),
-//            ),
-//          ),
           PopupMenuItem(
             enabled: false,
             child: Center(

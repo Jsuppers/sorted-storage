@@ -10,7 +10,8 @@ class TermsPage extends StatelessWidget {
         fontSize: 12,
         fontWeight: FontWeight.normal);
     return FutureBuilder(
-        future: DefaultAssetBundle.of(context).loadString('assets/docs/terms.txt'),
+        future:
+            DefaultAssetBundle.of(context).loadString('assets/docs/terms.txt'),
         builder: (context, document) {
           return Padding(
             padding: const EdgeInsets.all(20.0),

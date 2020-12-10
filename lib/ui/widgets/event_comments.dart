@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:timeline_list/timeline.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';

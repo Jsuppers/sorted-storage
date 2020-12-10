@@ -13,12 +13,14 @@ class NavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Card(
-            child: ScreenTypeLayout(
-              mobile: NavigationBarMobile(user: user),
-              tablet: NavigationBarTablet(user: user),
-              desktop: NavigationBarDesktop(user: user),
-            )));
+      padding: const EdgeInsets.all(20.0),
+      child: Card(
+        child: ScreenTypeLayout(
+          mobile: NavigationBarMobile(user: user),
+          tablet: NavigationBarTablet(user: user),
+          desktop: NavigationBarDesktop(user: user),
+        ),
+      ),
+    );
   }
 }

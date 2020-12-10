@@ -7,7 +7,8 @@ import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 class NavigationBarTablet extends StatelessWidget {
   final User user;
 
-  const NavigationBarTablet({Key key,  this.user}) : super(key: key);
+  const NavigationBarTablet({Key key, this.user}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     List<Widget> content;
@@ -18,7 +19,7 @@ class NavigationBarTablet extends StatelessWidget {
         Row(
           children: [
             NavigationMenu(),
-            NavBarLogo(showText: true)
+            NavBarLogo(showText: true),
           ],
         ),
         NavigationLogin(loggedIn: false)
@@ -36,13 +37,10 @@ class NavigationMenu extends StatelessWidget {
       splashRadius: 25,
       icon: Icon(Icons.menu, size: 24),
       color: Color(0xFF293040),
-      onPressed: () {
-        Scaffold.of(context).openDrawer();
-      },
+      onPressed: () => Scaffold.of(context).openDrawer(),
     );
   }
 }
-
 
 class NavigationContent extends StatelessWidget {
   final List<Widget> children;
@@ -55,10 +53,7 @@ class NavigationContent extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: children
-      ),
+          children: children),
     );
   }
 }
-
-

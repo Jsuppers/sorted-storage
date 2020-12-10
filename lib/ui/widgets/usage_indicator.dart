@@ -12,7 +12,6 @@ class UsageIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        //
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -26,13 +25,10 @@ class UsageIndicator extends StatelessWidget {
             ),
           ],
         ),
-        //space
         SizedBox(
           height: 8.0,
         ),
-        //progress bar
         LinearPercentIndicator(
-          // width: dou,
           lineHeight: 12.0,
           percent: calculateDataPercentage(),
           backgroundColor: Colors.grey[200],
@@ -41,13 +37,11 @@ class UsageIndicator extends StatelessWidget {
       ],
     );
   }
-
   calculateDataPercentage() {
     int index = usage.indexOf(' ');
     double usageInKB;
     double limitInKB;
     String usageType = usage.substring(index + 1);
-    //usage to kb
     if (usageType == 'KB') {
       usageInKB = double.parse(usage.substring(0, index));
     } else if (usageType == 'MB') {
@@ -55,10 +49,8 @@ class UsageIndicator extends StatelessWidget {
     } else {
       usageInKB = double.parse(usage.substring(0, index)) * 1024 * 1024;
     }
-    //limit to kb
     index = limit.indexOf(' ');
     limitInKB = double.parse(limit.substring(0, index)) * 1024 * 1024;
-    //covert to percentage
     double percent = usageInKB / limitInKB;
     print('percent: ' + percent.toString());
     return percent;

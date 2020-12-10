@@ -6,40 +6,33 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 class Footer extends StatelessWidget {
   final double width;
 
-  const Footer({@required this.width});
+  const Footer({Key key, this.width}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> spacer = [SizedBox(width: 5), Text("-"), SizedBox(width: 5)];
-
-    List<Widget> children = [
-      MaterialButton(
-        onPressed: () {
-          BlocProvider.of<NavigationBloc>(context)
-              .add(NavigateToPrivacyEvent());
-        },
-        child: Text('Privacy Policy',
-            style: Theme.of(context).textTheme.bodyText1),
-      ),
-      ...spacer,
-      MaterialButton(
-        onPressed: () {
-          BlocProvider.of<NavigationBloc>(context).add(NavigateToTermsEvent());
-        },
-        child: Text('Terms of Conditions',
-            style: Theme.of(context).textTheme.bodyText1),
-      ),
-    ];
-
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.all(12.0),
       child: Container(
         width: width,
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: children,
+            children: [
+              MaterialButton(
+                onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                    .add(NavigateToPrivacyEvent()),
+                child: Text('Privacy Policy',
+                    style: Theme.of(context).textTheme.bodyText1),
+              ),
+              Text(" - "),
+              MaterialButton(
+                onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                    .add(NavigateToTermsEvent()),
+                child: Text('Terms of Conditions',
+                    style: Theme.of(context).textTheme.bodyText1),
+              )
+            ],
           ),
         ),
       ),

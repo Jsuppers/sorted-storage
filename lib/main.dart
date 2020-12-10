@@ -85,7 +85,8 @@ class _MyAppState extends State<MyApp> {
           ),
           BlocListener<DriveBloc, DriveApi>(
             listener: (context, driveApi) {
-              _timelineBloc.add(TimelineEvent(TimelineMessageType.update_drive, driveApi: driveApi));
+              _timelineBloc.add(TimelineEvent(TimelineMessageType.update_drive,
+                  driveApi: driveApi));
               _imagesBloc.add(MediaCacheUpdateDriveAPIEvent(driveApi));
             },
           ),

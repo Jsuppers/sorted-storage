@@ -32,22 +32,18 @@ class _TimelineLayoutState extends State<TimelineLayout> {
   @override
   Widget build(BuildContext context) {
     var timelineState = BlocProvider.of<TimelineBloc>(context).state;
-    if (timelineState.type == TimelineMessageType.initial_state) {
-      loaded = false;
-    } else {
-      loaded = true;
-    }
+    loaded =
+        timelineState.type == TimelineMessageType.initial_state ? false : true;
     _timelineData = timelineState.stories;
     List<Widget> eventDisplay = List();
     List<_TimeLineEventEntry> timeLineEvents = List();
 
     _timelineData.forEach((folderId, event) {
       Widget display = TimelineCard(
-        width: widget.width,
-        height: widget.height,
-        event: event,
-        folderId: folderId
-      );
+          width: widget.width,
+          height: widget.height,
+          event: event,
+          folderId: folderId);
       _TimeLineEventEntry _timeLineEventEntry =
           _TimeLineEventEntry(event.mainEvent.timestamp, display);
       timeLineEvents.add(_timeLineEventEntry);
@@ -64,25 +60,25 @@ class _TimelineLayoutState extends State<TimelineLayout> {
         if (state.type == TimelineMessageType.updated_stories) {
           setState(() {
             _timelineData = state.stories;
-            _timelineData.forEach((key, story) {
-              story.subEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-            });
-
+            _timelineData.forEach((key, story) => story.subEvents
+                .sort((a, b) => b.timestamp.compareTo(a.timestamp)));
             loaded = true;
           });
         }
       },
-      child: !loaded ? StaticLoadingLogo() : Column(
-        key: Key(widgetKey),
-        children: [
-          Container(
-            width: 150,
-            child: AddStoryButton(),
-          ),
-          SizedBox(height: 20),
-          ...eventDisplay,
-        ],
-      ),
+      child: !loaded
+          ? StaticLoadingLogo()
+          : Column(
+              key: Key(widgetKey),
+              children: [
+                Container(
+                  width: 150,
+                  child: AddStoryButton(),
+                ),
+                SizedBox(height: 20),
+                ...eventDisplay,
+              ],
+            ),
     );
   }
 }
@@ -107,20 +103,23 @@ class _AddStoryButtonState extends State<AddStoryButton> {
 
   @override
   Widget build(BuildContext context) {
-    return addingStory ? StaticLoadingLogo() : ButtonWithIcon(
-        icon: Icons.add,
-        text: "add story",
-        width: Constants.SMALL_WIDTH,
-        backgroundColor: Colors.white,
-        textColor: Colors.black,
-        iconColor: Colors.black,
-        onPressed: () async {
-          int timestamp = DateTime.now().millisecondsSinceEpoch;
-          BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(TimelineMessageType.create_story, timestamp: timestamp, mainEvent: true));
-          setState(() {
-            addingStory = true;
-          });
-        },
-      );
+    return addingStory
+        ? StaticLoadingLogo()
+        : ButtonWithIcon(
+            icon: Icons.add,
+            text: "add story",
+            width: Constants.SMALL_WIDTH,
+            backgroundColor: Colors.white,
+            textColor: Colors.black,
+            iconColor: Colors.black,
+            onPressed: () async {
+              int timestamp = DateTime.now().millisecondsSinceEpoch;
+              BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                  TimelineMessageType.create_story,
+                  timestamp: timestamp,
+                  mainEvent: true));
+              setState(() => addingStory = true);
+            },
+          );
   }
 }
