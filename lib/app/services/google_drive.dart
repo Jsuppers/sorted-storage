@@ -21,7 +21,9 @@ class GoogleDrive {
     var uploadMedia;
     try {
       uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
-    } catch (e) {}
+    } catch (e) {
+      
+    }
 
     return uploadMedia.id;
   }

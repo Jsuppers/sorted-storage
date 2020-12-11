@@ -67,7 +67,7 @@ class _TimelineEventCardState extends State<EventCard> {
       child: MaterialButton(
         minWidth: 40,
         height: 40,
-        onPressed: () => DialogService.pickEmoji(
+        onPressed: () => DialogService.emojiDialog(
           context,
           parentID: widget.eventFolderID,
           folderID: widget.event.folderID,

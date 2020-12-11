@@ -7,8 +7,6 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
-import 'package:web/app/blocs/media_cache/media_cache_bloc.dart';
-import 'package:web/app/blocs/media_cache/media_cache_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_bloc.dart';
 import 'package:web/app/blocs/timeline/timeline_event.dart';
@@ -33,7 +31,6 @@ class _MyAppState extends State<MyApp> {
   NavigationBloc _navigationBloc;
   DriveBloc _driveBloc;
   TimelineBloc _timelineBloc;
-  MediaCacheBloc _imagesBloc;
 
   @override
   void initState() {
@@ -43,7 +40,6 @@ class _MyAppState extends State<MyApp> {
     _authenticationBloc = AuthenticationBloc();
     _authenticationBloc.add(AuthenticationSilentSignInEvent());
     _timelineBloc = TimelineBloc();
-    _imagesBloc = MediaCacheBloc();
   }
 
   @override
@@ -53,7 +49,6 @@ class _MyAppState extends State<MyApp> {
     _authenticationBloc.close();
     _driveBloc.close();
     _timelineBloc.close();
-    _imagesBloc.close();
   }
 
   @override
@@ -72,9 +67,6 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<TimelineBloc>(
           create: (BuildContext context) => _timelineBloc,
         ),
-        BlocProvider<MediaCacheBloc>(
-          create: (BuildContext context) => _imagesBloc,
-        )
       ],
       child: MultiBlocListener(
         listeners: [
@@ -87,7 +79,6 @@ class _MyAppState extends State<MyApp> {
             listener: (context, driveApi) {
               _timelineBloc.add(TimelineEvent(TimelineMessageType.update_drive,
                   driveApi: driveApi));
-              _imagesBloc.add(MediaCacheUpdateDriveAPIEvent(driveApi));
             },
           ),
         ],

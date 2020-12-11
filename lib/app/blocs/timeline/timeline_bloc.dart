@@ -33,7 +33,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         _getStories();
         break;
       case TimelineMessageType.initial_state:
-        // TODO: Handle this case.
+        throw Exception("unknown message");
         break;
       case TimelineMessageType.updated_stories:
         yield TimelineState(TimelineMessageType.updated_stories, localStories);
@@ -671,7 +671,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     print(maxTries);
     Future.delayed(Duration(seconds: 10), () async {
       for (MapEntry entry in localCopy.images.entries) {
-        if (entry.value.imageURL == null) {
+        if (entry.value.thumbnailURL == null) {
           print("still waiting for a thumbnail: ${entry.key}");
           checkNeedsRefreshing(folderID, uploadingImages, localCopy,
               maxTries: maxTries - 1);
