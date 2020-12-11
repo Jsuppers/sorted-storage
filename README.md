@@ -1,9 +1,11 @@
-# Sorted Storage
+
+![](assets/images/logo_tiny.png)
+
 
 This project provides users a sorted way to view their media and documents which are 
 saved in cloud storage. 
 
-## Getting Started
+### Getting Started
 
 there are a few steps to get this project running locally: 
 1. create a .env file in the root directory with ```GOOGLE_API_KEY``` which should hold a google api key which can be created
