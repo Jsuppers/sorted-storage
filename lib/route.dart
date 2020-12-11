@@ -38,7 +38,7 @@ class RouteConfiguration {
   static Widget getPageContent(String baseRoute, String destination) {
     switch (baseRoute) {
       case ViewPage.route:
-        return ViewPage(path: destination);
+        return ViewPage(destination: destination);
       case LoginPage.route:
         return LoginPage();
       case MediaPage.route:
