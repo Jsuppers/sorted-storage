@@ -5,10 +5,6 @@ class TermsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle normal = TextStyle(
-        color: Colors.black.withOpacity(0.6),
-        fontSize: 12,
-        fontWeight: FontWeight.normal);
     return FutureBuilder(
         future:
             DefaultAssetBundle.of(context).loadString('assets/docs/terms.txt'),

@@ -1,5 +1,3 @@
-
-
 class Constants {
   static const String WEBSITE_URL = 'https://sortedstorage.com/#';
   static const String ROOT_FOLDER = 'sorted-storage';
