@@ -9,14 +9,14 @@ class PageTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-          builder: (context, constraints) {
-            return Column(
-              children: [
-                ...createContent(constraints),
-              ],
-            );
-          },
+      builder: (context, constraints) {
+        return Column(
+          children: [
+            ...createContent(constraints),
+          ],
         );
+      },
+    );
   }
 
   List<Widget> createContent(BoxConstraints constraints) {
@@ -92,7 +92,8 @@ class _BorderlessContent extends StatelessWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: horizontalPadding / 2),
+      padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding, vertical: horizontalPadding / 2),
       child: mobile
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start, children: children)
@@ -111,8 +112,7 @@ class _BorderedContent extends StatelessWidget {
   final bool mobile;
 
   const _BorderedContent(
-      {Key key,
-      this.width,
+      {this.width,
       this.content,
       this.widthText,
       this.widthImage,

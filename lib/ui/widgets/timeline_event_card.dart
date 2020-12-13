@@ -54,8 +54,7 @@ class _TimelineEventCardState extends State<EventCard> {
     super.initState();
     saving = widget.saving;
     selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.event.timestamp);
-    uploadingImages =
-        List(); //TimelineService.getMediaThatAreUploading(widget.event);
+    uploadingImages = [];
     formattedDate = formatter.format(selectedDate);
     titleController.text = widget.event.title;
     descriptionController.text = widget.event.description;

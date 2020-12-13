@@ -35,8 +35,8 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     loaded =
         timelineState.type == TimelineMessageType.initial_state ? false : true;
     _timelineData = timelineState.stories;
-    List<Widget> eventDisplay = List();
-    List<_TimeLineEventEntry> timeLineEvents = List();
+    List<Widget> eventDisplay = [];
+    List<_TimeLineEventEntry> timeLineEvents = [];
 
     _timelineData.forEach((folderId, event) {
       Widget display = TimelineCard(
