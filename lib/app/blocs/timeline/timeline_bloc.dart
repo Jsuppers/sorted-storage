@@ -357,17 +357,17 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           comments: AdventureComments(comments: List()),
           folderID: folderID,
           timestamp: timestamp,
-          subEvents: List(),
+          subEvents: [],
           images: Map());
       event.settingsID = await _uploadSettingsFile(folderID, event);
 
       if (mainEvent) {
         TimelineData timelineEvent =
             TimelineData(mainEvent: event, subEvents: []);
+        await _uploadCommentsFile(event, null);
         cloudStories.putIfAbsent(folderID, () => timelineEvent);
         localStories.putIfAbsent(
             folderID, () => TimelineData.clone(timelineEvent));
-        await _uploadCommentsFile(event, null);
       }
 
       if (mainEvent) {
@@ -377,6 +377,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     } catch (e) {
       print('error: $e');
     }
+    return null;
   }
 
   Future<String> _uploadSettingsFile(
