@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
         text: "Welcome to SortedStorage.com! this site was created as a means to sort "
             "your cloud storage files in a nice way so that you can share it with friends and family. "
             "SortedStorage.com was built with three things in mind: keeping your privacy, being open source, and being free",
-        imageUri: "assets/images/google.png"),
+        imageUri: "assets/images/about.png"),
     PageContent(
         title: "Privacy",
         text: "SortedStorage.com simply acts as a middleman between you and "
@@ -34,7 +34,7 @@ class HomePage extends StatelessWidget {
         text: "If you are a developer or just curious about the code please visit https://github.com/Jsuppers/sorted-storage. "
             "There are still many features this project wants to achieve, so if you are a developer please consider "
             "contributing.",
-        imageUri: "assets/images/Octocat.png", callToActionCallback: () {
+        imageUri: "assets/images/open_source.png", callToActionCallback: () {
           html.window.open("https://github.com/Jsuppers/sorted-storage", "Github");
     }, callToActionButtonText: "Github"),
     PageContent(
