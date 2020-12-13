@@ -4,15 +4,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/constants.dart';
+import 'package:web/app/blocs/sharing/sharing_state.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/share_button.dart';
 
 class ShareWidget extends StatefulWidget {
   final String folderID;
-  final bool shared;
+  final SharingState state;
 
-  const ShareWidget({Key key, this.folderID, this.shared}) : super(key: key);
+  const ShareWidget({Key key, this.folderID, this.state}) : super(key: key);
 
   @override
   _ShareWidgetState createState() => _ShareWidgetState();
@@ -23,17 +23,20 @@ class _ShareWidgetState extends State<ShareWidget> {
 
   @override
   Widget build(BuildContext context) {
-    bool shared = widget.shared;
     TextEditingController controller = new TextEditingController();
-
-    if (shared) {
-      controller.text = "${Constants.WEBSITE_URL}/view/${widget.folderID}";
-    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        shared
+        widget.state.message != null ? Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error),
+            SizedBox(width: 5),
+            Text(widget.state.message),
+          ],
+        ): Container(),
+        widget.state.shared
             ? Container(
           padding: EdgeInsets.all(20),
           width: 300,
@@ -68,11 +71,11 @@ class _ShareWidgetState extends State<ShareWidget> {
         ),
         ShareButton(
             key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-            shared: shared,
+            shared: widget.state.shared,
             loading: false),
         Container(
           padding: EdgeInsets.all(20),
-          child: shared
+          child: widget.state.shared
               ? Text(
               "Everyone with this link can see and comment on your content. Be careful who you give it to!")
               : Container(),

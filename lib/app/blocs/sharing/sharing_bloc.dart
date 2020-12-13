@@ -2,8 +2,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/sharing/sharing_event.dart';
+import 'package:web/app/blocs/sharing/sharing_state.dart';
 
-class SharingBloc extends Bloc<ShareEvent, bool> {
+class SharingBloc extends Bloc<ShareEvent, SharingState> {
   String folderID;
   String commentsID;
   DriveApi driveApi;
@@ -15,7 +16,7 @@ class SharingBloc extends Bloc<ShareEvent, bool> {
   }
 
   @override
-  Stream<bool> mapEventToState(ShareEvent event) async* {
+  Stream<SharingState> mapEventToState(ShareEvent event) async* {
     if (event is InitialEvent){
       yield await _getPermissionsAll();
     }
@@ -27,10 +28,18 @@ class SharingBloc extends Bloc<ShareEvent, bool> {
     }
   }
 
-  Future<bool> _getPermissionsAll() async {
-    folderPermissionID = await _getPermissions(folderID, "anyone", "reader");
-    commentsPermissionID = await _getPermissions(commentsID, "anyone", "writer");
-    return folderPermissionID != null && commentsPermissionID != null;
+  Future<SharingState> _getPermissionsAll() async {
+    try {
+      folderPermissionID = await _getPermissions(folderID, "anyone", "reader");
+      commentsPermissionID =
+      await _getPermissions(commentsID, "anyone", "writer");
+    } catch (e) {
+      return SharingState(false, message: "cannot retrieve permissions");
+    }
+    if (folderPermissionID != null && commentsPermissionID != null) {
+      return SharingState(true);
+    }
+    return SharingState(false);
   }
 
   Future<String> _getPermissions(String folderID, String type, String role) async {
@@ -44,14 +53,18 @@ class SharingBloc extends Bloc<ShareEvent, bool> {
     return null;
   }
 
-  Future<bool> _shareFolder() async {
-    if (folderPermissionID == null) {
-      folderPermissionID = await _shareFile(folderID, "anyone", "reader");
+  Future<SharingState> _shareFolder() async {
+    try {
+      if (folderPermissionID == null) {
+        folderPermissionID = await _shareFile(folderID, "anyone", "reader");
+      }
+      if (commentsPermissionID == null) {
+        commentsPermissionID = await _shareFile(commentsID, "anyone", "writer");
+      }
+    } catch (e) {
+      return SharingState(false, message: "error while sharing folder, please try again");
     }
-    if (commentsPermissionID == null) {
-      commentsPermissionID = await _shareFile(commentsID, "anyone", "writer");
-    }
-    return true;
+    return SharingState(true);
 
   }
 
@@ -64,11 +77,15 @@ class SharingBloc extends Bloc<ShareEvent, bool> {
     return permission.id;
   }
 
-  Future<bool> _stopSharingFolder() async {
-    await driveApi.permissions.delete(commentsID, commentsPermissionID);
-    commentsPermissionID = null;
-    await driveApi.permissions.delete(folderID, folderPermissionID);
-    folderPermissionID = null;
-    return false;
+  Future<SharingState> _stopSharingFolder() async {
+    try {
+      await driveApi.permissions.delete(commentsID, commentsPermissionID);
+        commentsPermissionID = null;
+      await driveApi.permissions.delete(folderID, folderPermissionID);
+      folderPermissionID = null;
+    } catch (e) {
+      return SharingState(true,  message: "error while stopping sharing, please try again");
+    }
+    return SharingState(false);
   }
 }
