@@ -78,6 +78,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
           this.add(TimelineEvent(
               TimelineMessageType.uploading_comments_finished,
               folderId: event.folderId));
+          localStories[event.folderId].mainEvent.comments = timelineEvent.mainEvent.comments;
         });
         yield TimelineState(
             TimelineMessageType.uploading_comments_start, localStories,
@@ -91,26 +92,26 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         break;
       case TimelineMessageType.create_sub_story:
         var story = localStories[event.parentId];
+        String uniqueName = "temp_" +
+            event.parentId +
+            "_" +
+            DateTime.now().millisecondsSinceEpoch.toString();
         story.subEvents.add(EventContent(
-          folderID: "temp_" +
-              event.parentId +
-              "_" +
-              story.subEvents.length.toString(),
+          folderID: uniqueName,
           timestamp: story.mainEvent.timestamp,
           images: Map(),
-          comments: AdventureComments(comments: List()),
-          subEvents: List(),
+          comments: AdventureComments(comments: []),
+          subEvents: [],
         ));
-        print('sub story! ');
+        print('sub story created: $uniqueName');
         yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
             folderID: event.folderId);
         break;
       case TimelineMessageType.delete_sub_story:
         var story = localStories[event.parentId];
-        story.subEvents
-            .removeWhere((element) => element.folderID == event.folderId);
+        story.subEvents.removeWhere((element) => element.folderID == event.folderId);
         yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
-            folderID: event.folderId);
+            folderID: event.parentId);
         break;
       case TimelineMessageType.delete_image:
         var eventData = TimelineService.getEventWithFolderID(
@@ -437,7 +438,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       comments = AdventureComments();
     }
     if (comments.comments == null) {
-      comments.comments = List();
+      comments.comments = [];
     }
     if (comment != null) {
       comments.comments.add(comment);
@@ -656,8 +657,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         getThumbnail(
             localCopy.folderID, key, localCopy.images, uploadingImages);
       });
-      print(localCopy.images.toString());
-      print(cloudCopy.images.toString());
       checkNeedsRefreshing(localCopy.folderID, uploadingImages, localCopy);
     });
   }
@@ -668,7 +667,6 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     if (maxTries == 0) {
       return;
     }
-    print(maxTries);
     Future.delayed(Duration(seconds: 10), () async {
       for (MapEntry entry in localCopy.images.entries) {
         if (entry.value.thumbnailURL == null) {

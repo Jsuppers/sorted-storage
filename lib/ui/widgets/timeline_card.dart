@@ -232,7 +232,6 @@ class _TimelineCardState extends State<TimelineCard> {
             state.folderID == widget.folderId) {
           setState(() {
             saving = state.stories[state.folderID].saving;
-            print('42 saving $saving');
           });
         } else if (state.type == TimelineMessageType.edit_story &&
             state.folderID == widget.folderId) {
