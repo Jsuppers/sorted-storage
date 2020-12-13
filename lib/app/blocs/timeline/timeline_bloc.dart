@@ -10,6 +10,7 @@ import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/services/google_drive.dart';
+import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
@@ -138,31 +139,34 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       case TimelineMessageType.add_image:
         var eventContent = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
-        FilePickerResult file;
         try {
-          file = await FilePicker.platform.pickFiles(
-              type: FileType.media, allowMultiple: true, withReadStream: true);
+          FilePicker.platform.pickFiles(
+              type: FileType.media, allowMultiple: true, withReadStream: true).then((file) {
+                if (file == null || file.files == null || file.files.length == 0) {
+                  return file;
+                }
+                for (int i = 0; i < file.files.length; i++) {
+                  PlatformFile element = file.files[i];
+                  String mime = lookupMimeType(element.name);
+                  eventContent.images.putIfAbsent(
+                      element.name,
+                          () => StoryMedia(
+                          stream: element.readStream,
+                          size: element.size,
+                          isVideo: mime.startsWith("video/"),
+                          isDocument: !mime.startsWith("video/") &&
+                              !mime.startsWith("image/")));
+                }
+                this.add(TimelineEvent(TimelineMessageType.picked_image,
+                    folderId: event.folderId));
+
+                return file;
+          });
+
         } catch (e) {
           print(e);
-          return;
         }
-        if (file == null || file.files == null || file.files.length == 0) {
-          return;
-        }
-        for (int i = 0; i < file.files.length; i++) {
-          PlatformFile element = file.files[i];
-          String mime = lookupMimeType(element.name);
-          eventContent.images.putIfAbsent(
-              element.name,
-              () => StoryMedia(
-                  stream: element.readStream,
-                  size: element.size,
-                  isVideo: mime.startsWith("video/"),
-                  isDocument: !mime.startsWith("video/") &&
-                      !mime.startsWith("image/")));
-        }
-        yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
-            folderID: event.folderId);
+
         break;
       case TimelineMessageType.edit_timestamp:
         var eventData = TimelineService.getEventWithFolderID(
@@ -190,6 +194,10 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
         break;
       case TimelineMessageType.initial_state:
         // TODO: Handle this case.
+        break;
+      case TimelineMessageType.picked_image:
+        yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
+            folderID: event.folderId);
         break;
     }
   }
@@ -662,64 +670,18 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       localCopy.images
           .removeWhere((key, value) => localImagesToDelete.contains(key));
       imagesToAdd.forEach((key, value) {
-        getThumbnail(
-            localCopy.folderID, key, localCopy.images, uploadingImages);
+        RetryService.getThumbnail(
+            storage, localCopy.folderID, key, localCopy.images, uploadingImages,
+            () {
+          this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
+              folderId: localCopy.folderID, uploadingImages: uploadingImages));
+        });
       });
-      checkNeedsRefreshing(localCopy.folderID, uploadingImages, localCopy);
-    });
-  }
-
-  void checkNeedsRefreshing(String folderID,
-      Map<String, List<String>> uploadingImages, EventContent localCopy,
-      {int maxTries = 60}) {
-    if (maxTries == 0) {
-      return;
-    }
-    Future.delayed(Duration(seconds: 10), () async {
-      for (MapEntry entry in localCopy.images.entries) {
-        if (entry.value.thumbnailURL == null) {
-          print("still waiting for a thumbnail: ${entry.key}");
-          checkNeedsRefreshing(folderID, uploadingImages, localCopy,
-              maxTries: maxTries - 1);
-          return;
-        }
-      }
-      this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
-          folderId: localCopy.folderID, uploadingImages: uploadingImages));
-    });
-  }
-
-  void getThumbnail(String folderID, String imageKey,
-      Map<String, StoryMedia> images, Map<String, List<String>> uploadingImages,
-      {int maxTries = 10}) {
-    int exp = 10;
-    if (maxTries > exp) {
-      maxTries = 10;
-    }
-    if (maxTries == 0) {
-      return;
-    }
-    Future.delayed(Duration(seconds: (exp - maxTries) * 2), () async {
-      if (images == null || !images.containsKey(imageKey)) {
-        print('images $images');
-        return;
-      }
-
-      File mediaFile = await storage.getFile(imageKey,
-          filter: 'id,hasThumbnail,thumbnailLink');
-
-      if (mediaFile.hasThumbnail) {
-        print(
-            "thumbnail for image: $imageKey has been created! ${mediaFile.thumbnailLink}");
-        images[imageKey].imageURL = mediaFile.thumbnailLink;
+      RetryService.checkNeedsRefreshing(
+          localCopy.folderID, uploadingImages, localCopy, () {
         this.add(TimelineEvent(TimelineMessageType.syncing_story_state,
-            folderId: folderID, uploadingImages: uploadingImages));
-        return;
-      }
-
-      print("waiting for a thumbnail for image: $imageKey");
-      getThumbnail(folderID, imageKey, images, uploadingImages,
-          maxTries: maxTries - 1);
+            folderId: localCopy.folderID, uploadingImages: uploadingImages));
+      });
     });
   }
 }
