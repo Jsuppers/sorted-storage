@@ -35,7 +35,7 @@ class CommentWidget extends StatefulWidget {
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
-  List<AdventureComment> adventureComments = List();
+  List<AdventureComment> adventureComments = [];
   bool uploading = false;
 
   @override
@@ -47,7 +47,7 @@ class _CommentWidgetState extends State<CommentWidget> {
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
-    List<Widget> comments = List();
+    List<Widget> comments = [];
     for (int i = 0; i < adventureComments.length; i++) {
       String user = adventureComments[i].user;
       if (user == null || user == "") {

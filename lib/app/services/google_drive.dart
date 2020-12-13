@@ -6,8 +6,11 @@ import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class GoogleDrive {
-  static Future<String> uploadMediaToFolder(
-      DriveApi driveApi,
+  final DriveApi driveApi;
+
+  GoogleDrive(this.driveApi);
+
+  Future<String> uploadMediaToFolder(
       EventContent eventContent,
       String imageName,
       StoryMedia storyMedia,
@@ -21,14 +24,12 @@ class GoogleDrive {
     var uploadMedia;
     try {
       uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
-    } catch (e) {
-      
-    }
+    } catch (e) {}
 
     return uploadMedia.id;
   }
 
-  static Future<dynamic> getJsonFile(DriveApi driveApi, String fileId) async {
+  Future<dynamic> getJsonFile(String fileId) async {
     Map<String, dynamic> event;
     if (fileId != null) {
       Media mediaFile = await driveApi.files
@@ -43,8 +44,7 @@ class GoogleDrive {
     return event;
   }
 
-  static Future<String> createStory(
-      DriveApi driveApi, String parentID, int timestamp) async {
+  Future<String> createStory(String parentID, int timestamp) async {
     File eventToUpload = File();
     eventToUpload.parents = [parentID];
     eventToUpload.mimeType = "application/vnd.google-apps.folder";
@@ -54,8 +54,8 @@ class GoogleDrive {
     return folder.id;
   }
 
-  static Future<String> uploadMedia(DriveApi driveApi, String parentID,
-      String name, int contentLength, Stream<List<int>> mediaStream,
+  Future<String> uploadMedia(String parentID, String name, int contentLength,
+      Stream<List<int>> mediaStream,
       {String mimeType}) async {
     File mediaFile = File();
     mediaFile.parents = [parentID];
@@ -69,7 +69,7 @@ class GoogleDrive {
     return folder.id;
   }
 
-  static Future<String> getMediaFolder(DriveApi driveApi) async {
+  Future<String> getMediaFolder() async {
     try {
       String mediaFolderID;
       print('getting media folder');
@@ -115,8 +115,8 @@ class GoogleDrive {
     } finally {}
   }
 
-  static Future<String> updateEventFolderTimestamp(
-      DriveApi driveApi, String fileID, int timestamp) async {
+  Future<String> updateEventFolderTimestamp(
+      String fileID, int timestamp) async {
     try {
       File eventToUpload = File();
       eventToUpload.name = timestamp.toString();
@@ -129,5 +129,29 @@ class GoogleDrive {
       print('error: $e');
       return e.toString();
     }
+  }
+
+  Future createFile(File request, Media media) async {
+    return driveApi.files.create(request, uploadMedia: media);
+  }
+
+  Future delete(String fileID) async {
+    return driveApi.files.delete(fileID);
+  }
+
+  Future getFile(String fileID, {String filter}) async {
+    return driveApi.files.get(fileID, $fields: filter);
+  }
+
+  Future listFiles(String query, {String filter}) async {
+    return driveApi.files.list(q: query, $fields: filter);
+  }
+
+  Future updateFile(File request, String fileID, Media media) {
+    return driveApi.files.update(request, fileID, uploadMedia: media);
+  }
+
+  Future createPermission(String fileID, Permission permission) async {
+    return driveApi.permissions.create(permission, fileID);
   }
 }

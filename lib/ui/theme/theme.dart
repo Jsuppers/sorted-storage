@@ -43,9 +43,6 @@ ThemeData _buildTheme() {
     primarySwatch: customColor,
     dialogBackgroundColor: _lightPrimary,
     toggleableActiveColor: _darkPrimary,
-    textSelectionColor: _accent,
-    textSelectionHandleColor: _accent,
-    useTextSelectionTheme: false,
     dialogTheme: DialogTheme(
         shape: RoundedRectangleBorder(),
         backgroundColor: Colors.white,

@@ -54,8 +54,7 @@ class _TimelineEventCardState extends State<EventCard> {
     super.initState();
     saving = widget.saving;
     selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.event.timestamp);
-    uploadingImages =
-        List(); //TimelineService.getMediaThatAreUploading(widget.event);
+    uploadingImages = [];
     formattedDate = formatter.format(selectedDate);
     titleController.text = widget.event.title;
     descriptionController.text = widget.event.description;
@@ -316,8 +315,11 @@ class _TimelineEventCardState extends State<EventCard> {
               child: CachedNetworkImage(
                 imageUrl: media.imageURL,
                 placeholder: (context, url) => StaticLoadingLogo(),
-                errorWidget: (context, url, error) =>
-                    Image.asset("assets/images/error.png"),
+                errorWidget: (context, url, error) => backgroundImage(
+                    showPlaceholder,
+                    imageKey,
+                    media,
+                    AssetImage("assets/images/error.png")),
                 imageBuilder: (context, image) =>
                     backgroundImage(showPlaceholder, imageKey, media, image),
               ),

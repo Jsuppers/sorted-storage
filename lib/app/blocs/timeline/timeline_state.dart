@@ -6,6 +6,7 @@ enum TimelineMessageType {
   new_user,
   update_drive,
   retrieve_stories,
+  picked_image,
   retrieve_story,
   create_story,
   progress_upload,

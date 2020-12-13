@@ -12,7 +12,6 @@ class AdventureComment {
 
     String user = "";
     String comment = "";
-    Map<String, int> emoji = Map();
     if (json.containsKey('u')) {
       user = json['u'];
     }
@@ -42,9 +41,9 @@ class AdventureComments {
 
   static AdventureComments fromJson(Map<String, dynamic> json) {
     if (json == null) {
-      return new AdventureComments(comments: List());
+      return new AdventureComments(comments: []);
     }
-    List<AdventureComment> comments = List();
+    List<AdventureComment> comments = [];
     if (json.containsKey('c')) {
       for (dynamic comment in json['c']) {
         comments.add(AdventureComment.fromJson(comment));

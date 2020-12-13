@@ -20,7 +20,7 @@ class EmojiPicker extends StatefulWidget {
 
 class EmojiPickerState extends State<EmojiPicker> {
   TextEditingController controller = new TextEditingController();
-  List<String> possibleMatches = List();
+  List<String> possibleMatches = [];
   String filter;
   List<Emoji> flags;
 
@@ -38,7 +38,7 @@ class EmojiPickerState extends State<EmojiPicker> {
         return;
       }
 
-      possibleMatches = List();
+      possibleMatches = [];
       filter = controller.text;
       setState(() {
         flags.forEach((element) {
@@ -102,7 +102,7 @@ class EmojiPickerState extends State<EmojiPicker> {
   }
 
   Widget _buildListView() {
-    List<Widget> children = List();
+    List<Widget> children = [];
     possibleMatches.forEach((element) {
       children.add(
         MaterialButton(
