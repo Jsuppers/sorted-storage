@@ -34,6 +34,7 @@ jobs:
         run: ls -R
         working-directory: ./web
       - name: Deploy to GH Pages
+        if: github.ref == 'refs/heads/main'
         run: |
           cd build/web
           echo sortedstorage.com >> CNAME
