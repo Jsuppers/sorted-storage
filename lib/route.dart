@@ -40,7 +40,7 @@ class RouteConfiguration {
       case ViewPage.route:
         return ViewPage(destination: destination);
       case LoginPage.route:
-        return LoginPage();
+        return LoginPage(targetRoute: baseRoute);
       case MediaPage.route:
         return MediaPage();
       case DocumentsPage.route:

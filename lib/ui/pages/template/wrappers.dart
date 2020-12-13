@@ -32,9 +32,8 @@ class LayoutWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (this.requiresAuthentication || this.isViewMode) {
-      return BlocBuilder<AuthenticationBloc, usr.User>(
-          builder: (context, user) {
+    return BlocBuilder<AuthenticationBloc, usr.User>(builder: (context, user) {
+      if (this.requiresAuthentication || this.isViewMode) {
         if (user == null && !this.isViewMode) {
           return Content(
               widget: LoginPage(targetRoute: targetRoute),
@@ -51,15 +50,15 @@ class LayoutWrapper extends StatelessWidget {
             user: user,
             includeNavigation: includeNavigation,
             requiresAuthentication: requiresAuthentication);
-      });
-    } else {
-      return Content(
-        widget: widget,
-        user: null,
-        includeNavigation: includeNavigation,
-        requiresAuthentication: requiresAuthentication,
-      );
-    }
+      } else {
+        return Content(
+          widget: widget,
+          user: user,
+          includeNavigation: includeNavigation,
+          requiresAuthentication: requiresAuthentication,
+        );
+      }
+    });
   }
 }
 

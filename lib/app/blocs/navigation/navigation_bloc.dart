@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
+import 'package:web/ui/pages/static/home.dart';
 
 class NavigationBloc extends Bloc<NavigationEvent, dynamic> {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -25,7 +26,11 @@ class NavigationBloc extends Bloc<NavigationEvent, dynamic> {
         URLService.openURL(Constants.DONATE_URL);
         break;
       default:
-        navigatorKey.currentState.pushNamed(event.route);
+        if (!navigatorKey.currentState.canPop()) {
+          navigatorKey.currentState.pushNamed(event.route);
+        } else {
+          navigatorKey.currentState.pushReplacementNamed(event.route);
+        }
         break;
     }
   }

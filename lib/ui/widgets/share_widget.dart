@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/blocs/sharing/sharing_state.dart';
+import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/share_button.dart';
 
@@ -24,6 +25,9 @@ class _ShareWidgetState extends State<ShareWidget> {
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = new TextEditingController();
+    if (widget.state.shared) {
+      controller.text = "${Constants.WEBSITE_URL}/view/${widget.folderID}";
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
