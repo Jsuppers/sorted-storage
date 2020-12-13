@@ -91,7 +91,6 @@ flutter:
    - family: Roboto
      fonts:
        - asset: assets/fonts/Roboto-Regular.ttf
-  #         style: italic
    - family: OpenSans
      fonts:
        - asset: assets/fonts/OpenSans-Regular.ttf
