@@ -12,7 +12,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text("documents"),
+        Text("documents coming soon!"),
       ],
     );
   }

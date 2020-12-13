@@ -57,9 +57,16 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
     try {
       if (folderPermissionID == null) {
         folderPermissionID = await _shareFile(folderID, "anyone", "reader");
+        if (folderPermissionID == null) {
+          folderPermissionID = await _getPermissions(folderID, "anyone", "reader");
+        }
       }
       if (commentsPermissionID == null) {
-        commentsPermissionID = await _shareFile(commentsID, "anyone", "writer");
+        commentsPermissionID = await _getPermissions(commentsID, "anyone", "writer");
+        if (commentsPermissionID == null) {
+          commentsPermissionID =
+          await _shareFile(commentsID, "anyone", "writer");
+        }
       }
     } catch (e) {
       return SharingState(false, message: "error while sharing folder, please try again");

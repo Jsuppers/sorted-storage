@@ -26,7 +26,8 @@ class _AvatarState extends State<Avatar> {
         imageUrl: widget.url,
         progressIndicatorBuilder: (context, url, downloadProgress) =>
             CircularProgressIndicator(value: downloadProgress.progress),
-        errorWidget: (context, url, error) => Icon(Icons.error),
+        errorWidget: (context, url, error) =>
+            Image.asset("assets/images/error.png"),
       )),
     );
   }

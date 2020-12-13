@@ -284,10 +284,11 @@ class _TimelineEventCardState extends State<EventCard> {
                       readOnly: widget.locked || widget.saving,
                       onChanged: (string) {
                         BlocProvider.of<TimelineBloc>(context).add(
-                            TimelineEvent(TimelineMessageType.edit_description,
-                                parentId: widget.eventFolderID,
-                                folderId: widget.event.folderID,
-                                text: string));
+                          TimelineEvent(TimelineMessageType.edit_description,
+                              parentId: widget.eventFolderID,
+                              folderId: widget.event.folderID,
+                              text: string),
+                        );
                       },
                       maxLines: null),
                 )
@@ -307,22 +308,37 @@ class _TimelineEventCardState extends State<EventCard> {
           URLService.openDriveMedia(imageKey);
         }
       },
-      child: Container(
-        height: 150.0,
-        width: 150.0,
-        decoration: new BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(6)),
-          image: showPlaceholder
-              ? null
-              : DecorationImage(
-                  image: CachedNetworkImageProvider(media.imageURL),
-                  fit: BoxFit.cover,
-                ),
-        ),
-        child: !widget.locked
-            ? createEditControls(imageKey, showPlaceholder)
-            : createNonEditControls(imageKey, showPlaceholder, media),
+      child: showPlaceholder
+          ? backgroundImage(showPlaceholder, imageKey, media, null)
+          : Container(
+              height: 150.0,
+              width: 150.0,
+              child: CachedNetworkImage(
+                imageUrl: media.imageURL,
+                placeholder: (context, url) => StaticLoadingLogo(),
+                errorWidget: (context, url, error) =>
+                    Image.asset("assets/images/error.png"),
+                imageBuilder: (context, image) =>
+                    backgroundImage(showPlaceholder, imageKey, media, image),
+              ),
+            ),
+    );
+  }
+
+  Widget backgroundImage(bool showPlaceholder, String imageKey,
+      StoryMedia media, ImageProvider image) {
+    return Container(
+      height: 150.0,
+      width: 150.0,
+      decoration: new BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+        image: showPlaceholder
+            ? null
+            : DecorationImage(image: image, fit: BoxFit.cover),
       ),
+      child: !widget.locked
+          ? createEditControls(imageKey, showPlaceholder)
+          : createNonEditControls(imageKey, showPlaceholder, media),
     );
   }
 
