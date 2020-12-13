@@ -1,13 +1,6 @@
-
-
-import 'dart:html' as html;
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/page_content.dart';
-import 'package:web/app/services/dialog_service.dart';
+import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/pages/template/page_template.dart';
 
@@ -17,7 +10,8 @@ class HomePage extends StatelessWidget {
   final List<PageContent> content = [
     PageContent(
         title: "About",
-        text: "Welcome to SortedStorage.com! this site was created as a means to sort "
+        text:
+            "Welcome to SortedStorage.com! this site was created as a means to sort "
             "your cloud storage files in a nice way so that you can share it with friends and family. "
             "SortedStorage.com was built with three things in mind: keeping your privacy, being open source, and being free",
         imageUri: "assets/images/about.png"),
@@ -31,19 +25,21 @@ class HomePage extends StatelessWidget {
         imageUri: "assets/images/privacy.png"),
     PageContent(
         title: "Open Source",
-        text: "If you are a developer or just curious about the code please visit https://github.com/Jsuppers/sorted-storage. "
+        text:
+            "If you are a developer or just curious about the code please visit https://github.com/Jsuppers/sorted-storage. "
             "There are still many features this project wants to achieve, so if you are a developer please consider "
             "contributing.",
-        imageUri: "assets/images/open_source.png", callToActionCallback: () {
-          html.window.open("https://github.com/Jsuppers/sorted-storage", "Github");
-    }, callToActionButtonText: "Github"),
+        imageUri: "assets/images/open_source.png",
+        callToActionCallback: () => URLService.openURL(Constants.GITHUB_URL),
+        callToActionButtonText: "Github"),
     PageContent(
         title: "Free",
-        text: "This site does not charge you anything, it only asks you use this site with a smile :). If you want to support this"
-            "project and help fund further improvements and features please consider donating!",
-        imageUri: "assets/images/free.png", callToActionButtonText: "Donate", callToActionCallback: () {
-      html.window.open(Constants.DONATE_URL, "Donate");
-    })
+        text:
+            "This site does not charge you anything, it only asks you use this site with a smile :). If you want to support this"
+            " project and help fund further improvements and features please consider donating!",
+        imageUri: "assets/images/free.png",
+        callToActionButtonText: "Donate",
+        callToActionCallback: () => URLService.openURL(Constants.DONATE_URL))
   ];
 
   @override
