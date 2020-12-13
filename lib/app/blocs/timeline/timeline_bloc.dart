@@ -32,8 +32,11 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       case TimelineMessageType.retrieve_stories:
         _getStories();
         break;
-      case TimelineMessageType.initial_state:
-        throw Exception("unknown message");
+      case TimelineMessageType.new_user:
+        mediaFolderID = null;
+        cloudStories = null;
+        localStories = null;
+        yield TimelineState(TimelineMessageType.initial_state, Map());
         break;
       case TimelineMessageType.updated_stories:
         yield TimelineState(TimelineMessageType.updated_stories, localStories);
@@ -182,6 +185,9 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
       case TimelineMessageType.progress_upload:
         yield TimelineState(TimelineMessageType.progress_upload, localStories,
             folderID: event.folderId, data: event.data);
+        break;
+      case TimelineMessageType.initial_state:
+        // TODO: Handle this case.
         break;
     }
   }

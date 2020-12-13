@@ -6,18 +6,31 @@ import 'package:googleapis/drive/v3.dart';
 class StorageInformation {
   final String usage;
   final String limit;
+  final double percent;
 
-  StorageInformation({this.usage, this.limit});
+  StorageInformation({this.percent, this.usage, this.limit});
 }
 
 class GoogleStorageService{
   static Future<StorageInformation> getStorageInformation(DriveApi driveApi) async {
     About about = await driveApi.about.get($fields: 'storageQuota');
 
-    return StorageInformation(
+    var information = StorageInformation(
         limit: formatBytes(about.storageQuota.limit, 0),
-        usage: formatBytes(about.storageQuota.usage, 0)
+        usage: formatBytes(about.storageQuota.usage, 0),
+        percent: calculatePercentage(about.storageQuota.usage, about.storageQuota.limit)
     );
+    print(about.storageQuota.limit);
+    print(about.storageQuota.usage);
+    print('received information limit: ${information.limit} '
+        'usage: ${information.usage}, percent: ${information.percent}');
+    return information;
+  }
+
+  static double calculatePercentage(String usageString, String limitString) {
+    var usage = double.parse(usageString);
+    var limit = double.parse(limitString);
+    return usage / limit;
   }
 
   static String formatBytes(String stringBytes, int decimals) {
@@ -33,5 +46,4 @@ class GoogleStorageService{
       return "";
     }
   }
-
 }

@@ -6,6 +6,9 @@ import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/blocs/timeline/timeline_bloc.dart';
+import 'package:web/app/blocs/timeline/timeline_event.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart';
 import 'package:web/app/services/storage_service.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -53,7 +56,10 @@ class AvatarWithMenu extends StatelessWidget {
                               .add(NavigateToUpgradeEvent());
                         },
                         child: UsageIndicator(
-                            usage: information.usage, limit: information.limit),
+                          usage: information.usage,
+                          limit: information.limit,
+                          percent: information.percent,
+                        ),
                       );
                     }
                     return CircularProgressIndicator();
@@ -106,6 +112,8 @@ class AvatarWithMenu extends StatelessWidget {
                 onPressed: () {
                   BlocProvider.of<NavigationBloc>(context)
                       .add(NavigatorPopEvent());
+                  BlocProvider.of<TimelineBloc>(context)
+                      .add(TimelineEvent(TimelineMessageType.new_user));
                   BlocProvider.of<AuthenticationBloc>(context)
                       .add(AuthenticationSignOutEvent());
                 },

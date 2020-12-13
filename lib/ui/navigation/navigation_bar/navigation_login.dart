@@ -4,6 +4,9 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/blocs/timeline/timeline_bloc.dart';
+import 'package:web/app/blocs/timeline/timeline_event.dart';
+import 'package:web/app/blocs/timeline/timeline_state.dart';
 
 class NavigationLogin extends StatelessWidget {
   final bool loggedIn;
@@ -15,6 +18,8 @@ class NavigationLogin extends StatelessWidget {
     return MaterialButton(
       onPressed: () {
         if (loggedIn) {
+          BlocProvider.of<TimelineBloc>(context)
+              .add(TimelineEvent(TimelineMessageType.new_user));
           BlocProvider.of<AuthenticationBloc>(context).add(AuthenticationSignOutEvent());
         } else {
           BlocProvider.of<NavigationBloc>(context).add(NavigateToLoginEvent());

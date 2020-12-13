@@ -3,6 +3,7 @@ import 'package:web/ui/widgets/timeline_card.dart';
 
 enum TimelineMessageType {
   initial_state,
+  new_user,
   update_drive,
   retrieve_stories,
   retrieve_story,
