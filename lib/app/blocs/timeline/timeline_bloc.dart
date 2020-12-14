@@ -73,7 +73,7 @@ class TimelineBloc extends Bloc<TimelineEvent, TimelineState> {
     }
 
     // events which update the UI
-    UIUpdater uiUpdater = UIUpdater(storage, cloudStories, localStories);
+    UIUpdater uiUpdater = UIUpdater(localStories);
     await for (TimelineState state in uiUpdater.updateUI(event)) {
       yield state;
     }

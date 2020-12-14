@@ -1,14 +1,11 @@
 import 'package:web/app/blocs/timeline/timeline_event.dart';
 import 'package:web/app/blocs/timeline/timeline_state.dart';
-import 'package:web/app/services/google_drive.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class UIUpdater {
-  GoogleDrive storage;
-  Map<String, TimelineData> cloudStories;
   Map<String, TimelineData> localStories;
 
-  UIUpdater(this.storage, this.cloudStories, this.localStories);
+  UIUpdater(this.localStories);
 
   Stream<TimelineState> updateUI(TimelineEvent event) async* {
     switch (event.type) {
