@@ -116,10 +116,10 @@ class _TimelineEventCardState extends State<EventCard> {
             return;
           }
           setState(() => BlocProvider.of<TimelineBloc>(context).add(
-              TimelineEvent(TimelineMessageType.edit_timestamp,
+              TimelineLocalEvent(TimelineMessageType.edit_timestamp,
                   parentId: widget.eventFolderID,
                   folderId: widget.event.folderID,
-                  timestamp: date.millisecondsSinceEpoch)));
+                  data: date.millisecondsSinceEpoch)));
         },
       ),
     );
@@ -144,14 +144,13 @@ class _TimelineEventCardState extends State<EventCard> {
         }
 
         if (state.type == TimelineMessageType.syncing_story_state) {
-          if (state.uploadingImages == null) {
+          if (state.data == null) {
             return;
           }
-          if (!state.uploadingImages.containsKey(widget.event.folderID)) {
+          if (!state.data.containsKey(widget.event.folderID)) {
             return;
           }
-          List<String> newUploadingImages =
-              state.uploadingImages[widget.event.folderID];
+          List<String> newUploadingImages = state.data[widget.event.folderID];
           setState(() {
             uploadingImages = newUploadingImages;
           });
@@ -219,10 +218,10 @@ class _TimelineEventCardState extends State<EventCard> {
                     controller: titleController,
                     onChanged: (string) =>
                         BlocProvider.of<TimelineBloc>(context).add(
-                            TimelineEvent(TimelineMessageType.edit_title,
+                            TimelineLocalEvent(TimelineMessageType.edit_title,
                                 parentId: widget.eventFolderID,
                                 folderId: widget.event.folderID,
-                                text: string)),
+                                data: string)),
                   ),
                 ),
                 Padding(
@@ -251,7 +250,7 @@ class _TimelineEventCardState extends State<EventCard> {
                                   return;
                                 }
                                 BlocProvider.of<TimelineBloc>(context).add(
-                                  TimelineEvent(
+                                  TimelineLocalEvent(
                                     TimelineMessageType.add_image,
                                     parentId: widget.eventFolderID,
                                     folderId: widget.event.folderID,
@@ -283,10 +282,10 @@ class _TimelineEventCardState extends State<EventCard> {
                       readOnly: widget.locked || widget.saving,
                       onChanged: (string) {
                         BlocProvider.of<TimelineBloc>(context).add(
-                          TimelineEvent(TimelineMessageType.edit_description,
+                          TimelineLocalEvent(TimelineMessageType.edit_description,
                               parentId: widget.eventFolderID,
                               folderId: widget.event.folderID,
-                              text: string),
+                              data: string),
                         );
                       },
                       maxLines: null),
@@ -413,10 +412,10 @@ class _TimelineEventCardState extends State<EventCard> {
                       if (widget.saving) {
                         return;
                       }
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                      BlocProvider.of<TimelineBloc>(context).add(TimelineLocalEvent(
                           TimelineMessageType.delete_image,
                           folderId: widget.event.folderID,
-                          imageKey: imageKey,
+                          data: imageKey,
                           parentId: widget.eventFolderID));
                     },
                   ),

@@ -156,7 +156,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     text: "edit",
                     icon: Icons.edit,
                     onPressed: () {
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                      BlocProvider.of<TimelineBloc>(context).add(TimelineLocalEvent(
                           TimelineMessageType.edit_story,
                           folderId: widget.folderId));
                     },
@@ -173,7 +173,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     text: "cancel",
                     icon: Icons.cancel,
                     onPressed: () {
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                      BlocProvider.of<TimelineBloc>(context).add(TimelineLocalEvent(
                           TimelineMessageType.cancel_story,
                           folderId: widget.folderId));
                     },
@@ -186,7 +186,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     text: "delete",
                     icon: Icons.delete,
                     onPressed: () {
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                      BlocProvider.of<TimelineBloc>(context).add(TimelineCloudEvent(
                           TimelineMessageType.delete_story,
                           folderId: widget.folderId));
                     },
@@ -197,7 +197,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     text: "save",
                     icon: Icons.save,
                     onPressed: () async {
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+                      BlocProvider.of<TimelineBloc>(context).add(TimelineCloudEvent(
                           TimelineMessageType.syncing_story_start,
                           folderId: widget.folderId));
                     },
@@ -219,7 +219,7 @@ class _TimelineCardState extends State<TimelineCard> {
   @override
   Widget build(BuildContext context) {
     if (widget.viewMode) {
-      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+      BlocProvider.of<TimelineBloc>(context).add(TimelineInitialEvent(
           TimelineMessageType.retrieve_story,
           folderId: widget.folderId));
     }
@@ -282,7 +282,7 @@ class _TimelineCardState extends State<TimelineCard> {
                             return;
                           }
                           BlocProvider.of<TimelineBloc>(context).add(
-                              TimelineEvent(
+                              TimelineLocalEvent(
                                   TimelineMessageType.create_sub_story,
                                   parentId: adventure.mainEvent.folderID,
                                   folderId: widget.folderId));
@@ -328,7 +328,7 @@ class _TimelineCardState extends State<TimelineCard> {
                                             return;
                                           }
                                           BlocProvider.of<TimelineBloc>(context)
-                                              .add(TimelineEvent(
+                                              .add(TimelineLocalEvent(
                                                   TimelineMessageType
                                                       .delete_sub_story,
                                                   parentId: adventure
@@ -366,10 +366,13 @@ class _TimelineCardState extends State<TimelineCard> {
 
                     AdventureComment eventComment =
                         AdventureComment(comment: comment, user: user);
-                    BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                        TimelineMessageType.uploading_comments_start,
-                        comment: eventComment,
-                        folderId: widget.folderId));
+
+                    BlocProvider.of<TimelineBloc>(context).add(TimelineCommentEvent(TimelineMessageType.uploading_comments_start, widget.folderId, eventComment));
+
+//                    BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+//                        TimelineMessageType.uploading_comments_start,
+//                        data: eventComment,
+//                        folderId: widget.folderId));
                   },
                 );
               })

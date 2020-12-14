@@ -114,9 +114,9 @@ class _AddStoryButtonState extends State<AddStoryButton> {
             iconColor: Colors.black,
             onPressed: () async {
               int timestamp = DateTime.now().millisecondsSinceEpoch;
-              BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+              BlocProvider.of<TimelineBloc>(context).add(TimelineCloudEvent(
                   TimelineMessageType.create_story,
-                  timestamp: timestamp,
+                  data: timestamp,
                   mainEvent: true));
               setState(() => addingStory = true);
             },

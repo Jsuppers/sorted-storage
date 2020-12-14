@@ -108,11 +108,11 @@ class EmojiPickerState extends State<EmojiPicker> {
         MaterialButton(
           height: 40,
           onPressed: () {
-            BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
+            BlocProvider.of<TimelineBloc>(context).add(TimelineLocalEvent(
                 TimelineMessageType.edit_emoji,
                 parentId: widget.parentID,
                 folderId: widget.folderID,
-                text: element));
+                data: element));
             BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
           },
           child: Text(

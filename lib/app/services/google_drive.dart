@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class GoogleDrive {
@@ -69,51 +68,6 @@ class GoogleDrive {
     return folder.id;
   }
 
-  Future<String> getMediaFolder() async {
-    try {
-      String mediaFolderID;
-      print('getting media folder');
-
-      String query =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.ROOT_FOLDER}' and trashed=false";
-      var folderPArent = await driveApi.files.list(q: query);
-      String parentId;
-
-      if (folderPArent.files.length == 0) {
-        File fileMetadata = new File();
-        fileMetadata.name = Constants.ROOT_FOLDER;
-        fileMetadata.mimeType = "application/vnd.google-apps.folder";
-        fileMetadata.description = "please don't modify this folder";
-        var rt = await driveApi.files.create(fileMetadata);
-        parentId = rt.id;
-      } else {
-        parentId = folderPArent.files.first.id;
-      }
-
-      String query2 =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.MEDIA_FOLDER}' and '$parentId' in parents and trashed=false";
-      var folder = await driveApi.files.list(q: query2);
-
-      if (folder.files.length == 0) {
-        File fileMetadataMedia = new File();
-        fileMetadataMedia.name = Constants.MEDIA_FOLDER;
-        fileMetadataMedia.parents = [parentId];
-        fileMetadataMedia.mimeType = "application/vnd.google-apps.folder";
-        fileMetadataMedia.description = "please don't modify this folder";
-
-        var folder = await driveApi.files.create(fileMetadataMedia);
-        mediaFolderID = folder.id;
-      } else {
-        mediaFolderID = folder.files.first.id;
-      }
-
-      print('media folder: $mediaFolderID');
-      return mediaFolderID;
-    } catch (e) {
-      print('error: $e');
-      return e.toString();
-    } finally {}
-  }
 
   Future<String> updateEventFolderTimestamp(
       String fileID, int timestamp) async {
@@ -131,7 +85,7 @@ class GoogleDrive {
     }
   }
 
-  Future createFile(File request, Media media) async {
+  Future createFile(File request, {Media media}) async {
     return driveApi.files.create(request, uploadMedia: media);
   }
 

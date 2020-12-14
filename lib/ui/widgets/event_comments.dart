@@ -80,7 +80,7 @@ class _CommentWidgetState extends State<CommentWidget> {
         if (state.type == TimelineMessageType.uploading_comments_finished &&
             state.folderID == widget.folderID) {
           setState(() {
-            adventureComments = state.comments;
+            adventureComments = state.data;
             uploading = false;
           });
         }

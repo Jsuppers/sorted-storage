@@ -1,12 +1,12 @@
-import 'package:web/app/models/adventure.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 enum TimelineMessageType {
+  send_state,
   initial_state,
   new_user,
+  picked_image,
   update_drive,
   retrieve_stories,
-  picked_image,
   retrieve_story,
   create_story,
   progress_upload,
@@ -30,11 +30,9 @@ enum TimelineMessageType {
 }
 
 class TimelineState {
-  final String folderID;
-  final Map<String, TimelineData> stories;
   final TimelineMessageType type;
-  final List<AdventureComment> comments;
-  final Map<String, List<String>> uploadingImages;
+  final Map<String, TimelineData> stories;
   final dynamic data;
-  const TimelineState(this.type, this.stories, {this.data, this.comments,this.folderID, this.uploadingImages});
+  final String folderID;
+  const TimelineState(this.type, this.stories, {this.data, this.folderID});
 }

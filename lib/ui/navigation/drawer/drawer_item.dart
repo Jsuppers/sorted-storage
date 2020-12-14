@@ -21,7 +21,7 @@ class DrawerItem extends StatelessWidget {
       onPressed: () async {
         if (event is NavigateToLoginEvent) {
           BlocProvider.of<TimelineBloc>(context)
-              .add(TimelineEvent(TimelineMessageType.new_user));
+              .add(TimelineInitialEvent(TimelineMessageType.new_user));
           BlocProvider.of<AuthenticationBloc>(context)
               .add(AuthenticationSignOutEvent());
         } else {

@@ -19,7 +19,7 @@ class NavigationLogin extends StatelessWidget {
       onPressed: () {
         if (loggedIn) {
           BlocProvider.of<TimelineBloc>(context)
-              .add(TimelineEvent(TimelineMessageType.new_user));
+              .add(TimelineInitialEvent(TimelineMessageType.new_user));
           BlocProvider.of<AuthenticationBloc>(context).add(AuthenticationSignOutEvent());
         } else {
           BlocProvider.of<NavigationBloc>(context).add(NavigateToLoginEvent());

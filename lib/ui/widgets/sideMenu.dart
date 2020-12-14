@@ -113,7 +113,7 @@ class AvatarWithMenu extends StatelessWidget {
                   BlocProvider.of<NavigationBloc>(context)
                       .add(NavigatorPopEvent());
                   BlocProvider.of<TimelineBloc>(context)
-                      .add(TimelineEvent(TimelineMessageType.new_user));
+                      .add(TimelineInitialEvent(TimelineMessageType.new_user));
                   BlocProvider.of<AuthenticationBloc>(context)
                       .add(AuthenticationSignOutEvent());
                 },

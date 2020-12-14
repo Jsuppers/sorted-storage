@@ -43,7 +43,7 @@ class LayoutWrapper extends StatelessWidget {
         }
         if (!this.isViewMode) {
           BlocProvider.of<TimelineBloc>(context)
-              .add(TimelineEvent(TimelineMessageType.retrieve_stories));
+              .add(TimelineInitialEvent(TimelineMessageType.retrieve_stories));
         }
         return Content(
             widget: widget,
