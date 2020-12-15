@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
 
 class NavigationLogin extends StatelessWidget {
   final bool loggedIn;
@@ -18,9 +18,10 @@ class NavigationLogin extends StatelessWidget {
     return MaterialButton(
       onPressed: () {
         if (loggedIn) {
-          BlocProvider.of<TimelineBloc>(context)
-              .add(TimelineInitialEvent(TimelineMessageType.new_user));
-          BlocProvider.of<AuthenticationBloc>(context).add(AuthenticationSignOutEvent());
+          BlocProvider.of<CloudStoriesBloc>(context)
+              .add(CloudStoriesEvent(CloudStoriesType.new_user));
+          BlocProvider.of<AuthenticationBloc>(context)
+              .add(AuthenticationSignOutEvent());
         } else {
           BlocProvider.of<NavigationBloc>(context).add(NavigateToLoginEvent());
         }

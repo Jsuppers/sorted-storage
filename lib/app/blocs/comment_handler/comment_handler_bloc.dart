@@ -1,34 +1,32 @@
 import 'dart:convert';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
-class CommentSender {
+class CommentHandlerBloc extends Bloc<CommentHandlerEvent, CommentHandlerState>{
   GoogleDrive storage;
-  Map<String, TimelineData> cloudStories;
   Map<String, TimelineData> localStories;
 
-  CommentSender(this.storage, this.cloudStories, this.localStories);
+  CommentHandlerBloc({this.localStories, this.storage}) : super(CommentHandlerState(uploading: false));
 
-  Stream<TimelineState> processComment(TimelineCommentEvent event) async* {
-    yield TimelineState(
-        TimelineMessageType.uploading_comments_start, localStories,
+  @override
+  Stream<CommentHandlerState> mapEventToState(event) async* {
+    yield CommentHandlerState(
+        uploading: true,
         folderID: event.folderId);
 
-    TimelineData timelineEvent = cloudStories[event.folderId];
+    TimelineData timelineEvent = localStories[event.folderId];
     await _sendComment(timelineEvent.mainEvent, event.data);
-    localStories[event.folderId].mainEvent.comments =
-        timelineEvent.mainEvent.comments;
 
-    yield TimelineState(
-        TimelineMessageType.uploading_comments_finished, localStories,
-        folderID: event.folderId,
-        data: cloudStories[event.folderId].mainEvent.comments.comments);
+    yield CommentHandlerState(
+        uploading: false,
+        folderID: event.folderId);
   }
 
   Future _sendComment(EventContent event, AdventureComment comment) async {

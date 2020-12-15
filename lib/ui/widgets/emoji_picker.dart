@@ -1,12 +1,11 @@
-
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
+import 'package:web/app/blocs/local_stories/local_stories_event.dart';
+import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
 
 class EmojiPicker extends StatefulWidget {
   final String folderID;
@@ -82,9 +81,8 @@ class EmojiPickerState extends State<EmojiPicker> {
                     prefixIcon: new Icon(Icons.search),
                     suffixIcon: new IconButton(
                       icon: new Icon(Icons.close),
-                      onPressed: () =>
-                        BlocProvider.of<NavigationBloc>(context)
-                            .add(NavigatorPopEvent()),
+                      onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                          .add(NavigatorPopEvent()),
                     ),
                     hintText: "Search...",
                   ),
@@ -108,8 +106,8 @@ class EmojiPickerState extends State<EmojiPicker> {
         MaterialButton(
           height: 40,
           onPressed: () {
-            BlocProvider.of<TimelineBloc>(context).add(TimelineLocalEvent(
-                TimelineMessageType.edit_emoji,
+            BlocProvider.of<LocalStoriesBloc>(context).add(LocalStoriesEvent(
+                LocalStoriesType.edit_emoji,
                 parentId: widget.parentID,
                 folderId: widget.folderID,
                 data: element));

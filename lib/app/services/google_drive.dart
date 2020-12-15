@@ -5,9 +5,13 @@ import 'package:googleapis/drive/v3.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class GoogleDrive {
-  final DriveApi driveApi;
+  DriveApi driveApi;
 
-  GoogleDrive(this.driveApi);
+  GoogleDrive();
+
+  setDrive(DriveApi driveApi) {
+    this.driveApi = driveApi;
+  }
 
   Future<String> uploadMediaToFolder(
       EventContent eventContent,
@@ -67,7 +71,6 @@ class GoogleDrive {
 
     return folder.id;
   }
-
 
   Future<String> updateEventFolderTimestamp(
       String fileID, int timestamp) async {

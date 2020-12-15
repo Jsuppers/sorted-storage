@@ -5,15 +5,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
+import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
 import 'package:web/app/models/user.dart' as usr;
+import 'package:web/app/services/google_drive.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:web/ui/widgets/timeline_card.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,17 +31,26 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
   AuthenticationBloc _authenticationBloc;
   NavigationBloc _navigationBloc;
+  GoogleDrive _googleDrive;
   DriveBloc _driveBloc;
-  TimelineBloc _timelineBloc;
+  LocalStoriesBloc _localStoriesBloc;
+  CloudStoriesBloc _cloudStoriesBloc;
+  CommentHandlerBloc _commentHandler;
+  Map<String, TimelineData> _localStories = Map();
 
   @override
   void initState() {
     super.initState();
+    _googleDrive = GoogleDrive();
     _driveBloc = DriveBloc();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
     _authenticationBloc = AuthenticationBloc();
     _authenticationBloc.add(AuthenticationSilentSignInEvent());
-    _timelineBloc = TimelineBloc();
+    _localStoriesBloc = LocalStoriesBloc(localStories: _localStories);
+    _cloudStoriesBloc =
+        CloudStoriesBloc(localStories: _localStories, storage: _googleDrive);
+    _commentHandler =
+        CommentHandlerBloc(localStories: _localStories, storage: _googleDrive);
   }
 
   @override
@@ -48,7 +59,9 @@ class _MyAppState extends State<MyApp> {
     _navigationBloc.close();
     _authenticationBloc.close();
     _driveBloc.close();
-    _timelineBloc.close();
+    _localStoriesBloc.close();
+    _cloudStoriesBloc.close();
+    _commentHandler.close();
   }
 
   @override
@@ -64,8 +77,14 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AuthenticationBloc>(
           create: (BuildContext context) => _authenticationBloc,
         ),
-        BlocProvider<TimelineBloc>(
-          create: (BuildContext context) => _timelineBloc,
+        BlocProvider<CloudStoriesBloc>(
+          create: (BuildContext context) => _cloudStoriesBloc,
+        ),
+        BlocProvider<LocalStoriesBloc>(
+          create: (BuildContext context) => _localStoriesBloc,
+        ),
+        BlocProvider<CommentHandlerBloc>(
+          create: (BuildContext context) => _commentHandler,
         ),
       ],
       child: MultiBlocListener(
@@ -77,8 +96,7 @@ class _MyAppState extends State<MyApp> {
           ),
           BlocListener<DriveBloc, DriveApi>(
             listener: (context, driveApi) {
-              _timelineBloc.add(TimelineEvent(TimelineMessageType.update_drive,
-                  data: driveApi));
+              _googleDrive.setDrive(driveApi);
             },
           ),
         ],

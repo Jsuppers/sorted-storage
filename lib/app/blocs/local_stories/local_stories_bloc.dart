@@ -1,48 +1,49 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mime/mime.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_event.dart';
+import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
-class LocalChanges {
-  Map<String, TimelineData> cloudStories;
+class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
   Map<String, TimelineData> localStories;
 
-  LocalChanges(this.cloudStories, this.localStories);
+  LocalStoriesBloc({this.localStories})
+      : super(LocalStoriesState(LocalStoriesType.initial_state, localStories));
 
-  Stream<TimelineState> changeLocalState(
-      TimelineLocalEvent event, Function(TimelineEvent) callback) async* {
+  @override
+  Stream<LocalStoriesState> mapEventToState(event) async* {
     switch (event.type) {
-      case TimelineMessageType.cancel_story:
+      case LocalStoriesType.cancel_story:
         localStories[event.folderId] =
-            TimelineData.clone(cloudStories[event.folderId]);
+            TimelineData.clone(event.data[event.folderId]);
         localStories[event.folderId].locked = true;
-        yield TimelineState(TimelineMessageType.cancel_story, localStories,
+        yield LocalStoriesState(LocalStoriesType.cancel_story, localStories,
             folderID: event.folderId);
         break;
-      case TimelineMessageType.edit_story:
+      case LocalStoriesType.edit_story:
         localStories[event.folderId].locked = false;
-        yield TimelineState(TimelineMessageType.edit_story, localStories,
+        yield LocalStoriesState(LocalStoriesType.edit_story, localStories,
             folderID: event.folderId);
         break;
-      case TimelineMessageType.edit_description:
+      case LocalStoriesType.edit_description:
         var eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         eventData.description = event.data;
         break;
-      case TimelineMessageType.edit_title:
+      case LocalStoriesType.edit_title:
         var eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         eventData.title = event.data;
         break;
-      case TimelineMessageType.edit_timestamp:
+      case LocalStoriesType.edit_timestamp:
         var eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         eventData.timestamp = event.data;
         break;
-      case TimelineMessageType.add_image:
+      case LocalStoriesType.add_image:
         var eventContent = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         try {
@@ -67,7 +68,7 @@ class LocalChanges {
                       isDocument: !mime.startsWith("video/") &&
                           !mime.startsWith("image/")));
             }
-            callback(TimelineEvent(TimelineMessageType.picked_image,
+            this.add(LocalStoriesEvent(LocalStoriesType.picked_image,
                 folderId: event.folderId));
             return file;
           });
@@ -76,7 +77,7 @@ class LocalChanges {
         }
 
         break;
-      case TimelineMessageType.create_sub_story:
+      case LocalStoriesType.create_sub_story:
         var story = localStories[event.parentId];
         String uniqueName = "temp_" +
             event.parentId +
@@ -89,29 +90,44 @@ class LocalChanges {
           comments: AdventureComments(comments: []),
           subEvents: [],
         ));
-        yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
+        yield LocalStoriesState(
+            LocalStoriesType.syncing_story_end, localStories,
             folderID: event.folderId);
         break;
-      case TimelineMessageType.delete_sub_story:
+      case LocalStoriesType.delete_sub_story:
         var story = localStories[event.parentId];
         story.subEvents
             .removeWhere((element) => element.folderID == event.folderId);
-        yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
+        yield LocalStoriesState(
+            LocalStoriesType.syncing_story_end, localStories,
             folderID: event.parentId);
         break;
-      case TimelineMessageType.delete_image:
+      case LocalStoriesType.delete_image:
         var eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         eventData.images.remove(event.data);
-        yield TimelineState(TimelineMessageType.syncing_story_end, localStories,
+        yield LocalStoriesState(
+            LocalStoriesType.syncing_story_end, localStories,
             folderID: event.folderId);
         break;
-      case TimelineMessageType.edit_emoji:
+      case LocalStoriesType.edit_emoji:
         var eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         eventData.emoji = event.data;
-        yield TimelineState(TimelineMessageType.edit_emoji, localStories,
+        yield LocalStoriesState(LocalStoriesType.edit_emoji, localStories,
             folderID: event.folderId, data: event.data);
+        break;
+      case LocalStoriesType.picked_image:
+        yield LocalStoriesState(
+            LocalStoriesType.syncing_story_end, localStories,
+            folderID: event.folderId);
+        break;
+      case LocalStoriesType.syncing_story_end:
+        localStories[event.folderId].saving = false;
+        localStories[event.folderId].locked = true;
+        yield LocalStoriesState(
+            LocalStoriesType.syncing_story_end, localStories,
+            folderID: event.folderId);
         break;
       default:
         break;
