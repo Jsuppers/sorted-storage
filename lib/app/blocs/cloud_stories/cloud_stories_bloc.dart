@@ -1,8 +1,8 @@
-
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/models/adventure.dart';
@@ -11,7 +11,6 @@ import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
-import 'package:googleapis/drive/v3.dart';
 
 class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   Map<String, TimelineData> cloudStories;
@@ -19,7 +18,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   GoogleDrive storage;
   String mediaFolderID;
 
-  CloudStoriesBloc({this.localStories, this.storage}) : super(CloudStoriesState(CloudStoriesType.initial_state, null));
+  CloudStoriesBloc({this.localStories, this.storage})
+      : super(CloudStoriesState(CloudStoriesType.initial_state, null));
 
   @override
   Stream<CloudStoriesState> mapEventToState(event) async* {
@@ -52,8 +52,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             folderID: event.folderId);
         break;
       case CloudStoriesType.create_story:
-        createEventFolder(
-            mediaFolderID, event.data, event.mainEvent);
+        createEventFolder(mediaFolderID, event.data, event.mainEvent);
         break;
       case CloudStoriesType.updated_stories:
         yield CloudStoriesState(CloudStoriesType.updated_stories, cloudStories);
@@ -61,7 +60,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       case CloudStoriesType.syncing_story_end:
         localStories[event.folderId].saving = false;
         localStories[event.folderId].locked = true;
-        yield CloudStoriesState(CloudStoriesType.syncing_story_end, cloudStories,
+        yield CloudStoriesState(
+            CloudStoriesType.syncing_story_end, cloudStories,
             folderID: event.folderId);
         break;
       case CloudStoriesType.syncing_story_state:
@@ -77,7 +77,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         break;
     }
   }
-
 
   Future _deleteEvent(fileId) async {
     storage.delete(fileId).then((value) {
@@ -99,7 +98,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       EventContent cloudSubEvent;
       if (subEvent.folderID.startsWith("temp_")) {
         cloudSubEvent =
-        await createEventFolder(eventFolderID, subEvent.timestamp, false);
+            await createEventFolder(eventFolderID, subEvent.timestamp, false);
         cloudCopy.subEvents.add(cloudSubEvent);
         subEvent.folderID = cloudSubEvent.folderID;
         subEvent.settingsID = cloudSubEvent.settingsID;
@@ -164,13 +163,13 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       print('updating settings storage');
       tasks.add(
           _uploadSettingsFile(cloudCopy.folderID, localCopy).then((settingsId) {
-            cloudCopy.settingsID = settingsId;
-            cloudCopy.title = localCopy.title;
-            cloudCopy.description = localCopy.description;
-            cloudCopy.emoji = localCopy.emoji;
-          }, onError: (error) {
-            print('error $error');
-          }));
+        cloudCopy.settingsID = settingsId;
+        cloudCopy.title = localCopy.title;
+        cloudCopy.description = localCopy.description;
+        cloudCopy.emoji = localCopy.emoji;
+      }, onError: (error) {
+        print('error $error');
+      }));
     }
 
     print('uploading misc files');
@@ -187,7 +186,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       int sent = 0;
       for (int i = 0; i < localCopy.images.length; i++) {
         MapEntry<String, StoryMedia> image =
-        localCopy.images.entries.elementAt(i);
+            localCopy.images.entries.elementAt(i);
         if (!cloudCopy.images.containsKey(image.key)) {
           totalSize += image.value.size;
           uploadingImages.update(localCopy.folderID, (value) {
@@ -209,7 +208,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
       for (int i = 0; i < localCopy.images.length; i++) {
         MapEntry<String, StoryMedia> image =
-        localCopy.images.entries.elementAt(i);
+            localCopy.images.entries.elementAt(i);
         if (!cloudCopy.images.containsKey(image.key)) {
           var streamController = new StreamController<List<int>>();
 
@@ -228,15 +227,14 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
           await storage
               .uploadMediaToFolder(cloudCopy, image.key, image.value, 10,
-              streamController.stream)
+                  streamController.stream)
               .then((imageID) {
             uploadingImages.update(localCopy.folderID, (value) {
               value.remove(image.key);
               return value;
             });
             this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
-                folderId: localCopy.folderID,
-                data: uploadingImages));
+                folderId: localCopy.folderID, data: uploadingImages));
 
             if (imageID != null) {
               imagesToAdd.putIfAbsent(imageID, () => image.value);
@@ -273,10 +271,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       imagesToAdd.forEach((key, value) {
         RetryService.getThumbnail(
             storage, localCopy.folderID, key, localCopy.images, uploadingImages,
-                () {
-                  this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
-                  folderId: localCopy.folderID, data: uploadingImages));
-            });
+            () {
+          this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
+              folderId: localCopy.folderID, data: uploadingImages));
+        });
       });
       RetryService.checkNeedsRefreshing(
           localCopy.folderID, uploadingImages, localCopy, () {
@@ -300,9 +298,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       event.settingsID = await _uploadSettingsFile(folderID, event);
 
       if (mainEvent) {
+        var commentsResponse =
+            await storage.uploadCommentsFile(folderID: event.folderID);
+        event.comments = commentsResponse.comments;
+        event.commentsID = commentsResponse.commentsID;
         TimelineData timelineEvent =
-        TimelineData(mainEvent: event, subEvents: []);
-        event.commentsID = await _uploadCommentsFile(event, null);
+            TimelineData(mainEvent: event, subEvents: []);
         cloudStories.putIfAbsent(folderID, () => timelineEvent);
         localStories.putIfAbsent(
             folderID, () => TimelineData.clone(timelineEvent));
@@ -327,7 +328,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     String jsonString = jsonEncode(settings);
     List<int> fileContent = utf8.encode(jsonString);
     final Stream<List<int>> mediaStream =
-    Future.value(fileContent).asStream().asBroadcastStream();
+        Future.value(fileContent).asStream().asBroadcastStream();
 
     if (content.settingsID != null) {
       var folder = await storage.updateFile(
@@ -341,40 +342,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     return folderID;
   }
 
-  Future<String> _uploadCommentsFile(
-      EventContent event, AdventureComment comment) async {
-    AdventureComments comments =
-    AdventureComments.fromJson(await storage.getJsonFile(event.commentsID));
-    if (comments == null) {
-      comments = AdventureComments();
-    }
-    if (comments.comments == null) {
-      comments.comments = [];
-    }
-    if (comment != null) {
-      comments.comments.add(comment);
-    }
-    String jsonString = jsonEncode(comments);
-
-    List<int> fileContent = utf8.encode(jsonString);
-    final Stream<List<int>> mediaStream =
-    Future.value(fileContent).asStream().asBroadcastStream();
-
-    var folderID;
-    if (event.commentsID == null) {
-      folderID = await storage.uploadMedia(event.folderID,
-          Constants.COMMENTS_FILE, fileContent.length, mediaStream,
-          mimeType: "application/json");
-    } else {
-      var folder = await storage.updateFile(
-          null, event.commentsID, Media(mediaStream, fileContent.length));
-      folderID = folder.id;
-    }
-
-    event.comments = comments;
-    return folderID;
-  }
-
   _getStories({String folderID}) {
     if (cloudStories == null) {
       cloudStories = Map();
@@ -384,8 +351,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       } else {
         getMediaFolder().then((value) {
           mediaFolderID = value;
-          getEventsFromFolder(value).then((value) => this.add(
-              CloudStoriesEvent(CloudStoriesType.updated_stories)));
+          getEventsFromFolder(value).then((value) =>
+              this.add(CloudStoriesEvent(CloudStoriesType.updated_stories)));
         });
       }
     }
@@ -411,7 +378,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             }
 
             TimelineData data =
-            TimelineData(mainEvent: mainEvent, subEvents: subEvents);
+                TimelineData(mainEvent: mainEvent, subEvents: subEvents);
             cloudStories.putIfAbsent(file.id, () => data);
             localStories.putIfAbsent(file.id, () => TimelineData.clone(data));
           }));
@@ -529,10 +496,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
 
     AdventureSettings settings =
-    AdventureSettings.fromJson(await storage.getJsonFile(settingsID));
+        AdventureSettings.fromJson(await storage.getJsonFile(settingsID));
 
     AdventureComments comments =
-    AdventureComments.fromJson(await storage.getJsonFile(commentsID));
+        AdventureComments.fromJson(await storage.getJsonFile(commentsID));
 
     return EventContent(
         timestamp: timestamp,
@@ -546,5 +513,4 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         settingsID: settingsID,
         folderID: folderID);
   }
-
 }

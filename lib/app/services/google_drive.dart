@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:googleapis/drive/v3.dart';
+import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/comments_response.dart';
+import 'package:web/constants.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class GoogleDrive {
@@ -45,6 +48,41 @@ class GoogleDrive {
       event = jsonDecode(utf8.decode(dataStore));
     }
     return event;
+  }
+
+  Future<CommentsResponse> uploadCommentsFile(
+      {String commentsID, String folderID, AdventureComment comment}) async {
+    AdventureComments comments;
+    if (commentsID != null) {
+      comments = AdventureComments.fromJson(await getJsonFile(commentsID));
+    }
+    if (comments == null) {
+      comments = AdventureComments();
+    }
+    if (comments.comments == null) {
+      comments.comments = [];
+    }
+    if (comment != null) {
+      comments.comments.add(comment);
+    }
+    String jsonString = jsonEncode(comments);
+
+    List<int> fileContent = utf8.encode(jsonString);
+    final Stream<List<int>> mediaStream =
+    Future.value(fileContent).asStream().asBroadcastStream();
+
+    var responseID;
+    if (commentsID == null) {
+      responseID = await uploadMedia(folderID,
+          Constants.COMMENTS_FILE, fileContent.length, mediaStream,
+          mimeType: "application/json");
+    } else {
+      var folder = await updateFile(
+          null, commentsID, Media(mediaStream, fileContent.length));
+      responseID = folder.id;
+    }
+
+    return CommentsResponse(comments: comments, commentsID: responseID);
   }
 
   Future<String> createStory(String parentID, int timestamp) async {
@@ -110,5 +148,13 @@ class GoogleDrive {
 
   Future createPermission(String fileID, Permission permission) async {
     return driveApi.permissions.create(permission, fileID);
+  }
+
+  Future listPermissions(String fileID) async {
+    return driveApi.permissions.list(fileID);
+  }
+
+  Future deletePermission(String fileID, String permissionID) async {
+    return driveApi.permissions.delete(fileID, permissionID);
   }
 }

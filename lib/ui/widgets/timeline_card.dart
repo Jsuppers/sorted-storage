@@ -282,8 +282,10 @@ class _TimelineCardState extends State<TimelineCard> {
                 saving = adventure.saving;
               });
             } else if (state.type == LocalStoriesType.syncing_story_end) {
-              var subEvent = adventure.subEvents
-                  .firstWhere((element) => element.folderID == state.folderID);
+              var subEvent = adventure.subEvents.firstWhere(
+                  (element) => element.folderID == state.folderID, orElse: () {
+                return;
+              });
               if (subEvent == null) {
                 return;
               }
