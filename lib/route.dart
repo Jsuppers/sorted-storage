@@ -32,7 +32,9 @@ class RouteConfiguration {
   }
 
   static bool pageRequiresAuthentication(String baseRoute) {
-    return baseRoute == MediaPage.route || baseRoute == DocumentsPage.route;
+    return baseRoute == MediaPage.route ||
+        baseRoute == DocumentsPage.route ||
+        baseRoute == "/";
   }
 
   static Widget getPageContent(String baseRoute, String destination) {
@@ -51,8 +53,10 @@ class RouteConfiguration {
         return TermsPage();
       case ErrorPage.route:
         return ErrorPage();
-      default:
+      case HomePage.route:
         return HomePage();
+      default:
+        return MediaPage();
     }
   }
 }

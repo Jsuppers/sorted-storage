@@ -11,6 +11,7 @@ import 'package:web/app/services/cookie_service.dart';
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation.dart';
+import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
 
@@ -35,8 +36,14 @@ class LayoutWrapper extends StatelessWidget {
     return BlocBuilder<AuthenticationBloc, usr.User>(builder: (context, user) {
       if (this.requiresAuthentication || this.isViewMode) {
         if (user == null && !this.isViewMode) {
+          Widget redirectWidget;
+          if (targetRoute == "/") {
+            redirectWidget = HomePage();
+          } else {
+            redirectWidget = LoginPage(targetRoute: targetRoute);
+          }
           return Content(
-              widget: LoginPage(targetRoute: targetRoute),
+              widget: redirectWidget,
               user: user,
               includeNavigation: includeNavigation,
               requiresAuthentication: requiresAuthentication);
