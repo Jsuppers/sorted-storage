@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/constants.dart';
@@ -14,7 +15,6 @@ import 'package:web/ui/widgets/timeline_card.dart';
 class CommentWidget extends StatefulWidget {
   final Function(BuildContext context, usr.User user, String comment)
       sendComment;
-  final AdventureComments comments;
   final double width;
   final double height;
   final usr.User user;
@@ -23,7 +23,6 @@ class CommentWidget extends StatefulWidget {
   const CommentWidget(
       {Key key,
       this.sendComment,
-      this.comments,
       this.width,
       this.height,
       this.user,
@@ -41,7 +40,12 @@ class _CommentWidgetState extends State<CommentWidget> {
   @override
   void initState() {
     super.initState();
-    adventureComments = widget.comments.comments;
+    adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
+        .state
+        .localStories[widget.folderID]
+        .mainEvent
+        .comments
+        .comments;
   }
 
   @override
@@ -69,23 +73,22 @@ class _CommentWidgetState extends State<CommentWidget> {
         ),
       ));
     }
-    return BlocListener<TimelineBloc, TimelineState>(
+    return BlocListener<CommentHandlerBloc, CommentHandlerState>(
       listener: (context, state) {
-        if (state.type == TimelineMessageType.uploading_comments_start &&
-            state.folderID == widget.folderID) {
+        if (state.folderID == widget.folderID) {
           setState(() {
-            uploading = true;
-          });
-        }
-        if (state.type == TimelineMessageType.uploading_comments_finished &&
-            state.folderID == widget.folderID) {
-          setState(() {
-            adventureComments = state.comments;
-            uploading = false;
+            adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
+                .state
+                .localStories[widget.folderID]
+                .mainEvent
+                .comments
+                .comments;
+            uploading = state.uploading;
           });
         }
       },
       child: Container(
+        key: Key(adventureComments.length.toString()),
         width: widget.width,
         child: Padding(
           padding: const EdgeInsets.all(20.0),

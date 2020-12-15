@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class ViewPage extends StatefulWidget {
@@ -20,11 +21,13 @@ class _ViewPageState extends State<ViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<TimelineBloc, TimelineState>(
+    return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (context, state) {
-        if (state.type == TimelineMessageType.updated_stories) {
+        if (state.type == CloudStoriesType.updated_stories) {
           setState(() {
-            timelineData = state.stories[widget.destination];
+            timelineData = BlocProvider.of<LocalStoriesBloc>(context)
+                .state
+                .localStories[widget.destination];
             timelineData.subEvents
                 .sort((a, b) => b.timestamp.compareTo(a.timestamp));
           });

@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
@@ -31,10 +32,9 @@ class _TimelineLayoutState extends State<TimelineLayout> {
 
   @override
   Widget build(BuildContext context) {
-    var timelineState = BlocProvider.of<TimelineBloc>(context).state;
-    loaded =
-        timelineState.type == TimelineMessageType.initial_state ? false : true;
-    _timelineData = timelineState.stories;
+    var timelineState = BlocProvider.of<CloudStoriesBloc>(context).state;
+    loaded = timelineState.type == CloudStoriesType.initial_state ? false : true;
+    _timelineData = BlocProvider.of<LocalStoriesBloc>(context).state.localStories;
     List<Widget> eventDisplay = [];
     List<_TimeLineEventEntry> timeLineEvents = [];
 
@@ -55,11 +55,11 @@ class _TimelineLayoutState extends State<TimelineLayout> {
       widgetKey = widgetKey + element.timestamp.toString() + "";
       eventDisplay.add(element.event);
     });
-    return BlocListener<TimelineBloc, TimelineState>(
+    return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (context, state) {
-        if (state.type == TimelineMessageType.updated_stories) {
+        if (state.type == CloudStoriesType.updated_stories) {
           setState(() {
-            _timelineData = state.stories;
+            print('updating stories');
             _timelineData.forEach((key, story) => story.subEvents
                 .sort((a, b) => b.timestamp.compareTo(a.timestamp)));
             loaded = true;
@@ -114,9 +114,9 @@ class _AddStoryButtonState extends State<AddStoryButton> {
             iconColor: Colors.black,
             onPressed: () async {
               int timestamp = DateTime.now().millisecondsSinceEpoch;
-              BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                  TimelineMessageType.create_story,
-                  timestamp: timestamp,
+              BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+                  CloudStoriesType.create_story,
+                  data: timestamp,
                   mainEvent: true));
               setState(() => addingStory = true);
             },

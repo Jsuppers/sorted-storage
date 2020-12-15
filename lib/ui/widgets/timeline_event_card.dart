@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
+import 'package:web/app/blocs/local_stories/local_stories_event.dart';
+import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
@@ -56,8 +58,6 @@ class _TimelineEventCardState extends State<EventCard> {
     selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.event.timestamp);
     uploadingImages = [];
     formattedDate = formatter.format(selectedDate);
-    titleController.text = widget.event.title;
-    descriptionController.text = widget.event.description;
   }
 
   Widget emoji() {
@@ -115,11 +115,14 @@ class _TimelineEventCardState extends State<EventCard> {
           if (widget.saving) {
             return;
           }
-          setState(() => BlocProvider.of<TimelineBloc>(context).add(
-              TimelineEvent(TimelineMessageType.edit_timestamp,
+          setState(
+            () => BlocProvider.of<LocalStoriesBloc>(context).add(
+              LocalStoriesEvent(LocalStoriesType.edit_timestamp,
                   parentId: widget.eventFolderID,
                   folderId: widget.event.folderID,
-                  timestamp: date.millisecondsSinceEpoch)));
+                  data: date.millisecondsSinceEpoch),
+            ),
+          );
         },
       ),
     );
@@ -127,6 +130,9 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
+    titleController.text = widget.event.title;
+    descriptionController.text = widget.event.description;
+
     List<Widget> cards = [];
     if (widget.event.images != null) {
       for (MapEntry<String, StoryMedia> image in widget.event.images.entries) {
@@ -134,29 +140,35 @@ class _TimelineEventCardState extends State<EventCard> {
       }
     }
 
-    return BlocListener<TimelineBloc, TimelineState>(
-      listener: (context, state) {
-        if (state.type == TimelineMessageType.edit_emoji &&
-            state.folderID == widget.event.folderID) {
-          setState(() {
-            widget.event.emoji = state.data;
-          });
-        }
-
-        if (state.type == TimelineMessageType.syncing_story_state) {
-          if (state.uploadingImages == null) {
-            return;
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CloudStoriesBloc, CloudStoriesState>(
+          listener: (context, state) {
+            if (state.type == CloudStoriesType.syncing_story_state) {
+              if (state.data == null) {
+                return;
+              }
+              if (!state.data.containsKey(widget.event.folderID)) {
+                return;
+              }
+              List<String> newUploadingImages =
+                  state.data[widget.event.folderID];
+              setState(() {
+                uploadingImages = newUploadingImages;
+              });
+            }
+          },
+        ),
+        BlocListener<LocalStoriesBloc, LocalStoriesState>(
+            listener: (context, state) {
+          if (state.type == LocalStoriesType.edit_emoji &&
+              state.folderID == widget.event.folderID) {
+            setState(() {
+              widget.event.emoji = state.data;
+            });
           }
-          if (!state.uploadingImages.containsKey(widget.event.folderID)) {
-            return;
-          }
-          List<String> newUploadingImages =
-              state.uploadingImages[widget.event.folderID];
-          setState(() {
-            uploadingImages = newUploadingImages;
-          });
-        }
-      },
+        })
+      ],
       child: Form(
         key: _formKey,
         child: Padding(
@@ -218,11 +230,11 @@ class _TimelineEventCardState extends State<EventCard> {
                     readOnly: widget.locked || widget.saving,
                     controller: titleController,
                     onChanged: (string) =>
-                        BlocProvider.of<TimelineBloc>(context).add(
-                            TimelineEvent(TimelineMessageType.edit_title,
+                        BlocProvider.of<LocalStoriesBloc>(context).add(
+                            LocalStoriesEvent(LocalStoriesType.edit_title,
                                 parentId: widget.eventFolderID,
                                 folderId: widget.event.folderID,
-                                text: string)),
+                                data: string)),
                   ),
                 ),
                 Padding(
@@ -250,9 +262,9 @@ class _TimelineEventCardState extends State<EventCard> {
                                 if (widget.saving) {
                                   return;
                                 }
-                                BlocProvider.of<TimelineBloc>(context).add(
-                                  TimelineEvent(
-                                    TimelineMessageType.add_image,
+                                BlocProvider.of<LocalStoriesBloc>(context).add(
+                                  LocalStoriesEvent(
+                                    LocalStoriesType.add_image,
                                     parentId: widget.eventFolderID,
                                     folderId: widget.event.folderID,
                                   ),
@@ -282,11 +294,11 @@ class _TimelineEventCardState extends State<EventCard> {
                           hintText: 'Enter a description'),
                       readOnly: widget.locked || widget.saving,
                       onChanged: (string) {
-                        BlocProvider.of<TimelineBloc>(context).add(
-                          TimelineEvent(TimelineMessageType.edit_description,
+                        BlocProvider.of<LocalStoriesBloc>(context).add(
+                          LocalStoriesEvent(LocalStoriesType.edit_description,
                               parentId: widget.eventFolderID,
                               folderId: widget.event.folderID,
-                              text: string),
+                              data: string),
                         );
                       },
                       maxLines: null),
@@ -413,11 +425,11 @@ class _TimelineEventCardState extends State<EventCard> {
                       if (widget.saving) {
                         return;
                       }
-                      BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-                          TimelineMessageType.delete_image,
-                          folderId: widget.event.folderID,
-                          imageKey: imageKey,
-                          parentId: widget.eventFolderID));
+                      BlocProvider.of<LocalStoriesBloc>(context).add(
+                          LocalStoriesEvent(LocalStoriesType.delete_image,
+                              folderId: widget.event.folderID,
+                              data: imageKey,
+                              parentId: widget.eventFolderID));
                     },
                   ),
                 ),

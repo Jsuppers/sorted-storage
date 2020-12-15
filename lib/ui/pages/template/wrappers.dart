@@ -3,9 +3,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_bloc.dart';
-import 'package:web/app/blocs/timeline/timeline_event.dart';
-import 'package:web/app/blocs/timeline/timeline_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/cookie_service.dart';
 import 'package:web/ui/footer/footer.dart';
@@ -42,8 +42,8 @@ class LayoutWrapper extends StatelessWidget {
               requiresAuthentication: requiresAuthentication);
         }
         if (!this.isViewMode) {
-          BlocProvider.of<TimelineBloc>(context)
-              .add(TimelineEvent(TimelineMessageType.retrieve_stories));
+          BlocProvider.of<CloudStoriesBloc>(context)
+              .add(CloudStoriesEvent(CloudStoriesType.retrieve_stories));
         }
         return Content(
             widget: widget,
