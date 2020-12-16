@@ -9,6 +9,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/storage_information.dart';
 import 'package:web/app/models/user.dart';
 import 'package:web/app/services/storage_service.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -44,8 +45,7 @@ class AvatarWithMenu extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return Center(
-                          child:
-                              Text('Something went wrong ${snapshot.error}'));
+                          child: Icon(Icons.error));
                     }
                     // Once complete, show your application
                     if (snapshot.connectionState == ConnectionState.done) {

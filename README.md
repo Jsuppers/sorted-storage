@@ -4,7 +4,7 @@
 
 This project provides users a sorted way to view their media and documents which are 
 saved in cloud storage. It is hosted on [sortedstorage.com](https://sortedstorage.com)
-
+ 
 ### Getting Started
 
 there are a few steps to get this project running locally: 

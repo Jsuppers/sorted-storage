@@ -3,25 +3,25 @@ import 'package:web/app/services/google_drive.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class RetryService {
-  static void getThumbnail(
+  static Future getThumbnail(
       GoogleDrive storage,
       String folderID,
       String imageKey,
       Map<String, StoryMedia> images,
       Map<String, List<String>> uploadingImages,
       Function successCallback,
-      {int maxTries = 10}) {
+      {int maxTries = 10}) async {
     int exp = 10;
     if (maxTries > exp) {
       maxTries = 10;
     }
     if (maxTries == 0) {
-      return;
+      return null;
     }
-    Future.delayed(Duration(seconds: (exp - maxTries) * 2), () async {
+    return Future.delayed(Duration(seconds: (exp - maxTries) * 2), () async {
       if (images == null || !images.containsKey(imageKey)) {
         print('images $images');
-        return;
+        return null;
       }
 
       File mediaFile = await storage.getFile(imageKey,
@@ -32,33 +32,32 @@ class RetryService {
             "thumbnail for image: $imageKey has been created! ${mediaFile.thumbnailLink}");
         images[imageKey].imageURL = mediaFile.thumbnailLink;
         successCallback();
-        return;
+        return null;
       }
 
       print("waiting for a thumbnail for image: $imageKey");
-      getThumbnail(
+      return getThumbnail(
           storage, folderID, imageKey, images, uploadingImages, successCallback,
           maxTries: maxTries - 1);
     });
   }
 
-  static void checkNeedsRefreshing(
+  static Future checkNeedsRefreshing(
       String folderID,
       Map<String, List<String>> uploadingImages,
       EventContent localCopy,
       Function successCallback,
-      {int maxTries = 60}) {
+      {int maxTries = 60, int seconds = 10}) async {
     if (maxTries == 0) {
-      return;
+      return null;
     }
-    Future.delayed(Duration(seconds: 10), () async {
+    return Future.delayed(Duration(seconds: seconds), () async {
       for (MapEntry entry in localCopy.images.entries) {
         if (entry.value.imageURL == null) {
           print("still waiting for a thumbnail: ${entry.key}");
-          checkNeedsRefreshing(
+          return checkNeedsRefreshing(
               folderID, uploadingImages, localCopy, successCallback,
-              maxTries: maxTries - 1);
-          return;
+              maxTries: maxTries - 1, seconds: seconds);
         }
       }
       successCallback();

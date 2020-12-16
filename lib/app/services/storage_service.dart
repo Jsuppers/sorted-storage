@@ -2,14 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:googleapis/drive/v3.dart';
-
-class StorageInformation {
-  final String usage;
-  final String limit;
-  final double percent;
-
-  StorageInformation({this.percent, this.usage, this.limit});
-}
+import 'package:web/app/models/storage_information.dart';
 
 class GoogleStorageService{
   static Future<StorageInformation> getStorageInformation(DriveApi driveApi) async {
@@ -20,8 +13,6 @@ class GoogleStorageService{
         usage: formatBytes(about.storageQuota.usage, 0),
         percent: calculatePercentage(about.storageQuota.usage, about.storageQuota.limit)
     );
-    print(about.storageQuota.limit);
-    print(about.storageQuota.usage);
     print('received information limit: ${information.limit} '
         'usage: ${information.usage}, percent: ${information.percent}');
     return information;
