@@ -7,7 +7,7 @@ import 'package:web/app/models/user.dart' as usr;
 class AuthenticationBloc extends Bloc<AuthenticationEvent, usr.User> {
   final _googleSignIn = new GoogleSignIn(
     scopes: [
-      DriveApi.DriveScope,
+      DriveApi.DriveFileScope,
     ],
   );
 
