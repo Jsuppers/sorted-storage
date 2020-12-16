@@ -15,3 +15,11 @@ from [Google credentials](https://console.cloud.google.com/apis/credentials) (cr
 3. Google sign in only allows port 5000 from localhost so we need to run flutter web as follows: <br/>
 ```flutter run -d chrome --web-hostname localhost --web-port 5000```
 
+### Testing
+1. ```flutter test --coverage```
+4. ```genhtml coverage/lcov.info -o coverage --no-source``` If you don't have genhtml: <br/>
+    - ```sudo apt-get update -qq -y``` <br/>
+    - ```sudo apt-get install lcov -y``` <br/>
+
+Then you can open the file coverage/index.html
+
