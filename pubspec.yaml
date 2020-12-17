@@ -56,6 +56,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  lint: ^1.0.0
   build_web_compilers: ^2.0.0
   bloc_test: ^7.1.0
   mockito: ^4.1.3
