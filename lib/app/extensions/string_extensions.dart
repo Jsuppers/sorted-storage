@@ -13,8 +13,6 @@ extension StringExtensions on String {
       var match = matches.elementAt(0);
       baseRoute = match.group(1);
       destination = match.group(2).replaceFirst("/", "");
-    } else {
-      baseRoute = "/";
     }
 
     print("Routing Path:");
