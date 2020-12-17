@@ -1,3 +1,5 @@
+![Flutter Web Workflow](https://github.com/Jsuppers/sorted-storage/workflows/Flutter%20Web/badge.svg)
+[![codecov](https://codecov.io/gh/Jsuppers/sorted-storage/branch/main/graph/badge.svg?branch=master)](https://codecov.io/gh/Jsuppers/sorted-storage)
 
 ![](assets/images/logo_tiny.png)
 
