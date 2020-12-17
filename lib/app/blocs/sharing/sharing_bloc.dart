@@ -29,23 +29,23 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
   Future<SharingState> _getPermissionsAll() async {
     try {
       if (commentsID == null) {
-        var commentsResponse =
-            await storage.uploadCommentsFile(folderID: folderID);
-        commentsID = commentsResponse.commentsID;
-        print('found commentsID: $commentsID');
+        await _createCommentsFile();
       }
       folderPermissionID = await _getPermissions(folderID, "anyone", "reader");
-      commentsPermissionID =
-          await _getPermissions(commentsID, "anyone", "writer");
+      commentsPermissionID = await _getPermissions(commentsID, "anyone", "writer");
     } catch (e) {
-      print(e);
-      print('commentsID: $commentsID, folderID: $folderID');
-      return SharingState(false, message: "cannot retrieve permissions");
+      print('commentsID: $commentsID, folderID: $folderID, error: $e');
+      return SharingNotSharedState(message: "cannot retrieve permissions");
     }
     if (folderPermissionID != null && commentsPermissionID != null) {
-      return SharingState(true);
+      return SharingSharedState();
     }
-    return SharingState(false);
+    return SharingNotSharedState();
+  }
+
+  Future _createCommentsFile() async {
+    var commentsResponse = await storage.uploadCommentsFile(folderID: folderID);
+    commentsID = commentsResponse.commentsID;
   }
 
   Future<String> _getPermissions(
@@ -62,31 +62,30 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
 
   Future<SharingState> _shareFolder() async {
     try {
-      if (folderPermissionID == null) {
-        folderPermissionID = await _shareFile(folderID, "anyone", "reader");
-        if (folderPermissionID == null) {
-          folderPermissionID =
-              await _getPermissions(folderID, "anyone", "reader");
-        }
-      }
-      if (commentsPermissionID == null) {
-        commentsPermissionID =
-            await _getPermissions(commentsID, "anyone", "writer");
-        if (commentsPermissionID == null) {
-          commentsPermissionID =
-              await _shareFile(commentsID, "anyone", "writer");
-        }
-      }
+      folderPermissionID = await _shareFile(folderPermissionID, folderID, "anyone", "reader");
+      commentsPermissionID = await _shareFile(commentsPermissionID, commentsID, "anyone", "writer");
     } catch (e) {
-      print(e);
-      print('commentsID: $commentsID, folderID: $folderID');
-      return SharingState(false,
+      print('commentsID: $commentsID, folderID: $folderID, error: $e');
+      return SharingNotSharedState(
           message: "error while sharing folder, please try again");
     }
-    return SharingState(true);
+    if (folderPermissionID != null && commentsPermissionID != null) {
+      return SharingSharedState();
+    }
+    return SharingNotSharedState();
   }
 
-  Future<String> _shareFile(String fileID, String type, String role) async {
+  Future<String> _shareFile(String permissionID, String fileID, String type, String role) async {
+    if (permissionID == null) {
+      permissionID = await _getPermissions(fileID, type, role);
+      if (permissionID == null) {
+        permissionID = await _createPermission(fileID, type, role);
+      }
+    }
+    return permissionID;
+  }
+
+  Future<String> _createPermission(String fileID, String type, String role) async {
     Permission anyone = Permission();
     anyone.type = type;
     anyone.role = role;
@@ -102,10 +101,10 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
       await storage.deletePermission(folderID, folderPermissionID);
       folderPermissionID = null;
     } catch (e) {
-      print(e);
-      return SharingState(true,
+      print('error: $e');
+      return SharingSharedState(
           message: "error while stopping sharing, please try again");
     }
-    return SharingState(false);
+    return SharingNotSharedState();
   }
 }

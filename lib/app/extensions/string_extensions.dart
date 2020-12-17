@@ -1,10 +1,11 @@
 import 'package:web/app/models/routing_data.dart';
 
 extension StringExtensions on String {
+  static String uriRegex = r'(/.*?)(/.*)';
+
   RoutingData get getRoutingData {
     var uriData = Uri.parse(this);
-    String regexString = r'(/.*?)(/.*)';
-    RegExp regExp = new RegExp(regexString);
+    RegExp regExp = new RegExp(uriRegex);
     var matches = regExp.allMatches(uriData.path);
     var baseRoute = uriData.path;
     var destination = "";
@@ -12,6 +13,8 @@ extension StringExtensions on String {
       var match = matches.elementAt(0);
       baseRoute = match.group(1);
       destination = match.group(2).replaceFirst("/", "");
+    } else {
+      baseRoute = "/";
     }
 
     print("Routing Path:");
