@@ -16,7 +16,9 @@ jobs:
           channel: beta
       - run: flutter config --enable-web
       - run: flutter pub get
-      #     - run: flutter test
+      - run: |
+          flutter test --coverage
+          genhtml coverage/lcov.info -o coverage --no-source
       - run: mkdir env
       - run: echo GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} > .env
       - run: flutter pub run build_runner build
