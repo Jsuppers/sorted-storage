@@ -455,7 +455,7 @@ class _SavingIconState extends State<SavingIcon> {
       listener: (context, state) {
         if (state.type == CloudStoriesType.progress_upload &&
             state.folderID == widget.folderID) {
-          MediaProgress progress = state.data;
+          MediaProgress progress = state.data as MediaProgress;
           setState(() {
             // TODO this shows file loading progress not sending progress
             var total =
@@ -559,6 +559,6 @@ class ButtonWithIcon extends StatelessWidget {
               ),
         color: backgroundColor,
         textColor: textColor,
-        onPressed: onPressed);
+        onPressed: () => onPressed());
   }
 }

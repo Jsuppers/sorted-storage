@@ -46,14 +46,15 @@ class AvatarWithMenu extends StatelessWidget {
                       BlocProvider.of<DriveBloc>(context).state),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return Center(
-                          child: Icon(Icons.error));
+                      return Center(child: Icon(Icons.error));
                     }
                     // Once complete, show your application
                     if (snapshot.connectionState == ConnectionState.done) {
-                      StorageInformation information = snapshot.data;
+                      StorageInformation information =
+                          snapshot.data as StorageInformation;
                       return MaterialButton(
-                        onPressed: () => URLService.openURL(Constants.UPGRADE_URL),
+                        onPressed: () =>
+                            URLService.openURL(Constants.UPGRADE_URL),
                         child: UsageIndicator(
                           usage: information.usage,
                           limit: information.limit,
@@ -69,9 +70,10 @@ class AvatarWithMenu extends StatelessWidget {
                   child: Center(
                     child: MaterialButton(
                       hoverElevation: 1.0,
-                      shape: RoundedRectangleBorder(
+                      shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                      onPressed: () => URLService.openURL(Constants.PROFILE_URL),
+                      onPressed: () =>
+                          URLService.openURL(Constants.PROFILE_URL),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.end,

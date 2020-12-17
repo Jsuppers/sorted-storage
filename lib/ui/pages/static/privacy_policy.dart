@@ -18,7 +18,7 @@ class PolicyPage extends StatelessWidget {
                       style: DefaultTextStyle.of(context).style,
                       children: <TextSpan>[
                         TextSpan(
-                          text: document.data,
+                          text: document.data as String,
                           style: TextStyle(
                               color: Colors.black.withOpacity(0.6),
                               fontSize: 14,

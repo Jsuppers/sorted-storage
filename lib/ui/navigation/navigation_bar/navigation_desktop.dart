@@ -3,7 +3,7 @@ import 'package:web/app/models/user.dart';
 import 'package:web/ui/navigation/menu.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
-import 'package:web/ui/widgets/sideMenu.dart';
+import 'package:web/ui/widgets/side_menu.dart';
 
 import 'navigation_tablet.dart';
 

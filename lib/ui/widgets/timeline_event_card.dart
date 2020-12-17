@@ -148,11 +148,13 @@ class _TimelineEventCardState extends State<EventCard> {
               if (state.data == null) {
                 return;
               }
-              if (!state.data.containsKey(widget.event.folderID)) {
+              final Map<String, List<String>> events =
+                  state.data as Map<String, List<String>>;
+              if (!events.containsKey(widget.event.folderID)) {
                 return;
               }
-              List<String> newUploadingImages =
-                  state.data[widget.event.folderID];
+              final List<String> newUploadingImages =
+                  state.data[widget.event.folderID] as List<String>;
               setState(() {
                 uploadingImages = newUploadingImages;
               });
@@ -164,7 +166,7 @@ class _TimelineEventCardState extends State<EventCard> {
           if (state.type == LocalStoriesType.edit_emoji &&
               state.folderID == widget.event.folderID) {
             setState(() {
-              widget.event.emoji = state.data;
+              widget.event.emoji = state.data as String;
             });
           }
         })

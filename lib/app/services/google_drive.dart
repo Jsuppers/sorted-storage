@@ -32,20 +32,20 @@ class GoogleDrive {
       uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
     } catch (e) {}
 
-    return uploadMedia.id;
+    return uploadMedia.id as String;
   }
 
-  Future<dynamic> getJsonFile(String fileId) async {
+  Future<Map<String, dynamic>> getJsonFile(String fileId) async {
     Map<String, dynamic> event;
     if (fileId != null) {
-      Media mediaFile = await driveApi.files
+      final mediaFile = await driveApi.files
           .get(fileId, downloadOptions: DownloadOptions.FullMedia);
 
       List<int> dataStore = [];
-      await for (var data in mediaFile.stream) {
-        dataStore.insertAll(dataStore.length, data);
+      await for (dynamic data in mediaFile.stream) {
+        dataStore.insertAll(dataStore.length, data as Iterable<int>);
       }
-      event = jsonDecode(utf8.decode(dataStore));
+      event = jsonDecode(utf8.decode(dataStore)) as Map<String, dynamic>;
     }
     return event;
   }
@@ -56,12 +56,9 @@ class GoogleDrive {
     if (commentsID != null) {
       comments = AdventureComments.fromJson(await getJsonFile(commentsID));
     }
-    if (comments == null) {
-      comments = AdventureComments();
-    }
-    if (comments.comments == null) {
-      comments.comments = [];
-    }
+    comments ??= AdventureComments();
+    comments.comments ??= <AdventureComment>[];
+
     if (comment != null) {
       comments.comments.add(comment);
     }
@@ -69,15 +66,15 @@ class GoogleDrive {
 
     List<int> fileContent = utf8.encode(jsonString);
     final Stream<List<int>> mediaStream =
-    Future.value(fileContent).asStream().asBroadcastStream();
+        Future.value(fileContent).asStream().asBroadcastStream();
 
-    var responseID;
+    String responseID;
     if (commentsID == null) {
-      responseID = await uploadMedia(folderID,
-          Constants.COMMENTS_FILE, fileContent.length, mediaStream,
+      responseID = await uploadMedia(
+          folderID, Constants.COMMENTS_FILE, fileContent.length, mediaStream,
           mimeType: "application/json");
     } else {
-      var folder = await updateFile(
+      final File folder = await updateFile(
           null, commentsID, Media(mediaStream, fileContent.length));
       responseID = folder.id;
     }
@@ -134,27 +131,27 @@ class GoogleDrive {
     return driveApi.files.delete(fileID);
   }
 
-  Future getFile(String fileID, {String filter}) async {
+  Future<dynamic> getFile(String fileID, {String filter}) async {
     return driveApi.files.get(fileID, $fields: filter);
   }
 
-  Future listFiles(String query, {String filter}) async {
+  Future<FileList> listFiles(String query, {String filter}) async {
     return driveApi.files.list(q: query, $fields: filter);
   }
 
-  Future updateFile(File request, String fileID, Media media) {
+  Future<File> updateFile(File request, String fileID, Media media) {
     return driveApi.files.update(request, fileID, uploadMedia: media);
   }
 
-  Future createPermission(String fileID, Permission permission) async {
-    return driveApi.permissions.create(permission, fileID);
+  Future<Permission> createPermission(String fileID, Permission perm) async {
+    return driveApi.permissions.create(perm, fileID);
   }
 
-  Future listPermissions(String fileID) async {
+  Future<PermissionList> listPermissions(String fileID) async {
     return driveApi.permissions.list(fileID);
   }
 
-  Future deletePermission(String fileID, String permissionID) async {
+  Future<dynamic> deletePermission(String fileID, String permissionID) async {
     return driveApi.permissions.delete(fileID, permissionID);
   }
 }

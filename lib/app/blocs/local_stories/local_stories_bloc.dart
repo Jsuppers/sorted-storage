@@ -18,7 +18,7 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
     switch (event.type) {
       case LocalStoriesType.cancel_story:
         localStories[event.folderId] =
-            TimelineData.clone(event.data[event.folderId]);
+            TimelineData.clone(event.data[event.folderId] as TimelineData);
         localStories[event.folderId].locked = true;
         yield LocalStoriesState(LocalStoriesType.cancel_story, localStories,
             folderID: event.folderId);
@@ -29,22 +29,22 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
             folderID: event.folderId);
         break;
       case LocalStoriesType.edit_description:
-        var eventData = TimelineService.getEventWithFolderID(
+        EventContent eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
-        eventData.description = event.data;
+        eventData.description = event.data as String;
         break;
       case LocalStoriesType.edit_title:
-        var eventData = TimelineService.getEventWithFolderID(
+        EventContent eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
-        eventData.title = event.data;
+        eventData.title = event.data as String;
         break;
       case LocalStoriesType.edit_timestamp:
-        var eventData = TimelineService.getEventWithFolderID(
+        EventContent eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
-        eventData.timestamp = event.data;
+        eventData.timestamp = event.data as int;
         break;
       case LocalStoriesType.add_image:
-        var eventContent = TimelineService.getEventWithFolderID(
+        EventContent eventContent = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
         try {
           FilePicker.platform
@@ -113,7 +113,7 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
       case LocalStoriesType.edit_emoji:
         var eventData = TimelineService.getEventWithFolderID(
             event.parentId, event.folderId, localStories);
-        eventData.emoji = event.data;
+        eventData.emoji = event.data as String;
         yield LocalStoriesState(LocalStoriesType.edit_emoji, localStories,
             folderID: event.folderId, data: event.data);
         break;

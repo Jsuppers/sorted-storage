@@ -52,7 +52,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             folderID: event.folderId);
         break;
       case CloudStoriesType.create_story:
-        createEventFolder(mediaFolderID, event.data, event.mainEvent);
+        createEventFolder(mediaFolderID, event.data as int, event.mainEvent);
         break;
       case CloudStoriesType.updated_stories:
         yield CloudStoriesState(CloudStoriesType.updated_stories, cloudStories);
@@ -79,7 +79,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   }
 
   Future _deleteEvent(fileId) async {
-    storage.delete(fileId).then((value) {
+    storage.delete(fileId as String).then((value) {
       cloudStories.remove(fileId);
       localStories.remove(fileId);
       this.add(CloudStoriesEvent(CloudStoriesType.updated_stories));
@@ -395,7 +395,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     if (folder == null) {
       return null;
     }
-    int timestamp = int.tryParse(folder.name);
+    int timestamp = int.tryParse(folder.name as String);
     if (timestamp == null) {
       return null;
     }
@@ -427,7 +427,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         fileMetadata.mimeType = "application/vnd.google-apps.folder";
         fileMetadata.description = "please don't modify this folder";
         var rt = await storage.createFile(fileMetadata);
-        parentId = rt.id;
+        parentId = rt.id as String;
       } else {
         parentId = folderPArent.files.first.id;
       }
@@ -443,7 +443,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         fileMetadataMedia.mimeType = "application/vnd.google-apps.folder";
         fileMetadataMedia.description = "please don't modify this folder";
 
-        var folder = await storage.createFile(fileMetadataMedia);
+        File folder = await storage.createFile(fileMetadataMedia) as File;
         mediaFolderID = folder.id;
       } else {
         mediaFolderID = folder.files.first.id;

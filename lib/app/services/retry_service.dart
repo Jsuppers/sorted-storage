@@ -25,17 +25,16 @@ class RetryService {
       }
 
       File mediaFile = await storage.getFile(imageKey,
-          filter: 'id,hasThumbnail,thumbnailLink');
+          filter: 'id,hasThumbnail,thumbnailLink') as File;
 
       if (mediaFile.hasThumbnail) {
-        print(
-            "thumbnail for image: $imageKey has been created! ${mediaFile.thumbnailLink}");
+        print('thumbnail for image: $imageKey has been created!');
         images[imageKey].imageURL = mediaFile.thumbnailLink;
         successCallback();
         return null;
       }
 
-      print("waiting for a thumbnail for image: $imageKey");
+      print('waiting for a thumbnail for image: $imageKey');
       return getThumbnail(
           storage, folderID, imageKey, images, uploadingImages, successCallback,
           maxTries: maxTries - 1);
@@ -47,7 +46,8 @@ class RetryService {
       Map<String, List<String>> uploadingImages,
       EventContent localCopy,
       Function successCallback,
-      {int maxTries = 60, int seconds = 10}) async {
+      {int maxTries = 60,
+      int seconds = 10}) async {
     if (maxTries == 0) {
       return null;
     }
