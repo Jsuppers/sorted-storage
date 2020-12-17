@@ -7,6 +7,7 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
+import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
@@ -36,6 +37,7 @@ class _MyAppState extends State<MyApp> {
   LocalStoriesBloc _localStoriesBloc;
   CloudStoriesBloc _cloudStoriesBloc;
   CommentHandlerBloc _commentHandler;
+  CookieNoticeBloc _cookieNoticeBloc;
   Map<String, TimelineData> _localStories = Map();
 
   @override
@@ -51,6 +53,7 @@ class _MyAppState extends State<MyApp> {
         CloudStoriesBloc(localStories: _localStories, storage: _googleDrive);
     _commentHandler =
         CommentHandlerBloc(localStories: _localStories, storage: _googleDrive);
+    _cookieNoticeBloc = CookieNoticeBloc();
   }
 
   @override
@@ -62,6 +65,7 @@ class _MyAppState extends State<MyApp> {
     _localStoriesBloc.close();
     _cloudStoriesBloc.close();
     _commentHandler.close();
+    _cookieNoticeBloc.close();
   }
 
   @override
@@ -85,6 +89,9 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<CommentHandlerBloc>(
           create: (BuildContext context) => _commentHandler,
+        ),
+        BlocProvider<CookieNoticeBloc>(
+          create: (BuildContext context) => _cookieNoticeBloc,
         ),
       ],
       child: MultiBlocListener(

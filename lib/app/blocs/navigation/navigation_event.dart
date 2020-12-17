@@ -1,39 +1,38 @@
-// this import is needed to import NavItem,
-// which we'll use to represent the item the user has selected
-// it's important to use an abstract class, even if you have one
-// event, so that you can use it later in your BLoC and or tests
+import 'package:web/ui/pages/dynamic/documents.dart';
+import 'package:web/ui/pages/dynamic/media.dart';
+import 'package:web/ui/pages/static/home.dart';
+import 'package:web/ui/pages/static/login.dart';
+import 'package:web/ui/pages/static/privacy_policy.dart';
+import 'package:web/ui/pages/static/terms_of_conditions.dart';
+
 abstract class NavigationEvent {
   final String route;
   final bool requiresAuthentication;
   const NavigationEvent({this.route = "", this.requiresAuthentication = false});
 }
 
-class NavigateToChangeProfileEvent extends NavigationEvent {}
-class NavigateToUpgradeEvent extends NavigationEvent {}
-class NavigateToDonate extends NavigationEvent {}
-
 class NavigatorPopEvent extends NavigationEvent{}
 
 class NavigateToHomeEvent extends NavigationEvent{
-  NavigateToHomeEvent() : super(route: "/home");
+  NavigateToHomeEvent() : super(route: HomePage.route);
 }
 
 class NavigateToLoginEvent extends NavigationEvent{
-  NavigateToLoginEvent() : super(route: "/login");
+  NavigateToLoginEvent() : super(route: LoginPage.route);
 }
 
 class NavigateToMediaEvent extends NavigationEvent{
-  NavigateToMediaEvent() : super(route: "/media", requiresAuthentication: true);
+  NavigateToMediaEvent() : super(route: MediaPage.route, requiresAuthentication: true);
 }
 
 class NavigateToDocumentsEvent extends NavigationEvent{
-  NavigateToDocumentsEvent() : super(route: "/documents", requiresAuthentication: true);
+  NavigateToDocumentsEvent() : super(route: DocumentsPage.route, requiresAuthentication: true);
 }
 
 class NavigateToTermsEvent extends NavigationEvent{
-  NavigateToTermsEvent() : super(route: "/terms-of-conditions");
+  NavigateToTermsEvent() : super(route: TermsPage.route);
 }
 
 class NavigateToPrivacyEvent extends NavigationEvent{
-  NavigateToPrivacyEvent() : super(route: "/privacy-policy");
+  NavigateToPrivacyEvent() : super(route: PolicyPage.route);
 }

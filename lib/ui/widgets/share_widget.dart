@@ -25,7 +25,8 @@ class _ShareWidgetState extends State<ShareWidget> {
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = new TextEditingController();
-    if (widget.state.shared) {
+    bool shared = (widget.state is SharingSharedState);
+    if (shared) {
       controller.text = "${Constants.WEBSITE_URL}/view/${widget.folderID}";
     }
 
@@ -40,7 +41,7 @@ class _ShareWidgetState extends State<ShareWidget> {
             Text(widget.state.message),
           ],
         ): Container(),
-        widget.state.shared
+        shared
             ? Container(
           padding: EdgeInsets.all(20),
           width: 300,
@@ -75,11 +76,11 @@ class _ShareWidgetState extends State<ShareWidget> {
         ),
         ShareButton(
             key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-            shared: widget.state.shared,
+            shared: shared,
             loading: false),
         Container(
           padding: EdgeInsets.all(20),
-          child: widget.state.shared
+          child: shared
               ? Text(
               "Everyone with this link can see and comment on your content. Be careful who you give it to!")
               : Container(),

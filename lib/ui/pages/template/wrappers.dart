@@ -6,8 +6,8 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
-import 'package:web/app/services/cookie_service.dart';
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation.dart';
@@ -92,7 +92,7 @@ class _ContentState extends State<Content> {
   void initState() {
     super.initState();
     WidgetsBinding.instance
-        .addPostFrameCallback((_) => CookieService.showCookie(context));
+        .addPostFrameCallback((_) => BlocProvider.of<CookieNoticeBloc>(context).showCookie(context));
   }
 
   @override

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/user.dart';
+import 'package:web/app/services/url_service.dart';
+import 'package:web/constants.dart';
 import 'package:web/ui/navigation/drawer/drawer_item.dart';
 import 'package:web/ui/navigation/menu.dart';
 import 'package:web/ui/widgets/avatar.dart';
@@ -35,10 +35,7 @@ class NavigationDrawer extends StatelessWidget {
               child: MaterialButton(
                 color: Color(0xFFFF813F),
                 minWidth: 150,
-                onPressed: () {
-                  BlocProvider.of<NavigationBloc>(context)
-                      .add(NavigateToDonate());
-                },
+                onPressed: () => URLService.openURL(Constants.DONATE_URL),
                 child: Container(
                     width: 150, child: Image.asset("assets/images/bmc.png")),
               ),
@@ -57,8 +54,7 @@ List<Widget> createMenu(BuildContext context, User user) {
     widgets.addAll([
       SizedBox(height: 20),
       GestureDetector(
-          onTap: () => BlocProvider.of<NavigationBloc>(context)
-              .add(NavigateToChangeProfileEvent()),
+          onTap: () => URLService.openURL(Constants.PROFILE_URL),
           child: Avatar(url: user.photoUrl, size: 100.0)),
       SizedBox(height: 20),
       DrawerItem(title: "Logout", icon: Icons.exit_to_app, event: NavigateToLoginEvent())

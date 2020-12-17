@@ -1,10 +1,12 @@
+![Flutter Web Workflow](https://github.com/Jsuppers/sorted-storage/workflows/Flutter%20Web/badge.svg)
+[![codecov](https://codecov.io/gh/Jsuppers/sorted-storage/branch/main/graph/badge.svg?branch=master)](https://codecov.io/gh/Jsuppers/sorted-storage)
 
 ![](assets/images/logo_tiny.png)
 
 
 This project provides users a sorted way to view their media and documents which are 
 saved in cloud storage. It is hosted on [sortedstorage.com](https://sortedstorage.com)
-
+ 
 ### Getting Started
 
 there are a few steps to get this project running locally: 
@@ -14,4 +16,12 @@ from [Google credentials](https://console.cloud.google.com/apis/credentials) (cr
 2. Generate envify file: <br/> ```flutter pub run build_runner build```
 3. Google sign in only allows port 5000 from localhost so we need to run flutter web as follows: <br/>
 ```flutter run -d chrome --web-hostname localhost --web-port 5000```
+
+### Testing
+1. ```flutter test --coverage```
+4. ```genhtml coverage/lcov.info -o coverage --no-source``` If you don't have genhtml: <br/>
+    - ```sudo apt-get update -qq -y``` <br/>
+    - ```sudo apt-get install lcov -y``` <br/>
+
+Then you can open the file coverage/index.html
 
