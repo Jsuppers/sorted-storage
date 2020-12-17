@@ -16,9 +16,11 @@ jobs:
           channel: beta
       - run: flutter config --enable-web
       - run: flutter pub get
-      - run: |
-          flutter test --coverage
-          genhtml coverage/lcov.info -o coverage --no-source
+      - run: flutter test --coverage
+      - uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage/lcov.info
       - run: mkdir env
       - run: echo GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} > .env
       - run: flutter pub run build_runner build
