@@ -12,6 +12,8 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/storage_information.dart';
 import 'package:web/app/models/user.dart';
 import 'package:web/app/services/storage_service.dart';
+import 'package:web/app/services/url_service.dart';
+import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/avatar.dart';
 import 'package:web/ui/widgets/usage_indicator.dart';
@@ -51,10 +53,7 @@ class AvatarWithMenu extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.done) {
                       StorageInformation information = snapshot.data;
                       return MaterialButton(
-                        onPressed: () {
-                          BlocProvider.of<NavigationBloc>(context)
-                              .add(NavigateToUpgradeEvent());
-                        },
+                        onPressed: () => URLService.openURL(Constants.UPGRADE_URL),
                         child: UsageIndicator(
                           usage: information.usage,
                           limit: information.limit,
@@ -72,10 +71,7 @@ class AvatarWithMenu extends StatelessWidget {
                       hoverElevation: 1.0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                      onPressed: () {
-                        BlocProvider.of<NavigationBloc>(context)
-                            .add(NavigateToChangeProfileEvent());
-                      },
+                      onPressed: () => URLService.openURL(Constants.PROFILE_URL),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.end,
