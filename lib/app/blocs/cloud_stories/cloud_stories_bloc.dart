@@ -90,12 +90,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     bool rebuildAllStories = false;
     var localCopy = localStories[eventFolderID];
     var cloudCopy = cloudStories[eventFolderID];
-    if (localCopy.mainEvent.timestamp != cloudCopy.mainEvent.timestamp) {
+    if (localCopy.mainStory.timestamp != cloudCopy.mainStory.timestamp) {
       rebuildAllStories = true;
     }
     for (int i = 0; i < localCopy.subEvents.length; i++) {
-      EventContent subEvent = localCopy.subEvents[i];
-      EventContent cloudSubEvent;
+      StoryContent subEvent = localCopy.subEvents[i];
+      StoryContent cloudSubEvent;
       if (subEvent.folderID.startsWith("temp_")) {
         cloudSubEvent =
             await createEventFolder(eventFolderID, subEvent.timestamp, false);
@@ -110,9 +110,9 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       await _syncContent(subEvent, cloudSubEvent);
     }
 
-    List<EventContent> eventsToDelete = [];
-    for (EventContent subEvent in cloudCopy.subEvents) {
-      EventContent localEvent;
+    List<StoryContent> eventsToDelete = [];
+    for (StoryContent subEvent in cloudCopy.subEvents) {
+      StoryContent localEvent;
       for (int i = 0; i < localCopy.subEvents.length; i++) {
         if (subEvent.folderID == localCopy.subEvents[i].folderID) {
           localEvent = localCopy.subEvents[i];
@@ -125,11 +125,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       }
     }
 
-    for (EventContent subEvent in eventsToDelete) {
+    for (StoryContent subEvent in eventsToDelete) {
       cloudCopy.subEvents.remove(subEvent);
     }
 
-    await _syncContent(localCopy.mainEvent, cloudCopy.mainEvent);
+    await _syncContent(localCopy.mainStory, cloudCopy.mainStory);
     localCopy = TimelineData.clone(cloudCopy);
 
     this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_end,
@@ -141,7 +141,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
   }
 
-  Future _syncContent(EventContent localCopy, EventContent cloudCopy) async {
+  Future _syncContent(StoryContent localCopy, StoryContent cloudCopy) async {
     List<Future> tasks = [];
     Map<String, List<String>> uploadingImages = Map();
 
@@ -284,12 +284,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     });
   }
 
-  Future<EventContent> createEventFolder(
+  Future<StoryContent> createEventFolder(
       String parentId, int timestamp, bool mainEvent) async {
     try {
       var folderID = await storage.createStory(parentId, timestamp);
 
-      EventContent event = EventContent(
+      StoryContent event = StoryContent(
           comments: AdventureComments(comments: []),
           folderID: folderID,
           timestamp: timestamp,
@@ -303,7 +303,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         event.comments = commentsResponse.comments;
         event.commentsID = commentsResponse.commentsID;
         TimelineData timelineEvent =
-            TimelineData(mainEvent: event, subEvents: []);
+            TimelineData(mainStory: event, subEvents: []);
         cloudStories.putIfAbsent(folderID, () => timelineEvent);
         localStories.putIfAbsent(
             folderID, () => TimelineData.clone(timelineEvent));
@@ -320,7 +320,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   }
 
   Future<String> _uploadSettingsFile(
-      String parentId, EventContent content) async {
+      String parentId, StoryContent content) async {
     AdventureSettings settings = AdventureSettings(
         title: content.title,
         description: content.description,
@@ -371,14 +371,14 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           folderIds.add(file.id);
           tasks.add(_createEventFromFolder(file.id, timestamp)
               .then((mainEvent) async {
-            List<EventContent> subEvents = [];
+            List<StoryContent> subEvents = [];
             for (SubEvent subEvent in mainEvent.subEvents) {
               subEvents.add(await _createEventFromFolder(
                   subEvent.id, subEvent.timestamp));
             }
 
             TimelineData data =
-                TimelineData(mainEvent: mainEvent, subEvents: subEvents);
+                TimelineData(mainStory: mainEvent, subEvents: subEvents);
             cloudStories.putIfAbsent(file.id, () => data);
             localStories.putIfAbsent(file.id, () => TimelineData.clone(data));
           }));
@@ -401,12 +401,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
     var mainEvent = await _createEventFromFolder(folderID, timestamp);
 
-    List<EventContent> subEvents = [];
+    List<StoryContent> subEvents = [];
     for (SubEvent subEvent in mainEvent.subEvents) {
       subEvents
           .add(await _createEventFromFolder(subEvent.id, subEvent.timestamp));
     }
-    var timelineData = TimelineData(mainEvent: mainEvent, subEvents: subEvents);
+    var timelineData = TimelineData(mainStory: mainEvent, subEvents: subEvents);
     localStories.putIfAbsent(folderID, () => timelineData);
     cloudStories.putIfAbsent(folderID, () => TimelineData.clone(timelineData));
   }
@@ -457,7 +457,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     } finally {}
   }
 
-  Future<EventContent> _createEventFromFolder(
+  Future<StoryContent> _createEventFromFolder(
       String folderID, int timestamp) async {
     FileList filesInFolder = await storage.listFiles(
         "'$folderID' in parents and trashed=false",
@@ -501,7 +501,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     AdventureComments comments =
         AdventureComments.fromJson(await storage.getJsonFile(commentsID));
 
-    return EventContent(
+    return StoryContent(
         timestamp: timestamp,
         images: images,
         title: settings.title,

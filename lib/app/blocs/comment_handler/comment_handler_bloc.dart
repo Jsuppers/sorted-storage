@@ -19,11 +19,11 @@ class CommentHandlerBloc
 
     TimelineData timelineEvent = localStories[event.folderId];
     var commentsResponse = await storage.uploadCommentsFile(
-        commentsID: timelineEvent.mainEvent.commentsID,
+        commentsID: timelineEvent.mainStory.commentsID,
         folderID: event.folderId,
         comment: event.data as AdventureComment);
-    timelineEvent.mainEvent.comments = commentsResponse.comments;
-    timelineEvent.mainEvent.commentsID = commentsResponse.commentsID;
+    timelineEvent.mainStory.comments = commentsResponse.comments;
+    timelineEvent.mainStory.commentsID = commentsResponse.commentsID;
 
     yield CommentHandlerState(uploading: false, folderID: event.folderId);
   }

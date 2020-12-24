@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
-import 'package:web/app/blocs/local_stories/local_stories_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
@@ -108,8 +108,8 @@ class EmojiPickerState extends State<EmojiPicker> {
           onPressed: () {
             BlocProvider.of<LocalStoriesBloc>(context).add(LocalStoriesEvent(
                 LocalStoriesType.edit_emoji,
-                parentId: widget.parentID,
-                folderId: widget.folderID,
+                parentID: widget.parentID,
+                folderID: widget.folderID,
                 data: element));
             BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
           },

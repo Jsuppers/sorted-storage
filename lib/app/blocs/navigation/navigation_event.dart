@@ -6,9 +6,10 @@ import 'package:web/ui/pages/static/privacy_policy.dart';
 import 'package:web/ui/pages/static/terms_of_conditions.dart';
 
 abstract class NavigationEvent {
+  const NavigationEvent({this.route = "", this.requiresAuthentication = false});
+
   final String route;
   final bool requiresAuthentication;
-  const NavigationEvent({this.route = "", this.requiresAuthentication = false});
 }
 
 class NavigatorPopEvent extends NavigationEvent{}

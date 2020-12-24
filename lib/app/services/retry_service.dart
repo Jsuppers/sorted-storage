@@ -44,7 +44,7 @@ class RetryService {
   static Future checkNeedsRefreshing(
       String folderID,
       Map<String, List<String>> uploadingImages,
-      EventContent localCopy,
+      StoryContent localCopy,
       Function successCallback,
       {int maxTries = 60,
       int seconds = 10}) async {

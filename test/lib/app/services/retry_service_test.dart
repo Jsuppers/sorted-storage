@@ -92,7 +92,7 @@ main() {
       String folderID = "mockFolderID";
       String imageKey = "mockImageKey";
       Map<String, List<String>> uploadingImages = Map();
-      EventContent localCopy = EventContent();
+      StoryContent localCopy = StoryContent();
       Map<String, StoryMedia> images = Map();
       StoryMedia storyMedia = StoryMedia();
       images.putIfAbsent(imageKey, () => storyMedia);
@@ -116,7 +116,7 @@ main() {
       String folderID = "mockFolderID";
       String imageKey = "mockImageKey";
       Map<String, List<String>> uploadingImages = Map();
-      EventContent localCopy = EventContent();
+      StoryContent localCopy = StoryContent();
       Map<String, StoryMedia> images = Map();
       StoryMedia storyMedia = StoryMedia();
       storyMedia.imageURL = "validImageURL";

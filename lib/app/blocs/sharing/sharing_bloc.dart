@@ -4,16 +4,22 @@ import 'package:web/app/blocs/sharing/sharing_event.dart';
 import 'package:web/app/blocs/sharing/sharing_state.dart';
 import 'package:web/app/services/google_drive.dart';
 
+/// SharingBloc handles creating and delete permissions for a folder to allow
+/// This folder to be shared or un-shared
 class SharingBloc extends Bloc<ShareEvent, SharingState> {
-  String folderID;
-  String commentsID;
-  GoogleDrive storage;
-  String folderPermissionID;
-  String commentsPermissionID;
-
-  SharingBloc(this.folderID, this.commentsID, this.storage) : super(null) {
+  /// constructor
+  SharingBloc(String folderID, String CommentsID, GoogleDrive storage) : super(null) {
+    _folderID = folderID;
+    _commentsID = CommentsID;
+    _storage = storage;
     this.add(InitialEvent());
   }
+
+  String _folderID;
+  String _commentsID;
+  GoogleDrive _storage;
+  String _folderPermissionID;
+  String _commentsPermissionID;
 
   @override
   Stream<SharingState> mapEventToState(ShareEvent event) async* {
@@ -28,29 +34,29 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
 
   Future<SharingState> _getPermissionsAll() async {
     try {
-      if (commentsID == null) {
+      if (_commentsID == null) {
         await _createCommentsFile();
       }
-      folderPermissionID = await _getPermissions(folderID, "anyone", "reader");
-      commentsPermissionID = await _getPermissions(commentsID, "anyone", "writer");
+      _folderPermissionID = await _getPermissions(_folderID, "anyone", "reader");
+      _commentsPermissionID = await _getPermissions(_commentsID, "anyone", "writer");
     } catch (e) {
-      print('commentsID: $commentsID, folderID: $folderID, error: $e');
+      print('commentsID: $_commentsID, folderID: $_folderID, error: $e');
       return SharingNotSharedState(message: "cannot retrieve permissions");
     }
-    if (folderPermissionID != null && commentsPermissionID != null) {
+    if (_folderPermissionID != null && _commentsPermissionID != null) {
       return SharingSharedState();
     }
     return SharingNotSharedState();
   }
 
   Future _createCommentsFile() async {
-    var commentsResponse = await storage.uploadCommentsFile(folderID: folderID);
-    commentsID = commentsResponse.commentsID;
+    var commentsResponse = await _storage.uploadCommentsFile(folderID: _folderID);
+    _commentsID = commentsResponse.commentsID;
   }
 
   Future<String> _getPermissions(
       String folderID, String type, String role) async {
-    PermissionList list = await storage.listPermissions(folderID);
+    PermissionList list = await _storage.listPermissions(folderID);
 
     for (Permission permission in list.permissions) {
       if (permission.type == type && permission.role == role) {
@@ -62,14 +68,14 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
 
   Future<SharingState> _shareFolder() async {
     try {
-      folderPermissionID = await _shareFile(folderPermissionID, folderID, "anyone", "reader");
-      commentsPermissionID = await _shareFile(commentsPermissionID, commentsID, "anyone", "writer");
+      _folderPermissionID = await _shareFile(_folderPermissionID, _folderID, "anyone", "reader");
+      _commentsPermissionID = await _shareFile(_commentsPermissionID, _commentsID, "anyone", "writer");
     } catch (e) {
-      print('commentsID: $commentsID, folderID: $folderID, error: $e');
+      print('commentsID: $_commentsID, folderID: $_folderID, error: $e');
       return SharingNotSharedState(
           message: "error while sharing folder, please try again");
     }
-    if (folderPermissionID != null && commentsPermissionID != null) {
+    if (_folderPermissionID != null && _commentsPermissionID != null) {
       return SharingSharedState();
     }
     return SharingNotSharedState();
@@ -90,16 +96,16 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
     anyone.type = type;
     anyone.role = role;
 
-    Permission permission = await storage.createPermission(fileID, anyone);
+    Permission permission = await _storage.createPermission(fileID, anyone);
     return permission.id;
   }
 
   Future<SharingState> _stopSharingFolder() async {
     try {
-      await storage.deletePermission(commentsID, commentsPermissionID);
-      commentsPermissionID = null;
-      await storage.deletePermission(folderID, folderPermissionID);
-      folderPermissionID = null;
+      await _storage.deletePermission(_commentsID, _commentsPermissionID);
+      _commentsPermissionID = null;
+      await _storage.deletePermission(_folderID, _folderPermissionID);
+      _folderPermissionID = null;
     } catch (e) {
       print('error: $e');
       return SharingSharedState(

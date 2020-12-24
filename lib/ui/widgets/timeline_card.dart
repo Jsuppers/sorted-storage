@@ -13,6 +13,7 @@ import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/user.dart' as usr;
@@ -24,34 +25,28 @@ import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
 class TimelineData {
+  TimelineData(
+      {this.mainStory,
+        this.subEvents,
+        this.locked = true,
+        this.saving = false});
+
   bool saving;
   bool locked;
-  EventContent mainEvent;
-  List<EventContent> subEvents;
-
-  TimelineData(
-      {this.mainEvent,
-      this.subEvents,
-      this.locked = true,
-      this.saving = false});
+  StoryContent mainStory;
+  List<StoryContent> subEvents;
 
   static TimelineData clone(TimelineData timelineEvent) {
     return TimelineData(
         saving: timelineEvent.saving,
         locked: timelineEvent.locked,
-        mainEvent: EventContent.clone(timelineEvent.mainEvent),
+        mainStory: StoryContent.clone(timelineEvent.mainStory),
         subEvents: List.generate(timelineEvent.subEvents.length,
-            (index) => EventContent.clone(timelineEvent.subEvents[index])));
+            (index) => StoryContent.clone(timelineEvent.subEvents[index])));
   }
 }
 
 class StoryMedia {
-  String imageURL;
-  bool isVideo;
-  bool isDocument;
-  int size;
-  Stream<List<int>> stream;
-
   StoryMedia({
     this.imageURL,
     this.stream,
@@ -59,16 +54,37 @@ class StoryMedia {
     this.isDocument = false,
     this.size,
   });
+
+  String imageURL;
+  bool isVideo;
+  bool isDocument;
+  int size;
+  Stream<List<int>> stream;
 }
 
 class SubEvent {
+  SubEvent(this.id, this.timestamp);
+
   final String id;
   final int timestamp;
-
-  SubEvent(this.id, this.timestamp);
 }
 
-class EventContent {
+class StoryContent {
+  StoryContent(
+      {this.timestamp,
+      this.title = '',
+      this.emoji = '',
+      this.images,
+      this.description = '',
+      this.folderID,
+      this.settingsID,
+      this.subEvents,
+      this.commentsID,
+      this.comments}) {
+    this.images ??= Map<String, StoryMedia>();
+    this.subEvents ??= <SubEvent>[];
+  }
+
   int timestamp;
   String emoji;
   String title;
@@ -81,19 +97,7 @@ class EventContent {
   AdventureComments comments;
   List<SubEvent> subEvents;
 
-  EventContent(
-      {this.timestamp,
-      this.title = '',
-      this.emoji = '',
-      this.images,
-      this.description = '',
-      this.folderID,
-      this.settingsID,
-      this.subEvents,
-      this.commentsID,
-      this.comments});
-
-  EventContent.clone(EventContent event)
+  StoryContent.clone(StoryContent event)
       : this(
             timestamp: event.timestamp,
             title: event.title,
@@ -134,7 +138,7 @@ class _TimelineCardState extends State<TimelineCard> {
 
   Widget createHeader(double width, BuildContext context) {
     if (saving) {
-      return SavingIcon(folderID: adventure.mainEvent.folderID);
+      return SavingIcon(folderID: adventure.mainStory.folderID);
     }
     return Container(
       height: 30,
@@ -150,8 +154,8 @@ class _TimelineCardState extends State<TimelineCard> {
                     onPressed: () {
                       DialogService.shareDialog(
                           context,
-                          adventure.mainEvent.folderID,
-                          adventure.mainEvent.commentsID);
+                          adventure.mainStory.folderID,
+                          adventure.mainStory.commentsID);
                     },
                     width: width,
                     backgroundColor: Colors.white,
@@ -164,7 +168,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
                           LocalStoriesEvent(LocalStoriesType.edit_story,
-                              folderId: widget.folderId));
+                              folderID: widget.folderId));
                     },
                     width: width,
                     backgroundColor: Colors.white,
@@ -181,7 +185,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
                           LocalStoriesEvent(LocalStoriesType.cancel_story,
-                              folderId: widget.folderId,
+                              folderID: widget.folderId,
                               data: BlocProvider.of<CloudStoriesBloc>(context)
                                   .cloudStories));
                     },
@@ -301,7 +305,7 @@ class _TimelineCardState extends State<TimelineCard> {
           child: Column(
             children: [
               EventCard(
-                eventFolderID: adventure.mainEvent.folderID,
+                eventFolderID: adventure.mainStory.folderID,
                 saving: saving,
                 locked: locked,
                 controls: widget.viewMode
@@ -309,7 +313,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     : createHeader(widget.width, context),
                 width: widget.width,
                 height: widget.height,
-                event: adventure.mainEvent,
+                event: adventure.mainStory,
               ),
               Visibility(
                 visible: !locked,
@@ -328,8 +332,8 @@ class _TimelineCardState extends State<TimelineCard> {
                           BlocProvider.of<LocalStoriesBloc>(context).add(
                               LocalStoriesEvent(
                                   LocalStoriesType.create_sub_story,
-                                  parentId: adventure.mainEvent.folderID,
-                                  folderId: widget.folderId));
+                                  parentID: adventure.mainStory.folderID,
+                                  folderID: widget.folderId));
                         },
                         width: Constants.SMALL_WIDTH,
                         backgroundColor: Colors.white,
@@ -343,7 +347,7 @@ class _TimelineCardState extends State<TimelineCard> {
                   padding: const EdgeInsets.all(20.0),
                   child: Card(
                       child: EventCard(
-                          eventFolderID: adventure.mainEvent.folderID,
+                          eventFolderID: adventure.mainStory.folderID,
                           saving: saving,
                           locked: locked,
                           controls: Visibility(
@@ -377,9 +381,9 @@ class _TimelineCardState extends State<TimelineCard> {
                                                   LocalStoriesEvent(
                                                       LocalStoriesType
                                                           .delete_sub_story,
-                                                      parentId: adventure
-                                                          .mainEvent.folderID,
-                                                      folderId: adventure
+                                                      parentID: adventure
+                                                          .mainStory.folderID,
+                                                      folderID: adventure
                                                           .subEvents[index]
                                                           .folderID));
                                         },

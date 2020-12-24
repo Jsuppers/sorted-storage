@@ -14,13 +14,13 @@ main() {
       Map<String, TimelineData> timelineEvent = Map();
 
       TimelineData timelineData = TimelineData();
-      EventContent expected = EventContent();
+      StoryContent expected = StoryContent();
       expected.folderID = folderID;
-      timelineData.mainEvent = expected;
+      timelineData.mainStory = expected;
 
       timelineEvent.putIfAbsent(eventID, () => timelineData);
 
-      EventContent got = TimelineService.getEventWithFolderID(
+      StoryContent got = TimelineService.getEventWithFolderID(
           eventID, folderID, timelineEvent);
 
       expect(expected, got);
@@ -35,15 +35,15 @@ main() {
       Map<String, TimelineData> timelineEvent = Map();
 
       TimelineData timelineData = TimelineData();
-      EventContent expected = EventContent();
+      StoryContent expected = StoryContent();
       expected.folderID = folderID;
-      timelineData.mainEvent = EventContent();
+      timelineData.mainStory = StoryContent();
       timelineData.subEvents = [];
       timelineData.subEvents.add(expected);
 
       timelineEvent.putIfAbsent(eventID, () => timelineData);
 
-      EventContent got = TimelineService.getEventWithFolderID(
+      StoryContent got = TimelineService.getEventWithFolderID(
           eventID, folderID, timelineEvent);
 
       expect(expected, got);
@@ -59,13 +59,13 @@ main() {
       Map<String, TimelineData> timelineEvent = Map();
 
       TimelineData timelineData = TimelineData();
-      timelineData.mainEvent = EventContent();
+      timelineData.mainStory = StoryContent();
       timelineData.subEvents = [];
-      timelineData.subEvents.add(EventContent());
+      timelineData.subEvents.add(StoryContent());
 
       timelineEvent.putIfAbsent(eventID, () => timelineData);
 
-      EventContent got = TimelineService.getEventWithFolderID(
+      StoryContent got = TimelineService.getEventWithFolderID(
           eventID, folderID, timelineEvent);
 
       expect(got, null);

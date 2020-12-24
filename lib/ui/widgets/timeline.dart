@@ -38,14 +38,14 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     List<Widget> eventDisplay = [];
     List<_TimeLineEventEntry> timeLineEvents = [];
 
-    _timelineData.forEach((folderId, event) {
+    _timelineData.forEach((folderId, TimelineData event) {
       Widget display = TimelineCard(
           width: widget.width,
           height: widget.height,
           event: event,
           folderId: folderId);
       _TimeLineEventEntry _timeLineEventEntry =
-          _TimeLineEventEntry(event.mainEvent.timestamp, display);
+          _TimeLineEventEntry(event.mainStory.timestamp, display);
       timeLineEvents.add(_timeLineEventEntry);
     });
 

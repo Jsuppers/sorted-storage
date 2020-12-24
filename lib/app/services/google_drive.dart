@@ -17,7 +17,7 @@ class GoogleDrive {
   }
 
   Future<String> uploadMediaToFolder(
-      EventContent eventContent,
+      StoryContent eventContent,
       String imageName,
       StoryMedia storyMedia,
       int delayMilliseconds,

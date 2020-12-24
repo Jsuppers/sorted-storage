@@ -10,6 +10,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
+import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
@@ -21,7 +22,7 @@ class EventCard extends StatefulWidget {
   final Widget controls;
   final double width;
   final double height;
-  final EventContent event;
+  final StoryContent event;
   final bool saving;
   final bool locked;
   final String eventFolderID;
@@ -118,8 +119,8 @@ class _TimelineEventCardState extends State<EventCard> {
           setState(
             () => BlocProvider.of<LocalStoriesBloc>(context).add(
               LocalStoriesEvent(LocalStoriesType.edit_timestamp,
-                  parentId: widget.eventFolderID,
-                  folderId: widget.event.folderID,
+                  parentID: widget.eventFolderID,
+                  folderID: widget.event.folderID,
                   data: date.millisecondsSinceEpoch),
             ),
           );
@@ -234,8 +235,8 @@ class _TimelineEventCardState extends State<EventCard> {
                     onChanged: (string) =>
                         BlocProvider.of<LocalStoriesBloc>(context).add(
                             LocalStoriesEvent(LocalStoriesType.edit_title,
-                                parentId: widget.eventFolderID,
-                                folderId: widget.event.folderID,
+                                parentID: widget.eventFolderID,
+                                folderID: widget.event.folderID,
                                 data: string)),
                   ),
                 ),
@@ -267,8 +268,8 @@ class _TimelineEventCardState extends State<EventCard> {
                                 BlocProvider.of<LocalStoriesBloc>(context).add(
                                   LocalStoriesEvent(
                                     LocalStoriesType.add_image,
-                                    parentId: widget.eventFolderID,
-                                    folderId: widget.event.folderID,
+                                    parentID: widget.eventFolderID,
+                                    folderID: widget.event.folderID,
                                   ),
                                 );
                               },
@@ -298,8 +299,8 @@ class _TimelineEventCardState extends State<EventCard> {
                       onChanged: (string) {
                         BlocProvider.of<LocalStoriesBloc>(context).add(
                           LocalStoriesEvent(LocalStoriesType.edit_description,
-                              parentId: widget.eventFolderID,
-                              folderId: widget.event.folderID,
+                              parentID: widget.eventFolderID,
+                              folderID: widget.event.folderID,
                               data: string),
                         );
                       },
@@ -429,9 +430,9 @@ class _TimelineEventCardState extends State<EventCard> {
                       }
                       BlocProvider.of<LocalStoriesBloc>(context).add(
                           LocalStoriesEvent(LocalStoriesType.delete_image,
-                              folderId: widget.event.folderID,
+                              folderID: widget.event.folderID,
                               data: imageKey,
-                              parentId: widget.eventFolderID));
+                              parentID: widget.eventFolderID));
                     },
                   ),
                 ),

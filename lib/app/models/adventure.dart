@@ -1,9 +1,5 @@
 class AdventureComment {
-  String user;
-  String comment;
-
-  AdventureComment({this.user = "", this.comment = ""});
-
+  AdventureComment({this.user = '', this.comment = ''});
   static AdventureComment fromJson(Map<String, dynamic> json) {
     if (json == null) {
       return AdventureComment();
@@ -21,22 +17,26 @@ class AdventureComment {
     return AdventureComment(user: user, comment: comment);
   }
 
+  String user;
+  String comment;
+
   Map<String, dynamic> toJson() {
     return {'u': user, 'c': comment};
   }
 }
 
 class AdventureComments {
-  List<AdventureComment> comments;
-
-  AdventureComments({this.comments});
-
+  AdventureComments({this.comments}) {
+    this.comments ??= <AdventureComment>[];
+  }
   AdventureComments.clone(AdventureComments comment)
       : this(comments: List.from(comment.comments));
 
+  List<AdventureComment> comments;
+
   static AdventureComments fromJson(Map<String, dynamic> json) {
     if (json == null) {
-      return new AdventureComments(comments: []);
+      return AdventureComments();
     }
     final List<AdventureComment> comments = [];
     if (json.containsKey('c')) {
@@ -46,7 +46,7 @@ class AdventureComments {
       }
     }
 
-    return new AdventureComments(comments: comments);
+    new AdventureComments(comments: comments);
   }
 
   Map<String, dynamic> toJson() {
@@ -57,20 +57,16 @@ class AdventureComments {
 }
 
 class AdventureSettings {
-  String emoji;
-  String title;
-  String description;
-
-  AdventureSettings({this.title = "", this.description = "", this.emoji = ""});
+  AdventureSettings({this.title = '', this.description = '', this.emoji = ''});
 
   static AdventureSettings fromJson(Map<String, dynamic> json) {
     if (json == null) {
       return new AdventureSettings();
     }
 
-    String title = "";
-    String description = "";
-    String emoji = "";
+    String title = '';
+    String description = '';
+    String emoji = '';
     if (json.containsKey('t')) {
       title = json['t'] as String;
     }
@@ -84,6 +80,10 @@ class AdventureSettings {
     return new AdventureSettings(
         title: title, description: description, emoji: emoji);
   }
+
+  String emoji;
+  String title;
+  String description;
 
   Map<String, dynamic> toJson() {
     return {'t': title, 'd': description, 'e': emoji};

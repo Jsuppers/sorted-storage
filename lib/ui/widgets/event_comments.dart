@@ -43,7 +43,7 @@ class _CommentWidgetState extends State<CommentWidget> {
     adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
         .state
         .localStories[widget.folderID]
-        .mainEvent
+        .mainStory
         .comments
         .comments;
   }
@@ -80,7 +80,7 @@ class _CommentWidgetState extends State<CommentWidget> {
             adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
                 .state
                 .localStories[widget.folderID]
-                .mainEvent
+                .mainStory
                 .comments
                 .comments;
             uploading = state.uploading;
