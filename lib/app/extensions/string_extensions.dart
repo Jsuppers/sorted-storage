@@ -1,25 +1,22 @@
 import 'package:web/app/models/routing_data.dart';
 
+/// string extensions allow extra functionality on strings
 extension StringExtensions on String {
-  static String uriRegex = r'(/.*?)(/.*)';
+  static const String _uriRegex = '(/.*?)(/.*)';
 
+  /// gets the route, base route, destination and query parameters
   RoutingData get getRoutingData {
-    var uriData = Uri.parse(this);
-    RegExp regExp = new RegExp(uriRegex);
-    var matches = regExp.allMatches(uriData.path);
-    var baseRoute = uriData.path;
-    var destination = "";
-    if (matches.length >= 1) {
-      var match = matches.elementAt(0);
+    final Uri uriData = Uri.parse(this);
+    final RegExp regExp = RegExp(_uriRegex);
+    final Iterable<RegExpMatch> matches = regExp.allMatches(uriData.path);
+    String baseRoute = uriData.path;
+    String destination = '';
+    if (matches.isNotEmpty) {
+      final RegExpMatch match = matches.elementAt(0);
       baseRoute = match.group(1);
-      destination = match.group(2).replaceFirst("/", "");
+      destination = match.group(2).replaceFirst('/', '');
     }
 
-    print("Routing Path:");
-    print(" route: ${uriData.path}");
-    print(" baseRoute: $baseRoute");
-    print(" destination: $destination");
-    print(" queryParameters: ${uriData.queryParameters}");
     return RoutingData(
       queryParameters: uriData.queryParameters,
       route: uriData.path,

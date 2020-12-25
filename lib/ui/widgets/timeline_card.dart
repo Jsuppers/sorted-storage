@@ -7,9 +7,9 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
@@ -17,6 +17,7 @@ import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/media_progress.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
@@ -25,97 +26,10 @@ import 'package:web/ui/widgets/event_comments.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
-class TimelineData {
-  TimelineData(
-      {this.mainStory,
-      this.subEvents,
-      this.locked = true,
-      this.saving = false});
-
-  bool saving;
-  bool locked;
-  StoryContent mainStory;
-  List<StoryContent> subEvents;
-
-  static TimelineData clone(TimelineData timelineEvent) {
-    return TimelineData(
-        saving: timelineEvent.saving,
-        locked: timelineEvent.locked,
-        mainStory: StoryContent.clone(timelineEvent.mainStory),
-        subEvents: List.generate(timelineEvent.subEvents.length,
-            (index) => StoryContent.clone(timelineEvent.subEvents[index])));
-  }
-}
-
-class StoryMedia {
-  StoryMedia({
-    this.imageURL,
-    this.stream,
-    this.isVideo = false,
-    this.isDocument = false,
-    this.size,
-  });
-
-  String imageURL;
-  bool isVideo;
-  bool isDocument;
-  int size;
-  Stream<List<int>> stream;
-}
-
-class SubEvent {
-  SubEvent(this.id, this.timestamp);
-
-  final String id;
-  final int timestamp;
-}
-
-class StoryContent {
-  StoryContent(
-      {this.timestamp,
-      this.title = '',
-      this.emoji = '',
-      this.images,
-      this.description = '',
-      this.folderID,
-      this.settingsID,
-      this.subEvents,
-      this.commentsID,
-      this.comments}) {
-    this.images ??= Map<String, StoryMedia>();
-    this.subEvents ??= <SubEvent>[];
-  }
-
-  int timestamp;
-  String emoji;
-  String title;
-  Map<String, StoryMedia> images;
-  String description;
-  String folderID;
-  String settingsID;
-  String commentsID;
-  String permissionID;
-  AdventureComments comments;
-  List<SubEvent> subEvents;
-
-  StoryContent.clone(StoryContent event)
-      : this(
-            timestamp: event.timestamp,
-            title: event.title,
-            emoji: event.emoji,
-            images: Map.from(event.images),
-            description: event.description,
-            settingsID: event.settingsID,
-            commentsID: event.commentsID,
-            folderID: event.folderID,
-            subEvents: List.from(event.subEvents),
-            comments: AdventureComments.clone(event.comments));
-}
-
 class TimelineCard extends StatefulWidget {
   final double width;
   final double height;
-  final TimelineData event;
+  final StoryTimelineData event;
   final String folderId;
   final bool viewMode;
 
@@ -133,7 +47,7 @@ class TimelineCard extends StatefulWidget {
 }
 
 class _TimelineCardState extends State<TimelineCard> {
-  TimelineData adventure;
+  StoryTimelineData adventure;
   bool locked;
   bool saving;
 
@@ -168,7 +82,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     icon: Icons.edit,
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.edit_story,
+                          LocalStoriesEvent(LocalStoriesType.editStory,
                               folderID: widget.folderId));
                     },
                     width: width,
@@ -185,7 +99,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     icon: Icons.cancel,
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.cancel_story,
+                          LocalStoriesEvent(LocalStoriesType.cancelStory,
                               folderID: widget.folderId,
                               data: BlocProvider.of<CloudStoriesBloc>(context)
                                   .cloudStories));
@@ -200,8 +114,8 @@ class _TimelineCardState extends State<TimelineCard> {
                     icon: Icons.delete,
                     onPressed: () {
                       BlocProvider.of<CloudStoriesBloc>(context).add(
-                          CloudStoriesEvent(CloudStoriesType.delete_story,
-                              folderId: widget.folderId));
+                          CloudStoriesEvent(CloudStoriesType.deleteStory,
+                              folderID: widget.folderId));
                     },
                     width: width,
                     backgroundColor: Colors.redAccent),
@@ -211,9 +125,8 @@ class _TimelineCardState extends State<TimelineCard> {
                     icon: Icons.save,
                     onPressed: () async {
                       BlocProvider.of<CloudStoriesBloc>(context).add(
-                          CloudStoriesEvent(
-                              CloudStoriesType.syncing_story_start,
-                              folderId: widget.folderId));
+                          CloudStoriesEvent(CloudStoriesType.syncingStart,
+                              folderID: widget.folderId));
                     },
                     width: width,
                     backgroundColor: Colors.greenAccent),
@@ -234,8 +147,8 @@ class _TimelineCardState extends State<TimelineCard> {
   Widget build(BuildContext context) {
     if (widget.viewMode) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieve_story,
-          folderId: widget.folderId));
+          CloudStoriesType.retrieveStory,
+          folderID: widget.folderId));
     }
     if (adventure == null) {
       return FullPageLoadingLogo(backgroundColor: Colors.white);
@@ -244,7 +157,7 @@ class _TimelineCardState extends State<TimelineCard> {
       listeners: [
         BlocListener<CloudStoriesBloc, CloudStoriesState>(
           listener: (context, state) {
-            if (state.type == CloudStoriesType.syncing_story_start &&
+            if (state.type == CloudStoriesType.syncingStart &&
                 state.folderID == widget.folderId) {
               setState(() {
                 saving = BlocProvider.of<LocalStoriesBloc>(context)
@@ -253,7 +166,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     .saving;
               });
             }
-            if (state.type == CloudStoriesType.syncing_story_end &&
+            if (state.type == CloudStoriesType.syncingEnd &&
                 state.folderID == widget.folderId) {
               setState(() {
                 adventure = BlocProvider.of<LocalStoriesBloc>(context)
@@ -271,13 +184,13 @@ class _TimelineCardState extends State<TimelineCard> {
           listener: (context, state) {
             print(
                 'type: ${state.type} folderID: ${state.folderID} currentID: ${widget.folderId}');
-            if (state.type == LocalStoriesType.edit_story &&
+            if (state.type == LocalStoriesType.editStory &&
                 state.folderID == widget.folderId) {
               setState(() {
                 locked = state.localStories[state.folderID].locked;
               });
-            } else if ((state.type == LocalStoriesType.cancel_story ||
-                    state.type == LocalStoriesType.syncing_story_end) &&
+            } else if ((state.type == LocalStoriesType.cancelStory ||
+                    state.type == LocalStoriesType.updateUI) &&
                 state.folderID == widget.folderId) {
               setState(() {
                 adventure = state.localStories[state.folderID];
@@ -286,7 +199,7 @@ class _TimelineCardState extends State<TimelineCard> {
                 locked = adventure.locked;
                 saving = adventure.saving;
               });
-            } else if (state.type == LocalStoriesType.syncing_story_end) {
+            } else if (state.type == LocalStoriesType.updateUI) {
               var subEvent = adventure.subEvents.firstWhere(
                   (element) => element.folderID == state.folderID, orElse: () {
                 return;
@@ -331,8 +244,7 @@ class _TimelineCardState extends State<TimelineCard> {
                             return;
                           }
                           BlocProvider.of<LocalStoriesBloc>(context).add(
-                              LocalStoriesEvent(
-                                  LocalStoriesType.create_sub_story,
+                              LocalStoriesEvent(LocalStoriesType.createSubStory,
                                   parentID: adventure.mainStory.folderID,
                                   folderID: widget.folderId));
                         },
@@ -381,7 +293,7 @@ class _TimelineCardState extends State<TimelineCard> {
                                               .add(
                                                   LocalStoriesEvent(
                                                       LocalStoriesType
-                                                          .delete_sub_story,
+                                                          .deleteSubStory,
                                                       parentID: adventure
                                                           .mainStory.folderID,
                                                       folderID: adventure
@@ -453,7 +365,7 @@ class _SavingIconState extends State<SavingIcon> {
   Widget build(BuildContext context) {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (context, state) {
-        if (state.type == CloudStoriesType.progress_upload &&
+        if (state.type == CloudStoriesType.progressUpload &&
             state.folderID == widget.folderID) {
           MediaProgress progress = state.data as MediaProgress;
           setState(() {

@@ -6,6 +6,7 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/ui/footer/footer.dart';
@@ -50,7 +51,7 @@ class LayoutWrapper extends StatelessWidget {
         }
         if (!this.isViewMode) {
           BlocProvider.of<CloudStoriesBloc>(context)
-              .add(CloudStoriesEvent(CloudStoriesType.retrieve_stories));
+              .add(CloudStoriesEvent(CloudStoriesType.retrieveStories));
         }
         return Content(
             widget: widget,

@@ -12,11 +12,11 @@ import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
   CloudStoriesBloc _cloudStoriesBloc;
   CommentHandlerBloc _commentHandler;
   CookieNoticeBloc _cookieNoticeBloc;
-  Map<String, TimelineData> _localStories = Map();
+  Map<String, StoryTimelineData> _localStories = Map();
 
   @override
   void initState() {

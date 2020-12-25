@@ -5,6 +5,7 @@ import 'package:web/app/blocs/cookie_notice/cookie_notice_event.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 
+///
 class CookieNoticeBloc extends Cubit<CookieNoticeEvent> {
   bool showing;
   Future<SharedPreferences> sharedPreferenceInstance;

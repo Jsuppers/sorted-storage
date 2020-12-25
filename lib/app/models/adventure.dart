@@ -38,7 +38,7 @@ class AdventureComments {
     if (json == null) {
       return AdventureComments();
     }
-    final List<AdventureComment> comments = [];
+    final List<AdventureComment> comments = <AdventureComment>[];
     if (json.containsKey('c')) {
       for (dynamic comment in json['c']) {
         comments

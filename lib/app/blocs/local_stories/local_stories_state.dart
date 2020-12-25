@@ -1,5 +1,5 @@
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
+import 'package:web/app/models/timeline_data.dart';
 
 /// State returned
 class LocalStoriesState {
@@ -11,12 +11,11 @@ class LocalStoriesState {
   final LocalStoriesType type;
 
   /// local copy of the timeline
-  final Map<String, TimelineData> localStories;
+  final Map<String, StoryTimelineData> localStories;
 
   /// data returned from the state
   final dynamic data;
 
   /// the folder ID for the related story
   final String folderID;
-
 }

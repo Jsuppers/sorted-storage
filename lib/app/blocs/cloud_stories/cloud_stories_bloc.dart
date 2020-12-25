@@ -5,113 +5,126 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/comments_response.dart';
 import 'package:web/app/models/media_progress.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/story_media.dart';
+import 'package:web/app/models/sub_event.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/constants.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
+/// CloudStoriesBloc handles all the cloud changes of the timeline.
 class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
-  Map<String, TimelineData> cloudStories;
-  Map<String, TimelineData> localStories;
-  GoogleDrive storage;
-  String mediaFolderID;
+  /// The constructor sets the private timeline data and sets the state to
+  /// initial_state
+  CloudStoriesBloc(
+      {Map<String, StoryTimelineData> localStories, GoogleDrive storage})
+      : super(const CloudStoriesState(CloudStoriesType.initialState, null)) {
+    _localStories = localStories;
+    _storage = storage;
+  }
 
-  CloudStoriesBloc({this.localStories, this.storage})
-      : super(CloudStoriesState(CloudStoriesType.initial_state, null));
+  Map<String, StoryTimelineData> _cloudStories;
+  Map<String, StoryTimelineData> _localStories;
+  GoogleDrive _storage;
+  String _mediaFolderID;
+
+  /// returns the current cloud copy of the timeline
+  Map<String, StoryTimelineData> get cloudStories {
+    return _cloudStories;
+  }
 
   @override
-  Stream<CloudStoriesState> mapEventToState(event) async* {
-    if (event.type == CloudStoriesType.new_user) {
-      mediaFolderID = null;
-      cloudStories = null;
-      localStories.clear();
-      yield CloudStoriesState(CloudStoriesType.initial_state, cloudStories);
+  Stream<CloudStoriesState> mapEventToState(CloudStoriesEvent event) async* {
+    if (event.type == CloudStoriesType.newUser) {
+      _mediaFolderID = null;
+      _cloudStories = null;
+      _localStories.clear();
+      yield CloudStoriesState(CloudStoriesType.initialState, _cloudStories);
       return;
     }
 
-    if (event.type == CloudStoriesType.retrieve_story ||
-        event.type == CloudStoriesType.retrieve_stories) {
-      _getStories(folderID: event.folderId);
+    if (event.type == CloudStoriesType.retrieveStory ||
+        event.type == CloudStoriesType.retrieveStories) {
+      _getStories(folderID: event.folderID);
       return;
     }
 
     switch (event.type) {
-      case CloudStoriesType.delete_story:
-        yield CloudStoriesState(
-            CloudStoriesType.syncing_story_start, cloudStories,
-            folderID: event.folderId);
-        _deleteEvent(event.folderId);
+      case CloudStoriesType.deleteStory:
+        yield CloudStoriesState(CloudStoriesType.syncingStart, _cloudStories,
+            folderID: event.folderID);
+        _deleteEvent(event.folderID);
         break;
-      case CloudStoriesType.syncing_story_start:
-        localStories[event.folderId].saving = true;
-        syncCopies(event.folderId);
-        yield CloudStoriesState(
-            CloudStoriesType.syncing_story_start, cloudStories,
-            folderID: event.folderId);
+      case CloudStoriesType.syncingStart:
+        _localStories[event.folderID].saving = true;
+        _syncCopies(event.folderID);
+        yield CloudStoriesState(CloudStoriesType.syncingStart, _cloudStories,
+            folderID: event.folderID);
         break;
-      case CloudStoriesType.create_story:
-        createEventFolder(mediaFolderID, event.data as int, event.mainEvent);
+      case CloudStoriesType.createStory:
+        _createEventFolder(_mediaFolderID, event.data as int, event.mainEvent);
         break;
-      case CloudStoriesType.updated_stories:
-        yield CloudStoriesState(CloudStoriesType.updated_stories, cloudStories);
+      case CloudStoriesType.updateUI:
+        yield CloudStoriesState(CloudStoriesType.updateUI, _cloudStories);
         break;
-      case CloudStoriesType.syncing_story_end:
-        localStories[event.folderId].saving = false;
-        localStories[event.folderId].locked = true;
-        yield CloudStoriesState(
-            CloudStoriesType.syncing_story_end, cloudStories,
-            folderID: event.folderId);
+      case CloudStoriesType.syncingEnd:
+        _localStories[event.folderID].saving = false;
+        _localStories[event.folderID].locked = true;
+        yield CloudStoriesState(CloudStoriesType.syncingEnd, _cloudStories,
+            folderID: event.folderID);
         break;
-      case CloudStoriesType.syncing_story_state:
-        yield CloudStoriesState(
-            CloudStoriesType.syncing_story_state, cloudStories,
-            folderID: event.folderId, data: event.data);
+      case CloudStoriesType.syncingState:
+        yield CloudStoriesState(CloudStoriesType.syncingState, _cloudStories,
+            folderID: event.folderID, data: event.data);
         break;
-      case CloudStoriesType.progress_upload:
-        yield CloudStoriesState(CloudStoriesType.progress_upload, cloudStories,
-            folderID: event.folderId, data: event.data);
+      case CloudStoriesType.progressUpload:
+        yield CloudStoriesState(CloudStoriesType.progressUpload, _cloudStories,
+            folderID: event.folderID, data: event.data);
         break;
       default:
         break;
     }
   }
 
-  Future _deleteEvent(fileId) async {
-    storage.delete(fileId as String).then((value) {
-      cloudStories.remove(fileId);
-      localStories.remove(fileId);
-      this.add(CloudStoriesEvent(CloudStoriesType.updated_stories));
+  Future<void> _deleteEvent(String fileID) async {
+    _storage.delete(fileID).then((dynamic value) {
+      _cloudStories.remove(fileID);
+      _localStories.remove(fileID);
+      add(const CloudStoriesEvent(CloudStoriesType.updateUI));
     });
   }
 
-  Future syncCopies(String eventFolderID) async {
+  Future<void> _syncCopies(String eventFolderID) async {
     bool rebuildAllStories = false;
-    var localCopy = localStories[eventFolderID];
-    var cloudCopy = cloudStories[eventFolderID];
+    StoryTimelineData localCopy = _localStories[eventFolderID];
+    final StoryTimelineData cloudCopy = _cloudStories[eventFolderID];
     if (localCopy.mainStory.timestamp != cloudCopy.mainStory.timestamp) {
       rebuildAllStories = true;
     }
     for (int i = 0; i < localCopy.subEvents.length; i++) {
-      StoryContent subEvent = localCopy.subEvents[i];
+      final StoryContent subEvent = localCopy.subEvents[i];
       StoryContent cloudSubEvent;
-      if (subEvent.folderID.startsWith("temp_")) {
+      if (subEvent.folderID.startsWith('temp_')) {
         cloudSubEvent =
-            await createEventFolder(eventFolderID, subEvent.timestamp, false);
+            await _createEventFolder(eventFolderID, subEvent.timestamp, false);
         cloudCopy.subEvents.add(cloudSubEvent);
         subEvent.folderID = cloudSubEvent.folderID;
         subEvent.settingsID = cloudSubEvent.settingsID;
       } else {
-        cloudSubEvent = cloudCopy.subEvents
-            .singleWhere((element) => element.folderID == subEvent.folderID);
+        cloudSubEvent = cloudCopy.subEvents.singleWhere(
+            (StoryContent element) => element.folderID == subEvent.folderID);
       }
 
       await _syncContent(subEvent, cloudSubEvent);
     }
 
-    List<StoryContent> eventsToDelete = [];
-    for (StoryContent subEvent in cloudCopy.subEvents) {
+    final List<StoryContent> eventsToDelete = <StoryContent>[];
+    for (final StoryContent subEvent in cloudCopy.subEvents) {
       StoryContent localEvent;
       for (int i = 0; i < localCopy.subEvents.length; i++) {
         if (subEvent.folderID == localCopy.subEvents[i].folderID) {
@@ -120,141 +133,131 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         }
       }
       if (localEvent == null) {
-        await storage.delete(subEvent.folderID);
+        await _storage.delete(subEvent.folderID);
         eventsToDelete.add(subEvent);
       }
     }
 
-    for (StoryContent subEvent in eventsToDelete) {
+    for (final StoryContent subEvent in eventsToDelete) {
       cloudCopy.subEvents.remove(subEvent);
     }
 
     await _syncContent(localCopy.mainStory, cloudCopy.mainStory);
-    localCopy = TimelineData.clone(cloudCopy);
+    localCopy = StoryTimelineData.clone(cloudCopy);
 
-    this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_end,
-        folderId: eventFolderID));
+    add(CloudStoriesEvent(CloudStoriesType.syncingEnd,
+        folderID: eventFolderID));
 
     if (rebuildAllStories) {
-      this.add(CloudStoriesEvent(CloudStoriesType.updated_stories,
-          folderId: eventFolderID));
+      add(CloudStoriesEvent(CloudStoriesType.updateUI,
+          folderID: eventFolderID));
     }
   }
 
-  Future _syncContent(StoryContent localCopy, StoryContent cloudCopy) async {
-    List<Future> tasks = [];
-    Map<String, List<String>> uploadingImages = Map();
+  Future<void> _syncContent(
+      StoryContent localCopy, StoryContent cloudCopy) async {
+    List<Future<dynamic>> tasks = <Future<dynamic>>[];
+    final Map<String, List<String>> uploadingImages = <String, List<String>>{};
 
-    print('updating cloud storage');
     if (localCopy.timestamp != cloudCopy.timestamp) {
-      tasks.add(storage
+      tasks.add(_storage
           .updateEventFolderTimestamp(localCopy.folderID, localCopy.timestamp)
-          .then((value) {
+          .then((String value) {
         cloudCopy.timestamp = localCopy.timestamp;
-      }, onError: (error) {
+      }, onError: (dynamic error) {
         print('error $error');
       }));
-      print("timestamp is different!");
     }
 
     if (localCopy.title != cloudCopy.title ||
         localCopy.description != cloudCopy.description ||
         localCopy.emoji != cloudCopy.emoji) {
-      print('updating settings storage');
-      tasks.add(
-          _uploadSettingsFile(cloudCopy.folderID, localCopy).then((settingsId) {
-        cloudCopy.settingsID = settingsId;
+      tasks.add(_uploadSettingsFile(cloudCopy.folderID, localCopy).then(
+          (String settingsID) {
+        cloudCopy.settingsID = settingsID;
         cloudCopy.title = localCopy.title;
         cloudCopy.description = localCopy.description;
         cloudCopy.emoji = localCopy.emoji;
-      }, onError: (error) {
+      }, onError: (dynamic error) {
         print('error $error');
       }));
     }
 
-    print('uploading misc files');
     await Future.wait(tasks);
-    tasks = [];
-    print('starting on images');
+    tasks = <Future<dynamic>>[];
 
-    Map<String, StoryMedia> imagesToAdd = Map();
-    List<String> imagesToDelete = [];
-    List<String> localImagesToDelete = [];
+    final Map<String, StoryMedia> imagesToAdd = <String, StoryMedia>{};
+    final List<String> imagesToDelete = <String>[];
+    final List<String> localImagesToDelete = <String>[];
     if (localCopy.images != null) {
-      // inform the frontend which files need to upload
       int totalSize = 0;
       int sent = 0;
       for (int i = 0; i < localCopy.images.length; i++) {
-        MapEntry<String, StoryMedia> image =
+        final MapEntry<String, StoryMedia> image =
             localCopy.images.entries.elementAt(i);
         if (!cloudCopy.images.containsKey(image.key)) {
           totalSize += image.value.size;
-          uploadingImages.update(localCopy.folderID, (value) {
+          uploadingImages.update(localCopy.folderID, (List<String> value) {
             value.add(image.key);
             return value;
           }, ifAbsent: () {
-            List<String> list = [];
-            list.add(image.key);
-            return list;
+            return <String>[image.key];
           });
         }
       }
 
-      this.add(CloudStoriesEvent(CloudStoriesType.progress_upload,
-          folderId: localCopy.folderID, data: MediaProgress(totalSize, sent)));
-      print('sending: $totalSize');
-      this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
-          folderId: localCopy.folderID, data: uploadingImages));
+      add(CloudStoriesEvent(CloudStoriesType.progressUpload,
+          folderID: localCopy.folderID, data: MediaProgress(totalSize, sent)));
+      add(CloudStoriesEvent(CloudStoriesType.syncingState,
+          folderID: localCopy.folderID, data: uploadingImages));
 
       for (int i = 0; i < localCopy.images.length; i++) {
-        MapEntry<String, StoryMedia> image =
+        final MapEntry<String, StoryMedia> image =
             localCopy.images.entries.elementAt(i);
         if (!cloudCopy.images.containsKey(image.key)) {
-          var streamController = new StreamController<List<int>>();
+          final StreamController<List<int>> streamController =
+              StreamController<List<int>>();
 
-          image.value.stream.listen((event) {
+          image.value.stream.listen((List<int> event) {
             sent += event.length;
-            this.add(CloudStoriesEvent(CloudStoriesType.progress_upload,
-                folderId: localCopy.folderID,
+            add(CloudStoriesEvent(CloudStoriesType.progressUpload,
+                folderID: localCopy.folderID,
                 data: MediaProgress(totalSize, sent)));
             streamController.add(event);
           }, onDone: () {
             streamController.close();
-          }, onError: (error) {
+          }, onError: (dynamic error) {
             print('error: $error');
             streamController.close();
           });
 
-          await storage
+          await _storage
               .uploadMediaToFolder(cloudCopy, image.key, image.value, 10,
                   streamController.stream)
-              .then((imageID) {
-            uploadingImages.update(localCopy.folderID, (value) {
+              .then((String imageID) {
+            uploadingImages.update(localCopy.folderID, (List<String> value) {
               value.remove(image.key);
               return value;
             });
-            this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
-                folderId: localCopy.folderID, data: uploadingImages));
+            add(CloudStoriesEvent(CloudStoriesType.syncingState,
+                folderID: localCopy.folderID, data: uploadingImages));
 
             if (imageID != null) {
               imagesToAdd.putIfAbsent(imageID, () => image.value);
               localImagesToDelete.add(image.key);
-            } else {
-              print('imageID $imageID');
             }
-            print('uploaded this image: ${image.key}');
-          }, onError: (error) {
+          }, onError: (dynamic error) {
             print('error $error');
           });
         }
       }
 
-      for (MapEntry<String, StoryMedia> image in cloudCopy.images.entries) {
+      for (final MapEntry<String, StoryMedia> image
+          in cloudCopy.images.entries) {
         if (!localCopy.images.containsKey(image.key)) {
-          print('delete this image: ${image.key}');
-          tasks.add(storage.delete(image.key).then((value) {
+          tasks.add(_storage.delete(image.key).then((_) {
             imagesToDelete.add(image.key);
-          }, onError: (error) {
+          }, onError: (dynamic error) {
             print('error $error');
           }));
         }
@@ -264,53 +267,50 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     return Future.wait(tasks).then((_) {
       cloudCopy.images.addAll(imagesToAdd);
       localCopy.images.addAll(imagesToAdd);
-      cloudCopy.images
-          .removeWhere((key, value) => imagesToDelete.contains(key));
-      localCopy.images
-          .removeWhere((key, value) => localImagesToDelete.contains(key));
-      imagesToAdd.forEach((key, value) {
-        RetryService.getThumbnail(
-            storage, localCopy.folderID, key, localCopy.images, uploadingImages,
-            () {
-          this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
-              folderId: localCopy.folderID, data: uploadingImages));
+      cloudCopy.images.removeWhere(
+          (String key, StoryMedia value) => imagesToDelete.contains(key));
+      localCopy.images.removeWhere(
+          (String key, StoryMedia value) => localImagesToDelete.contains(key));
+      imagesToAdd.forEach((String key, StoryMedia value) {
+        RetryService.getThumbnail(_storage, localCopy.folderID, key,
+            localCopy.images, uploadingImages, () {
+          add(CloudStoriesEvent(CloudStoriesType.syncingState,
+              folderID: localCopy.folderID, data: uploadingImages));
         });
       });
       RetryService.checkNeedsRefreshing(
           localCopy.folderID, uploadingImages, localCopy, () {
-        this.add(CloudStoriesEvent(CloudStoriesType.syncing_story_state,
-            folderId: localCopy.folderID, data: uploadingImages));
+        add(CloudStoriesEvent(CloudStoriesType.syncingState,
+            folderID: localCopy.folderID, data: uploadingImages));
       });
     });
   }
 
-  Future<StoryContent> createEventFolder(
+  Future<StoryContent> _createEventFolder(
       String parentId, int timestamp, bool mainEvent) async {
     try {
-      var folderID = await storage.createStory(parentId, timestamp);
+      final String folderID = await _storage.createStory(parentId, timestamp);
 
-      StoryContent event = StoryContent(
-          comments: AdventureComments(comments: []),
+      final StoryContent event = StoryContent(
+          comments: AdventureComments(),
           folderID: folderID,
-          timestamp: timestamp,
-          subEvents: [],
-          images: Map());
+          timestamp: timestamp);
       event.settingsID = await _uploadSettingsFile(folderID, event);
 
       if (mainEvent) {
-        var commentsResponse =
-            await storage.uploadCommentsFile(folderID: event.folderID);
+        final CommentsResponse commentsResponse =
+            await _storage.uploadCommentsFile(folderID: event.folderID);
         event.comments = commentsResponse.comments;
         event.commentsID = commentsResponse.commentsID;
-        TimelineData timelineEvent =
-            TimelineData(mainStory: event, subEvents: []);
-        cloudStories.putIfAbsent(folderID, () => timelineEvent);
-        localStories.putIfAbsent(
-            folderID, () => TimelineData.clone(timelineEvent));
+        final StoryTimelineData timelineEvent =
+            StoryTimelineData(mainStory: event, subEvents: []);
+        _cloudStories.putIfAbsent(folderID, () => timelineEvent);
+        _localStories.putIfAbsent(
+            folderID, () => StoryTimelineData.clone(timelineEvent));
       }
 
       if (mainEvent) {
-        this.add(CloudStoriesEvent(CloudStoriesType.updated_stories));
+        add(const CloudStoriesEvent(CloudStoriesType.updateUI));
       }
       return event;
     } catch (e) {
@@ -321,66 +321,67 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
   Future<String> _uploadSettingsFile(
       String parentId, StoryContent content) async {
-    AdventureSettings settings = AdventureSettings(
+    final AdventureSettings settings = AdventureSettings(
         title: content.title,
         description: content.description,
         emoji: content.emoji);
-    String jsonString = jsonEncode(settings);
-    List<int> fileContent = utf8.encode(jsonString);
+    final String jsonString = jsonEncode(settings);
+    final List<int> fileContent = utf8.encode(jsonString);
     final Stream<List<int>> mediaStream =
         Future.value(fileContent).asStream().asBroadcastStream();
 
     if (content.settingsID != null) {
-      var folder = await storage.updateFile(
+      final File folder = await _storage.updateFile(
           null, content.settingsID, Media(mediaStream, fileContent.length));
       return folder.id;
     }
 
-    var folderID = await storage.uploadMedia(
+    final String folderID = await _storage.uploadMedia(
         parentId, Constants.SETTINGS_FILE, fileContent.length, mediaStream,
-        mimeType: "application/json");
+        mimeType: 'application/json');
     return folderID;
   }
 
-  _getStories({String folderID}) {
-    if (cloudStories == null) {
-      cloudStories = Map();
+  void _getStories({String folderID}) {
+    if (_cloudStories == null) {
+      _cloudStories = <String, StoryTimelineData>{};
       if (folderID != null) {
-        getViewEvent(folderID).then((value) =>
-            this.add(CloudStoriesEvent(CloudStoriesType.updated_stories)));
+        _getViewEvent(folderID).then(
+            (_) => add(const CloudStoriesEvent(CloudStoriesType.updateUI)));
       } else {
-        getMediaFolder().then((value) {
-          mediaFolderID = value;
-          getEventsFromFolder(value).then((value) =>
-              this.add(CloudStoriesEvent(CloudStoriesType.updated_stories)));
+        _getMediaFolder().then((String value) {
+          _mediaFolderID = value;
+          _getEventsFromFolder(value).then(
+              (_) => add(const CloudStoriesEvent(CloudStoriesType.updateUI)));
         });
       }
     }
   }
 
-  Future getEventsFromFolder(String folderID) async {
+  Future<void> _getEventsFromFolder(String folderID) async {
     try {
-      FileList eventList = await storage.listFiles(
+      final FileList eventList = await _storage.listFiles(
           "mimeType='application/vnd.google-apps.folder' and '$folderID' in parents and trashed=false");
-      List<String> folderIds = [];
-      List<Future> tasks = [];
-      for (File file in eventList.files) {
-        int timestamp = int.tryParse(file.name);
+      final List<String> folderIds = <String>[];
+      final List<Future<dynamic>> tasks = <Future<dynamic>>[];
+      for (final File file in eventList.files) {
+        final int timestamp = int.tryParse(file.name);
 
         if (timestamp != null) {
           folderIds.add(file.id);
           tasks.add(_createEventFromFolder(file.id, timestamp)
-              .then((mainEvent) async {
-            List<StoryContent> subEvents = [];
-            for (SubEvent subEvent in mainEvent.subEvents) {
+              .then((StoryContent mainEvent) async {
+            final List<StoryContent> subEvents = <StoryContent>[];
+            for (final SubEvent subEvent in mainEvent.subEvents) {
               subEvents.add(await _createEventFromFolder(
                   subEvent.id, subEvent.timestamp));
             }
 
-            TimelineData data =
-                TimelineData(mainStory: mainEvent, subEvents: subEvents);
-            cloudStories.putIfAbsent(file.id, () => data);
-            localStories.putIfAbsent(file.id, () => TimelineData.clone(data));
+            final StoryTimelineData data =
+                StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
+            _cloudStories.putIfAbsent(file.id, () => data);
+            _localStories.putIfAbsent(
+                file.id, () => StoryTimelineData.clone(data));
           }));
         }
       }
@@ -390,66 +391,67 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     } finally {}
   }
 
-  Future getViewEvent(String folderID) async {
-    var folder = await storage.getFile(folderID);
+  Future<void> _getViewEvent(String folderID) async {
+    final dynamic folder = await _storage.getFile(folderID);
     if (folder == null) {
-      return null;
+      return;
     }
-    int timestamp = int.tryParse(folder.name as String);
+    final int timestamp = int.tryParse(folder.name as String);
     if (timestamp == null) {
-      return null;
+      return;
     }
-    var mainEvent = await _createEventFromFolder(folderID, timestamp);
+    final StoryContent mainEvent =
+        await _createEventFromFolder(folderID, timestamp);
 
-    List<StoryContent> subEvents = [];
-    for (SubEvent subEvent in mainEvent.subEvents) {
+    final List<StoryContent> subEvents = <StoryContent>[];
+    for (final SubEvent subEvent in mainEvent.subEvents) {
       subEvents
           .add(await _createEventFromFolder(subEvent.id, subEvent.timestamp));
     }
-    var timelineData = TimelineData(mainStory: mainEvent, subEvents: subEvents);
-    localStories.putIfAbsent(folderID, () => timelineData);
-    cloudStories.putIfAbsent(folderID, () => TimelineData.clone(timelineData));
+    final StoryTimelineData timelineData =
+        StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
+    _localStories.putIfAbsent(folderID, () => timelineData);
+    _cloudStories.putIfAbsent(
+        folderID, () => StoryTimelineData.clone(timelineData));
   }
 
-  Future<String> getMediaFolder() async {
+  Future<String> _getMediaFolder() async {
     try {
       String mediaFolderID;
-      print('getting media folder');
 
-      String query =
+      final String query =
           "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.ROOT_FOLDER}' and trashed=false";
-      var folderPArent = await storage.listFiles(query);
+      final FileList folderParent = await _storage.listFiles(query);
       String parentId;
 
-      if (folderPArent.files.length == 0) {
-        File fileMetadata = new File();
+      if (folderParent.files.isEmpty) {
+        final File fileMetadata = File();
         fileMetadata.name = Constants.ROOT_FOLDER;
-        fileMetadata.mimeType = "application/vnd.google-apps.folder";
+        fileMetadata.mimeType = 'application/vnd.google-apps.folder';
         fileMetadata.description = "please don't modify this folder";
-        var rt = await storage.createFile(fileMetadata);
-        parentId = rt.id as String;
+        final File rt = await _storage.createFile(fileMetadata);
+        parentId = rt.id;
       } else {
-        parentId = folderPArent.files.first.id;
+        parentId = folderParent.files.first.id;
       }
 
-      String query2 =
+      final String query2 =
           "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.MEDIA_FOLDER}' and '$parentId' in parents and trashed=false";
-      var folder = await storage.listFiles(query2);
+      final FileList folder = await _storage.listFiles(query2);
 
-      if (folder.files.length == 0) {
-        File fileMetadataMedia = new File();
-        fileMetadataMedia.name = Constants.MEDIA_FOLDER;
-        fileMetadataMedia.parents = [parentId];
-        fileMetadataMedia.mimeType = "application/vnd.google-apps.folder";
-        fileMetadataMedia.description = "please don't modify this folder";
+      if (folder.files.isEmpty) {
+        final File mediaFolder = File();
+        mediaFolder.name = Constants.MEDIA_FOLDER;
+        mediaFolder.parents = <String>[parentId];
+        mediaFolder.mimeType = 'application/vnd.google-apps.folder';
+        mediaFolder.description = "please don't modify this folder";
 
-        File folder = await storage.createFile(fileMetadataMedia) as File;
+        final File folder = await _storage.createFile(mediaFolder);
         mediaFolderID = folder.id;
       } else {
         mediaFolderID = folder.files.first.id;
       }
 
-      print('found media folder: $mediaFolderID');
       return mediaFolderID;
     } catch (e) {
       print('error: $e');
@@ -459,19 +461,19 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
   Future<StoryContent> _createEventFromFolder(
       String folderID, int timestamp) async {
-    FileList filesInFolder = await storage.listFiles(
+    final FileList filesInFolder = await _storage.listFiles(
         "'$folderID' in parents and trashed=false",
         filter: 'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink)');
 
     String settingsID;
     String commentsID;
-    Map<String, StoryMedia> images = Map();
-    List<SubEvent> subEvents = [];
-    for (File file in filesInFolder.files) {
-      if (file.mimeType.startsWith("image/") ||
-          file.mimeType.startsWith("video/")) {
-        StoryMedia media = StoryMedia();
-        media.isVideo = file.mimeType.startsWith("video/");
+    final Map<String, StoryMedia> images = <String, StoryMedia>{};
+    final List<SubEvent> subEvents = <SubEvent>[];
+    for (final File file in filesInFolder.files) {
+      if (file.mimeType.startsWith('image/') ||
+          file.mimeType.startsWith('video/')) {
+        final StoryMedia media = StoryMedia();
+        media.isVideo = file.mimeType.startsWith('video/');
         if (file.hasThumbnail) {
           media.imageURL = file.thumbnailLink;
         }
@@ -481,12 +483,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       } else if (file.name == Constants.COMMENTS_FILE) {
         commentsID = file.id;
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
-        int timestamp = int.tryParse(file.name);
+        final int timestamp = int.tryParse(file.name);
         if (timestamp != null) {
           subEvents.add(SubEvent(file.id, timestamp));
         }
       } else {
-        StoryMedia media = StoryMedia();
+        final StoryMedia media = StoryMedia();
         media.isDocument = true;
         if (file.hasThumbnail) {
           media.imageURL = file.thumbnailLink;
@@ -495,11 +497,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       }
     }
 
-    AdventureSettings settings =
-        AdventureSettings.fromJson(await storage.getJsonFile(settingsID));
+    final AdventureSettings settings =
+        AdventureSettings.fromJson(await _storage.getJsonFile(settingsID));
 
-    AdventureComments comments =
-        AdventureComments.fromJson(await storage.getJsonFile(commentsID));
+    final AdventureComments comments =
+        AdventureComments.fromJson(await _storage.getJsonFile(commentsID));
 
     return StoryContent(
         timestamp: timestamp,

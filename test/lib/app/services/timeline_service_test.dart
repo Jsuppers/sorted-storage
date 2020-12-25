@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/timeline_service.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,9 +12,9 @@ main() {
     () async {
       String eventID = "event";
       String folderID = "folder";
-      Map<String, TimelineData> timelineEvent = Map();
+      Map<String, StoryTimelineData> timelineEvent = Map();
 
-      TimelineData timelineData = TimelineData();
+      StoryTimelineData timelineData = StoryTimelineData();
       StoryContent expected = StoryContent();
       expected.folderID = folderID;
       timelineData.mainStory = expected;
@@ -32,9 +33,9 @@ main() {
     () async {
       String eventID = "event";
       String folderID = "folder";
-      Map<String, TimelineData> timelineEvent = Map();
+      Map<String, StoryTimelineData> timelineEvent = Map();
 
-      TimelineData timelineData = TimelineData();
+      StoryTimelineData timelineData = StoryTimelineData();
       StoryContent expected = StoryContent();
       expected.folderID = folderID;
       timelineData.mainStory = StoryContent();
@@ -50,15 +51,14 @@ main() {
     },
   );
 
-
   test(
     'Given a invalid folder ID When we call getEventWithFolderID Then return null',
-        () async {
+    () async {
       String eventID = "event";
       String folderID = "folder";
-      Map<String, TimelineData> timelineEvent = Map();
+      Map<String, StoryTimelineData> timelineEvent = Map();
 
-      TimelineData timelineData = TimelineData();
+      StoryTimelineData timelineData = StoryTimelineData();
       timelineData.mainStory = StoryContent();
       timelineData.subEvents = [];
       timelineData.subEvents.add(StoryContent());

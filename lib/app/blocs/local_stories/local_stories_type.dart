@@ -1,16 +1,41 @@
 /// possible types used for states and events
 enum LocalStoriesType {
-  initial_state,
-  picked_image,
-  create_sub_story,
-  delete_sub_story,
-  edit_timestamp,
-  edit_description,
-  edit_emoji,
-  edit_title,
-  delete_image,
-  add_image,
-  cancel_story,
-  edit_story,
-  syncing_story_end,
+  /// initial state
+  initialState,
+
+  /// one or images have been added
+  pickedImage,
+
+  /// create a sub story
+  createSubStory,
+
+  /// delete a sub story
+  deleteSubStory,
+
+  /// edit the timestamp
+  editTimestamp,
+
+  /// edit the description
+  editDescription,
+
+  /// edit the emoji
+  editEmoji,
+
+  /// edit the title
+  editTitle,
+
+  /// delete a image
+  deleteImage,
+
+  /// event to start adding images
+  addImage,
+
+  /// cancel story resetting all unsaved changes
+  cancelStory,
+
+  /// allow user to start editing local story
+  editStory,
+
+  /// update ui of current state of the local copy
+  updateUI,
 }

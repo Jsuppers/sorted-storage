@@ -1,9 +1,10 @@
-import 'package:web/ui/widgets/timeline_card.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/timeline_data.dart';
 
 class TimelineService {
   static StoryContent getEventWithFolderID(String eventID, String folderID,
-      Map<String, TimelineData> timelineEvent) {
-    TimelineData event = timelineEvent[eventID];
+      Map<String, StoryTimelineData> timelineEvent) {
+    StoryTimelineData event = timelineEvent[eventID];
     if (event.mainStory.folderID == folderID) {
       return event.mainStory;
     } else {

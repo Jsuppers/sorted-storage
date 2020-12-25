@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:mockito/mockito.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/story_media.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/retry_service.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 class MockGoogleDrive extends Mock implements GoogleDrive {}
 
@@ -32,7 +33,7 @@ main() {
 
   test(
     'Given tries is 0 When a getThumbnail request is made than return',
-        () async {
+    () async {
       MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
 
       String folderID = "mockFolder";
@@ -42,7 +43,8 @@ main() {
       Function successCallback = () {};
 
       await RetryService.getThumbnail(mockGoogleDrive, folderID, imageKey,
-          images, uploadingImages, successCallback, maxTries: 0);
+          images, uploadingImages, successCallback,
+          maxTries: 0);
 
       verifyNever(mockGoogleDrive.getFile(imageKey,
           filter: 'id,hasThumbnail,thumbnailLink'));
@@ -51,7 +53,7 @@ main() {
 
   test(
     'Given a second retry When the second request has a thumbnail link than return',
-        () async {
+    () async {
       MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
 
       String expectedLink = "mockLink";
@@ -72,13 +74,16 @@ main() {
       secondResponse.hasThumbnail = true;
       secondResponse.thumbnailLink = expectedLink;
       var answers = [firstResponse, secondResponse];
-      when(mockGoogleDrive.getFile(imageKey, filter: 'id,hasThumbnail,thumbnailLink')).thenAnswer((_) => Future.value(answers.removeAt(0)));
+      when(mockGoogleDrive.getFile(imageKey,
+              filter: 'id,hasThumbnail,thumbnailLink'))
+          .thenAnswer((_) => Future.value(answers.removeAt(0)));
 
       await RetryService.getThumbnail(mockGoogleDrive, folderID, imageKey,
           images, uploadingImages, successCallback);
 
       verify(mockGoogleDrive.getFile(imageKey,
-          filter: 'id,hasThumbnail,thumbnailLink')).called(2);
+              filter: 'id,hasThumbnail,thumbnailLink'))
+          .called(2);
       expect(storyMedia.imageURL, expectedLink);
       assert(successCalled);
     },
@@ -86,9 +91,7 @@ main() {
 
   test(
     'Given a checkNeedsRefreshing request When value stays null than successCallback does not get called',
-        () async {
-
-
+    () async {
       String folderID = "mockFolderID";
       String imageKey = "mockImageKey";
       Map<String, List<String>> uploadingImages = Map();
@@ -102,8 +105,9 @@ main() {
         successCalled = true;
       };
 
-      await RetryService.checkNeedsRefreshing(folderID, uploadingImages, localCopy,
-          successCallback, seconds: 0, maxTries: 2);
+      await RetryService.checkNeedsRefreshing(
+          folderID, uploadingImages, localCopy, successCallback,
+          seconds: 0, maxTries: 2);
 
       assert(successCalled == false);
     },
@@ -111,8 +115,7 @@ main() {
 
   test(
     'Given a checkNeedsRefreshing request When image has url than successCallback gets called',
-        () async {
-
+    () async {
       String folderID = "mockFolderID";
       String imageKey = "mockImageKey";
       Map<String, List<String>> uploadingImages = Map();
@@ -127,8 +130,9 @@ main() {
         successCalled = true;
       };
 
-      await RetryService.checkNeedsRefreshing(folderID, uploadingImages, localCopy,
-          successCallback, seconds: 0);
+      await RetryService.checkNeedsRefreshing(
+          folderID, uploadingImages, localCopy, successCallback,
+          seconds: 0);
 
       assert(successCalled);
     },

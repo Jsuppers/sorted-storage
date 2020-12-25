@@ -107,7 +107,7 @@ class EmojiPickerState extends State<EmojiPicker> {
           height: 40,
           onPressed: () {
             BlocProvider.of<LocalStoriesBloc>(context).add(LocalStoriesEvent(
-                LocalStoriesType.edit_emoji,
+                LocalStoriesType.editEmoji,
                 parentID: widget.parentID,
                 folderID: widget.folderID,
                 data: element));

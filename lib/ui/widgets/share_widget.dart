@@ -33,12 +33,12 @@ class _ShareWidgetState extends State<ShareWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        widget.state.message != null ? Row(
+        widget.state.errorMessage != null ? Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.error),
             SizedBox(width: 5),
-            Text(widget.state.message),
+            Text(widget.state.errorMessage),
           ],
         ): Container(),
         shared

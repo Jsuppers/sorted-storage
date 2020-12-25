@@ -4,8 +4,9 @@ import 'dart:convert';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/comments_response.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/story_media.dart';
 import 'package:web/constants.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 class GoogleDrive {
   DriveApi driveApi;
@@ -123,11 +124,11 @@ class GoogleDrive {
     }
   }
 
-  Future createFile(File request, {Media media}) async {
+  Future<File> createFile(File request, {Media media}) async {
     return driveApi.files.create(request, uploadMedia: media);
   }
 
-  Future delete(String fileID) async {
+  Future<dynamic> delete(String fileID) async {
     return driveApi.files.delete(fileID);
   }
 

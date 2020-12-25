@@ -7,10 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/story_media.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
@@ -118,7 +121,7 @@ class _TimelineEventCardState extends State<EventCard> {
           }
           setState(
             () => BlocProvider.of<LocalStoriesBloc>(context).add(
-              LocalStoriesEvent(LocalStoriesType.edit_timestamp,
+              LocalStoriesEvent(LocalStoriesType.editTimestamp,
                   parentID: widget.eventFolderID,
                   folderID: widget.event.folderID,
                   data: date.millisecondsSinceEpoch),
@@ -145,7 +148,7 @@ class _TimelineEventCardState extends State<EventCard> {
       listeners: [
         BlocListener<CloudStoriesBloc, CloudStoriesState>(
           listener: (context, state) {
-            if (state.type == CloudStoriesType.syncing_story_state) {
+            if (state.type == CloudStoriesType.syncingState) {
               if (state.data == null) {
                 return;
               }
@@ -164,7 +167,7 @@ class _TimelineEventCardState extends State<EventCard> {
         ),
         BlocListener<LocalStoriesBloc, LocalStoriesState>(
             listener: (context, state) {
-          if (state.type == LocalStoriesType.edit_emoji &&
+          if (state.type == LocalStoriesType.editEmoji &&
               state.folderID == widget.event.folderID) {
             setState(() {
               widget.event.emoji = state.data as String;
@@ -234,7 +237,7 @@ class _TimelineEventCardState extends State<EventCard> {
                     controller: titleController,
                     onChanged: (string) =>
                         BlocProvider.of<LocalStoriesBloc>(context).add(
-                            LocalStoriesEvent(LocalStoriesType.edit_title,
+                            LocalStoriesEvent(LocalStoriesType.editTitle,
                                 parentID: widget.eventFolderID,
                                 folderID: widget.event.folderID,
                                 data: string)),
@@ -267,7 +270,7 @@ class _TimelineEventCardState extends State<EventCard> {
                                 }
                                 BlocProvider.of<LocalStoriesBloc>(context).add(
                                   LocalStoriesEvent(
-                                    LocalStoriesType.add_image,
+                                    LocalStoriesType.addImage,
                                     parentID: widget.eventFolderID,
                                     folderID: widget.event.folderID,
                                   ),
@@ -298,7 +301,7 @@ class _TimelineEventCardState extends State<EventCard> {
                       readOnly: widget.locked || widget.saving,
                       onChanged: (string) {
                         BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.edit_description,
+                          LocalStoriesEvent(LocalStoriesType.editDescription,
                               parentID: widget.eventFolderID,
                               folderID: widget.event.folderID,
                               data: string),
@@ -429,7 +432,7 @@ class _TimelineEventCardState extends State<EventCard> {
                         return;
                       }
                       BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.delete_image,
+                          LocalStoriesEvent(LocalStoriesType.deleteImage,
                               folderID: widget.event.folderID,
                               data: imageKey,
                               parentID: widget.eventFolderID));

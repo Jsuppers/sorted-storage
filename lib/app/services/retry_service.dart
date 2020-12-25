@@ -1,6 +1,7 @@
 import 'package:googleapis/drive/v3.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/story_media.dart';
 import 'package:web/app/services/google_drive.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 class RetryService {
   static Future getThumbnail(

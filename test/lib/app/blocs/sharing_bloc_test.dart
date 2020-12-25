@@ -48,7 +48,7 @@ main() {
         },
         verify: (SharingBloc bloc) {
           expect(bloc.state, isA<SharingSharedState>());
-          expect(bloc.state.message, null);
+          expect(bloc.state.errorMessage, null);
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
         },
@@ -70,7 +70,7 @@ main() {
         },
         verify: (SharingBloc bloc) {
           expect(bloc.state, isA<SharingNotSharedState>());
-          expect(bloc.state.message, null);
+          expect(bloc.state.errorMessage, null);
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
         },
@@ -92,7 +92,7 @@ main() {
         },
         verify: (SharingBloc bloc) {
           expect(bloc.state, isA<SharingNotSharedState>());
-          expect(bloc.state.message, 'cannot retrieve permissions');
+          expect(bloc.state.errorMessage, 'cannot retrieve permissions');
           verify(mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
         },
       );
@@ -120,7 +120,7 @@ main() {
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
           expect(bloc.state, isA<SharingSharedState>());
-          expect(bloc.state.message,
+          expect(bloc.state.errorMessage,
               'error while stopping sharing, please try again');
         },
       );
@@ -146,7 +146,7 @@ main() {
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
           expect(bloc.state, isA<SharingNotSharedState>());
-          expect(bloc.state.message, null);
+          expect(bloc.state.errorMessage, null);
         },
       );
 
@@ -170,7 +170,7 @@ main() {
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
           expect(bloc.state, isA<SharingNotSharedState>());
-          expect(bloc.state.message, 'error while sharing folder, please try again');
+          expect(bloc.state.errorMessage, 'error while sharing folder, please try again');
         },
       );
 
@@ -197,7 +197,7 @@ main() {
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
           expect(bloc.state, isA<SharingSharedState>());
-          expect(bloc.state.message, null);
+          expect(bloc.state.errorMessage, null);
         },
       );
 
@@ -223,7 +223,7 @@ main() {
           verifyNever(
               mockGoogleDrive.uploadCommentsFile(folderID: mockFolderID));
           expect(bloc.state, isA<SharingNotSharedState>());
-          expect(bloc.state.message, null);
+          expect(bloc.state.errorMessage, null);
         },
       );
     },

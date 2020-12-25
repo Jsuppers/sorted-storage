@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
@@ -27,18 +29,18 @@ class TimelineLayout extends StatefulWidget {
 }
 
 class _TimelineLayoutState extends State<TimelineLayout> {
-  Map<String, TimelineData> _timelineData;
+  Map<String, StoryTimelineData> _timelineData;
   bool loaded = true;
 
   @override
   Widget build(BuildContext context) {
     var timelineState = BlocProvider.of<CloudStoriesBloc>(context).state;
-    loaded = timelineState.type == CloudStoriesType.initial_state ? false : true;
+    loaded = timelineState.type == CloudStoriesType.initialState ? false : true;
     _timelineData = BlocProvider.of<LocalStoriesBloc>(context).state.localStories;
     List<Widget> eventDisplay = [];
     List<_TimeLineEventEntry> timeLineEvents = [];
 
-    _timelineData.forEach((folderId, TimelineData event) {
+    _timelineData.forEach((folderId, StoryTimelineData event) {
       Widget display = TimelineCard(
           width: widget.width,
           height: widget.height,
@@ -57,7 +59,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     });
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (context, state) {
-        if (state.type == CloudStoriesType.updated_stories) {
+        if (state.type == CloudStoriesType.updateUI) {
           setState(() {
             print('updating stories');
             _timelineData.forEach((key, story) => story.subEvents
@@ -115,7 +117,7 @@ class _AddStoryButtonState extends State<AddStoryButton> {
             onPressed: () async {
               int timestamp = DateTime.now().millisecondsSinceEpoch;
               BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-                  CloudStoriesType.create_story,
+                  CloudStoriesType.createStory,
                   data: timestamp,
                   mainEvent: true));
               setState(() => addingStory = true);
