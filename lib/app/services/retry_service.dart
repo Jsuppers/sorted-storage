@@ -30,7 +30,7 @@ class RetryService {
 
       if (mediaFile.hasThumbnail) {
         print('thumbnail for image: $imageKey has been created!');
-        images[imageKey].imageURL = mediaFile.thumbnailLink;
+        images[imageKey].thumbnailURL = mediaFile.thumbnailLink;
         successCallback();
         return null;
       }
@@ -54,7 +54,7 @@ class RetryService {
     }
     return Future.delayed(Duration(seconds: seconds), () async {
       for (MapEntry entry in localCopy.images.entries) {
-        if (entry.value.imageURL == null) {
+        if (entry.value.thumbnailURL == null) {
           print("still waiting for a thumbnail: ${entry.key}");
           return checkNeedsRefreshing(
               folderID, uploadingImages, localCopy, successCallback,

@@ -70,7 +70,7 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
                 element.name,
                 () => StoryMedia(
                     stream: element.readStream,
-                    size: element.size,
+                    contentSize: element.size,
                     isVideo: mime.startsWith('video/'),
                     isDocument: !mime.startsWith('video/') &&
                         !mime.startsWith('image/')));

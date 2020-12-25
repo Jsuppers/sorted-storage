@@ -318,7 +318,7 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   Widget imageWidget(String imageKey, StoryMedia media) {
-    bool showPlaceholder = media.imageURL == null;
+    bool showPlaceholder = media.thumbnailURL == null;
     return RawMaterialButton(
       onPressed: () {
         if (widget.locked) {
@@ -331,7 +331,7 @@ class _TimelineEventCardState extends State<EventCard> {
               height: 150.0,
               width: 150.0,
               child: CachedNetworkImage(
-                imageUrl: media.imageURL,
+                imageUrl: media.thumbnailURL,
                 placeholder: (context, url) => StaticLoadingLogo(),
                 errorWidget: (context, url, error) => backgroundImage(
                     showPlaceholder,

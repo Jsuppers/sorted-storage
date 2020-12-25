@@ -2,7 +2,9 @@ import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/sub_event.dart';
 
+/// content for a story
 class StoryContent {
+  // ignore: public_member_api_docs
   StoryContent(
       {this.timestamp,
         this.title = '',
@@ -14,33 +16,54 @@ class StoryContent {
         this.subEvents,
         this.commentsID,
         this.comments}) {
-    this.images ??= Map<String, StoryMedia>();
-    this.subEvents ??= <SubEvent>[];
-    this.comments ??= AdventureComments();
+    images ??= <String, StoryMedia>{};
+    subEvents ??= <SubEvent>[];
+    comments ??= AdventureComments();
   }
 
-  int timestamp;
-  String emoji;
-  String title;
-  Map<String, StoryMedia> images;
-  String description;
-  String folderID;
-  String settingsID;
-  String commentsID;
-  String permissionID;
-  AdventureComments comments;
-  List<SubEvent> subEvents;
+  /// clones a story content
+  StoryContent.clone(StoryContent event):
+        timestamp = event.timestamp,
+        title = event.title,
+        emoji = event.emoji,
+        images = Map<String, StoryMedia>.from(event.images),
+        description = event.description,
+        settingsID = event.settingsID,
+        commentsID = event.commentsID,
+        folderID = event.folderID,
+        subEvents = List<SubEvent>.from(event.subEvents),
+        comments = AdventureComments.clone(event.comments);
 
-  StoryContent.clone(StoryContent event)
-      : this(
-      timestamp: event.timestamp,
-      title: event.title,
-      emoji: event.emoji,
-      images: Map.from(event.images),
-      description: event.description,
-      settingsID: event.settingsID,
-      commentsID: event.commentsID,
-      folderID: event.folderID,
-      subEvents: List.from(event.subEvents),
-      comments: AdventureComments.clone(event.comments));
+  /// timestamp of the story
+  int timestamp;
+
+  /// a small emoji for the story
+  String emoji;
+
+  /// the title of the story
+  String title;
+
+  /// images on the main story
+  Map<String, StoryMedia> images;
+
+  /// the description of the story
+  String description;
+
+  /// the folder ID of this story
+  String folderID;
+
+  /// the file ID of the settings file
+  String settingsID;
+
+  /// the file ID of the comments file
+  String commentsID;
+
+  /// the ID of the permission for this story
+  String permissionID;
+
+  /// comments for this story
+  AdventureComments comments;
+
+  /// a list of all the sub events for this story
+  List<SubEvent> subEvents;
 }

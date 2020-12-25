@@ -84,7 +84,7 @@ main() {
       verify(mockGoogleDrive.getFile(imageKey,
               filter: 'id,hasThumbnail,thumbnailLink'))
           .called(2);
-      expect(storyMedia.imageURL, expectedLink);
+      expect(storyMedia.thumbnailURL, expectedLink);
       assert(successCalled);
     },
   );
@@ -122,7 +122,7 @@ main() {
       StoryContent localCopy = StoryContent();
       Map<String, StoryMedia> images = Map();
       StoryMedia storyMedia = StoryMedia();
-      storyMedia.imageURL = "validImageURL";
+      storyMedia.thumbnailURL = "validImageURL";
       images.putIfAbsent(imageKey, () => storyMedia);
       localCopy.images = images;
       bool successCalled = false;

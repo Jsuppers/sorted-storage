@@ -1,25 +1,28 @@
+/// information about a user
 class User {
-  final String id;
-  final String email;
-  final String displayName;
-  final String photoUrl;
-  final double balance;
-  final Map<String, String> headers;
-
+  // ignore: public_member_api_docs
   User(
       {this.displayName,
-      this.headers,
-      this.photoUrl,
-      this.balance,
-      this.id,
-      this.email});
+        this.headers,
+        this.photoUrl,
+        this.email});
+
+  /// email address of this user
+  final String email;
+
+  /// display name of this user, used when sending comments
+  final String displayName;
+
+  /// url of a photo for this user
+  final String photoUrl;
+
+  /// auth headers for this user
+  final Map<String, String> headers;
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
+    return <String, dynamic>{
       'name': displayName,
       'email': email,
-      'balance': balance,
       'photoUrl': photoUrl,
     };
   }

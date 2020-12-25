@@ -1,4 +1,6 @@
+/// AdventureComment holds a comment from a user
 class AdventureComment {
+  /// constructor which sets default values
   AdventureComment({this.user = '', this.comment = ''});
   static AdventureComment fromJson(Map<String, dynamic> json) {
     if (json == null) {
@@ -46,7 +48,7 @@ class AdventureComments {
       }
     }
 
-    new AdventureComments(comments: comments);
+    AdventureComments(comments: comments);
   }
 
   Map<String, dynamic> toJson() {
@@ -61,7 +63,7 @@ class AdventureSettings {
 
   static AdventureSettings fromJson(Map<String, dynamic> json) {
     if (json == null) {
-      return new AdventureSettings();
+      return AdventureSettings();
     }
 
     String title = '';
@@ -77,7 +79,7 @@ class AdventureSettings {
       emoji = json['e'] as String;
     }
 
-    return new AdventureSettings(
+    return AdventureSettings(
         title: title, description: description, emoji: emoji);
   }
 

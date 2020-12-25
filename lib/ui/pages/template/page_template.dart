@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web/app/models/page_content.dart';
 
 class PageTemplate extends StatelessWidget {
-  final List<PageContent> contentList;
+  final List<PageItemContent> contentList;
 
   PageTemplate(this.contentList);
 
@@ -32,7 +32,7 @@ class PageTemplate extends StatelessWidget {
     }
 
     List<Widget> children = [];
-    for (PageContent content in contentList) {
+    for (PageItemContent content in contentList) {
       if (borderless) {
         children.add(_BorderlessContent(
           mobile: mobile,
@@ -63,7 +63,7 @@ class _BorderlessContent extends StatelessWidget {
   final double widthText;
   final double widthImage;
   final double horizontalPadding;
-  final PageContent content;
+  final PageItemContent content;
   final bool mobile;
 
   const _BorderlessContent(
@@ -80,14 +80,14 @@ class _BorderlessContent extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> children;
 
-    if (content.imageUri == null) {
+    if (content.imageURL == null) {
       children = [
         _TextWidget(width: widthText + widthImage, content: content),
       ];
     } else {
       children = [
         _TextWidget(width: widthText, content: content),
-        _ImageWidget(imageUri: content.imageUri, width: widthImage)
+        _ImageWidget(imageUri: content.imageURL, width: widthImage)
       ];
     }
 
@@ -108,7 +108,7 @@ class _BorderedContent extends StatelessWidget {
   final double widthText;
   final double widthImage;
   final double horizontalPadding;
-  final PageContent content;
+  final PageItemContent content;
   final bool mobile;
 
   const _BorderedContent(
@@ -123,13 +123,13 @@ class _BorderedContent extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> children;
 
-    if (content.imageUri == null) {
+    if (content.imageURL == null) {
       children = [
         _TextWidget(width: widthText + widthImage, content: content),
       ];
     } else {
       children = [
-        _ImageWidget(imageUri: content.imageUri, width: widthImage),
+        _ImageWidget(imageUri: content.imageURL, width: widthImage),
         _TextWidget(width: widthText, content: content)
       ];
     }
@@ -167,7 +167,7 @@ class _CallToActionButton extends StatelessWidget {
     @required this.content,
   }) : super(key: key);
 
-  final PageContent content;
+  final PageItemContent content;
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +195,7 @@ class _CallToActionButton extends StatelessWidget {
 
 class _TextWidget extends StatelessWidget {
   final double width;
-  final PageContent content;
+  final PageItemContent content;
 
   const _TextWidget({Key key, this.width, this.content}) : super(key: key);
 

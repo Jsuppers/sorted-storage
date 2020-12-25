@@ -196,7 +196,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         final MapEntry<String, StoryMedia> image =
             localCopy.images.entries.elementAt(i);
         if (!cloudCopy.images.containsKey(image.key)) {
-          totalSize += image.value.size;
+          totalSize += image.value.contentSize;
           uploadingImages.update(localCopy.folderID, (List<String> value) {
             value.add(image.key);
             return value;
@@ -475,7 +475,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         final StoryMedia media = StoryMedia();
         media.isVideo = file.mimeType.startsWith('video/');
         if (file.hasThumbnail) {
-          media.imageURL = file.thumbnailLink;
+          media.thumbnailURL = file.thumbnailLink;
         }
         images.putIfAbsent(file.id, () => media);
       } else if (file.name == Constants.SETTINGS_FILE) {
@@ -491,7 +491,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         final StoryMedia media = StoryMedia();
         media.isDocument = true;
         if (file.hasThumbnail) {
-          media.imageURL = file.thumbnailLink;
+          media.thumbnailURL = file.thumbnailLink;
         }
         images.putIfAbsent(file.id, () => media);
       }

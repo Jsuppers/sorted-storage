@@ -43,9 +43,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, usr.User> {
       return null;
     }
     return usr.User(
-        balance: 0,
         displayName: user.displayName,
-        id: user.id,
         email: user.email,
         photoUrl: user.photoUrl,
         headers: await user.authHeaders);

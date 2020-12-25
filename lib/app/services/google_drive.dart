@@ -27,7 +27,7 @@ class GoogleDrive {
     mediaFile.parents = [eventContent.folderID];
     mediaFile.name = imageName;
 
-    Media image = Media(dataStream, storyMedia.size);
+    Media image = Media(dataStream, storyMedia.contentSize);
     var uploadMedia;
     try {
       uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
