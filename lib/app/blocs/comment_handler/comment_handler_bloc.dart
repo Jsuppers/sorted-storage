@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
-import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/comments_response.dart';
+import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/google_drive.dart';
 
@@ -29,7 +29,7 @@ class CommentHandlerBloc
     final CommentsResponse commentsResponse = await _storage.uploadCommentsFile(
         commentsID: timelineEvent.mainStory.commentsID,
         folderID: event.folderID,
-        comment: event.data as AdventureComment);
+        comment: event.data as StoryComment);
 
     timelineEvent.mainStory.comments = commentsResponse.comments;
     timelineEvent.mainStory.commentsID = commentsResponse.commentsID;

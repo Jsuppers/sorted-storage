@@ -5,7 +5,7 @@ import 'package:mime/mime.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
-import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/timeline_data.dart';
@@ -27,8 +27,8 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
   Stream<LocalStoriesState> mapEventToState(LocalStoriesEvent event) async* {
     switch (event.type) {
       case LocalStoriesType.cancelStory:
-        _localStories[event.folderID] =
-            StoryTimelineData.clone(event.data[event.folderID] as StoryTimelineData);
+        _localStories[event.folderID] = StoryTimelineData.clone(
+            event.data[event.folderID] as StoryTimelineData);
         _localStories[event.folderID].locked = true;
         yield LocalStoriesState(LocalStoriesType.cancelStory, _localStories,
             folderID: event.folderID);
@@ -86,7 +86,7 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
         story.subEvents.add(StoryContent(
           folderID: TimelineService.createUniqueTempName(event.parentID),
           timestamp: story.mainStory.timestamp,
-          comments: AdventureComments(),
+          comments: StoryComments(),
         ));
         yield LocalStoriesState(LocalStoriesType.updateUI, _localStories,
             folderID: event.folderID);

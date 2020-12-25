@@ -1,4 +1,4 @@
-import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/story_comments.dart';
 
 /// response from sending a comment
 class CommentsResponse {
@@ -6,9 +6,8 @@ class CommentsResponse {
   CommentsResponse({this.comments, this.commentsID});
 
   /// all the comments
-  final AdventureComments comments;
+  final StoryComments comments;
 
   /// folder ID for the comments file
   final String commentsID;
-
 }

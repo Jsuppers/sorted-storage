@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/comments_response.dart';
+import 'package:web/app/models/story_comment.dart';
+import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/constants.dart';
@@ -52,13 +53,13 @@ class GoogleDrive {
   }
 
   Future<CommentsResponse> uploadCommentsFile(
-      {String commentsID, String folderID, AdventureComment comment}) async {
-    AdventureComments comments;
+      {String commentsID, String folderID, StoryComment comment}) async {
+    StoryComments comments;
     if (commentsID != null) {
-      comments = AdventureComments.fromJson(await getJsonFile(commentsID));
+      comments = StoryComments.fromJson(await getJsonFile(commentsID));
     }
-    comments ??= AdventureComments();
-    comments.comments ??= <AdventureComment>[];
+    comments ??= StoryComments();
+    comments.comments ??= <StoryComment>[];
 
     if (comment != null) {
       comments.comments.add(comment);

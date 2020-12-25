@@ -6,11 +6,12 @@ import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/comments_response.dart';
 import 'package:web/app/models/media_progress.dart';
+import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
+import 'package:web/app/models/story_settings.dart';
 import 'package:web/app/models/sub_event.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/google_drive.dart';
@@ -292,9 +293,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       final String folderID = await _storage.createStory(parentId, timestamp);
 
       final StoryContent event = StoryContent(
-          comments: AdventureComments(),
-          folderID: folderID,
-          timestamp: timestamp);
+          comments: StoryComments(), folderID: folderID, timestamp: timestamp);
       event.settingsID = await _uploadSettingsFile(folderID, event);
 
       if (mainEvent) {
@@ -321,7 +320,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
   Future<String> _uploadSettingsFile(
       String parentId, StoryContent content) async {
-    final AdventureSettings settings = AdventureSettings(
+    final StorySettings settings = StorySettings(
         title: content.title,
         description: content.description,
         emoji: content.emoji);
@@ -497,11 +496,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       }
     }
 
-    final AdventureSettings settings =
-        AdventureSettings.fromJson(await _storage.getJsonFile(settingsID));
+    final StorySettings settings =
+        StorySettings.fromJson(await _storage.getJsonFile(settingsID));
 
-    final AdventureComments comments =
-        AdventureComments.fromJson(await _storage.getJsonFile(commentsID));
+    final StoryComments comments =
+        StoryComments.fromJson(await _storage.getJsonFile(commentsID));
 
     return StoryContent(
         timestamp: timestamp,

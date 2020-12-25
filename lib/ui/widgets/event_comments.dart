@@ -5,7 +5,7 @@ import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
-import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -34,7 +34,7 @@ class CommentWidget extends StatefulWidget {
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
-  List<AdventureComment> adventureComments = [];
+  List<StoryComment> adventureComments = [];
   bool uploading = false;
 
   @override

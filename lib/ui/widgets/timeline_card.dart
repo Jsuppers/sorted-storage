@@ -15,8 +15,8 @@ import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
-import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/media_progress.dart';
+import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
@@ -326,8 +326,8 @@ class _TimelineCardState extends State<TimelineCard> {
                       }
                     }
 
-                    AdventureComment eventComment =
-                        AdventureComment(comment: comment, user: user);
+                    StoryComment eventComment =
+                        StoryComment(comment: comment, user: user);
 
                     BlocProvider.of<CommentHandlerBloc>(context).add(
                         CommentHandlerEvent(

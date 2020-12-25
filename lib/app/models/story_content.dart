@@ -1,4 +1,4 @@
-import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/sub_event.dart';
 
@@ -7,23 +7,23 @@ class StoryContent {
   // ignore: public_member_api_docs
   StoryContent(
       {this.timestamp,
-        this.title = '',
-        this.emoji = '',
-        this.images,
-        this.description = '',
-        this.folderID,
-        this.settingsID,
-        this.subEvents,
-        this.commentsID,
-        this.comments}) {
+      this.title = '',
+      this.emoji = '',
+      this.images,
+      this.description = '',
+      this.folderID,
+      this.settingsID,
+      this.subEvents,
+      this.commentsID,
+      this.comments}) {
     images ??= <String, StoryMedia>{};
     subEvents ??= <SubEvent>[];
-    comments ??= AdventureComments();
+    comments ??= StoryComments();
   }
 
   /// clones a story content
-  StoryContent.clone(StoryContent event):
-        timestamp = event.timestamp,
+  StoryContent.clone(StoryContent event)
+      : timestamp = event.timestamp,
         title = event.title,
         emoji = event.emoji,
         images = Map<String, StoryMedia>.from(event.images),
@@ -32,7 +32,7 @@ class StoryContent {
         commentsID = event.commentsID,
         folderID = event.folderID,
         subEvents = List<SubEvent>.from(event.subEvents),
-        comments = AdventureComments.clone(event.comments);
+        comments = StoryComments.clone(event.comments);
 
   /// timestamp of the story
   int timestamp;
@@ -62,7 +62,7 @@ class StoryContent {
   String permissionID;
 
   /// comments for this story
-  AdventureComments comments;
+  StoryComments comments;
 
   /// a list of all the sub events for this story
   List<SubEvent> subEvents;
