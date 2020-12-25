@@ -1,3 +1,4 @@
+/// possible types used for states and events
 enum LocalStoriesType {
   initial_state,
   picked_image,

@@ -4,18 +4,20 @@ import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/models/user.dart' as usr;
 
+/// This bloc handles the signing in and out of users
 class AuthenticationBloc extends Bloc<AuthenticationEvent, usr.User> {
-  final _googleSignIn = new GoogleSignIn(
-    scopes: [
+  /// constructor creates the bloc and listens for user changes
+  AuthenticationBloc() : super(null) {
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount user) {
+      add(AuthenticationNewUserEvent(user));
+    });
+  }
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
       DriveApi.DriveFileScope,
     ],
   );
-
-  AuthenticationBloc() : super(null) {
-    _googleSignIn.onCurrentUserChanged.listen((user) {
-      this.add(AuthenticationNewUserEvent(user));
-    });
-  }
 
   @override
   Stream<usr.User> mapEventToState(AuthenticationEvent event) async* {

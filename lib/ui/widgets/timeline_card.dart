@@ -10,6 +10,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
@@ -27,9 +28,9 @@ import 'package:web/ui/widgets/timeline_event_card.dart';
 class TimelineData {
   TimelineData(
       {this.mainStory,
-        this.subEvents,
-        this.locked = true,
-        this.saving = false});
+      this.subEvents,
+      this.locked = true,
+      this.saving = false});
 
   bool saving;
   bool locked;
@@ -418,14 +419,9 @@ class _TimelineCardState extends State<TimelineCard> {
 
                     BlocProvider.of<CommentHandlerBloc>(context).add(
                         CommentHandlerEvent(
-                            CommentHandlerType.uploading_comments_start,
-                            folderId: widget.folderId,
+                            CommentHandlerType.uploadingCommentsStart,
+                            folderID: widget.folderId,
                             data: eventComment));
-
-//                    BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-//                        TimelineMessageType.uploading_comments_start,
-//                        data: eventComment,
-//                        folderId: widget.folderId));
                   },
                 );
               })
