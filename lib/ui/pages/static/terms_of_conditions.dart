@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
+/// Terms page
 class TermsPage extends StatelessWidget {
-  static const String route = '/terms-of-conditions';
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future:
-            DefaultAssetBundle.of(context).loadString('assets/docs/terms.txt'),
-        builder: (context, document) {
+    const String file = 'assets/docs/terms.txt';
+    return FutureBuilder<String>(
+        future: DefaultAssetBundle.of(context).loadString(file),
+        builder: (BuildContext context, AsyncSnapshot<String> document) {
           return Padding(
             padding: const EdgeInsets.all(20.0),
             child: Card(
@@ -19,7 +18,7 @@ class TermsPage extends StatelessWidget {
                   style: DefaultTextStyle.of(context).style,
                   children: <TextSpan>[
                     TextSpan(
-                      text: document.data as String,
+                      text: document.data,
                       style: TextStyle(
                           color: Colors.black.withOpacity(0.6),
                           fontSize: 14,

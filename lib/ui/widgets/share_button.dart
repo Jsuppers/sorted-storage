@@ -6,11 +6,15 @@ import 'package:web/app/blocs/sharing/sharing_event.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
 
+// ignore: public_member_api_docs
 class ShareButton extends StatefulWidget {
-  final bool shared;
-  final bool loading;
-
+  // ignore: public_member_api_docs
   const ShareButton({Key key, this.shared, this.loading}) : super(key: key);
+
+  // ignore: public_member_api_docs
+  final bool shared;
+  // ignore: public_member_api_docs
+  final bool loading;
 
   @override
   _ShareButtonState createState() => _ShareButtonState();
@@ -41,12 +45,12 @@ class _ShareButtonState extends State<ShareButton> {
           BlocProvider.of<SharingBloc>(context).add(StartSharingEvent());
         }
       },
-      child: Text(
-        widget.shared ? "stop sharing" : "share",
-        style: myThemeData.textTheme.button,
-      ),
       color: myThemeData.primaryColorDark,
       textColor: Colors.white,
+      child: Text(
+        widget.shared ? 'stop sharing' : 'share',
+        style: myThemeData.textTheme.button,
+      ),
     );
   }
 }

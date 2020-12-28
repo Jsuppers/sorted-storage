@@ -3,8 +3,10 @@ import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/services/google_drive.dart';
 
+/// service for retrying
 class RetryService {
-  static Future getThumbnail(
+  /// get thumbnail image for a file
+  static Future<dynamic> getThumbnail(
       GoogleDrive storage,
       String folderID,
       String imageKey,
@@ -12,20 +14,21 @@ class RetryService {
       Map<String, List<String>> uploadingImages,
       Function successCallback,
       {int maxTries = 10}) async {
-    int exp = 10;
+    const int exp = 10;
+    int currentTry = maxTries;
     if (maxTries > exp) {
-      maxTries = 10;
+      currentTry = 10;
     }
     if (maxTries == 0) {
       return null;
     }
-    return Future.delayed(Duration(seconds: (exp - maxTries) * 2), () async {
+    return Future<dynamic>.delayed(Duration(seconds: (exp - currentTry) * 2),
+        () async {
       if (images == null || !images.containsKey(imageKey)) {
-        print('images $images');
         return null;
       }
 
-      File mediaFile = await storage.getFile(imageKey,
+      final File mediaFile = await storage.getFile(imageKey,
           filter: 'id,hasThumbnail,thumbnailLink') as File;
 
       if (mediaFile.hasThumbnail) {
@@ -38,11 +41,12 @@ class RetryService {
       print('waiting for a thumbnail for image: $imageKey');
       return getThumbnail(
           storage, folderID, imageKey, images, uploadingImages, successCallback,
-          maxTries: maxTries - 1);
+          maxTries: currentTry - 1);
     });
   }
 
-  static Future checkNeedsRefreshing(
+  /// a recursive wait method to keep checking if a thumbnail URL is available
+  static Future<dynamic> checkNeedsRefreshing(
       String folderID,
       Map<String, List<String>> uploadingImages,
       StoryContent localCopy,
@@ -52,8 +56,9 @@ class RetryService {
     if (maxTries == 0) {
       return null;
     }
-    return Future.delayed(Duration(seconds: seconds), () async {
-      for (MapEntry entry in localCopy.images.entries) {
+    return Future<dynamic>.delayed(Duration(seconds: seconds), () async {
+      for (final MapEntry<String, StoryMedia> entry
+          in localCopy.images.entries) {
         if (entry.value.thumbnailURL == null) {
           print("still waiting for a thumbnail: ${entry.key}");
           return checkNeedsRefreshing(

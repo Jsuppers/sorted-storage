@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:web/app/models/page_content.dart';
 
+/// template for displaying a page
 class PageTemplate extends StatelessWidget {
-  final List<PageItemContent> contentList;
+  // ignore: public_member_api_docs
+  const PageTemplate(this._contentList);
 
-  PageTemplate(this.contentList);
+  final List<PageItemContent> _contentList;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (BuildContext context, BoxConstraints constraints) {
         return Column(
-          children: [
-            ...createContent(constraints),
-          ],
+          children: _createContent(constraints),
         );
       },
     );
   }
 
-  List<Widget> createContent(BoxConstraints constraints) {
+  List<Widget> _createContent(BoxConstraints constraints) {
     bool borderless = true;
     bool mobile = false;
-    double width = constraints.biggest.width;
-    double padding = 40.0;
+    final double width = constraints.biggest.width;
+    const double padding = 40.0;
     double contentWidth = (constraints.biggest.width) / 2 - padding;
 
     if (constraints.maxWidth <= 800) {
@@ -31,26 +31,30 @@ class PageTemplate extends StatelessWidget {
       mobile = true;
     }
 
-    List<Widget> children = [];
-    for (PageItemContent content in contentList) {
+    final List<Widget> children = <Widget>[];
+    for (final PageItemContent content in _contentList) {
       if (borderless) {
-        children.add(_BorderlessContent(
-          mobile: mobile,
-          width: width,
-          horizontalPadding: padding,
-          widthImage: contentWidth,
-          widthText: contentWidth,
-          content: content,
-        ));
+        children.add(
+          _BorderlessContent(
+            mobile: mobile,
+            width: width,
+            horizontalPadding: padding,
+            widthImage: contentWidth,
+            widthText: contentWidth,
+            content: content,
+          ),
+        );
       } else {
-        children.add(_BorderedContent(
-          mobile: mobile,
-          width: width,
-          horizontalPadding: padding,
-          widthImage: contentWidth,
-          widthText: contentWidth,
-          content: content,
-        ));
+        children.add(
+          _BorderedContent(
+            mobile: mobile,
+            width: width,
+            horizontalPadding: padding,
+            widthImage: contentWidth,
+            widthText: contentWidth,
+            content: content,
+          ),
+        );
       }
       borderless = !borderless;
     }
@@ -59,13 +63,6 @@ class PageTemplate extends StatelessWidget {
 }
 
 class _BorderlessContent extends StatelessWidget {
-  final double width;
-  final double widthText;
-  final double widthImage;
-  final double horizontalPadding;
-  final PageItemContent content;
-  final bool mobile;
-
   const _BorderlessContent(
       {Key key,
       this.width,
@@ -76,19 +73,25 @@ class _BorderlessContent extends StatelessWidget {
       this.mobile})
       : super(key: key);
 
+  final double width;
+  final double widthText;
+  final double widthImage;
+  final double horizontalPadding;
+  final PageItemContent content;
+  final bool mobile;
+
   @override
   Widget build(BuildContext context) {
-    List<Widget> children;
+    final List<Widget> children = <Widget>[];
 
     if (content.imageURL == null) {
-      children = [
-        _TextWidget(width: widthText + widthImage, content: content),
-      ];
+      children
+          .add(_TextWidget(width: widthText + widthImage, content: content));
     } else {
-      children = [
+      children.addAll(<Widget>[
         _TextWidget(width: widthText, content: content),
         _ImageWidget(imageUri: content.imageURL, width: widthImage)
-      ];
+      ]);
     }
 
     return Padding(
@@ -104,13 +107,6 @@ class _BorderlessContent extends StatelessWidget {
 }
 
 class _BorderedContent extends StatelessWidget {
-  final double width;
-  final double widthText;
-  final double widthImage;
-  final double horizontalPadding;
-  final PageItemContent content;
-  final bool mobile;
-
   const _BorderedContent(
       {this.width,
       this.content,
@@ -119,19 +115,26 @@ class _BorderedContent extends StatelessWidget {
       this.horizontalPadding,
       this.mobile});
 
+  final double width;
+  final double widthText;
+  final double widthImage;
+  final double horizontalPadding;
+  final PageItemContent content;
+  final bool mobile;
+
   @override
   Widget build(BuildContext context) {
-    List<Widget> children;
+    final List<Widget> children = <Widget>[];
 
     if (content.imageURL == null) {
-      children = [
+      children.add(
         _TextWidget(width: widthText + widthImage, content: content),
-      ];
+      );
     } else {
-      children = [
+      children.addAll(<Widget>[
         _ImageWidget(imageUri: content.imageURL, width: widthImage),
         _TextWidget(width: widthText, content: content)
-      ];
+      ]);
     }
 
     return Padding(
@@ -140,18 +143,16 @@ class _BorderedContent extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: 200),
+            constraints: const BoxConstraints(minHeight: 200),
             child: Container(
               width: width,
               color: Colors.white,
               child: mobile
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: children)
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: children),
             ),
           ),
@@ -181,6 +182,7 @@ class _CallToActionButton extends StatelessWidget {
           content.callToActionCallback();
         }
       },
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 40.0),
         child: Text(
@@ -188,27 +190,25 @@ class _CallToActionButton extends StatelessWidget {
           style: Theme.of(context).textTheme.headline5,
         ),
       ),
-      color: Colors.white,
     );
   }
 }
 
 class _TextWidget extends StatelessWidget {
+  const _TextWidget({Key key, this.width, this.content}) : super(key: key);
   final double width;
   final PageItemContent content;
 
-  const _TextWidget({Key key, this.width, this.content}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: width,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
+          children: <Widget>[
+            const SizedBox(height: 20),
             Text(content.title, style: Theme.of(context).textTheme.headline1),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -227,23 +227,22 @@ class _TextWidget extends StatelessWidget {
 }
 
 class _ImageWidget extends StatelessWidget {
+  const _ImageWidget({Key key, this.imageUri, this.width}) : super(key: key);
   final String imageUri;
   final double width;
 
-  const _ImageWidget({Key key, this.imageUri, this.width}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: width,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           Container(),
           ConstrainedBox(
             constraints: BoxConstraints(maxWidth: width),
             child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              borderRadius: const BorderRadius.all(Radius.circular(8.0)),
               child: Image.asset(
                 imageUri,
               ),

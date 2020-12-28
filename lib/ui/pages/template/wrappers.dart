@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
@@ -16,53 +14,58 @@ import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
 
+/// layout widget
 class LayoutWrapper extends StatelessWidget {
-  final Widget widget;
-  final bool requiresAuthentication;
-  final bool isViewMode;
-  final String targetRoute;
-  final bool includeNavigation;
-
+  // ignore: public_member_api_docs
   const LayoutWrapper(
       {Key key,
       this.widget,
       this.requiresAuthentication = false,
       this.targetRoute,
-      this.includeNavigation = true,
       this.isViewMode = false})
       : super(key: key);
 
+  /// main widget
+  final Widget widget;
+
+  /// whether this widget requires a authenticated user
+  final bool requiresAuthentication;
+
+  /// whether this widget is on the
+  final bool isViewMode;
+
+  /// the targeted route
+  final String targetRoute;
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthenticationBloc, usr.User>(builder: (context, user) {
-      if (this.requiresAuthentication || this.isViewMode) {
-        if (user == null && !this.isViewMode) {
+    return BlocBuilder<AuthenticationBloc, usr.User>(
+        builder: (BuildContext context, usr.User user) {
+      if (requiresAuthentication || isViewMode) {
+        if (user == null && !isViewMode) {
           Widget redirectWidget;
-          if (targetRoute == "/") {
+          if (targetRoute == '/') {
             redirectWidget = HomePage();
           } else {
-            redirectWidget = LoginPage(targetRoute: targetRoute);
+            redirectWidget = LoginPage();
           }
           return Content(
               widget: redirectWidget,
-              user: user,
-              includeNavigation: includeNavigation,
+              includeNavigation: !isViewMode,
               requiresAuthentication: requiresAuthentication);
         }
-        if (!this.isViewMode) {
+        if (!isViewMode) {
           BlocProvider.of<CloudStoriesBloc>(context)
-              .add(CloudStoriesEvent(CloudStoriesType.retrieveStories));
+              .add(const CloudStoriesEvent(CloudStoriesType.retrieveStories));
         }
         return Content(
             widget: widget,
-            user: user,
-            includeNavigation: includeNavigation,
+            includeNavigation: !isViewMode,
             requiresAuthentication: requiresAuthentication);
       } else {
         return Content(
           widget: widget,
-          user: user,
-          includeNavigation: includeNavigation,
+          includeNavigation: !isViewMode,
           requiresAuthentication: requiresAuthentication,
         );
       }
@@ -70,18 +73,23 @@ class LayoutWrapper extends StatelessWidget {
   }
 }
 
+/// content styling
 class Content extends StatefulWidget {
+  // ignore: public_member_api_docs
   const Content({
     Key key,
     @required this.widget,
-    this.user,
     this.includeNavigation = true,
     this.requiresAuthentication,
   }) : super(key: key);
 
+  /// main widget
   final Widget widget;
-  final usr.User user;
+
+  /// should include the navigation bar
   final bool includeNavigation;
+
+  /// whether this widget requires a authenticated user
   final bool requiresAuthentication;
 
   @override
@@ -92,29 +100,30 @@ class _ContentState extends State<Content> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => BlocProvider.of<CookieNoticeBloc>(context).showCookie(context));
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => BlocProvider.of<CookieNoticeBloc>(context).showCookie(context));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationDrawer(user: widget.user),
+      drawer: NavigationDrawer(),
       body: ResponsiveBuilder(
-        builder: (context, sizingInformation) => Container(
+        builder: (BuildContext context, SizingInformation sizingInformation) =>
+            Container(
           width: sizingInformation.screenSize.width,
           height: sizingInformation.screenSize.height,
           decoration: myBackgroundDecoration,
           child: ListView(
-            scrollDirection: Axis.vertical,
-            children: [
+            children: <Widget>[
               Column(
-                children: [
-                  widget.includeNavigation
-                      ? NavigationBar(user: widget.user)
-                      : Container(),
+                children: <Widget>[
+                  if (widget.includeNavigation)
+                    NavigationBar()
+                  else
+                    Container(),
                   widget.widget,
-                  Footer(width: sizingInformation.screenSize.width)
+                  Footer(sizingInformation.screenSize.width)
                 ],
               )
             ],

@@ -336,7 +336,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
 
     final String folderID = await _storage.uploadMedia(
-        parentId, Constants.SETTINGS_FILE, fileContent.length, mediaStream,
+        parentId, Constants.settingsFile, fileContent.length, mediaStream,
         mimeType: 'application/json');
     return folderID;
   }
@@ -419,13 +419,13 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       String mediaFolderID;
 
       final String query =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.ROOT_FOLDER}' and trashed=false";
+          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
       final FileList folderParent = await _storage.listFiles(query);
       String parentId;
 
       if (folderParent.files.isEmpty) {
         final File fileMetadata = File();
-        fileMetadata.name = Constants.ROOT_FOLDER;
+        fileMetadata.name = Constants.rootFolder;
         fileMetadata.mimeType = 'application/vnd.google-apps.folder';
         fileMetadata.description = "please don't modify this folder";
         final File rt = await _storage.createFile(fileMetadata);
@@ -435,12 +435,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       }
 
       final String query2 =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.MEDIA_FOLDER}' and '$parentId' in parents and trashed=false";
+          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.mediaFolder}' and '$parentId' in parents and trashed=false";
       final FileList folder = await _storage.listFiles(query2);
 
       if (folder.files.isEmpty) {
         final File mediaFolder = File();
-        mediaFolder.name = Constants.MEDIA_FOLDER;
+        mediaFolder.name = Constants.mediaFolder;
         mediaFolder.parents = <String>[parentId];
         mediaFolder.mimeType = 'application/vnd.google-apps.folder';
         mediaFolder.description = "please don't modify this folder";
@@ -477,9 +477,9 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           media.thumbnailURL = file.thumbnailLink;
         }
         images.putIfAbsent(file.id, () => media);
-      } else if (file.name == Constants.SETTINGS_FILE) {
+      } else if (file.name == Constants.settingsFile) {
         settingsID = file.id;
-      } else if (file.name == Constants.COMMENTS_FILE) {
+      } else if (file.name == Constants.commentsFile) {
         commentsID = file.id;
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final int timestamp = int.tryParse(file.name);

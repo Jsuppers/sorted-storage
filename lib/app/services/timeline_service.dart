@@ -1,15 +1,17 @@
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/timeline_data.dart';
 
+/// service for various functions regarding the timeline
 class TimelineService {
-  static StoryContent getEventWithFolderID(String eventID, String folderID,
+  /// Retrieves a story with the given folder ID
+  static StoryContent getStoryWithFolderID(String parentID, String folderID,
       Map<String, StoryTimelineData> timelineEvent) {
-    StoryTimelineData event = timelineEvent[eventID];
+    final StoryTimelineData event = timelineEvent[parentID];
     if (event.mainStory.folderID == folderID) {
       return event.mainStory;
     } else {
       for (int i = 0; i < event.subEvents.length; i++) {
-        StoryContent element = event.subEvents[i];
+        final StoryContent element = event.subEvents[i];
         if (element.folderID == folderID) {
           return element;
         }
@@ -19,7 +21,7 @@ class TimelineService {
   }
 
   /// Creates a unique temp name based on the parents ID and current time
-  static String createUniqueTempName(String parentID) {
+  static String createUniqueTempStoryName(String parentID) {
     final int milliseconds = DateTime.now().millisecondsSinceEpoch;
     return 'temp_${parentID}_${milliseconds.toString()}';
   }

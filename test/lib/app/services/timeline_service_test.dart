@@ -21,7 +21,7 @@ main() {
 
       timelineEvent.putIfAbsent(eventID, () => timelineData);
 
-      StoryContent got = TimelineService.getEventWithFolderID(
+      StoryContent got = TimelineService.getStoryWithFolderID(
           eventID, folderID, timelineEvent);
 
       expect(expected, got);
@@ -44,7 +44,7 @@ main() {
 
       timelineEvent.putIfAbsent(eventID, () => timelineData);
 
-      StoryContent got = TimelineService.getEventWithFolderID(
+      StoryContent got = TimelineService.getStoryWithFolderID(
           eventID, folderID, timelineEvent);
 
       expect(expected, got);
@@ -65,7 +65,7 @@ main() {
 
       timelineEvent.putIfAbsent(eventID, () => timelineData);
 
-      StoryContent got = TimelineService.getEventWithFolderID(
+      StoryContent got = TimelineService.getStoryWithFolderID(
           eventID, folderID, timelineEvent);
 
       expect(got, null);

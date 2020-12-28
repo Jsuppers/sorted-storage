@@ -9,11 +9,16 @@ import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/share_button.dart';
 
+// ignore: public_member_api_docs
 class ShareWidget extends StatefulWidget {
+  // ignore: public_member_api_docs
+  const ShareWidget({Key key, this.folderID, this.state}) : super(key: key);
+
+  // ignore: public_member_api_docs
   final String folderID;
+  // ignore: public_member_api_docs
   final SharingState state;
 
-  const ShareWidget({Key key, this.folderID, this.state}) : super(key: key);
 
   @override
   _ShareWidgetState createState() => _ShareWidgetState();
@@ -24,42 +29,41 @@ class _ShareWidgetState extends State<ShareWidget> {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController controller = new TextEditingController();
-    bool shared = (widget.state is SharingSharedState);
+    final TextEditingController controller = TextEditingController();
+    final bool shared = widget.state is SharingSharedState;
     if (shared) {
-      controller.text = "${Constants.WEBSITE_URL}/view/${widget.folderID}";
+      controller.text = '${Constants.websiteURL}/view/${widget.folderID}';
     }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        widget.state.errorMessage != null ? Row(
+      children: <Widget>[
+        if (widget.state.errorMessage != null) Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error),
-            SizedBox(width: 5),
+          children: <Widget>[
+            const Icon(Icons.error),
+            const SizedBox(width: 5),
             Text(widget.state.errorMessage),
           ],
-        ): Container(),
-        shared
-            ? Container(
-          padding: EdgeInsets.all(20),
+        ) else Container(),
+        if (shared) Container(
+          padding: const EdgeInsets.all(20),
           width: 300,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            children: <Widget>[
               IconButton(
-                icon: Icon(Icons.copy, size: 20),
+                icon: const Icon(Icons.copy, size: 20),
                 iconSize: 20,
                 splashRadius: 20,
                 padding: EdgeInsets.zero,
                 onPressed: () => Clipboard.setData(
                     ClipboardData(text: controller.text)),
               ),
-              SizedBox(width: 10),
-              Container(
+              const SizedBox(width: 10),
+              SizedBox(
                 width: 200,
-                child: new TextField(
+                child: TextField(
                     controller: controller,
                     style: myThemeData.textTheme.bodyText1,
                     minLines: 2,
@@ -68,47 +72,45 @@ class _ShareWidgetState extends State<ShareWidget> {
               )
             ],
           ),
-        )
-            : Padding(
-          padding: const EdgeInsets.all(20.0),
+        ) else const Padding(
+          padding: EdgeInsets.all(20.0),
           child: Text(
-              "To make this event publicly visible click the share button."),
+              'To make this event publicly visible click the share button.'),
         ),
         ShareButton(
             key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
             shared: shared,
             loading: false),
         Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: shared
-              ? Text(
-              "Everyone with this link can see and comment on your content. Be careful who you give it to!")
+              ? const Text(
+              'Everyone with this link can see and comment on your content. '
+                  'Be careful who you give it to!')
               : Container(),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                MaterialButton(
-                    minWidth: 100,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.cancel,
-                          color: Colors.black,
-                        ),
-                        SizedBox(width: 5),
-                        Text("close"),
-                      ],
-                    ),
-                    color: Colors.white,
-                    textColor: Colors.black,
-                    onPressed: () => BlocProvider.of<NavigationBloc>(context)
-                        .add(NavigatorPopEvent())),
-              ],
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              MaterialButton(
+                  minWidth: 100,
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                      .add(NavigatorPopEvent()),
+                  child: Row(
+                    children: const <Widget>[
+                      Icon(
+                        Icons.cancel,
+                        color: Colors.black,
+                      ),
+                      SizedBox(width: 5),
+                      Text('close'),
+                    ],
+                  )),
+            ],
           ),
         ),
       ],

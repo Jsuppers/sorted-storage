@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
+/// Policy page
 class PolicyPage extends StatelessWidget {
-  static const String route = '/privacy-policy';
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: DefaultAssetBundle.of(context).loadString('assets/docs/privacy.txt'),
-        builder: (context, document) {
+    const String file = 'assets/docs/privacy.txt';
+    return FutureBuilder<String>(
+        future: DefaultAssetBundle.of(context).loadString(file),
+        builder: (BuildContext context, AsyncSnapshot<String> document) {
           return Padding(
             padding: const EdgeInsets.all(20.0),
             child: Card(
@@ -18,7 +19,7 @@ class PolicyPage extends StatelessWidget {
                       style: DefaultTextStyle.of(context).style,
                       children: <TextSpan>[
                         TextSpan(
-                          text: document.data as String,
+                          text: document.data,
                           style: TextStyle(
                               color: Colors.black.withOpacity(0.6),
                               fontSize: 14,

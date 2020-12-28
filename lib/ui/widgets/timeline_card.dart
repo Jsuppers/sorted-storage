@@ -26,21 +26,29 @@ import 'package:web/ui/widgets/event_comments.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
+// ignore: public_member_api_docs
 class TimelineCard extends StatefulWidget {
-  final double width;
-  final double height;
-  final StoryTimelineData event;
-  final String folderId;
-  final bool viewMode;
-
+  // ignore: public_member_api_docs
   const TimelineCard(
       {Key key,
-      @required this.width,
-      this.height,
-      @required this.event,
-      this.folderId,
-      this.viewMode = false})
+        @required this.width,
+        this.height,
+        @required this.event,
+        this.folderId,
+        this.viewMode = false})
       : super(key: key);
+
+  // ignore: public_member_api_docs
+  final double width;
+  // ignore: public_member_api_docs
+  final double height;
+  // ignore: public_member_api_docs
+  final StoryTimelineData event;
+  // ignore: public_member_api_docs
+  final String folderId;
+  // ignore: public_member_api_docs
+  final bool viewMode;
+
 
   @override
   _TimelineCardState createState() => _TimelineCardState();
@@ -62,9 +70,9 @@ class _TimelineCardState extends State<TimelineCard> {
       child: locked
           ? Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 ButtonWithIcon(
-                    text: "share",
+                    text: 'share',
                     icon: Icons.share,
                     onPressed: () {
                       DialogService.shareDialog(
@@ -76,9 +84,9 @@ class _TimelineCardState extends State<TimelineCard> {
                     backgroundColor: Colors.white,
                     textColor: Colors.black,
                     iconColor: Colors.black),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ButtonWithIcon(
-                    text: "edit",
+                    text: 'edit',
                     icon: Icons.edit,
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
@@ -93,9 +101,9 @@ class _TimelineCardState extends State<TimelineCard> {
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 ButtonWithIcon(
-                    text: "cancel",
+                    text: 'cancel',
                     icon: Icons.cancel,
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
@@ -108,9 +116,9 @@ class _TimelineCardState extends State<TimelineCard> {
                     backgroundColor: Colors.white,
                     textColor: Colors.black,
                     iconColor: Colors.black),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ButtonWithIcon(
-                    text: "delete",
+                    text: 'delete',
                     icon: Icons.delete,
                     onPressed: () {
                       BlocProvider.of<CloudStoriesBloc>(context).add(
@@ -119,9 +127,9 @@ class _TimelineCardState extends State<TimelineCard> {
                     },
                     width: width,
                     backgroundColor: Colors.redAccent),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ButtonWithIcon(
-                    text: "save",
+                    text: 'save',
                     icon: Icons.save,
                     onPressed: () async {
                       BlocProvider.of<CloudStoriesBloc>(context).add(
@@ -151,12 +159,12 @@ class _TimelineCardState extends State<TimelineCard> {
           folderID: widget.folderId));
     }
     if (adventure == null) {
-      return FullPageLoadingLogo(backgroundColor: Colors.white);
+      return const FullPageLoadingLogo(backgroundColor: Colors.white);
     }
     return MultiBlocListener(
-      listeners: [
+      listeners: <BlocListener<dynamic, dynamic>>[
         BlocListener<CloudStoriesBloc, CloudStoriesState>(
-          listener: (context, state) {
+          listener: (BuildContext context, CloudStoriesState state) {
             if (state.type == CloudStoriesType.syncingStart &&
                 state.folderID == widget.folderId) {
               setState(() {
@@ -219,7 +227,7 @@ class _TimelineCardState extends State<TimelineCard> {
           child: Column(
             children: [
               EventCard(
-                eventFolderID: adventure.mainStory.folderID,
+                storyFolderID: adventure.mainStory.folderID,
                 saving: saving,
                 locked: locked,
                 controls: widget.viewMode
@@ -227,7 +235,7 @@ class _TimelineCardState extends State<TimelineCard> {
                     : createHeader(widget.width, context),
                 width: widget.width,
                 height: widget.height,
-                event: adventure.mainStory,
+                story: adventure.mainStory,
               ),
               Visibility(
                 visible: !locked,
@@ -248,7 +256,7 @@ class _TimelineCardState extends State<TimelineCard> {
                                   parentID: adventure.mainStory.folderID,
                                   folderID: widget.folderId));
                         },
-                        width: Constants.SMALL_WIDTH,
+                        width: Constants.minScreenWidth,
                         backgroundColor: Colors.white,
                         textColor: Colors.black,
                         iconColor: Colors.black),
@@ -260,7 +268,7 @@ class _TimelineCardState extends State<TimelineCard> {
                   padding: const EdgeInsets.all(20.0),
                   child: Card(
                       child: EventCard(
-                          eventFolderID: adventure.mainStory.folderID,
+                          storyFolderID: adventure.mainStory.folderID,
                           saving: saving,
                           locked: locked,
                           controls: Visibility(
@@ -306,7 +314,7 @@ class _TimelineCardState extends State<TimelineCard> {
                               visible: !locked),
                           width: widget.width,
                           height: widget.height,
-                          event: adventure.subEvents[index])),
+                          story: adventure.subEvents[index])),
                 );
               }),
               BlocBuilder<AuthenticationBloc, usr.User>(
@@ -444,8 +452,8 @@ class ButtonWithIcon extends StatelessWidget {
   Widget buttonWithIcon(String text, IconData icon, Function onPressed,
       Color iconColor, Color backgroundColor, Color textColor, double width) {
     return MaterialButton(
-        minWidth: width >= Constants.SMALL_WIDTH ? 100 : 30,
-        child: width >= Constants.SMALL_WIDTH
+        minWidth: width >= Constants.minScreenWidth ? 100 : 30,
+        child: width >= Constants.minScreenWidth
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,

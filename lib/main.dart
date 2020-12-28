@@ -23,6 +23,7 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
+/// Main Parent Widget
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
@@ -38,7 +39,8 @@ class _MyAppState extends State<MyApp> {
   CloudStoriesBloc _cloudStoriesBloc;
   CommentHandlerBloc _commentHandler;
   CookieNoticeBloc _cookieNoticeBloc;
-  Map<String, StoryTimelineData> _localStories = Map();
+  final Map<String, StoryTimelineData> _localStories =
+      <String, StoryTimelineData>{};
 
   @override
   void initState() {
@@ -71,7 +73,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [
+      providers: <BlocProvider<dynamic>>[
         BlocProvider<DriveBloc>(
           create: (BuildContext context) => _driveBloc,
         ),
@@ -95,15 +97,15 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MultiBlocListener(
-        listeners: [
+        listeners: <BlocListener<dynamic, dynamic>>[
           BlocListener<AuthenticationBloc, usr.User>(
-            listener: (context, user) {
+            listener: (BuildContext context, usr.User user) {
               _driveBloc.add(InitialDriveEvent(user: user));
             },
           ),
           BlocListener<DriveBloc, DriveApi>(
-            listener: (context, driveApi) {
-              _googleDrive.setDrive(driveApi);
+            listener: (BuildContext context, DriveApi driveApi) {
+              _googleDrive.driveApi = driveApi;
             },
           ),
         ],

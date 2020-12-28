@@ -3,29 +3,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
+/// The footer which contains the privacy policy and terms of conditions
 class Footer extends StatelessWidget {
-  final double width;
+  /// constructor which sets the width
+  const Footer(this._width, {Key key}) : super(key: key);
 
-  const Footer({Key key, this.width}) : super(key: key);
+  final double _width;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
-      child: Container(
-        width: width,
+      child: SizedBox(
+        width: _width,
         child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+            children: <Widget>[
               MaterialButton(
                 onPressed: () => BlocProvider.of<NavigationBloc>(context)
                     .add(NavigateToPrivacyEvent()),
                 child: Text('Privacy Policy',
                     style: Theme.of(context).textTheme.bodyText1),
               ),
-              Text(" - "),
+              const Text(' - '),
               MaterialButton(
                 onPressed: () => BlocProvider.of<NavigationBloc>(context)
                     .add(NavigateToTermsEvent()),

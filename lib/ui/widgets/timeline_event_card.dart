@@ -21,25 +21,41 @@ import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
+///
 class EventCard extends StatefulWidget {
-  final Widget controls;
-  final double width;
-  final double height;
-  final StoryContent event;
-  final bool saving;
-  final bool locked;
-  final String eventFolderID;
-
+  // ignore: public_member_api_docs
   const EventCard(
       {Key key,
-      this.width,
-      this.height = double.infinity,
-      this.event,
-      this.controls,
-      this.saving,
-      this.eventFolderID,
-      this.locked})
+        this.width,
+        this.height = double.infinity,
+        this.story,
+        this.controls,
+        this.saving,
+        this.storyFolderID,
+        this.locked})
       : super(key: key);
+
+  /// controls of the card e.g. save, edit, cancel
+  final Widget controls;
+
+  /// width of the card
+  final double width;
+
+  /// height of the card
+  final double height;
+
+  /// the story this card is related to
+  final StoryContent story;
+
+  /// whether we are currently saving
+  final bool saving;
+
+  /// whether the card is locked
+  final bool locked;
+
+  /// the folder ID of this story
+  final String storyFolderID;
+
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -49,8 +65,8 @@ class _TimelineEventCardState extends State<EventCard> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   DateTime selectedDate;
-  final _formKey = GlobalKey<FormState>();
-  final formatter = new DateFormat('dd MMMM, yyyy');
+  final GlobalKey _formKey = GlobalKey<FormState>();
+  final DateFormat formatter = DateFormat('dd MMMM, yyyy');
   String formattedDate;
   List<String> uploadingImages;
   bool saving;
@@ -59,8 +75,8 @@ class _TimelineEventCardState extends State<EventCard> {
   void initState() {
     super.initState();
     saving = widget.saving;
-    selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.event.timestamp);
-    uploadingImages = [];
+    selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.story.timestamp);
+    uploadingImages = <String>[];
     formattedDate = formatter.format(selectedDate);
   }
 
@@ -72,19 +88,19 @@ class _TimelineEventCardState extends State<EventCard> {
         height: 40,
         onPressed: () => DialogService.emojiDialog(
           context,
-          parentID: widget.eventFolderID,
-          folderID: widget.event.folderID,
+          parentID: widget.storyFolderID,
+          folderID: widget.story.folderID,
         ),
-        child: widget.event.emoji == ""
-            ? Text(
-                "📅",
+        child: widget.story.emoji.isEmpty
+            ? const Text(
+                '📅',
                 style: TextStyle(
                   height: 1.2,
                 ),
               )
             : Text(
-                widget.event.emoji,
-                style: TextStyle(
+                widget.story.emoji,
+                style: const TextStyle(
                   height: 1.2,
                 ),
               ),
@@ -98,7 +114,7 @@ class _TimelineEventCardState extends State<EventCard> {
       height: 38,
       width: 130,
       child: DateTimeFormField(
-        decoration: new InputDecoration(
+        decoration: const InputDecoration(
             errorBorder: InputBorder.none,
             border: InputBorder.none,
             focusedBorder: InputBorder.none,
@@ -113,7 +129,6 @@ class _TimelineEventCardState extends State<EventCard> {
           color: myThemeData.primaryColorLight,
         ),
         label: null,
-        mode: DateFieldPickerMode.date,
         initialValue: selectedDate,
         onDateSelected: (DateTime date) {
           if (widget.saving) {
@@ -122,8 +137,8 @@ class _TimelineEventCardState extends State<EventCard> {
           setState(
             () => BlocProvider.of<LocalStoriesBloc>(context).add(
               LocalStoriesEvent(LocalStoriesType.editTimestamp,
-                  parentID: widget.eventFolderID,
-                  folderID: widget.event.folderID,
+                  parentID: widget.storyFolderID,
+                  folderID: widget.story.folderID,
                   data: date.millisecondsSinceEpoch),
             ),
           );
@@ -134,31 +149,32 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    titleController.text = widget.event.title;
-    descriptionController.text = widget.event.description;
+    titleController.text = widget.story.title;
+    descriptionController.text = widget.story.description;
 
-    List<Widget> cards = [];
-    if (widget.event.images != null) {
-      for (MapEntry<String, StoryMedia> image in widget.event.images.entries) {
+    final List<Widget> cards = <Widget>[];
+    if (widget.story.images != null) {
+      for (final MapEntry<String, StoryMedia> image
+          in widget.story.images.entries) {
         cards.add(imageWidget(image.key, image.value));
       }
     }
 
     return MultiBlocListener(
-      listeners: [
+      listeners: <BlocListener<dynamic, dynamic>>[
         BlocListener<CloudStoriesBloc, CloudStoriesState>(
-          listener: (context, state) {
+          listener: (BuildContext context, CloudStoriesState state) {
             if (state.type == CloudStoriesType.syncingState) {
               if (state.data == null) {
                 return;
               }
               final Map<String, List<String>> events =
                   state.data as Map<String, List<String>>;
-              if (!events.containsKey(widget.event.folderID)) {
+              if (!events.containsKey(widget.story.folderID)) {
                 return;
               }
               final List<String> newUploadingImages =
-                  state.data[widget.event.folderID] as List<String>;
+                  state.data[widget.story.folderID] as List<String>;
               setState(() {
                 uploadingImages = newUploadingImages;
               });
@@ -166,11 +182,11 @@ class _TimelineEventCardState extends State<EventCard> {
           },
         ),
         BlocListener<LocalStoriesBloc, LocalStoriesState>(
-            listener: (context, state) {
+            listener: (BuildContext context, LocalStoriesState state) {
           if (state.type == LocalStoriesType.editEmoji &&
-              state.folderID == widget.event.folderID) {
+              state.folderID == widget.story.folderID) {
             setState(() {
-              widget.event.emoji = state.data as String;
+              widget.story.emoji = state.data as String;
             });
           }
         })
@@ -179,52 +195,49 @@ class _TimelineEventCardState extends State<EventCard> {
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: Column(children: [
-            this.widget.width > Constants.SMALL_WIDTH
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          emoji(),
-                          SizedBox(width: 4),
-                          timeStamp(),
-                        ],
-                      ),
-                      this.widget.controls,
-                    ],
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          emoji(),
-                          this.widget.controls,
-                        ],
-                      ),
+          child: Column(children: <Widget>[
+            if (widget.width > Constants.minScreenWidth)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      emoji(),
+                      const SizedBox(width: 4),
                       timeStamp(),
                     ],
                   ),
+                  widget.controls,
+                ],
+              )
+            else
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      emoji(),
+                      widget.controls,
+                    ],
+                  ),
+                  timeStamp(),
+                ],
+              ),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 AbsorbPointer(
                   absorbing: widget.locked || widget.saving,
                   child: TextFormField(
                     textAlign: TextAlign.center,
-                    autofocus: false,
                     maxLines: null,
                     style: TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'OpenSans',
                         color: myThemeData.primaryColorDark),
-                    decoration: new InputDecoration(
+                    decoration: const InputDecoration(
                         errorMaxLines: 0,
                         errorBorder: InputBorder.none,
                         border: InputBorder.none,
@@ -235,11 +248,11 @@ class _TimelineEventCardState extends State<EventCard> {
                         hintText: 'Enter a title'),
                     readOnly: widget.locked || widget.saving,
                     controller: titleController,
-                    onChanged: (string) =>
+                    onChanged: (String string) =>
                         BlocProvider.of<LocalStoriesBloc>(context).add(
                             LocalStoriesEvent(LocalStoriesType.editTitle,
-                                parentID: widget.eventFolderID,
-                                folderID: widget.event.folderID,
+                                parentID: widget.storyFolderID,
+                                folderID: widget.story.folderID,
                                 data: string)),
                   ),
                 ),
@@ -257,12 +270,12 @@ class _TimelineEventCardState extends State<EventCard> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
+                      children: <Widget>[
+                        SizedBox(
                           height: 40,
                           width: 140,
                           child: ButtonWithIcon(
-                              text: "add media",
+                              text: 'add media',
                               icon: Icons.image,
                               onPressed: () async {
                                 if (widget.saving) {
@@ -271,12 +284,12 @@ class _TimelineEventCardState extends State<EventCard> {
                                 BlocProvider.of<LocalStoriesBloc>(context).add(
                                   LocalStoriesEvent(
                                     LocalStoriesType.addImage,
-                                    parentID: widget.eventFolderID,
-                                    folderID: widget.event.folderID,
+                                    parentID: widget.storyFolderID,
+                                    folderID: widget.story.folderID,
                                   ),
                                 );
                               },
-                              width: Constants.SMALL_WIDTH,
+                              width: Constants.minScreenWidth,
                               backgroundColor: Colors.white,
                               textColor: Colors.black,
                               iconColor: Colors.black),
@@ -294,16 +307,16 @@ class _TimelineEventCardState extends State<EventCard> {
                           fontSize: 14.0,
                           fontFamily: 'OpenSans',
                           color: myThemeData.primaryColorDark),
-                      decoration: new InputDecoration(
+                      decoration: const InputDecoration(
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
                           hintText: 'Enter a description'),
                       readOnly: widget.locked || widget.saving,
-                      onChanged: (string) {
+                      onChanged: (String string) {
                         BlocProvider.of<LocalStoriesBloc>(context).add(
                           LocalStoriesEvent(LocalStoriesType.editDescription,
-                              parentID: widget.eventFolderID,
-                              folderID: widget.event.folderID,
+                              parentID: widget.storyFolderID,
+                              folderID: widget.story.folderID,
                               data: string),
                         );
                       },
@@ -318,7 +331,7 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   Widget imageWidget(String imageKey, StoryMedia media) {
-    bool showPlaceholder = media.thumbnailURL == null;
+    final bool showPlaceholder = media.thumbnailURL == null;
     return RawMaterialButton(
       onPressed: () {
         if (widget.locked) {
@@ -326,66 +339,64 @@ class _TimelineEventCardState extends State<EventCard> {
         }
       },
       child: showPlaceholder
-          ? backgroundImage(showPlaceholder, imageKey, media, null)
-          : Container(
+          ? _backgroundImage(showPlaceholder, imageKey, media, null)
+          : SizedBox(
               height: 150.0,
               width: 150.0,
               child: CachedNetworkImage(
                 imageUrl: media.thumbnailURL,
-                placeholder: (context, url) => StaticLoadingLogo(),
-                errorWidget: (context, url, error) => backgroundImage(
-                    showPlaceholder,
-                    imageKey,
-                    media,
-                    AssetImage("assets/images/error.png")),
-                imageBuilder: (context, image) =>
-                    backgroundImage(showPlaceholder, imageKey, media, image),
+                placeholder: (BuildContext context, String url) =>
+                    StaticLoadingLogo(),
+                errorWidget:
+                    (BuildContext context, String url, dynamic error) =>
+                        _backgroundImage(showPlaceholder, imageKey, media,
+                            const AssetImage('assets/images/error.png')),
+                imageBuilder: (BuildContext context,
+                        ImageProvider<Object> image) =>
+                    _backgroundImage(showPlaceholder, imageKey, media, image),
               ),
             ),
     );
   }
 
-  Widget backgroundImage(bool showPlaceholder, String imageKey,
+  Widget _backgroundImage(bool showPlaceholder, String imageKey,
       StoryMedia media, ImageProvider image) {
     return Container(
       height: 150.0,
       width: 150.0,
-      decoration: new BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6)),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
         image: showPlaceholder
             ? null
             : DecorationImage(image: image, fit: BoxFit.cover),
       ),
       child: !widget.locked
-          ? createEditControls(imageKey, showPlaceholder)
-          : createNonEditControls(imageKey, showPlaceholder, media),
+          ? _createEditControls(imageKey, showPlaceholder)
+          : _createNonEditControls(imageKey, showPlaceholder, media),
     );
   }
 
-  Widget createNonEditControls(
+  Widget _createNonEditControls(
       String imageKey, bool showPlaceholder, StoryMedia media) {
     if (showPlaceholder) {
-      return Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.insert_drive_file),
-            Center(child: Text(imageKey)),
-          ],
-        ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Icon(Icons.insert_drive_file),
+          Center(child: Text(imageKey)),
+        ],
       );
     }
     if (!media.isVideo && !media.isDocument) {
       return Container();
     }
     return Align(
-      alignment: Alignment.center,
       child: Padding(
         padding: const EdgeInsets.only(right: 3, top: 3),
         child: Container(
           height: 34,
           width: 34,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(40))),
           child: Icon(
@@ -398,13 +409,13 @@ class _TimelineEventCardState extends State<EventCard> {
     );
   }
 
-  Widget createEditControls(String imageKey, bool showplaceholder) {
+  Widget _createEditControls(String imageKey, bool showPlaceholder) {
     return Container(
       color: uploadingImages.contains(imageKey)
           ? Colors.white.withOpacity(0.5)
           : null,
       child: Column(
-        children: [
+        children: <Widget>[
           Align(
               alignment: Alignment.topRight,
               child: Padding(
@@ -412,7 +423,7 @@ class _TimelineEventCardState extends State<EventCard> {
                 child: Container(
                   height: 34,
                   width: 34,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(40))),
                   child: IconButton(
@@ -433,35 +444,35 @@ class _TimelineEventCardState extends State<EventCard> {
                       }
                       BlocProvider.of<LocalStoriesBloc>(context).add(
                           LocalStoriesEvent(LocalStoriesType.deleteImage,
-                              folderID: widget.event.folderID,
+                              folderID: widget.story.folderID,
                               data: imageKey,
-                              parentID: widget.eventFolderID));
+                              parentID: widget.storyFolderID));
                     },
                   ),
                 ),
               )),
-          Container(
-            child: Column(children: [
-              uploadingImages.contains(imageKey)
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: StaticLoadingLogo(),
-                    )
-                  : Container(),
-              showplaceholder
-                  ? Container(
-                      child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        widget.saving
-                            ? Container()
-                            : Icon(Icons.insert_drive_file),
-                        Center(child: Text(imageKey)),
-                      ],
-                    ))
-                  : Container()
-            ]),
-          )
+          Column(children: <Widget>[
+            if (uploadingImages.contains(imageKey))
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: StaticLoadingLogo(),
+              )
+            else
+              Container(),
+            if (showPlaceholder)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (widget.saving)
+                    Container()
+                  else
+                    const Icon(Icons.insert_drive_file),
+                  Center(child: Text(imageKey)),
+                ],
+              )
+            else
+              Container()
+          ])
         ],
       ),
     );

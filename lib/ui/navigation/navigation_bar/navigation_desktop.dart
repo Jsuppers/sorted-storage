@@ -1,54 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:web/app/models/user.dart';
-import 'package:web/ui/navigation/menu.dart';
-import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/authentication/authentication_bloc.dart';
+import 'package:web/ui/navigation/drawer/drawer_icon.dart';
+import 'package:web/ui/navigation/navigation_bar/navigation_content.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
+import 'package:web/ui/navigation/navigation_bar/navigation_menu.dart';
 import 'package:web/ui/widgets/side_menu.dart';
 
-import 'navigation_tablet.dart';
-
+/// Desktop navigation bar
 class NavigationBarDesktop extends StatelessWidget {
-  final User user;
-
-  const NavigationBarDesktop({Key key, this.user}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> content = <Widget>[];
 
-    List<Widget> content;
-
-    if (user != null) {
-      content = [
+    // User is logged in
+    if (BlocProvider.of<AuthenticationBloc>(context).state != null) {
+      content.addAll(<Widget>[
         Row(
-          children: [
-            NavigationMenu(),
-            NavBarLogo(showText: false),
+          children: <Widget>[
+            DrawerIcon(),
+            const NavBarLogo(showText: false),
           ],
         ),
         Container(),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: createMenu(context, true, true),
-        ),
-        SizedBox(width: 10),
-        AvatarWithMenu(user: user)
-      ];
-    } else {
-      content = [
-        NavBarLogo(showText: true),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ...createMenu(context, false, true),
-            SizedBox(width: 10),
-            NavigationLogin(loggedIn: false)
-          ],
-        )
-      ];
+        const NavigationMenu(loggedIn: true),
+        const SizedBox(width: 10),
+        AvatarWithMenu()
+      ]);
+    }
+    // User is not logged in
+    else {
+      content.addAll(<Widget>[
+        const NavBarLogo(showText: true),
+        const NavigationMenu(loggedIn: false),
+      ]);
     }
 
-    return NavigationContent(children: content);
+    return NavigationContent(content);
   }
 }
-
-

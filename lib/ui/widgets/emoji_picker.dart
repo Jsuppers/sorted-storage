@@ -7,54 +7,60 @@ import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
+/// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
-  final String folderID;
-  final String parentID;
-
+  // ignore: public_member_api_docs
   const EmojiPicker({Key key, this.folderID, this.parentID}) : super(key: key);
+
+  // ignore: public_member_api_docs
+  final String folderID;
+
+  // ignore: public_member_api_docs
+  final String parentID;
 
   @override
   State createState() => EmojiPickerState();
 }
 
+/// state of the emoji widget
 class EmojiPickerState extends State<EmojiPicker> {
-  TextEditingController controller = new TextEditingController();
-  List<String> possibleMatches = [];
-  String filter;
-  List<Emoji> flags;
+  final TextEditingController _controller = TextEditingController();
+  List<String> _possibleMatches = <String>[];
+  String _filter;
+  List<Emoji> _flags;
 
   @override
   void initState() {
-    flags = Emoji.byGroup(EmojiGroup.flags).toList();
+    _flags = Emoji.byGroup(EmojiGroup.flags).toList();
 
-    Emoji.byGroup(EmojiGroup.travelPlaces).forEach((element) {
-      possibleMatches.add(element.char);
+    Emoji.byGroup(EmojiGroup.travelPlaces).forEach((Emoji element) {
+      _possibleMatches.add(element.char);
     });
     super.initState();
 
-    controller.addListener(() {
-      if (controller.text == "") {
+    _controller.addListener(() {
+      if (_controller.text.isEmpty) {
         return;
       }
 
-      possibleMatches = [];
-      filter = controller.text;
+      _possibleMatches = <String>[];
+      _filter = _controller.text;
       setState(() {
-        flags.forEach((element) {
-          if (element.name.contains(filter)) {
-            possibleMatches.add(element.char);
+        for(final Emoji element in _flags) {
+          if (element.name.contains(_filter)) {
+            _possibleMatches.add(element.char);
           }
-        });
-
-        Iterable<Emoji> emojis = Emoji.byKeyword(filter);
-        if (emojis != null) {
-          emojis.forEach((element) {
-            possibleMatches.add(element.char);
-          });
         }
-        Emoji emoji = Emoji.byName(filter);
+
+        final Iterable<Emoji> emojis = Emoji.byKeyword(_filter);
+        if (emojis != null) {
+          for(final Emoji element in emojis) {
+            _possibleMatches.add(element.char);
+          }
+        }
+        final Emoji emoji = Emoji.byName(_filter);
         if (emoji != null) {
-          possibleMatches.insert(0, emoji.char);
+          _possibleMatches.insert(0, emoji.char);
         }
       });
     });
@@ -63,35 +69,36 @@ class EmojiPickerState extends State<EmojiPicker> {
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
+    _controller.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
         color: Colors.transparent,
-        child: new Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            new Padding(
-                padding: new EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
-                child: new TextField(
-                  style: new TextStyle(fontSize: 18.0, color: Colors.black),
+            Padding(
+                padding:
+                    const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
+                child: TextField(
+                  style: const TextStyle(fontSize: 18.0, color: Colors.black),
                   decoration: InputDecoration(
-                    prefixIcon: new Icon(Icons.search),
-                    suffixIcon: new IconButton(
-                      icon: new Icon(Icons.close),
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.close),
                       onPressed: () => BlocProvider.of<NavigationBloc>(context)
                           .add(NavigatorPopEvent()),
                     ),
-                    hintText: "Search...",
+                    hintText: 'Search...',
                   ),
-                  controller: controller,
+                  controller: _controller,
                 )),
             Expanded(
               child: SingleChildScrollView(
-                child: new Padding(
-                    padding: new EdgeInsets.only(top: 8.0),
+                child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
                     child: _buildListView()),
               ),
             )
@@ -100,8 +107,8 @@ class EmojiPickerState extends State<EmojiPicker> {
   }
 
   Widget _buildListView() {
-    List<Widget> children = [];
-    possibleMatches.forEach((element) {
+    final List<Widget> children = <Widget>[];
+    for (final String element in _possibleMatches) {
       children.add(
         MaterialButton(
           height: 40,
@@ -115,14 +122,14 @@ class EmojiPickerState extends State<EmojiPicker> {
           },
           child: Text(
             element,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               height: 1.1,
             ),
           ),
         ),
       );
-    });
+    }
 
     return Align(
       alignment: Alignment.topCenter,

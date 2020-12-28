@@ -39,22 +39,22 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
             folderID: event.folderID);
         break;
       case LocalStoriesType.editDescription:
-        final StoryContent eventData = TimelineService.getEventWithFolderID(
+        final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _localStories);
         eventData.description = event.data as String;
         break;
       case LocalStoriesType.editTitle:
-        final StoryContent eventData = TimelineService.getEventWithFolderID(
+        final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _localStories);
         eventData.title = event.data as String;
         break;
       case LocalStoriesType.editTimestamp:
-        final StoryContent eventData = TimelineService.getEventWithFolderID(
+        final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _localStories);
         eventData.timestamp = event.data as int;
         break;
       case LocalStoriesType.addImage:
-        final StoryContent eventContent = TimelineService.getEventWithFolderID(
+        final StoryContent eventContent = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _localStories);
         FilePicker.platform
             .pickFiles(
@@ -84,7 +84,7 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
       case LocalStoriesType.createSubStory:
         final StoryTimelineData story = _localStories[event.parentID];
         story.subEvents.add(StoryContent(
-          folderID: TimelineService.createUniqueTempName(event.parentID),
+          folderID: TimelineService.createUniqueTempStoryName(event.parentID),
           timestamp: story.mainStory.timestamp,
           comments: StoryComments(),
         ));
@@ -99,14 +99,14 @@ class LocalStoriesBloc extends Bloc<LocalStoriesEvent, LocalStoriesState> {
             folderID: event.parentID);
         break;
       case LocalStoriesType.deleteImage:
-        final StoryContent eventData = TimelineService.getEventWithFolderID(
+        final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _localStories);
         eventData.images.remove(event.data);
         yield LocalStoriesState(LocalStoriesType.updateUI, _localStories,
             folderID: event.folderID);
         break;
       case LocalStoriesType.editEmoji:
-        final StoryContent eventData = TimelineService.getEventWithFolderID(
+        final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _localStories);
         eventData.emoji = event.data as String;
         yield LocalStoriesState(LocalStoriesType.editEmoji, _localStories,

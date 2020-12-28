@@ -3,8 +3,10 @@ import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/emoji_dialog.dart';
 import 'package:web/ui/widgets/dialogs/share_dialog.dart';
 
+/// Service to open dialogs
 class DialogService {
-  static cookieDialog(BuildContext context) {
+  /// cookie dialog, which the user needs to accept
+  static void cookieDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -15,7 +17,9 @@ class DialogService {
     );
   }
 
-  static shareDialog(BuildContext context, String folderID, String commentsID) {
+  /// dialog to share a folder
+  static void shareDialog(
+      BuildContext context, String folderID, String commentsID) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -26,7 +30,9 @@ class DialogService {
     );
   }
 
-  static emojiDialog(BuildContext context, {String folderID, String parentID}) {
+  /// dialog to allow the user to select a emoji
+  static void emojiDialog(BuildContext context,
+      {String folderID, String parentID}) {
     showDialog(
       context: context,
       barrierDismissible: true,

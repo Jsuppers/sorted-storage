@@ -21,14 +21,14 @@ class CookieNoticeBloc extends Cubit<CookieNoticeEvent> {
     }
     showing = true;
     var pref = await sharedPreferenceInstance;
-    if (!pref.containsKey(Constants.ACCEPTED_COOKIE_VARIABLE)) {
+    if (!pref.containsKey(Constants.acceptedCookieVariable)) {
       DialogService.cookieDialog(context);
     }
   }
 
   Future acceptCookie() async {
     var pref = await sharedPreferenceInstance;
-    pref.setBool(Constants.ACCEPTED_COOKIE_VARIABLE, true);
+    pref.setBool(Constants.acceptedCookieVariable, true);
   }
 
 }
