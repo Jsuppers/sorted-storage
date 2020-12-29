@@ -9,8 +9,8 @@ import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 /// widget for comments
 class CommentWidget extends StatefulWidget {

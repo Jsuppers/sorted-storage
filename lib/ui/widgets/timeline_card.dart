@@ -17,12 +17,14 @@ import 'package:web/app/blocs/local_stories/local_stories_state.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/story_comment.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/event_comments.dart';
+import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
@@ -31,24 +33,27 @@ class TimelineCard extends StatefulWidget {
   // ignore: public_member_api_docs
   const TimelineCard(
       {Key key,
-        @required this.width,
-        this.height,
-        @required this.event,
-        this.folderId,
-        this.viewMode = false})
+      @required this.width,
+      this.height,
+      @required this.event,
+      this.folderId,
+      this.viewMode = false})
       : super(key: key);
 
   // ignore: public_member_api_docs
   final double width;
+
   // ignore: public_member_api_docs
   final double height;
+
   // ignore: public_member_api_docs
   final StoryTimelineData event;
+
   // ignore: public_member_api_docs
   final String folderId;
+
   // ignore: public_member_api_docs
   final bool viewMode;
-
 
   @override
   _TimelineCardState createState() => _TimelineCardState();
@@ -147,8 +152,13 @@ class _TimelineCardState extends State<TimelineCard> {
   void initState() {
     super.initState();
     adventure = widget.event;
-    locked = adventure == null ? true : adventure.locked;
-    saving = adventure == null ? false : adventure.saving;
+    if (adventure == null) {
+      locked = true;
+      saving = false;
+    } else {
+      locked = adventure.locked;
+      saving = adventure.saving;
+    }
   }
 
   @override
@@ -180,8 +190,8 @@ class _TimelineCardState extends State<TimelineCard> {
                 adventure = BlocProvider.of<LocalStoriesBloc>(context)
                     .state
                     .localStories[state.folderID];
-                adventure.subEvents
-                    .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                adventure.subEvents.sort((StoryContent a, StoryContent b) =>
+                    b.timestamp.compareTo(a.timestamp));
                 locked = adventure.locked;
                 saving = adventure.saving;
               });
@@ -189,9 +199,7 @@ class _TimelineCardState extends State<TimelineCard> {
           },
         ),
         BlocListener<LocalStoriesBloc, LocalStoriesState>(
-          listener: (context, state) {
-            print(
-                'type: ${state.type} folderID: ${state.folderID} currentID: ${widget.folderId}');
+          listener: (BuildContext context, LocalStoriesState state) {
             if (state.type == LocalStoriesType.editStory &&
                 state.folderID == widget.folderId) {
               setState(() {
@@ -202,14 +210,15 @@ class _TimelineCardState extends State<TimelineCard> {
                 state.folderID == widget.folderId) {
               setState(() {
                 adventure = state.localStories[state.folderID];
-                adventure.subEvents
-                    .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                adventure.subEvents.sort((StoryContent a, StoryContent b) =>
+                    b.timestamp.compareTo(a.timestamp));
                 locked = adventure.locked;
                 saving = adventure.saving;
               });
             } else if (state.type == LocalStoriesType.updateUI) {
-              var subEvent = adventure.subEvents.firstWhere(
-                  (element) => element.folderID == state.folderID, orElse: () {
+              final StoryContent subEvent = adventure.subEvents.firstWhere(
+                  (StoryContent element) => element.folderID == state.folderID,
+                  orElse: () {
                 return;
               });
               if (subEvent == null) {
@@ -240,12 +249,12 @@ class _TimelineCardState extends State<TimelineCard> {
               Visibility(
                 visible: !locked,
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: Container(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: SizedBox(
                     height: 40,
                     width: 140,
                     child: ButtonWithIcon(
-                        text: "add sub-event",
+                        text: 'add sub-event',
                         icon: Icons.add,
                         onPressed: () async {
                           if (saving) {
@@ -263,7 +272,7 @@ class _TimelineCardState extends State<TimelineCard> {
                   ),
                 ),
               ),
-              ...List.generate(adventure.subEvents.length, (index) {
+              ...List<Widget>.generate(adventure.subEvents.length, (int index) {
                 return Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Card(
@@ -272,53 +281,51 @@ class _TimelineCardState extends State<TimelineCard> {
                           saving: saving,
                           locked: locked,
                           controls: Visibility(
-                              child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.only(right: 3, top: 3),
-                                    child: Container(
-                                      height: 34,
-                                      width: 34,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(40))),
-                                      child: IconButton(
-                                        iconSize: 18,
-                                        splashRadius: 18,
-                                        icon: Icon(
-                                          Icons.clear,
-                                          color: Colors.redAccent,
-                                          size: 18,
-                                        ),
-                                        onPressed: () {
-                                          if (saving) {
-                                            return;
-                                          }
-                                          BlocProvider.of<LocalStoriesBloc>(
-                                                  context)
-                                              .add(
-                                                  LocalStoriesEvent(
-                                                      LocalStoriesType
-                                                          .deleteSubStory,
-                                                      parentID: adventure
-                                                          .mainStory.folderID,
-                                                      folderID: adventure
-                                                          .subEvents[index]
-                                                          .folderID));
-                                        },
-                                      ),
+                            visible: !locked,
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(right: 3, top: 3),
+                                child: Container(
+                                  height: 34,
+                                  width: 34,
+                                  decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(40))),
+                                  child: IconButton(
+                                    iconSize: 18,
+                                    splashRadius: 18,
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      color: Colors.redAccent,
+                                      size: 18,
                                     ),
-                                  )),
-                              visible: !locked),
+                                    onPressed: () {
+                                      if (saving) {
+                                        return;
+                                      }
+                                      BlocProvider.of<LocalStoriesBloc>(context)
+                                          .add(LocalStoriesEvent(
+                                              LocalStoriesType.deleteSubStory,
+                                              parentID:
+                                                  adventure.mainStory.folderID,
+                                              folderID: adventure
+                                                  .subEvents[index].folderID));
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                           width: widget.width,
                           height: widget.height,
                           story: adventure.subEvents[index])),
                 );
               }),
               BlocBuilder<AuthenticationBloc, usr.User>(
-                  builder: (context, user) {
+                  builder: (BuildContext context, usr.User user) {
                 return CommentWidget(
                   folderID: widget.folderId,
                   user: user,
@@ -326,15 +333,15 @@ class _TimelineCardState extends State<TimelineCard> {
                   height: widget.height,
                   sendComment: (BuildContext context, usr.User currentUser,
                       String comment) async {
-                    String user = "";
+                    String user = '';
                     if (currentUser != null) {
                       user = currentUser.displayName;
-                      if (user == null || user == "") {
+                      if (user == null || user == '') {
                         user = currentUser.email;
                       }
                     }
 
-                    StoryComment eventComment =
+                    final StoryComment eventComment =
                         StoryComment(comment: comment, user: user);
 
                     BlocProvider.of<CommentHandlerBloc>(context).add(
@@ -353,13 +360,16 @@ class _TimelineCardState extends State<TimelineCard> {
   }
 }
 
+// ignore: public_member_api_docs
 class SavingIcon extends StatefulWidget {
-  final String folderID;
-
+  // ignore: public_member_api_docs
   const SavingIcon({
     Key key,
     this.folderID,
   }) : super(key: key);
+
+  // ignore: public_member_api_docs
+  final String folderID;
 
   @override
   _SavingIconState createState() => _SavingIconState();
@@ -367,26 +377,26 @@ class SavingIcon extends StatefulWidget {
 
 class _SavingIconState extends State<SavingIcon> {
   double percent = 0;
-  String text = "0%";
+  String text = '0%';
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
-      listener: (context, state) {
+      listener: (BuildContext context, CloudStoriesState state) {
         if (state.type == CloudStoriesType.progressUpload &&
             state.folderID == widget.folderID) {
-          MediaProgress progress = state.data as MediaProgress;
+          final MediaProgress progress = state.data as MediaProgress;
           setState(() {
             // TODO this shows file loading progress not sending progress
-            var total =
+            final int total =
                 progress.total + 1; // we will be evil and never show 100%
-            var sent = progress.sent;
+            final int sent = progress.sent;
             if (sent == 0) {
               percent = 0;
             } else {
               percent = sent / total;
             }
-            text = (percent * 100).toInt().toString() + "%";
+            text = '${(percent * 100).toInt()}%';
           });
         }
       },
@@ -397,9 +407,10 @@ class _SavingIconState extends State<SavingIcon> {
             radius: 48.0,
             lineWidth: 8.0,
             percent: percent,
-            center: new Text(
+            center: Text(
               text,
-              style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
             ),
             circularStrokeCap: CircularStrokeCap.round,
             progressColor: myThemeData.accentColor,
@@ -408,77 +419,5 @@ class _SavingIconState extends State<SavingIcon> {
         ],
       ),
     );
-  }
-}
-
-class TimelineHeader extends StatefulWidget {
-  @override
-  _TimelineHeaderState createState() => _TimelineHeaderState();
-}
-
-class _TimelineHeaderState extends State<TimelineHeader> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class ButtonWithIcon extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final Function onPressed;
-  final Color iconColor;
-  final Color backgroundColor;
-  final Color textColor;
-  final double width;
-
-  const ButtonWithIcon(
-      {Key key,
-      this.text,
-      this.icon,
-      this.onPressed,
-      this.iconColor = Colors.white,
-      this.backgroundColor,
-      this.textColor = Colors.white,
-      this.width})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return buttonWithIcon(this.text, this.icon, this.onPressed, this.iconColor,
-        this.backgroundColor, this.textColor, this.width);
-  }
-
-  Widget buttonWithIcon(String text, IconData icon, Function onPressed,
-      Color iconColor, Color backgroundColor, Color textColor, double width) {
-    return MaterialButton(
-        minWidth: width >= Constants.minScreenWidth ? 100 : 30,
-        child: width >= Constants.minScreenWidth
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    color: iconColor,
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    text,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: 'Roboto',
-                      color: textColor,
-                    ),
-                  ),
-                ],
-              )
-            : Icon(
-                icon,
-                color: iconColor,
-              ),
-        color: backgroundColor,
-        textColor: textColor,
-        onPressed: () => onPressed());
   }
 }

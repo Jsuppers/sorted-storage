@@ -18,8 +18,8 @@ import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 ///
 class EventCard extends StatefulWidget {
