@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:web/ui/theme/theme.dart';
 
+/// shows the cloud storage usage
 class UsageIndicator extends StatelessWidget {
-  final String limit;
-  final String usage;
-  final double percent;
-  const UsageIndicator({@required this.limit, @required this.usage, Key key, this.percent})
+  // ignore: public_member_api_docs
+  const UsageIndicator(
+      {@required this.limit, @required this.usage, Key key, this.percent})
       : super(key: key);
+
+  // ignore: public_member_api_docs
+  final String limit;
+  // ignore: public_member_api_docs
+  final String usage;
+  // ignore: public_member_api_docs
+  final double percent;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             Text(
               usage,
               style: myThemeData.textTheme.bodyText1,
@@ -26,7 +33,7 @@ class UsageIndicator extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 8.0,
         ),
         LinearPercentIndicator(

@@ -1,14 +1,39 @@
+/// Constant files which holds various constants
 class Constants {
-  static const String WEBSITE_URL = 'https://sortedstorage.com/#';
-  static const String ROOT_FOLDER = 'sorted-storage';
-  static const String MEDIA_FOLDER = 'media';
-  static const String DOCUMENT_FOLDER = 'documents';
-  static const String SETTINGS_FILE = 'settings.json';
-  static const String COMMENTS_FILE = 'comments.json';
-  static const String DONATE_URL = 'https://www.buymeacoffee.com/joris';
-  static const String GITHUB_URL = 'https://github.com/Jsuppers/sorted-storage';
-  static const String PROFILE_URL = 'https://myaccount.google.com/personal-info';
-  static const String UPGRADE_URL = 'https://one.google.com/about/plans';
-  static const String ACCEPTED_COOKIE_VARIABLE = 'ACCEPTED_COOKIE';
-  static const double SMALL_WIDTH = 600;
+  /// url of sorted storage website
+  static const String websiteURL = 'https://sortedstorage.com/#';
+
+  /// the root folder for sorted storage
+  static const String rootFolder = 'sorted-storage';
+
+  /// root folder for media content
+  static const String mediaFolder = 'media';
+
+  /// root folder for documents
+  static const String documentFolder = 'documents';
+
+  /// file name of settings file
+  static const String settingsFile = 'settings.json';
+
+  /// file name of comments file
+  static const String commentsFile = 'comments.json';
+
+  /// donate url
+  static const String donateURL = 'https://www.buymeacoffee.com/joris';
+
+  /// github page url
+  static const String githubURL = 'https://github.com/Jsuppers/sorted-storage';
+
+  /// profile url
+  static const String profileURL = 'https://myaccount.google.com/personal-info';
+
+  /// url to upgrade the storage plan
+  static const String upgradeURL = 'https://one.google.com/about/plans';
+
+  /// shared preferences variable used to indicate if the cookie message
+  /// has been accepted
+  static const String acceptedCookieVariable = 'ACCEPTED_COOKIE';
+
+  /// minimum width of a screen
+  static const double minScreenWidth = 600;
 }

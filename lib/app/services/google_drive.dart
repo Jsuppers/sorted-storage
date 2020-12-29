@@ -2,77 +2,83 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/models/adventure.dart';
 import 'package:web/app/models/comments_response.dart';
+import 'package:web/app/models/story_comment.dart';
+import 'package:web/app/models/story_comments.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/story_media.dart';
 import 'package:web/constants.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
+/// service which communicates with google drive
 class GoogleDrive {
+    // ignore: public_member_api_docs
+  GoogleDrive({this.driveApi});
+
+  /// drive api
   DriveApi driveApi;
 
-  GoogleDrive();
-
-  setDrive(DriveApi driveApi) {
-    this.driveApi = driveApi;
-  }
-
+  /// upload a data stream to a file, and return the file's id
   Future<String> uploadMediaToFolder(
-      EventContent eventContent,
+      StoryContent eventContent,
       String imageName,
       StoryMedia storyMedia,
       int delayMilliseconds,
       Stream<List<int>> dataStream) async {
-    File mediaFile = File();
+    final File mediaFile = File();
     mediaFile.parents = [eventContent.folderID];
     mediaFile.name = imageName;
 
-    Media image = Media(dataStream, storyMedia.size);
-    var uploadMedia;
+    final Media image = Media(dataStream, storyMedia.contentSize);
+    File uploadMedia;
     try {
-      uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
-    } catch (e) {}
+      uploadMedia =
+          await driveApi.files.create(mediaFile, uploadMedia: image);
+    } catch (e) {
+      print('error $e');
+    }
 
-    return uploadMedia.id as String;
+    return uploadMedia.id;
   }
 
+  /// read and return the contents of a json file
   Future<Map<String, dynamic>> getJsonFile(String fileId) async {
     Map<String, dynamic> event;
     if (fileId != null) {
-      final mediaFile = await driveApi.files
-          .get(fileId, downloadOptions: DownloadOptions.FullMedia);
+      final Media mediaFile = await driveApi.files
+          .get(fileId, downloadOptions: DownloadOptions.FullMedia) as Media;
 
-      List<int> dataStore = [];
-      await for (dynamic data in mediaFile.stream) {
-        dataStore.insertAll(dataStore.length, data as Iterable<int>);
+      final List<int> dataStore = <int>[];
+      await for (final List<int> data in mediaFile.stream) {
+        dataStore.insertAll(dataStore.length, data);
       }
       event = jsonDecode(utf8.decode(dataStore)) as Map<String, dynamic>;
     }
     return event;
   }
 
+  /// upload a comment to the comments file
   Future<CommentsResponse> uploadCommentsFile(
-      {String commentsID, String folderID, AdventureComment comment}) async {
-    AdventureComments comments;
+      {String commentsID, String folderID, StoryComment comment}) async {
+    StoryComments comments;
     if (commentsID != null) {
-      comments = AdventureComments.fromJson(await getJsonFile(commentsID));
+      comments = StoryComments.fromJson(await getJsonFile(commentsID));
     }
-    comments ??= AdventureComments();
-    comments.comments ??= <AdventureComment>[];
+    comments ??= StoryComments();
+    comments.comments ??= <StoryComment>[];
 
     if (comment != null) {
       comments.comments.add(comment);
     }
-    String jsonString = jsonEncode(comments);
 
-    List<int> fileContent = utf8.encode(jsonString);
+    final List<int> fileContent = utf8.encode(jsonEncode(comments));
     final Stream<List<int>> mediaStream =
-        Future.value(fileContent).asStream().asBroadcastStream();
+        Future<List<int>>.value(fileContent).asStream().asBroadcastStream();
 
     String responseID;
     if (commentsID == null) {
       responseID = await uploadMedia(
-          folderID, Constants.COMMENTS_FILE, fileContent.length, mediaStream,
-          mimeType: "application/json");
+          folderID, Constants.commentsFile, fileContent.length, mediaStream,
+          mimeType: 'application/json');
     } else {
       final File folder = await updateFile(
           null, commentsID, Media(mediaStream, fileContent.length));
@@ -82,26 +88,27 @@ class GoogleDrive {
     return CommentsResponse(comments: comments, commentsID: responseID);
   }
 
+  /// create a story (a folder with the timestamp as the name)
   Future<String> createStory(String parentID, int timestamp) async {
-    File eventToUpload = File();
-    eventToUpload.parents = [parentID];
-    eventToUpload.mimeType = "application/vnd.google-apps.folder";
-    eventToUpload.name = timestamp.toString();
+    final File story = File();
+    story.parents = <String>[parentID];
+    story.mimeType = 'application/vnd.google-apps.folder';
+    story.name = timestamp.toString();
 
-    var folder = await driveApi.files.create(eventToUpload);
+    final File folder = await driveApi.files.create(story);
     return folder.id;
   }
 
   Future<String> uploadMedia(String parentID, String name, int contentLength,
       Stream<List<int>> mediaStream,
       {String mimeType}) async {
-    File mediaFile = File();
-    mediaFile.parents = [parentID];
+    final File mediaFile = File();
+    mediaFile.parents = <String>[parentID];
     if (mimeType != null) {
       mediaFile.mimeType = mimeType;
     }
     mediaFile.name = name;
-    var folder = await driveApi.files
+    final File folder = await driveApi.files
         .create(mediaFile, uploadMedia: Media(mediaStream, contentLength));
 
     return folder.id;
@@ -110,24 +117,22 @@ class GoogleDrive {
   Future<String> updateEventFolderTimestamp(
       String fileID, int timestamp) async {
     try {
-      File eventToUpload = File();
+      final File eventToUpload = File();
       eventToUpload.name = timestamp.toString();
 
-      var folder = await driveApi.files.update(eventToUpload, fileID);
-      print('updated folder: $folder');
+      final File folder = await driveApi.files.update(eventToUpload, fileID);
 
       return folder.id;
     } catch (e) {
-      print('error: $e');
       return e.toString();
     }
   }
 
-  Future createFile(File request, {Media media}) async {
+  Future<File> createFile(File request, {Media media}) async {
     return driveApi.files.create(request, uploadMedia: media);
   }
 
-  Future delete(String fileID) async {
+  Future<dynamic> delete(String fileID) async {
     return driveApi.files.delete(fileID);
   }
 

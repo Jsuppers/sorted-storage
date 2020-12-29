@@ -1,8 +1,13 @@
-import 'package:web/app/models/adventure.dart';
+import 'package:web/app/models/story_comments.dart';
 
+/// response from sending a comment
 class CommentsResponse {
-  final AdventureComments comments;
-  final String commentsID;
-
+  // ignore: public_member_api_docs
   CommentsResponse({this.comments, this.commentsID});
+
+  /// all the comments
+  final StoryComments comments;
+
+  /// folder ID for the comments file
+  final String commentsID;
 }

@@ -1,7 +1,14 @@
+/// information to show current cloud storage usage and limit
 class StorageInformation {
-  final String usage;
-  final String limit;
-  final double percent;
+  // ignore: public_member_api_docs
+  StorageInformation({this.percent = 0, this.usage = '', this.limit = ''});
 
-  StorageInformation({this.percent, this.usage, this.limit});
+  /// used space
+  final String usage;
+
+  /// maximum space in cloud storage
+  final String limit;
+
+  /// percentage used
+  final double percent;
 }

@@ -4,8 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/constants.dart';
+import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
@@ -13,55 +17,64 @@ class _TimeLineEventEntry {
   final int timestamp;
   final Widget event;
 
+  // ignore: sort_constructors_first
   _TimeLineEventEntry(this.timestamp, this.event);
 }
 
+// ignore: public_member_api_docs
 class TimelineLayout extends StatefulWidget {
-  final double width;
-  final double height;
-
+  // ignore: public_member_api_docs
   const TimelineLayout({Key key, this.width, this.height}) : super(key: key);
+
+  // ignore: public_member_api_docs
+  final double width;
+  // ignore: public_member_api_docs
+  final double height;
 
   @override
   State<StatefulWidget> createState() => _TimelineLayoutState();
 }
 
 class _TimelineLayoutState extends State<TimelineLayout> {
-  Map<String, TimelineData> _timelineData;
+  Map<String, StoryTimelineData> _timelineData;
   bool loaded = true;
 
   @override
   Widget build(BuildContext context) {
-    var timelineState = BlocProvider.of<CloudStoriesBloc>(context).state;
-    loaded = timelineState.type == CloudStoriesType.initial_state ? false : true;
-    _timelineData = BlocProvider.of<LocalStoriesBloc>(context).state.localStories;
-    List<Widget> eventDisplay = [];
-    List<_TimeLineEventEntry> timeLineEvents = [];
+    final CloudStoriesState timelineState =
+        BlocProvider.of<CloudStoriesBloc>(context).state;
+    loaded = timelineState.type != CloudStoriesType.initialState;
+    _timelineData =
+        BlocProvider.of<LocalStoriesBloc>(context).state.localStories;
+    final List<Widget> eventDisplay = <Widget>[];
+    final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
-    _timelineData.forEach((folderId, event) {
-      Widget display = TimelineCard(
+    _timelineData.forEach((String folderId, StoryTimelineData event) {
+      final Widget display = TimelineCard(
           width: widget.width,
           height: widget.height,
           event: event,
           folderId: folderId);
-      _TimeLineEventEntry _timeLineEventEntry =
-          _TimeLineEventEntry(event.mainEvent.timestamp, display);
+      final _TimeLineEventEntry _timeLineEventEntry =
+          _TimeLineEventEntry(event.mainStory.timestamp, display);
       timeLineEvents.add(_timeLineEventEntry);
     });
 
-    String widgetKey = _timelineData.length.toString();
-    timeLineEvents.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    timeLineEvents.forEach((element) {
-      widgetKey = widgetKey + element.timestamp.toString() + "";
+    final StringBuffer widgetKey = StringBuffer();
+    widgetKey.write(_timelineData.length.toString());
+    timeLineEvents.sort((_TimeLineEventEntry a, _TimeLineEventEntry b) =>
+        b.timestamp.compareTo(a.timestamp));
+    for(final _TimeLineEventEntry element in timeLineEvents) {
+      widgetKey.write(element.timestamp.toString());
       eventDisplay.add(element.event);
-    });
+    }
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
-      listener: (context, state) {
-        if (state.type == CloudStoriesType.updated_stories) {
+      listener: (BuildContext context, CloudStoriesState state) {
+        if (state.type == CloudStoriesType.updateUI) {
           setState(() {
-            print('updating stories');
-            _timelineData.forEach((key, story) => story.subEvents
-                .sort((a, b) => b.timestamp.compareTo(a.timestamp)));
+            _timelineData.forEach((String key, StoryTimelineData story) =>
+                story.subEvents.sort((StoryContent a, StoryContent b) =>
+                    b.timestamp.compareTo(a.timestamp)));
             loaded = true;
           });
         }
@@ -69,13 +82,13 @@ class _TimelineLayoutState extends State<TimelineLayout> {
       child: !loaded
           ? StaticLoadingLogo()
           : Column(
-              key: Key(widgetKey),
-              children: [
-                Container(
+              key: Key(widgetKey.toString()),
+              children: <Widget>[
+                SizedBox(
                   width: 150,
                   child: AddStoryButton(),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 ...eventDisplay,
               ],
             ),
@@ -83,11 +96,8 @@ class _TimelineLayoutState extends State<TimelineLayout> {
   }
 }
 
+// ignore: public_member_api_docs
 class AddStoryButton extends StatefulWidget {
-  const AddStoryButton({
-    Key key,
-  }) : super(key: key);
-
   @override
   _AddStoryButtonState createState() => _AddStoryButtonState();
 }
@@ -107,15 +117,15 @@ class _AddStoryButtonState extends State<AddStoryButton> {
         ? StaticLoadingLogo()
         : ButtonWithIcon(
             icon: Icons.add,
-            text: "add story",
-            width: Constants.SMALL_WIDTH,
+            text: 'add story',
+            width: Constants.minScreenWidth,
             backgroundColor: Colors.white,
             textColor: Colors.black,
             iconColor: Colors.black,
             onPressed: () async {
-              int timestamp = DateTime.now().millisecondsSinceEpoch;
+              final int timestamp = DateTime.now().millisecondsSinceEpoch;
               BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-                  CloudStoriesType.create_story,
+                  CloudStoriesType.createStory,
                   data: timestamp,
                   mainEvent: true));
               setState(() => addingStory = true);

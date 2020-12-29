@@ -4,12 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/ui/pages/dynamic/documents.dart';
-import 'package:web/ui/pages/dynamic/media.dart';
-import 'package:web/ui/pages/static/home.dart';
-import 'package:web/ui/pages/static/login.dart';
-import 'package:web/ui/pages/static/privacy_policy.dart';
-import 'package:web/ui/pages/static/terms_of_conditions.dart';
+import 'package:web/route.dart';
 
 // ignore: must_be_immutable
 class MockGlobalKey extends Mock implements GlobalKey<NavigatorState> {
@@ -107,12 +102,12 @@ main() {
         expect: [],
         verify: (bloc) {
           expect(pushedNames, [
-            HomePage.route,
-            LoginPage.route,
-            MediaPage.route,
-            DocumentsPage.route,
-            TermsPage.route,
-            PolicyPage.route
+            routePaths[route.home],
+            routePaths[route.login],
+            routePaths[route.media],
+            routePaths[route.documents],
+            routePaths[route.terms],
+            routePaths[route.policy],
           ]);
         });
 
@@ -138,12 +133,12 @@ main() {
         expect: [],
         verify: (bloc) {
           expect(pushReplacementNamed, [
-            HomePage.route,
-            LoginPage.route,
-            MediaPage.route,
-            DocumentsPage.route,
-            TermsPage.route,
-            PolicyPage.route
+            routePaths[route.home],
+            routePaths[route.login],
+            routePaths[route.media],
+            routePaths[route.documents],
+            routePaths[route.terms],
+            routePaths[route.policy],
           ]);
         });
   });

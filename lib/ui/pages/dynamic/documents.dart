@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Page for documents
 class DocumentsPage extends StatefulWidget {
-  static const String route = '/documents';
-
   @override
   _DocumentsPageState createState() => _DocumentsPageState();
 }
@@ -10,10 +9,6 @@ class DocumentsPage extends StatefulWidget {
 class _DocumentsPageState extends State<DocumentsPage> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("documents coming soon!"),
-      ],
-    );
+    return const Text('documents coming soon!');
   }
 }

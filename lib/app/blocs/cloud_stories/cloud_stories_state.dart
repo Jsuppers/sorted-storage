@@ -1,24 +1,21 @@
-import 'package:web/ui/widgets/timeline_card.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/models/timeline_data.dart';
 
-enum CloudStoriesType {
-  initial_state,
-  new_user,
-  retrieve_stories,
-  retrieve_story,
-  create_story,
-  progress_upload,
-  updated_stories,
-  syncing_story_start,
-  syncing_story_end,
-  syncing_story_state,
-  delete_story
-}
-
+/// State returned
 class CloudStoriesState {
-  final CloudStoriesType type;
-  final Map<String, TimelineData> cloudStories;
-  final dynamic data;
-  final String folderID;
+  /// The state contains the type of state and a copy of the cloud timeline
+  const CloudStoriesState(this.type, this.cloudStories,
+      {this.data, this.folderID});
 
-  const CloudStoriesState(this.type, this.cloudStories, {this.data, this.folderID});
+  /// type of state
+  final CloudStoriesType type;
+
+  /// cloud copy of the timeline
+  final Map<String, StoryTimelineData> cloudStories;
+
+  /// data returned from the state
+  final dynamic data;
+
+  /// the folder ID for the related story
+  final String folderID;
 }

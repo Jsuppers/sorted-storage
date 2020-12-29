@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+/// Navigation logo which shows a logo without or with text
 class NavBarLogo extends StatelessWidget {
+  // ignore: public_member_api_docs
+  const NavBarLogo({Key key, this.showText}) : super(key: key);
+
+  /// should show logo with text
   final bool showText;
 
-  const NavBarLogo({Key key, this.showText}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -11,14 +15,12 @@ class NavBarLogo extends StatelessWidget {
       height: 60,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Container(
-          child: Row(
-            children: [
-              Image.asset(this.showText
-                  ? "assets/images/logo.png"
-                  : "assets/images/logo_no_text.png"),
-            ],
-          ),
+        child: Row(
+          children: <Widget>[
+            Image.asset(showText
+                ? 'assets/images/logo.png'
+                : 'assets/images/logo_no_text.png'),
+          ],
         ),
       ),
     );

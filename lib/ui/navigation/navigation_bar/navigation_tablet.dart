@@ -1,59 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/models/user.dart';
+import 'package:web/ui/navigation/drawer/drawer_icon.dart';
+import 'package:web/ui/navigation/navigation_bar/navigation_content.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_desktop.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 
+/// Tablet navigation bar
 class NavigationBarTablet extends StatelessWidget {
-  final User user;
-
-  const NavigationBarTablet({Key key, this.user}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    List<Widget> content;
+    final List<Widget> content = <Widget>[];
+    final User user = BlocProvider.of<AuthenticationBloc>(context).state;
     if (user != null) {
-      return NavigationBarDesktop(user: user);
+      return NavigationBarDesktop();
     } else {
-      content = [
+      content.addAll(<Widget>[
         Row(
-          children: [
-            NavigationMenu(),
-            NavBarLogo(showText: true),
+          children: <Widget>[
+            DrawerIcon(),
+            const NavBarLogo(showText: true),
           ],
         ),
-        NavigationLogin(loggedIn: false)
-      ];
+        NavigationLogin()
+      ]);
     }
 
-    return NavigationContent(children: content);
-  }
-}
-
-class NavigationMenu extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      splashRadius: 25,
-      icon: Icon(Icons.menu, size: 24),
-      color: Color(0xFF293040),
-      onPressed: () => Scaffold.of(context).openDrawer(),
-    );
-  }
-}
-
-class NavigationContent extends StatelessWidget {
-  final List<Widget> children;
-
-  const NavigationContent({Key key, this.children}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: children),
-    );
+    return NavigationContent(content);
   }
 }

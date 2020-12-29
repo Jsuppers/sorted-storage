@@ -7,113 +7,30 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
+import 'package:web/app/blocs/comment_handler/comment_handler_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_state.dart';
-import 'package:web/app/models/adventure.dart';
+import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/models/media_progress.dart';
+import 'package:web/app/models/story_comment.dart';
+import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/event_comments.dart';
+import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
-class TimelineData {
-  bool saving;
-  bool locked;
-  EventContent mainEvent;
-  List<EventContent> subEvents;
-
-  TimelineData(
-      {this.mainEvent,
-      this.subEvents,
-      this.locked = true,
-      this.saving = false});
-
-  static TimelineData clone(TimelineData timelineEvent) {
-    return TimelineData(
-        saving: timelineEvent.saving,
-        locked: timelineEvent.locked,
-        mainEvent: EventContent.clone(timelineEvent.mainEvent),
-        subEvents: List.generate(timelineEvent.subEvents.length,
-            (index) => EventContent.clone(timelineEvent.subEvents[index])));
-  }
-}
-
-class StoryMedia {
-  String imageURL;
-  bool isVideo;
-  bool isDocument;
-  int size;
-  Stream<List<int>> stream;
-
-  StoryMedia({
-    this.imageURL,
-    this.stream,
-    this.isVideo = false,
-    this.isDocument = false,
-    this.size,
-  });
-}
-
-class SubEvent {
-  final String id;
-  final int timestamp;
-
-  SubEvent(this.id, this.timestamp);
-}
-
-class EventContent {
-  int timestamp;
-  String emoji;
-  String title;
-  Map<String, StoryMedia> images;
-  String description;
-  String folderID;
-  String settingsID;
-  String commentsID;
-  String permissionID;
-  AdventureComments comments;
-  List<SubEvent> subEvents;
-
-  EventContent(
-      {this.timestamp,
-      this.title = '',
-      this.emoji = '',
-      this.images,
-      this.description = '',
-      this.folderID,
-      this.settingsID,
-      this.subEvents,
-      this.commentsID,
-      this.comments});
-
-  EventContent.clone(EventContent event)
-      : this(
-            timestamp: event.timestamp,
-            title: event.title,
-            emoji: event.emoji,
-            images: Map.from(event.images),
-            description: event.description,
-            settingsID: event.settingsID,
-            commentsID: event.commentsID,
-            folderID: event.folderID,
-            subEvents: List.from(event.subEvents),
-            comments: AdventureComments.clone(event.comments));
-}
-
+// ignore: public_member_api_docs
 class TimelineCard extends StatefulWidget {
-  final double width;
-  final double height;
-  final TimelineData event;
-  final String folderId;
-  final bool viewMode;
-
+  // ignore: public_member_api_docs
   const TimelineCard(
       {Key key,
       @required this.width,
@@ -123,18 +40,33 @@ class TimelineCard extends StatefulWidget {
       this.viewMode = false})
       : super(key: key);
 
+  // ignore: public_member_api_docs
+  final double width;
+
+  // ignore: public_member_api_docs
+  final double height;
+
+  // ignore: public_member_api_docs
+  final StoryTimelineData event;
+
+  // ignore: public_member_api_docs
+  final String folderId;
+
+  // ignore: public_member_api_docs
+  final bool viewMode;
+
   @override
   _TimelineCardState createState() => _TimelineCardState();
 }
 
 class _TimelineCardState extends State<TimelineCard> {
-  TimelineData adventure;
+  StoryTimelineData adventure;
   bool locked;
   bool saving;
 
   Widget createHeader(double width, BuildContext context) {
     if (saving) {
-      return SavingIcon(folderID: adventure.mainEvent.folderID);
+      return SavingIcon(folderID: adventure.mainStory.folderID);
     }
     return Container(
       height: 30,
@@ -143,28 +75,28 @@ class _TimelineCardState extends State<TimelineCard> {
       child: locked
           ? Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 ButtonWithIcon(
-                    text: "share",
+                    text: 'share',
                     icon: Icons.share,
                     onPressed: () {
                       DialogService.shareDialog(
                           context,
-                          adventure.mainEvent.folderID,
-                          adventure.mainEvent.commentsID);
+                          adventure.mainStory.folderID,
+                          adventure.mainStory.commentsID);
                     },
                     width: width,
                     backgroundColor: Colors.white,
                     textColor: Colors.black,
                     iconColor: Colors.black),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ButtonWithIcon(
-                    text: "edit",
+                    text: 'edit',
                     icon: Icons.edit,
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.edit_story,
-                              folderId: widget.folderId));
+                          LocalStoriesEvent(LocalStoriesType.editStory,
+                              folderID: widget.folderId));
                     },
                     width: width,
                     backgroundColor: Colors.white,
@@ -174,14 +106,14 @@ class _TimelineCardState extends State<TimelineCard> {
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 ButtonWithIcon(
-                    text: "cancel",
+                    text: 'cancel',
                     icon: Icons.cancel,
                     onPressed: () {
                       BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.cancel_story,
-                              folderId: widget.folderId,
+                          LocalStoriesEvent(LocalStoriesType.cancelStory,
+                              folderID: widget.folderId,
                               data: BlocProvider.of<CloudStoriesBloc>(context)
                                   .cloudStories));
                     },
@@ -189,26 +121,25 @@ class _TimelineCardState extends State<TimelineCard> {
                     backgroundColor: Colors.white,
                     textColor: Colors.black,
                     iconColor: Colors.black),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ButtonWithIcon(
-                    text: "delete",
+                    text: 'delete',
                     icon: Icons.delete,
                     onPressed: () {
                       BlocProvider.of<CloudStoriesBloc>(context).add(
-                          CloudStoriesEvent(CloudStoriesType.delete_story,
-                              folderId: widget.folderId));
+                          CloudStoriesEvent(CloudStoriesType.deleteStory,
+                              folderID: widget.folderId));
                     },
                     width: width,
                     backgroundColor: Colors.redAccent),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ButtonWithIcon(
-                    text: "save",
+                    text: 'save',
                     icon: Icons.save,
                     onPressed: () async {
                       BlocProvider.of<CloudStoriesBloc>(context).add(
-                          CloudStoriesEvent(
-                              CloudStoriesType.syncing_story_start,
-                              folderId: widget.folderId));
+                          CloudStoriesEvent(CloudStoriesType.syncingStart,
+                              folderID: widget.folderId));
                     },
                     width: width,
                     backgroundColor: Colors.greenAccent),
@@ -221,25 +152,30 @@ class _TimelineCardState extends State<TimelineCard> {
   void initState() {
     super.initState();
     adventure = widget.event;
-    locked = adventure == null ? true : adventure.locked;
-    saving = adventure == null ? false : adventure.saving;
+    if (adventure == null) {
+      locked = true;
+      saving = false;
+    } else {
+      locked = adventure.locked;
+      saving = adventure.saving;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.viewMode) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieve_story,
-          folderId: widget.folderId));
+          CloudStoriesType.retrieveStory,
+          folderID: widget.folderId));
     }
     if (adventure == null) {
-      return FullPageLoadingLogo(backgroundColor: Colors.white);
+      return const FullPageLoadingLogo(backgroundColor: Colors.white);
     }
     return MultiBlocListener(
-      listeners: [
+      listeners: <BlocListener<dynamic, dynamic>>[
         BlocListener<CloudStoriesBloc, CloudStoriesState>(
-          listener: (context, state) {
-            if (state.type == CloudStoriesType.syncing_story_start &&
+          listener: (BuildContext context, CloudStoriesState state) {
+            if (state.type == CloudStoriesType.syncingStart &&
                 state.folderID == widget.folderId) {
               setState(() {
                 saving = BlocProvider.of<LocalStoriesBloc>(context)
@@ -248,14 +184,14 @@ class _TimelineCardState extends State<TimelineCard> {
                     .saving;
               });
             }
-            if (state.type == CloudStoriesType.syncing_story_end &&
+            if (state.type == CloudStoriesType.syncingEnd &&
                 state.folderID == widget.folderId) {
               setState(() {
                 adventure = BlocProvider.of<LocalStoriesBloc>(context)
                     .state
                     .localStories[state.folderID];
-                adventure.subEvents
-                    .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                adventure.subEvents.sort((StoryContent a, StoryContent b) =>
+                    b.timestamp.compareTo(a.timestamp));
                 locked = adventure.locked;
                 saving = adventure.saving;
               });
@@ -263,27 +199,26 @@ class _TimelineCardState extends State<TimelineCard> {
           },
         ),
         BlocListener<LocalStoriesBloc, LocalStoriesState>(
-          listener: (context, state) {
-            print(
-                'type: ${state.type} folderID: ${state.folderID} currentID: ${widget.folderId}');
-            if (state.type == LocalStoriesType.edit_story &&
+          listener: (BuildContext context, LocalStoriesState state) {
+            if (state.type == LocalStoriesType.editStory &&
                 state.folderID == widget.folderId) {
               setState(() {
                 locked = state.localStories[state.folderID].locked;
               });
-            } else if ((state.type == LocalStoriesType.cancel_story ||
-                    state.type == LocalStoriesType.syncing_story_end) &&
+            } else if ((state.type == LocalStoriesType.cancelStory ||
+                    state.type == LocalStoriesType.updateUI) &&
                 state.folderID == widget.folderId) {
               setState(() {
                 adventure = state.localStories[state.folderID];
-                adventure.subEvents
-                    .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                adventure.subEvents.sort((StoryContent a, StoryContent b) =>
+                    b.timestamp.compareTo(a.timestamp));
                 locked = adventure.locked;
                 saving = adventure.saving;
               });
-            } else if (state.type == LocalStoriesType.syncing_story_end) {
-              var subEvent = adventure.subEvents.firstWhere(
-                  (element) => element.folderID == state.folderID, orElse: () {
+            } else if (state.type == LocalStoriesType.updateUI) {
+              final StoryContent subEvent = adventure.subEvents.firstWhere(
+                  (StoryContent element) => element.folderID == state.folderID,
+                  orElse: () {
                 return;
               });
               if (subEvent == null) {
@@ -301,7 +236,7 @@ class _TimelineCardState extends State<TimelineCard> {
           child: Column(
             children: [
               EventCard(
-                eventFolderID: adventure.mainEvent.folderID,
+                storyFolderID: adventure.mainStory.folderID,
                 saving: saving,
                 locked: locked,
                 controls: widget.viewMode
@@ -309,91 +244,88 @@ class _TimelineCardState extends State<TimelineCard> {
                     : createHeader(widget.width, context),
                 width: widget.width,
                 height: widget.height,
-                event: adventure.mainEvent,
+                story: adventure.mainStory,
               ),
               Visibility(
                 visible: !locked,
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: Container(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: SizedBox(
                     height: 40,
                     width: 140,
                     child: ButtonWithIcon(
-                        text: "add sub-event",
+                        text: 'add sub-event',
                         icon: Icons.add,
                         onPressed: () async {
                           if (saving) {
                             return;
                           }
                           BlocProvider.of<LocalStoriesBloc>(context).add(
-                              LocalStoriesEvent(
-                                  LocalStoriesType.create_sub_story,
-                                  parentId: adventure.mainEvent.folderID,
-                                  folderId: widget.folderId));
+                              LocalStoriesEvent(LocalStoriesType.createSubStory,
+                                  parentID: adventure.mainStory.folderID,
+                                  folderID: widget.folderId));
                         },
-                        width: Constants.SMALL_WIDTH,
+                        width: Constants.minScreenWidth,
                         backgroundColor: Colors.white,
                         textColor: Colors.black,
                         iconColor: Colors.black),
                   ),
                 ),
               ),
-              ...List.generate(adventure.subEvents.length, (index) {
+              ...List<Widget>.generate(adventure.subEvents.length, (int index) {
                 return Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: Card(
                       child: EventCard(
-                          eventFolderID: adventure.mainEvent.folderID,
+                          storyFolderID: adventure.mainStory.folderID,
                           saving: saving,
                           locked: locked,
                           controls: Visibility(
-                              child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.only(right: 3, top: 3),
-                                    child: Container(
-                                      height: 34,
-                                      width: 34,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(40))),
-                                      child: IconButton(
-                                        iconSize: 18,
-                                        splashRadius: 18,
-                                        icon: Icon(
-                                          Icons.clear,
-                                          color: Colors.redAccent,
-                                          size: 18,
-                                        ),
-                                        onPressed: () {
-                                          if (saving) {
-                                            return;
-                                          }
-                                          BlocProvider.of<LocalStoriesBloc>(
-                                                  context)
-                                              .add(
-                                                  LocalStoriesEvent(
-                                                      LocalStoriesType
-                                                          .delete_sub_story,
-                                                      parentId: adventure
-                                                          .mainEvent.folderID,
-                                                      folderId: adventure
-                                                          .subEvents[index]
-                                                          .folderID));
-                                        },
-                                      ),
+                            visible: !locked,
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(right: 3, top: 3),
+                                child: Container(
+                                  height: 34,
+                                  width: 34,
+                                  decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(40))),
+                                  child: IconButton(
+                                    iconSize: 18,
+                                    splashRadius: 18,
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      color: Colors.redAccent,
+                                      size: 18,
                                     ),
-                                  )),
-                              visible: !locked),
+                                    onPressed: () {
+                                      if (saving) {
+                                        return;
+                                      }
+                                      BlocProvider.of<LocalStoriesBloc>(context)
+                                          .add(LocalStoriesEvent(
+                                              LocalStoriesType.deleteSubStory,
+                                              parentID:
+                                                  adventure.mainStory.folderID,
+                                              folderID: adventure
+                                                  .subEvents[index].folderID));
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                           width: widget.width,
                           height: widget.height,
-                          event: adventure.subEvents[index])),
+                          story: adventure.subEvents[index])),
                 );
               }),
               BlocBuilder<AuthenticationBloc, usr.User>(
-                  builder: (context, user) {
+                  builder: (BuildContext context, usr.User user) {
                 return CommentWidget(
                   folderID: widget.folderId,
                   user: user,
@@ -401,27 +333,22 @@ class _TimelineCardState extends State<TimelineCard> {
                   height: widget.height,
                   sendComment: (BuildContext context, usr.User currentUser,
                       String comment) async {
-                    String user = "";
+                    String user = '';
                     if (currentUser != null) {
                       user = currentUser.displayName;
-                      if (user == null || user == "") {
+                      if (user == null || user == '') {
                         user = currentUser.email;
                       }
                     }
 
-                    AdventureComment eventComment =
-                        AdventureComment(comment: comment, user: user);
+                    final StoryComment eventComment =
+                        StoryComment(comment: comment, user: user);
 
                     BlocProvider.of<CommentHandlerBloc>(context).add(
                         CommentHandlerEvent(
-                            CommentHandlerType.uploading_comments_start,
-                            folderId: widget.folderId,
+                            CommentHandlerType.uploadingCommentsStart,
+                            folderID: widget.folderId,
                             data: eventComment));
-
-//                    BlocProvider.of<TimelineBloc>(context).add(TimelineEvent(
-//                        TimelineMessageType.uploading_comments_start,
-//                        data: eventComment,
-//                        folderId: widget.folderId));
                   },
                 );
               })
@@ -433,13 +360,16 @@ class _TimelineCardState extends State<TimelineCard> {
   }
 }
 
+// ignore: public_member_api_docs
 class SavingIcon extends StatefulWidget {
-  final String folderID;
-
+  // ignore: public_member_api_docs
   const SavingIcon({
     Key key,
     this.folderID,
   }) : super(key: key);
+
+  // ignore: public_member_api_docs
+  final String folderID;
 
   @override
   _SavingIconState createState() => _SavingIconState();
@@ -447,26 +377,26 @@ class SavingIcon extends StatefulWidget {
 
 class _SavingIconState extends State<SavingIcon> {
   double percent = 0;
-  String text = "0%";
+  String text = '0%';
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
-      listener: (context, state) {
-        if (state.type == CloudStoriesType.progress_upload &&
+      listener: (BuildContext context, CloudStoriesState state) {
+        if (state.type == CloudStoriesType.progressUpload &&
             state.folderID == widget.folderID) {
-          MediaProgress progress = state.data as MediaProgress;
+          final MediaProgress progress = state.data as MediaProgress;
           setState(() {
             // TODO this shows file loading progress not sending progress
-            var total =
+            final int total =
                 progress.total + 1; // we will be evil and never show 100%
-            var sent = progress.sent;
+            final int sent = progress.sent;
             if (sent == 0) {
               percent = 0;
             } else {
               percent = sent / total;
             }
-            text = (percent * 100).toInt().toString() + "%";
+            text = '${(percent * 100).toInt()}%';
           });
         }
       },
@@ -477,9 +407,10 @@ class _SavingIconState extends State<SavingIcon> {
             radius: 48.0,
             lineWidth: 8.0,
             percent: percent,
-            center: new Text(
+            center: Text(
               text,
-              style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0),
             ),
             circularStrokeCap: CircularStrokeCap.round,
             progressColor: myThemeData.accentColor,
@@ -488,77 +419,5 @@ class _SavingIconState extends State<SavingIcon> {
         ],
       ),
     );
-  }
-}
-
-class TimelineHeader extends StatefulWidget {
-  @override
-  _TimelineHeaderState createState() => _TimelineHeaderState();
-}
-
-class _TimelineHeaderState extends State<TimelineHeader> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class ButtonWithIcon extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final Function onPressed;
-  final Color iconColor;
-  final Color backgroundColor;
-  final Color textColor;
-  final double width;
-
-  const ButtonWithIcon(
-      {Key key,
-      this.text,
-      this.icon,
-      this.onPressed,
-      this.iconColor = Colors.white,
-      this.backgroundColor,
-      this.textColor = Colors.white,
-      this.width})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return buttonWithIcon(this.text, this.icon, this.onPressed, this.iconColor,
-        this.backgroundColor, this.textColor, this.width);
-  }
-
-  Widget buttonWithIcon(String text, IconData icon, Function onPressed,
-      Color iconColor, Color backgroundColor, Color textColor, double width) {
-    return MaterialButton(
-        minWidth: width >= Constants.SMALL_WIDTH ? 100 : 30,
-        child: width >= Constants.SMALL_WIDTH
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    color: iconColor,
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    text,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: 'Roboto',
-                      color: textColor,
-                    ),
-                  ),
-                ],
-              )
-            : Icon(
-                icon,
-                color: iconColor,
-              ),
-        color: backgroundColor,
-        textColor: textColor,
-        onPressed: () => onPressed());
   }
 }

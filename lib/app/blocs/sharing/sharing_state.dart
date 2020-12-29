@@ -1,11 +1,20 @@
+/// abstract class for the sharing state
 abstract class SharingState {
-  final String message;
-  SharingState(this.message);
+  /// constructor which sets the message
+  SharingState(this.errorMessage);
+
+  /// error message
+  final String errorMessage;
 }
 
+/// story is shared
 class SharingSharedState extends SharingState {
-  SharingSharedState({String message}) : super(message);
+  /// constructor which allows setting the error message
+  SharingSharedState({String errorMessage}) : super(errorMessage);
 }
+
+/// story is not shared
 class SharingNotSharedState extends SharingState {
-  SharingNotSharedState({String message}) : super(message);
+  /// constructor which allows setting the error message
+  SharingNotSharedState({String errorMessage}) : super(errorMessage);
 }

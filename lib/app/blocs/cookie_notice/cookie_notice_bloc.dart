@@ -5,6 +5,7 @@ import 'package:web/app/blocs/cookie_notice/cookie_notice_event.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 
+///
 class CookieNoticeBloc extends Cubit<CookieNoticeEvent> {
   bool showing;
   Future<SharedPreferences> sharedPreferenceInstance;
@@ -20,14 +21,14 @@ class CookieNoticeBloc extends Cubit<CookieNoticeEvent> {
     }
     showing = true;
     var pref = await sharedPreferenceInstance;
-    if (!pref.containsKey(Constants.ACCEPTED_COOKIE_VARIABLE)) {
+    if (!pref.containsKey(Constants.acceptedCookieVariable)) {
       DialogService.cookieDialog(context);
     }
   }
 
   Future acceptCookie() async {
     var pref = await sharedPreferenceInstance;
-    pref.setBool(Constants.ACCEPTED_COOKIE_VARIABLE, true);
+    pref.setBool(Constants.acceptedCookieVariable, true);
   }
 
 }
