@@ -85,6 +85,14 @@ class _CommentWidgetState extends State<CommentWidget> {
     return BlocListener<CommentHandlerBloc, CommentHandlerState>(
       listener: (BuildContext context, CommentHandlerState state) {
         if (state.folderID == widget.folderID) {
+          if (state.error != null) {
+            final SnackBar snackBar = SnackBar(
+              content: Text(state.error, textAlign: TextAlign.center),
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+
           setState(() {
             adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
                 .state

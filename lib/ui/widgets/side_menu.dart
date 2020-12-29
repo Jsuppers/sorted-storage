@@ -120,10 +120,10 @@ class AvatarWithMenu extends StatelessWidget {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        child: Avatar(url: user.photoUrl, size: 45.0),
         onTap: () {
           _showPopupMenu();
         },
+        child: Avatar(url: user.photoUrl, size: 45.0),
       ),
     );
   }

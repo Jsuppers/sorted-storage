@@ -28,6 +28,7 @@ class TimelineLayout extends StatefulWidget {
 
   // ignore: public_member_api_docs
   final double width;
+
   // ignore: public_member_api_docs
   final double height;
 
@@ -38,6 +39,7 @@ class TimelineLayout extends StatefulWidget {
 class _TimelineLayoutState extends State<TimelineLayout> {
   Map<String, StoryTimelineData> _timelineData;
   bool loaded = true;
+  bool addingStory = false;
 
   @override
   Widget build(BuildContext context) {
@@ -64,14 +66,23 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     widgetKey.write(_timelineData.length.toString());
     timeLineEvents.sort((_TimeLineEventEntry a, _TimeLineEventEntry b) =>
         b.timestamp.compareTo(a.timestamp));
-    for(final _TimeLineEventEntry element in timeLineEvents) {
+    for (final _TimeLineEventEntry element in timeLineEvents) {
       widgetKey.write(element.timestamp.toString());
       eventDisplay.add(element.event);
     }
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (BuildContext context, CloudStoriesState state) {
         if (state.type == CloudStoriesType.updateUI) {
+          if (state.error != null) {
+            final SnackBar snackBar = SnackBar(
+              content: Text(state.error, textAlign: TextAlign.center),
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+
           setState(() {
+            addingStory = false;
             _timelineData.forEach((String key, StoryTimelineData story) =>
                 story.subEvents.sort((StoryContent a, StoryContent b) =>
                     b.timestamp.compareTo(a.timestamp)));
@@ -86,50 +97,29 @@ class _TimelineLayoutState extends State<TimelineLayout> {
               children: <Widget>[
                 SizedBox(
                   width: 150,
-                  child: AddStoryButton(),
+                  child: addingStory
+                      ? StaticLoadingLogo()
+                      : ButtonWithIcon(
+                          icon: Icons.add,
+                          text: 'add story',
+                          width: Constants.minScreenWidth,
+                          backgroundColor: Colors.white,
+                          textColor: Colors.black,
+                          iconColor: Colors.black,
+                          onPressed: () async {
+                            final int timestamp =
+                                DateTime.now().millisecondsSinceEpoch;
+                            BlocProvider.of<CloudStoriesBloc>(context).add(
+                                CloudStoriesEvent(CloudStoriesType.createStory,
+                                    data: timestamp, mainEvent: true));
+                            setState(() => addingStory = true);
+                          },
+                        ),
                 ),
                 const SizedBox(height: 20),
                 ...eventDisplay,
               ],
             ),
     );
-  }
-}
-
-// ignore: public_member_api_docs
-class AddStoryButton extends StatefulWidget {
-  @override
-  _AddStoryButtonState createState() => _AddStoryButtonState();
-}
-
-class _AddStoryButtonState extends State<AddStoryButton> {
-  bool addingStory;
-
-  @override
-  void initState() {
-    super.initState();
-    addingStory = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return addingStory
-        ? StaticLoadingLogo()
-        : ButtonWithIcon(
-            icon: Icons.add,
-            text: 'add story',
-            width: Constants.minScreenWidth,
-            backgroundColor: Colors.white,
-            textColor: Colors.black,
-            iconColor: Colors.black,
-            onPressed: () async {
-              final int timestamp = DateTime.now().millisecondsSinceEpoch;
-              BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-                  CloudStoriesType.createStory,
-                  data: timestamp,
-                  mainEvent: true));
-              setState(() => addingStory = true);
-            },
-          );
   }
 }

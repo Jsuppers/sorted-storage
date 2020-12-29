@@ -5,7 +5,7 @@ import 'package:web/app/models/timeline_data.dart';
 class CloudStoriesState {
   /// The state contains the type of state and a copy of the cloud timeline
   const CloudStoriesState(this.type, this.cloudStories,
-      {this.data, this.folderID});
+      {this.data, this.folderID, this.error});
 
   /// type of state
   final CloudStoriesType type;
@@ -18,4 +18,7 @@ class CloudStoriesState {
 
   /// the folder ID for the related story
   final String folderID;
+
+  /// error message
+  final String error;
 }
