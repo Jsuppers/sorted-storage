@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/ui/widgets/timeline.dart';
 
 /// Page which contains all the stories
@@ -8,6 +12,14 @@ class MediaPage extends StatefulWidget {
 }
 
 class _MediaPageState extends State<MediaPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<CloudStoriesBloc>(context)
+        .add(const CloudStoriesEvent(CloudStoriesType.retrieveStories));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(

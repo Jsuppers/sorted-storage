@@ -27,7 +27,9 @@ const Map<route, String> routePaths = <route, String>{
   route.home: '/home',
 };
 
+/// class for various routing methods
 class RouteConfiguration {
+  /// create a page depending on route
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final RoutingData routingData = settings.name.getRoutingData;
     final String baseRoute = routingData.baseRoute;
@@ -36,20 +38,20 @@ class RouteConfiguration {
       type: PageTransitionType.fade,
       settings: settings,
       child: LayoutWrapper(
-          widget: getPageContent(baseRoute, routingData.destination),
+          widget: _getPageContent(baseRoute, routingData.destination),
           isViewMode: baseRoute == routePaths[route.view],
-          requiresAuthentication: pageRequiresAuthentication(baseRoute),
+          requiresAuthentication: _pageRequiresAuthentication(baseRoute),
           targetRoute: routingData.route),
     );
   }
 
-  static bool pageRequiresAuthentication(String baseRoute) {
+  static bool _pageRequiresAuthentication(String baseRoute) {
     return baseRoute == routePaths[route.media] ||
         baseRoute == routePaths[route.documents] ||
         baseRoute == '/';
   }
 
-  static Widget getPageContent(String baseRoute, String destination) {
+  static Widget _getPageContent(String baseRoute, String destination) {
     if (baseRoute == routePaths[route.view]) {
       return ViewPage(destination);
     }

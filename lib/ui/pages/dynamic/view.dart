@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
@@ -22,6 +23,14 @@ class ViewPage extends StatefulWidget {
 
 class _ViewPageState extends State<ViewPage> {
   StoryTimelineData timelineData;
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+        CloudStoriesType.retrieveStory,
+        folderID: widget._destination));
+  }
 
   @override
   Widget build(BuildContext context) {

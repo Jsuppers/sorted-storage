@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/ui/footer/footer.dart';
@@ -41,34 +38,19 @@ class LayoutWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthenticationBloc, usr.User>(
         builder: (BuildContext context, usr.User user) {
-      if (requiresAuthentication || isViewMode) {
-        if (user == null && !isViewMode) {
-          Widget redirectWidget;
-          if (targetRoute == '/') {
-            redirectWidget = HomePage();
-          } else {
-            redirectWidget = LoginPage();
-          }
-          return Content(
-              widget: redirectWidget,
-              includeNavigation: !isViewMode,
-              requiresAuthentication: requiresAuthentication);
+      if (requiresAuthentication && user == null) {
+        Widget redirectWidget;
+        if (targetRoute == '/') {
+          redirectWidget = HomePage();
+        } else {
+          redirectWidget = LoginPage();
         }
-        if (!isViewMode) {
-          BlocProvider.of<CloudStoriesBloc>(context)
-              .add(const CloudStoriesEvent(CloudStoriesType.retrieveStories));
-        }
-        return Content(
-            widget: widget,
-            includeNavigation: !isViewMode,
-            requiresAuthentication: requiresAuthentication);
-      } else {
-        return Content(
-          widget: widget,
-          includeNavigation: !isViewMode,
-          requiresAuthentication: requiresAuthentication,
-        );
+        return Content(widget: redirectWidget);
       }
+      return Content(
+        widget: widget,
+        includeNavigation: !isViewMode,
+      );
     });
   }
 }
@@ -80,7 +62,6 @@ class Content extends StatefulWidget {
     Key key,
     @required this.widget,
     this.includeNavigation = true,
-    this.requiresAuthentication,
   }) : super(key: key);
 
   /// main widget
@@ -88,9 +69,6 @@ class Content extends StatefulWidget {
 
   /// should include the navigation bar
   final bool includeNavigation;
-
-  /// whether this widget requires a authenticated user
-  final bool requiresAuthentication;
 
   @override
   _ContentState createState() => _ContentState();

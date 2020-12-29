@@ -163,11 +163,6 @@ class _TimelineCardState extends State<TimelineCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.viewMode) {
-      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveStory,
-          folderID: widget.folderId));
-    }
     if (adventure == null) {
       return const FullPageLoadingLogo(backgroundColor: Colors.white);
     }
