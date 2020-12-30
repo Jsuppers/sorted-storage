@@ -8,7 +8,7 @@ import 'package:web/ui/pages/template/page_template.dart';
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final List<PageItemContent> content = [
+    final List<PageItemContent> content = <PageItemContent>[
       PageItemContent(
           title: 'About',
           text:

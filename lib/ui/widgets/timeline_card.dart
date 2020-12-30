@@ -181,6 +181,12 @@ class _TimelineCardState extends State<TimelineCard> {
             }
             if (state.type == CloudStoriesType.syncingEnd &&
                 state.folderID == widget.folderId) {
+              final List<String> errorMessages = state.data as List<String>;
+              if (errorMessages != null && errorMessages.isNotEmpty) {
+                DialogService.errorSyncingDialog(context,
+                    errorMessages: errorMessages);
+              }
+
               setState(() {
                 adventure = BlocProvider.of<LocalStoriesBloc>(context)
                     .state

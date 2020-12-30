@@ -63,21 +63,22 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         break;
       case CloudStoriesType.syncingStart:
         _localStories[event.folderID].saving = true;
-        _syncCopies(event.folderID);
         yield CloudStoriesState(CloudStoriesType.syncingStart, _cloudStories,
             folderID: event.folderID);
+        _syncCopies(event.folderID);
         break;
       case CloudStoriesType.createStory:
         _createEventFolder(_mediaFolderID, event.data as int, event.mainEvent);
         break;
       case CloudStoriesType.updateUI:
-        yield CloudStoriesState(CloudStoriesType.updateUI, _cloudStories);
+        yield CloudStoriesState(CloudStoriesType.updateUI, _cloudStories,
+            error: event.error);
         break;
       case CloudStoriesType.syncingEnd:
         _localStories[event.folderID].saving = false;
         _localStories[event.folderID].locked = true;
         yield CloudStoriesState(CloudStoriesType.syncingEnd, _cloudStories,
-            folderID: event.folderID);
+            folderID: event.folderID, data: event.data);
         break;
       case CloudStoriesType.syncingState:
         yield CloudStoriesState(CloudStoriesType.syncingState, _cloudStories,
@@ -97,11 +98,15 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       _cloudStories.remove(fileID);
       _localStories.remove(fileID);
       add(const CloudStoriesEvent(CloudStoriesType.updateUI));
+    }, onError: (_) {
+      add(const CloudStoriesEvent(CloudStoriesType.updateUI,
+          error: 'Error when deleting story'));
     });
   }
 
   Future<void> _syncCopies(String eventFolderID) async {
     bool rebuildAllStories = false;
+    final List<String> errorMessages = <String>[];
     StoryTimelineData localCopy = _localStories[eventFolderID];
     final StoryTimelineData cloudCopy = _cloudStories[eventFolderID];
     if (localCopy.mainStory.timestamp != cloudCopy.mainStory.timestamp) {
@@ -121,7 +126,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             (StoryContent element) => element.folderID == subEvent.folderID);
       }
 
-      await _syncContent(subEvent, cloudSubEvent);
+      await _syncContent(subEvent, cloudSubEvent, errorMessages);
     }
 
     final List<StoryContent> eventsToDelete = <StoryContent>[];
@@ -143,11 +148,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       cloudCopy.subEvents.remove(subEvent);
     }
 
-    await _syncContent(localCopy.mainStory, cloudCopy.mainStory);
+    await _syncContent(localCopy.mainStory, cloudCopy.mainStory, errorMessages);
     localCopy = StoryTimelineData.clone(cloudCopy);
 
     add(CloudStoriesEvent(CloudStoriesType.syncingEnd,
-        folderID: eventFolderID));
+        folderID: eventFolderID, data: errorMessages));
 
     if (rebuildAllStories) {
       add(CloudStoriesEvent(CloudStoriesType.updateUI,
@@ -155,8 +160,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
   }
 
-  Future<void> _syncContent(
-      StoryContent localCopy, StoryContent cloudCopy) async {
+  Future<void> _syncContent(StoryContent localCopy, StoryContent cloudCopy,
+      List<String> errorMessages) async {
     List<Future<dynamic>> tasks = <Future<dynamic>>[];
     final Map<String, List<String>> uploadingImages = <String, List<String>>{};
 
@@ -166,7 +171,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           .then((String value) {
         cloudCopy.timestamp = localCopy.timestamp;
       }, onError: (dynamic error) {
-        print('error $error');
+        localCopy.timestamp = cloudCopy.timestamp;
+        errorMessages.add('Edit the date');
       }));
     }
 
@@ -179,8 +185,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         cloudCopy.title = localCopy.title;
         cloudCopy.description = localCopy.description;
         cloudCopy.emoji = localCopy.emoji;
-      }, onError: (dynamic error) {
-        print('error $error');
+      }, onError: (_) {
+        localCopy.title = cloudCopy.title;
+        localCopy.description = cloudCopy.description;
+        localCopy.emoji = cloudCopy.emoji;
+        errorMessages.add('Edit title, description, and/or story emoji');
       }));
     }
 
@@ -189,7 +198,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
     final Map<String, StoryMedia> imagesToAdd = <String, StoryMedia>{};
     final List<String> imagesToDelete = <String>[];
-    final List<String> localImagesToDelete = <String>[];
     if (localCopy.images != null) {
       int totalSize = 0;
       int sent = 0;
@@ -228,7 +236,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           }, onDone: () {
             streamController.close();
           }, onError: (dynamic error) {
-            print('error: $error');
             streamController.close();
           });
 
@@ -236,20 +243,19 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
               .uploadMediaToFolder(cloudCopy, image.key, image.value, 10,
                   streamController.stream)
               .then((String imageID) {
-            uploadingImages.update(localCopy.folderID, (List<String> value) {
-              value.remove(image.key);
-              return value;
-            });
-            add(CloudStoriesEvent(CloudStoriesType.syncingState,
-                folderID: localCopy.folderID, data: uploadingImages));
-
             if (imageID != null) {
               imagesToAdd.putIfAbsent(imageID, () => image.value);
-              localImagesToDelete.add(image.key);
             }
           }, onError: (dynamic error) {
-            print('error $error');
+            errorMessages.add('Add Image ${image.key}');
           });
+
+          uploadingImages.update(localCopy.folderID, (List<String> value) {
+            value.remove(image.key);
+            return value;
+          });
+          add(CloudStoriesEvent(CloudStoriesType.syncingState,
+              folderID: localCopy.folderID, data: uploadingImages));
         }
       }
 
@@ -259,19 +265,18 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           tasks.add(_storage.delete(image.key).then((_) {
             imagesToDelete.add(image.key);
           }, onError: (dynamic error) {
-            print('error $error');
+            errorMessages.add('Delete Image ${image.key}');
           }));
         }
       }
     }
 
-    return Future.wait(tasks).then((_) {
-      cloudCopy.images.addAll(imagesToAdd);
-      localCopy.images.addAll(imagesToAdd);
+    await Future.wait(tasks).then((_) {
       cloudCopy.images.removeWhere(
           (String key, StoryMedia value) => imagesToDelete.contains(key));
-      localCopy.images.removeWhere(
-          (String key, StoryMedia value) => localImagesToDelete.contains(key));
+      cloudCopy.images.addAll(imagesToAdd);
+      localCopy.images = Map<String, StoryMedia>.of(cloudCopy.images);
+
       imagesToAdd.forEach((String key, StoryMedia value) {
         RetryService.getThumbnail(_storage, localCopy.folderID, key,
             localCopy.images, uploadingImages, () {
@@ -302,7 +307,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         event.comments = commentsResponse.comments;
         event.commentsID = commentsResponse.commentsID;
         final StoryTimelineData timelineEvent =
-            StoryTimelineData(mainStory: event, subEvents: []);
+            StoryTimelineData(mainStory: event);
         _cloudStories.putIfAbsent(folderID, () => timelineEvent);
         _localStories.putIfAbsent(
             folderID, () => StoryTimelineData.clone(timelineEvent));
@@ -311,9 +316,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       if (mainEvent) {
         add(const CloudStoriesEvent(CloudStoriesType.updateUI));
       }
+
       return event;
     } catch (e) {
-      print('error: $e');
+      add(const CloudStoriesEvent(CloudStoriesType.updateUI,
+          error: 'Error when creating story'));
     }
     return null;
   }
@@ -327,7 +334,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     final String jsonString = jsonEncode(settings);
     final List<int> fileContent = utf8.encode(jsonString);
     final Stream<List<int>> mediaStream =
-        Future.value(fileContent).asStream().asBroadcastStream();
+        Future<List<int>>.value(fileContent).asStream().asBroadcastStream();
 
     if (content.settingsID != null) {
       final File folder = await _storage.updateFile(
@@ -346,48 +353,53 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       _cloudStories = <String, StoryTimelineData>{};
       if (folderID != null) {
         _getViewEvent(folderID).then(
-            (_) => add(const CloudStoriesEvent(CloudStoriesType.updateUI)));
+            (_) => add(const CloudStoriesEvent(CloudStoriesType.updateUI)),
+            onError: (dynamic error) => add(CloudStoriesEvent(
+                CloudStoriesType.updateUI,
+                error: error.toString())));
       } else {
         _getMediaFolder().then((String value) {
           _mediaFolderID = value;
-          _getEventsFromFolder(value).then(
-              (_) => add(const CloudStoriesEvent(CloudStoriesType.updateUI)));
-        });
+          _getStoriesFromFolder(value).then(
+              (_) => add(const CloudStoriesEvent(CloudStoriesType.updateUI)),
+              onError: (_) => add(const CloudStoriesEvent(
+                  CloudStoriesType.updateUI,
+                  error: 'Error retrieving stories')));
+        },
+            onError: (_) => add(const CloudStoriesEvent(
+                CloudStoriesType.updateUI,
+                error: 'Error retrieving media')));
       }
     }
   }
 
-  Future<void> _getEventsFromFolder(String folderID) async {
-    try {
-      final FileList eventList = await _storage.listFiles(
-          "mimeType='application/vnd.google-apps.folder' and '$folderID' in parents and trashed=false");
-      final List<String> folderIds = <String>[];
-      final List<Future<dynamic>> tasks = <Future<dynamic>>[];
-      for (final File file in eventList.files) {
-        final int timestamp = int.tryParse(file.name);
+  Future<void> _getStoriesFromFolder(String folderID) async {
+    final FileList eventList = await _storage.listFiles(
+        "mimeType='application/vnd.google-apps.folder' and '$folderID' in parents and trashed=false");
+    final List<String> folderIds = <String>[];
+    final List<Future<dynamic>> tasks = <Future<dynamic>>[];
+    for (final File file in eventList.files) {
+      final int timestamp = int.tryParse(file.name);
 
-        if (timestamp != null) {
-          folderIds.add(file.id);
-          tasks.add(_createEventFromFolder(file.id, timestamp)
-              .then((StoryContent mainEvent) async {
-            final List<StoryContent> subEvents = <StoryContent>[];
-            for (final SubEvent subEvent in mainEvent.subEvents) {
-              subEvents.add(await _createEventFromFolder(
-                  subEvent.id, subEvent.timestamp));
-            }
+      if (timestamp != null) {
+        folderIds.add(file.id);
+        tasks.add(_createEventFromFolder(file.id, timestamp)
+            .then((StoryContent mainEvent) async {
+          final List<StoryContent> subEvents = <StoryContent>[];
+          for (final SubEvent subEvent in mainEvent.subEvents) {
+            subEvents.add(
+                await _createEventFromFolder(subEvent.id, subEvent.timestamp));
+          }
 
-            final StoryTimelineData data =
-                StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
-            _cloudStories.putIfAbsent(file.id, () => data);
-            _localStories.putIfAbsent(
-                file.id, () => StoryTimelineData.clone(data));
-          }));
-        }
+          final StoryTimelineData data =
+              StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
+          _cloudStories.putIfAbsent(file.id, () => data);
+          _localStories.putIfAbsent(
+              file.id, () => StoryTimelineData.clone(data));
+        }));
       }
-      await Future.wait(tasks);
-    } catch (e) {
-      print('error: $e');
-    } finally {}
+    }
+    await Future.wait(tasks);
   }
 
   Future<void> _getViewEvent(String folderID) async {
@@ -415,47 +427,42 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   }
 
   Future<String> _getMediaFolder() async {
-    try {
-      String mediaFolderID;
+    String mediaFolderID;
 
-      final String query =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
-      final FileList folderParent = await _storage.listFiles(query);
-      String parentId;
+    final String query =
+        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+    final FileList folderParent = await _storage.listFiles(query);
+    String parentId;
 
-      if (folderParent.files.isEmpty) {
-        final File fileMetadata = File();
-        fileMetadata.name = Constants.rootFolder;
-        fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-        fileMetadata.description = "please don't modify this folder";
-        final File rt = await _storage.createFile(fileMetadata);
-        parentId = rt.id;
-      } else {
-        parentId = folderParent.files.first.id;
-      }
+    if (folderParent.files.isEmpty) {
+      final File fileMetadata = File();
+      fileMetadata.name = Constants.rootFolder;
+      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+      fileMetadata.description = "please don't modify this folder";
+      final File rt = await _storage.createFile(fileMetadata);
+      parentId = rt.id;
+    } else {
+      parentId = folderParent.files.first.id;
+    }
 
-      final String query2 =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.mediaFolder}' and '$parentId' in parents and trashed=false";
-      final FileList folder = await _storage.listFiles(query2);
+    final String query2 =
+        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.mediaFolder}' and '$parentId' in parents and trashed=false";
+    final FileList folder = await _storage.listFiles(query2);
 
-      if (folder.files.isEmpty) {
-        final File mediaFolder = File();
-        mediaFolder.name = Constants.mediaFolder;
-        mediaFolder.parents = <String>[parentId];
-        mediaFolder.mimeType = 'application/vnd.google-apps.folder';
-        mediaFolder.description = "please don't modify this folder";
+    if (folder.files.isEmpty) {
+      final File mediaFolder = File();
+      mediaFolder.name = Constants.mediaFolder;
+      mediaFolder.parents = <String>[parentId];
+      mediaFolder.mimeType = 'application/vnd.google-apps.folder';
+      mediaFolder.description = "please don't modify this folder";
 
-        final File folder = await _storage.createFile(mediaFolder);
-        mediaFolderID = folder.id;
-      } else {
-        mediaFolderID = folder.files.first.id;
-      }
+      final File folder = await _storage.createFile(mediaFolder);
+      mediaFolderID = folder.id;
+    } else {
+      mediaFolderID = folder.files.first.id;
+    }
 
-      return mediaFolderID;
-    } catch (e) {
-      print('error: $e');
-      return e.toString();
-    } finally {}
+    return mediaFolderID;
   }
 
   Future<StoryContent> _createEventFromFolder(

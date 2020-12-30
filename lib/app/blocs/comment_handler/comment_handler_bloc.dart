@@ -25,15 +25,22 @@ class CommentHandlerBloc
       CommentHandlerEvent event) async* {
     yield CommentHandlerState(uploading: true, folderID: event.folderID);
 
-    final StoryTimelineData timelineEvent = _localStories[event.folderID];
-    final CommentsResponse commentsResponse = await _storage.uploadCommentsFile(
-        commentsID: timelineEvent.mainStory.commentsID,
-        folderID: event.folderID,
-        comment: event.data as StoryComment);
+    String error;
+    try {
+      final StoryTimelineData timelineEvent = _localStories[event.folderID];
+      final CommentsResponse commentsResponse =
+          await _storage.uploadCommentsFile(
+              commentsID: timelineEvent.mainStory.commentsID,
+              folderID: event.folderID,
+              comment: event.data as StoryComment);
 
-    timelineEvent.mainStory.comments = commentsResponse.comments;
-    timelineEvent.mainStory.commentsID = commentsResponse.commentsID;
+      timelineEvent.mainStory.comments = commentsResponse.comments;
+      timelineEvent.mainStory.commentsID = commentsResponse.commentsID;
+    } catch (e) {
+      error = 'Error sending comment';
+    }
 
-    yield CommentHandlerState(uploading: false, folderID: event.folderID);
+    yield CommentHandlerState(
+        uploading: false, folderID: event.folderID, error: error);
   }
 }

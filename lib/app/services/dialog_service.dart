@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/emoji_dialog.dart';
+import 'package:web/ui/widgets/dialogs/error_dialog.dart';
 import 'package:web/ui/widgets/dialogs/share_dialog.dart';
 
 /// Service to open dialogs
@@ -39,6 +40,19 @@ class DialogService {
       useRootNavigator: true,
       builder: (BuildContext context) {
         return EmojiDialog(folderID: folderID, parentID: parentID);
+      },
+    );
+  }
+
+  /// dialog to show error messages when syncing
+  static void errorSyncingDialog(BuildContext context,
+      {List<String> errorMessages}) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      useRootNavigator: true,
+      builder: (BuildContext context) {
+        return ErrorDialog(errorMessages: errorMessages);
       },
     );
   }
