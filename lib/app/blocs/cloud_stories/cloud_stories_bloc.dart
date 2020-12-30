@@ -148,8 +148,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       cloudCopy.subEvents.remove(subEvent);
     }
 
-    await _syncContent(
-        localCopy.mainStory, cloudCopy.mainStory, errorMessages);
+    await _syncContent(localCopy.mainStory, cloudCopy.mainStory, errorMessages);
     localCopy = StoryTimelineData.clone(cloudCopy);
 
     add(CloudStoriesEvent(CloudStoriesType.syncingEnd,
@@ -199,7 +198,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
     final Map<String, StoryMedia> imagesToAdd = <String, StoryMedia>{};
     final List<String> imagesToDelete = <String>[];
-    final List<String> localImagesToDelete = <String>[];
     if (localCopy.images != null) {
       int totalSize = 0;
       int sent = 0;
@@ -245,10 +243,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
               .uploadMediaToFolder(cloudCopy, image.key, image.value, 10,
                   streamController.stream)
               .then((String imageID) {
-
             if (imageID != null) {
               imagesToAdd.putIfAbsent(imageID, () => image.value);
-              localImagesToDelete.add(image.key);
             }
           }, onError: (dynamic error) {
             errorMessages.add('Add Image ${image.key}');
@@ -260,7 +256,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           });
           add(CloudStoriesEvent(CloudStoriesType.syncingState,
               folderID: localCopy.folderID, data: uploadingImages));
-
         }
       }
 
@@ -277,14 +272,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
 
     await Future.wait(tasks).then((_) {
-      cloudCopy.images.addAll(imagesToAdd);
-      localCopy.images = Map<String, StoryMedia>.of(cloudCopy.images);
-      //localCopy.images.addAll(imagesToAdd);
-
       cloudCopy.images.removeWhere(
           (String key, StoryMedia value) => imagesToDelete.contains(key));
-      localCopy.images.removeWhere(
-          (String key, StoryMedia value) => localImagesToDelete.contains(key));
+      cloudCopy.images.addAll(imagesToAdd);
+      localCopy.images = Map<String, StoryMedia>.of(cloudCopy.images);
+
       imagesToAdd.forEach((String key, StoryMedia value) {
         RetryService.getThumbnail(_storage, localCopy.folderID, key,
             localCopy.images, uploadingImages, () {
@@ -298,7 +290,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             folderID: localCopy.folderID, data: uploadingImages));
       });
     });
-
   }
 
   Future<StoryContent> _createEventFolder(
