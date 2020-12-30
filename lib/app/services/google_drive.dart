@@ -11,7 +11,7 @@ import 'package:web/constants.dart';
 
 /// service which communicates with google drive
 class GoogleDrive {
-    // ignore: public_member_api_docs
+  // ignore: public_member_api_docs
   GoogleDrive({this.driveApi});
 
   /// drive api
@@ -30,12 +30,7 @@ class GoogleDrive {
 
     final Media image = Media(dataStream, storyMedia.contentSize);
     File uploadMedia;
-    try {
-      uploadMedia =
-          await driveApi.files.create(mediaFile, uploadMedia: image);
-    } catch (e) {
-      print('error $e');
-    }
+    uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
 
     return uploadMedia.id;
   }

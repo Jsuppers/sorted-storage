@@ -32,13 +32,11 @@ class RetryService {
           filter: 'id,hasThumbnail,thumbnailLink') as File;
 
       if (mediaFile.hasThumbnail) {
-        print('thumbnail for image: $imageKey has been created!');
         images[imageKey].thumbnailURL = mediaFile.thumbnailLink;
         successCallback();
         return null;
       }
 
-      print('waiting for a thumbnail for image: $imageKey');
       return getThumbnail(
           storage, folderID, imageKey, images, uploadingImages, successCallback,
           maxTries: currentTry - 1);
@@ -60,7 +58,6 @@ class RetryService {
       for (final MapEntry<String, StoryMedia> entry
           in localCopy.images.entries) {
         if (entry.value.thumbnailURL == null) {
-          print("still waiting for a thumbnail: ${entry.key}");
           return checkNeedsRefreshing(
               folderID, uploadingImages, localCopy, successCallback,
               maxTries: maxTries - 1, seconds: seconds);

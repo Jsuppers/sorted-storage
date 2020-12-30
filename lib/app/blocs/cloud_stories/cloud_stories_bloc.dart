@@ -65,7 +65,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         _localStories[event.folderID].saving = true;
         yield CloudStoriesState(CloudStoriesType.syncingStart, _cloudStories,
             folderID: event.folderID);
-          _syncCopies(event.folderID);
+        _syncCopies(event.folderID);
         break;
       case CloudStoriesType.createStory:
         _createEventFolder(_mediaFolderID, event.data as int, event.mainEvent);
@@ -78,7 +78,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         _localStories[event.folderID].saving = false;
         _localStories[event.folderID].locked = true;
         yield CloudStoriesState(CloudStoriesType.syncingEnd, _cloudStories,
-            folderID: event.folderID);
+            folderID: event.folderID, data: event.data);
         break;
       case CloudStoriesType.syncingState:
         yield CloudStoriesState(CloudStoriesType.syncingState, _cloudStories,
@@ -106,7 +106,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
   Future<void> _syncCopies(String eventFolderID) async {
     bool rebuildAllStories = false;
-    bool error = false;
+    final List<String> errorMessages = <String>[];
     StoryTimelineData localCopy = _localStories[eventFolderID];
     final StoryTimelineData cloudCopy = _cloudStories[eventFolderID];
     if (localCopy.mainStory.timestamp != cloudCopy.mainStory.timestamp) {
@@ -126,9 +126,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             (StoryContent element) => element.folderID == subEvent.folderID);
       }
 
-      if(await _syncContent(subEvent, cloudSubEvent)) {
-        error = true;
-      }
+      await _syncContent(subEvent, cloudSubEvent, errorMessages);
     }
 
     final List<StoryContent> eventsToDelete = <StoryContent>[];
@@ -150,32 +148,23 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       cloudCopy.subEvents.remove(subEvent);
     }
 
-    if(await _syncContent(localCopy.mainStory, cloudCopy.mainStory)) {
-      error = true;
-    }
+    await _syncContent(
+        localCopy.mainStory, cloudCopy.mainStory, errorMessages);
     localCopy = StoryTimelineData.clone(cloudCopy);
 
     add(CloudStoriesEvent(CloudStoriesType.syncingEnd,
-        folderID: eventFolderID));
-
-    String errorMessage;
-    if (error) {
-      errorMessage = 'Error while syncing';
-      add(CloudStoriesEvent(CloudStoriesType.updateUI,
-          folderID: eventFolderID, error: errorMessage));
-    }
+        folderID: eventFolderID, data: errorMessages));
 
     if (rebuildAllStories) {
       add(CloudStoriesEvent(CloudStoriesType.updateUI,
-          folderID: eventFolderID, error: errorMessage));
+          folderID: eventFolderID));
     }
   }
 
-  Future<bool> _syncContent(
-      StoryContent localCopy, StoryContent cloudCopy) async {
+  Future<void> _syncContent(StoryContent localCopy, StoryContent cloudCopy,
+      List<String> errorMessages) async {
     List<Future<dynamic>> tasks = <Future<dynamic>>[];
     final Map<String, List<String>> uploadingImages = <String, List<String>>{};
-    bool error = false;
 
     if (localCopy.timestamp != cloudCopy.timestamp) {
       tasks.add(_storage
@@ -183,7 +172,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           .then((String value) {
         cloudCopy.timestamp = localCopy.timestamp;
       }, onError: (dynamic error) {
-        error = true;
+        localCopy.timestamp = cloudCopy.timestamp;
+        errorMessages.add('Edit the date');
       }));
     }
 
@@ -197,7 +187,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         cloudCopy.description = localCopy.description;
         cloudCopy.emoji = localCopy.emoji;
       }, onError: (_) {
-        error = true;
+        localCopy.title = cloudCopy.title;
+        localCopy.description = cloudCopy.description;
+        localCopy.emoji = cloudCopy.emoji;
+        errorMessages.add('Edit title, description, and/or story emoji');
       }));
     }
 
@@ -252,20 +245,22 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
               .uploadMediaToFolder(cloudCopy, image.key, image.value, 10,
                   streamController.stream)
               .then((String imageID) {
-            uploadingImages.update(localCopy.folderID, (List<String> value) {
-              value.remove(image.key);
-              return value;
-            });
-            add(CloudStoriesEvent(CloudStoriesType.syncingState,
-                folderID: localCopy.folderID, data: uploadingImages));
 
             if (imageID != null) {
               imagesToAdd.putIfAbsent(imageID, () => image.value);
               localImagesToDelete.add(image.key);
             }
           }, onError: (dynamic error) {
-            error = true;
+            errorMessages.add('Add Image ${image.key}');
           });
+
+          uploadingImages.update(localCopy.folderID, (List<String> value) {
+            value.remove(image.key);
+            return value;
+          });
+          add(CloudStoriesEvent(CloudStoriesType.syncingState,
+              folderID: localCopy.folderID, data: uploadingImages));
+
         }
       }
 
@@ -275,7 +270,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           tasks.add(_storage.delete(image.key).then((_) {
             imagesToDelete.add(image.key);
           }, onError: (dynamic error) {
-            error = true;
+            errorMessages.add('Delete Image ${image.key}');
           }));
         }
       }
@@ -283,7 +278,9 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
     await Future.wait(tasks).then((_) {
       cloudCopy.images.addAll(imagesToAdd);
-      localCopy.images.addAll(imagesToAdd);
+      localCopy.images = Map<String, StoryMedia>.of(cloudCopy.images);
+      //localCopy.images.addAll(imagesToAdd);
+
       cloudCopy.images.removeWhere(
           (String key, StoryMedia value) => imagesToDelete.contains(key));
       localCopy.images.removeWhere(
@@ -302,7 +299,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       });
     });
 
-    return error;
   }
 
   Future<StoryContent> _createEventFolder(

@@ -84,8 +84,9 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           setState(() {
             addingStory = false;
             _timelineData.forEach((String key, StoryTimelineData story) =>
-                story.subEvents.sort((StoryContent a, StoryContent b) =>
-                    b.timestamp.compareTo(a.timestamp)));
+              story.subEvents.sort((StoryContent a, StoryContent b) =>
+                  b.timestamp.compareTo(a.timestamp)));
+
             loaded = true;
           });
         }
