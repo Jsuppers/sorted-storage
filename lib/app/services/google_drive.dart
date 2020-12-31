@@ -22,17 +22,25 @@ class GoogleDrive {
       StoryContent eventContent,
       String imageName,
       StoryMedia storyMedia,
-      int delayMilliseconds,
       Stream<List<int>> dataStream) async {
     final File mediaFile = File();
-    mediaFile.parents = [eventContent.folderID];
+    mediaFile.parents = <String>[eventContent.folderID];
     mediaFile.name = imageName;
+    mediaFile.description = storyMedia.index.toString();
 
     final Media image = Media(dataStream, storyMedia.contentSize);
     File uploadMedia;
     uploadMedia = await driveApi.files.create(mediaFile, uploadMedia: image);
 
     return uploadMedia.id;
+  }
+
+  /// update a media file index
+  Future<void> updatePosition(String imageID, int position) async {
+    final File mediaFile = File();
+    mediaFile.description = position.toString();
+
+    await driveApi.files.update(mediaFile, imageID);
   }
 
   /// read and return the contents of a json file

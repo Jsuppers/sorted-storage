@@ -7,7 +7,21 @@ class StoryMedia {
     this.isVideo = false,
     this.isDocument = false,
     this.contentSize,
+    this.index = highIntValue,
   });
+
+  /// clone the media file
+  StoryMedia.clone(StoryMedia media)
+      : thumbnailURL = media.thumbnailURL,
+        stream = media.stream,
+        isVideo = media.isVideo,
+        isDocument = media.isDocument,
+        contentSize = media.contentSize,
+        index = media.index;
+
+  /// and index which will ensure the media without an index will be at the end
+  /// of the list hopefully no one uploads this much media in one story..
+  static const int highIntValue = 65536;
 
   /// the url for the thumbnail
   String thumbnailURL;
@@ -23,4 +37,7 @@ class StoryMedia {
 
   /// byte stream of this media
   Stream<List<int>> stream;
+
+  /// index of this media
+  int index;
 }

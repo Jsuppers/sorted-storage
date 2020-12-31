@@ -198,6 +198,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
     final Map<String, StoryMedia> imagesToAdd = <String, StoryMedia>{};
     final List<String> imagesToDelete = <String>[];
+
     if (localCopy.images != null) {
       int totalSize = 0;
       int sent = 0;
@@ -212,6 +213,18 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           }, ifAbsent: () {
             return <String>[image.key];
           });
+        } else {
+          final int newIndex = localCopy.images[image.key].index;
+          final int oldIndex = cloudCopy.images[image.key].index;
+          if (newIndex != oldIndex) {
+            tasks.add(_storage
+                .updatePosition(image.key, newIndex)
+                .then((_) => cloudCopy.images[image.key].index = newIndex,
+                    onError: (_) {
+              errorMessages.add('Set index for Image');
+              localCopy.images[image.key].index = oldIndex;
+            }));
+          }
         }
       }
 
@@ -240,8 +253,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           });
 
           await _storage
-              .uploadMediaToFolder(cloudCopy, image.key, image.value, 10,
-                  streamController.stream)
+              .uploadMediaToFolder(
+                  cloudCopy, image.key, image.value, streamController.stream)
               .then((String imageID) {
             if (imageID != null) {
               imagesToAdd.putIfAbsent(imageID, () => image.value);
@@ -275,7 +288,14 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       cloudCopy.images.removeWhere(
           (String key, StoryMedia value) => imagesToDelete.contains(key));
       cloudCopy.images.addAll(imagesToAdd);
-      localCopy.images = Map<String, StoryMedia>.of(cloudCopy.images);
+
+      final Map<String, StoryMedia> imagesCopy = <String, StoryMedia>{};
+      for (final MapEntry<String, StoryMedia> image
+          in cloudCopy.images.entries) {
+        imagesCopy.putIfAbsent(image.key, () => StoryMedia.clone(image.value));
+      }
+
+      localCopy.images = imagesCopy;
 
       imagesToAdd.forEach((String key, StoryMedia value) {
         RetryService.getThumbnail(_storage, localCopy.folderID, key,
@@ -469,17 +489,26 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       String folderID, int timestamp) async {
     final FileList filesInFolder = await _storage.listFiles(
         "'$folderID' in parents and trashed=false",
-        filter: 'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink)');
+        filter:
+            'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
 
     String settingsID;
     String commentsID;
     final Map<String, StoryMedia> images = <String, StoryMedia>{};
     final List<SubEvent> subEvents = <SubEvent>[];
     for (final File file in filesInFolder.files) {
+      int fileIndex;
+      if (file.description != null) {
+        fileIndex = int.tryParse(file.description);
+      }
+
       if (file.mimeType.startsWith('image/') ||
           file.mimeType.startsWith('video/')) {
         final StoryMedia media = StoryMedia();
         media.isVideo = file.mimeType.startsWith('video/');
+        if (fileIndex != null) {
+          media.index = fileIndex;
+        }
         if (file.hasThumbnail) {
           media.thumbnailURL = file.thumbnailLink;
         }
@@ -496,6 +525,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       } else {
         final StoryMedia media = StoryMedia();
         media.isDocument = true;
+        media.index ??= fileIndex;
         if (file.hasThumbnail) {
           media.thumbnailURL = file.thumbnailLink;
         }
