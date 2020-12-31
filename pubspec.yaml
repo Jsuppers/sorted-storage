@@ -24,8 +24,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  page_transition: ^1.1.7+3
   envify: ^2.0.0
+  reorderables: ^0.3.2
+  page_transition: ^1.1.7+3
   mime: ^0.9.7
   bloc: ^6.1.0
   flutter_bloc: ^6.1.1

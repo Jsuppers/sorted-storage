@@ -26,7 +26,10 @@ class StoryContent {
       : timestamp = event.timestamp,
         title = event.title,
         emoji = event.emoji,
-        images = Map<String, StoryMedia>.from(event.images),
+        images = Map<String, StoryMedia>.from(
+            event.images.map((String key, StoryMedia value) {
+          return MapEntry<String, StoryMedia>(key, StoryMedia.clone(value));
+        })),
         description = event.description,
         settingsID = event.settingsID,
         commentsID = event.commentsID,
