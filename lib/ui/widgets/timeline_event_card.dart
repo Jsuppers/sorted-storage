@@ -234,11 +234,11 @@ class _TimelineEventCardState extends State<EventCard> {
                   timeStamp(),
                 ],
               ),
-            AbsorbPointer(
-              absorbing: widget.locked || widget.saving,
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
+            Column(
+              children: <Widget>[
+                AbsorbPointer(
+                  absorbing: widget.locked || widget.saving,
+                  child: TextFormField(
                     textAlign: TextAlign.center,
                     maxLines: null,
                     style: TextStyle(
@@ -264,58 +264,61 @@ class _TimelineEventCardState extends State<EventCard> {
                                 folderID: widget.story.folderID,
                                 data: string)),
                   ),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: ReorderableWrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          padding: const EdgeInsets.all(8),
-                          onReorder: (int oldIndex, int newIndex) {
-                            setState(() {
-                              final StoryImage image = cards.removeAt(oldIndex);
-                              cards.insert(newIndex, image);
-                              for (int i = 0; i < cards.length; i++) {
-                                cards[i].storyMedia.index = i;
-                              }
-                            });
-                          },
-                          children: cards)),
-                  Visibility(
-                    visible: !widget.locked,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 40,
-                            width: 140,
-                            child: ButtonWithIcon(
-                                text: 'add media',
-                                icon: Icons.image,
-                                onPressed: () async {
-                                  if (widget.saving) {
-                                    return;
-                                  }
-                                  BlocProvider.of<LocalStoriesBloc>(context)
-                                      .add(
-                                    LocalStoriesEvent(
-                                      LocalStoriesType.addImage,
-                                      parentID: widget.storyFolderID,
-                                      folderID: widget.story.folderID,
-                                    ),
-                                  );
-                                },
-                                width: Constants.minScreenWidth,
-                                backgroundColor: Colors.white,
-                                textColor: Colors.black,
-                                iconColor: Colors.black),
-                          ),
-                        ],
-                      ),
+                ),
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: ReorderableWrap(
+                        spacing: 8.0,
+                        runSpacing: 4.0,
+                        padding: const EdgeInsets.all(8),
+                        onReorder: (int oldIndex, int newIndex) {
+                          setState(() {
+                            final StoryImage image = cards.removeAt(oldIndex);
+                            cards.insert(newIndex, image);
+                            for (int i = 0; i < cards.length; i++) {
+                              cards[i].storyMedia.index = i;
+                            }
+                          });
+                        },
+                        children: cards)),
+                Visibility(
+                  visible: !widget.locked,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 40,
+                          width: 140,
+                          child: ButtonWithIcon(
+                              text: 'add media',
+                              icon: Icons.image,
+                              onPressed: () async {
+                                if (widget.saving) {
+                                  return;
+                                }
+                                BlocProvider.of<LocalStoriesBloc>(context)
+                                    .add(
+                                  LocalStoriesEvent(
+                                    LocalStoriesType.addImage,
+                                    parentID: widget.storyFolderID,
+                                    folderID: widget.story.folderID,
+                                  ),
+                                );
+                              },
+                              width: Constants.minScreenWidth,
+                              backgroundColor: Colors.white,
+                              textColor: Colors.black,
+                              iconColor: Colors.black),
+                        ),
+                      ],
                     ),
                   ),
-                  TextFormField(
+                ),
+                AbsorbPointer(
+                  absorbing: widget.locked || widget.saving,
+                  child: TextFormField(
                       textAlign: TextAlign.center,
                       controller: descriptionController,
                       style: TextStyle(
@@ -336,8 +339,8 @@ class _TimelineEventCardState extends State<EventCard> {
                         );
                       },
                       maxLines: null),
-                ],
-              ),
+                ),
+              ],
             ),
           ]),
         ),
