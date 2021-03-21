@@ -7,11 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
-import 'package:web/app/blocs/local_stories/local_stories_event.dart';
-import 'package:web/app/blocs/local_stories/local_stories_state.dart';
-import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/services/dialog_service.dart';
@@ -89,7 +84,7 @@ class _TimelineEventCardState extends State<EventCard> {
           parentID: widget.storyFolderID,
           folderID: widget.story.folderID,
         ),
-        child: widget.story.emoji.isEmpty
+        child: widget.story.metadata.emoji.isEmpty
             ? const Text(
                 '📅',
                 style: TextStyle(
@@ -97,7 +92,7 @@ class _TimelineEventCardState extends State<EventCard> {
                 ),
               )
             : Text(
-                widget.story.emoji,
+                widget.story.metadata.emoji,
                 style: const TextStyle(
                   height: 1.2,
                 ),
@@ -132,14 +127,14 @@ class _TimelineEventCardState extends State<EventCard> {
           if (widget.saving) {
             return;
           }
-          setState(
-            () => BlocProvider.of<LocalStoriesBloc>(context).add(
-              LocalStoriesEvent(LocalStoriesType.editTimestamp,
-                  parentID: widget.storyFolderID,
-                  folderID: widget.story.folderID,
-                  data: date.millisecondsSinceEpoch),
-            ),
-          );
+//          setState(
+//            () => BlocProvider.of<CloudStoriesBloc>(context).add(
+//              CloudStoriesEvent(CloudStoriesType.editTimestamp,
+//                  parentID: widget.storyFolderID,
+//                  folderID: widget.story.folderID,
+//                  data: date.millisecondsSinceEpoch),
+//            ),
+//          );
         },
       ),
     );
@@ -147,8 +142,8 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    titleController.text = widget.story.title;
-    descriptionController.text = widget.story.description;
+    titleController.text = widget.story.metadata.title;
+    descriptionController.text = widget.story.metadata.description;
 
     final List<StoryImage> cards = <StoryImage>[];
     if (widget.story.images != null) {
@@ -173,31 +168,31 @@ class _TimelineEventCardState extends State<EventCard> {
       listeners: <BlocListener<dynamic, dynamic>>[
         BlocListener<CloudStoriesBloc, CloudStoriesState>(
           listener: (BuildContext context, CloudStoriesState state) {
-            if (state.type == CloudStoriesType.syncingState) {
-              if (state.data == null) {
-                return;
-              }
-              final Map<String, List<String>> events =
-                  state.data as Map<String, List<String>>;
-              if (!events.containsKey(widget.story.folderID)) {
-                return;
-              }
-              final List<String> newUploadingImages =
-                  state.data[widget.story.folderID] as List<String>;
-              setState(() {
-                uploadingImages = newUploadingImages;
-              });
-            }
+//            if (state.type == CloudStoriesType.syncingState) {
+//              if (state.data == null) {
+//                return;
+//              }
+//              final Map<String, List<String>> events =
+//                  state.data as Map<String, List<String>>;
+//              if (!events.containsKey(widget.story.folderID)) {
+//                return;
+//              }
+//              final List<String> newUploadingImages =
+//                  state.data[widget.story.folderID] as List<String>;
+//              setState(() {
+//                uploadingImages = newUploadingImages;
+//              });
+//            }
           },
         ),
-        BlocListener<LocalStoriesBloc, LocalStoriesState>(
-            listener: (BuildContext context, LocalStoriesState state) {
-          if (state.type == LocalStoriesType.editEmoji &&
-              state.folderID == widget.story.folderID) {
-            setState(() {
-              widget.story.emoji = state.data as String;
-            });
-          }
+        BlocListener<CloudStoriesBloc, CloudStoriesState>(
+            listener: (BuildContext context, CloudStoriesState state) {
+//          if (state.type == CloudStoriesType.editEmoji &&
+//              state.folderID == widget.story.folderID) {
+//            setState(() {
+//              widget.story.emoji = state.data as String;
+//            });
+//          }
         })
       ],
       child: Form(
@@ -257,12 +252,11 @@ class _TimelineEventCardState extends State<EventCard> {
                         hintText: 'Enter a title'),
                     readOnly: widget.locked || widget.saving,
                     controller: titleController,
-                    onChanged: (String string) =>
-                        BlocProvider.of<LocalStoriesBloc>(context).add(
-                            LocalStoriesEvent(LocalStoriesType.editTitle,
-                                parentID: widget.storyFolderID,
-                                folderID: widget.story.folderID,
-                                data: string)),
+                    onChanged: (String string) => print('exception should be called')
+//                        BlocProvider.of<CloudStoriesBloc>(context).add(
+//                            CloudStoriesEvent(CloudStoriesType.update,
+//                                parentID: widget.storyFolderID,
+//                                folderID: widget.story.folderID)),
                   ),
                 ),
                 Padding(
@@ -298,14 +292,15 @@ class _TimelineEventCardState extends State<EventCard> {
                                 if (widget.saving) {
                                   return;
                                 }
-                                BlocProvider.of<LocalStoriesBloc>(context)
-                                    .add(
-                                  LocalStoriesEvent(
-                                    LocalStoriesType.addImage,
-                                    parentID: widget.storyFolderID,
-                                    folderID: widget.story.folderID,
-                                  ),
-                                );
+                                // TODO add image
+//                                BlocProvider.of<LocalStoriesBloc>(context)
+//                                    .add(
+//                                  LocalStoriesEvent(
+//                                    LocalStoriesType.addImage,
+//                                    parentID: widget.storyFolderID,
+//                                    folderID: widget.story.folderID,
+//                                  ),
+//                                );
                               },
                               width: Constants.minScreenWidth,
                               backgroundColor: Colors.white,
@@ -331,12 +326,11 @@ class _TimelineEventCardState extends State<EventCard> {
                           hintText: 'Enter a description'),
                       readOnly: widget.locked || widget.saving,
                       onChanged: (String string) {
-                        BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.editDescription,
-                              parentID: widget.storyFolderID,
-                              folderID: widget.story.folderID,
-                              data: string),
-                        );
+//                        BlocProvider.of<CloudStoriesBloc>(context).add(
+//                          CloudStoriesEvent(CloudStoriesType.update,
+//                              parentID: widget.storyFolderID,
+//                              folderID: widget.story.folderID),
+//                        );
                       },
                       maxLines: null),
                 ),

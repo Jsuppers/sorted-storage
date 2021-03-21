@@ -41,7 +41,8 @@ class RouteConfiguration {
           widget: _getPageContent(baseRoute, routingData.destination),
           isViewMode: baseRoute == routePaths[route.view],
           requiresAuthentication: _pageRequiresAuthentication(baseRoute),
-          targetRoute: routingData.route),
+          showAddButton: _showAddButton(baseRoute),
+          routingData: routingData),
     );
   }
 
@@ -49,6 +50,10 @@ class RouteConfiguration {
     return baseRoute == routePaths[route.media] ||
         baseRoute == routePaths[route.documents] ||
         baseRoute == '/';
+  }
+
+  static bool _showAddButton(String baseRoute) {
+    return baseRoute == routePaths[route.media];
   }
 
   static Widget _getPageContent(String baseRoute, String destination) {

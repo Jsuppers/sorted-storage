@@ -19,10 +19,4 @@ class TimelineService {
     }
     return null;
   }
-
-  /// Creates a unique temp name based on the parents ID and current time
-  static String createUniqueTempStoryName(String parentID) {
-    final int milliseconds = DateTime.now().millisecondsSinceEpoch;
-    return 'temp_${parentID}_${milliseconds.toString()}';
-  }
 }

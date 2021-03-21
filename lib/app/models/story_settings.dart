@@ -1,12 +1,13 @@
 /// various settings for a story
-class StorySettings {
+class StoryMetadata {
   // ignore: public_member_api_docs
-  StorySettings({this.title = '', this.description = '', this.emoji = ''});
+  StoryMetadata(
+      {this.id, this.title = '', this.description = '', this.emoji = ''});
 
   // ignore: public_member_api_docs, prefer_constructors_over_static_methods
-  static StorySettings fromJson(Map<String, dynamic> json) {
+  static StoryMetadata fromJson(String id, Map<String, dynamic> json) {
     if (json == null) {
-      return StorySettings();
+      return StoryMetadata();
     }
 
     String title = '';
@@ -22,9 +23,18 @@ class StorySettings {
       emoji = json['e'] as String;
     }
 
-    return StorySettings(
-        title: title, description: description, emoji: emoji);
+    return StoryMetadata(
+        id: id, title: title, description: description, emoji: emoji);
   }
+
+  StoryMetadata.clone(StoryMetadata metadata)
+      : id = metadata.id,
+        title = metadata.title,
+        description = metadata.description,
+        emoji = metadata.emoji;
+
+  /// id for this settings file
+  String id;
 
   /// a emoji for this story
   String emoji;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:web/app/models/story_settings.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
+import 'package:web/ui/widgets/dialogs/edit_story_dialog.dart';
 import 'package:web/ui/widgets/dialogs/emoji_dialog.dart';
 import 'package:web/ui/widgets/dialogs/error_dialog.dart';
 import 'package:web/ui/widgets/dialogs/share_dialog.dart';
@@ -19,6 +21,18 @@ class DialogService {
   }
 
   /// dialog to share a folder
+  static void editDialog(BuildContext context, String folderID) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      useRootNavigator: true,
+      builder: (BuildContext context) {
+        return EditStoryDialog(folderID: folderID);
+      },
+    );
+  }
+
+  /// dialog to share a folder
   static void shareDialog(
       BuildContext context, String folderID, String commentsID) {
     showDialog(
@@ -33,13 +47,14 @@ class DialogService {
 
   /// dialog to allow the user to select a emoji
   static void emojiDialog(BuildContext context,
-      {String folderID, String parentID}) {
+      {String folderID, String parentID, StoryMetadata metadata}) {
     showDialog(
       context: context,
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext context) {
-        return EmojiDialog(folderID: folderID, parentID: parentID);
+        return EmojiDialog(
+            folderID: folderID, parentID: parentID, metadata: metadata);
       },
     );
   }

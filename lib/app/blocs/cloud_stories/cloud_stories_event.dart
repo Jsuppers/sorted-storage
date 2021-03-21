@@ -1,10 +1,11 @@
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/models/timeline_data.dart';
 
 /// Event for the CloudStoriesBloc
 class CloudStoriesEvent {
   /// The constructor requires a CloudStories type
   const CloudStoriesEvent(this.type,
-      {this.data, this.parentID, this.mainEvent, this.folderID, this.error});
+      {this.storyTimelineData, this.parentID, this.mainEvent, this.folderID, this.error});
 
   /// represents which story this event is for, this can also be a sub event
   final String folderID;
@@ -19,7 +20,7 @@ class CloudStoriesEvent {
   final bool mainEvent;
 
   /// data which the bloc will read
-  final dynamic data;
+  final StoryTimelineData storyTimelineData;
 
   /// error message to pass on to the front end
   final String error;

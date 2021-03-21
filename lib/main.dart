@@ -10,6 +10,7 @@ import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
+import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/timeline_data.dart';
@@ -31,43 +32,29 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
-  AuthenticationBloc _authenticationBloc;
-  NavigationBloc _navigationBloc;
   GoogleDrive _googleDrive;
   DriveBloc _driveBloc;
-  LocalStoriesBloc _localStoriesBloc;
+  NavigationBloc _navigationBloc;
   CloudStoriesBloc _cloudStoriesBloc;
-  CommentHandlerBloc _commentHandler;
-  CookieNoticeBloc _cookieNoticeBloc;
-  final Map<String, StoryTimelineData> _localStories =
-      <String, StoryTimelineData>{};
+  Map<String, StoryTimelineData> _cloudStories;
 
   @override
   void initState() {
     super.initState();
+    _cloudStories = <String, StoryTimelineData>{};
     _googleDrive = GoogleDrive();
     _driveBloc = DriveBloc();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
-    _authenticationBloc = AuthenticationBloc();
-    _authenticationBloc.add(AuthenticationSilentSignInEvent());
-    _localStoriesBloc = LocalStoriesBloc(localStories: _localStories);
     _cloudStoriesBloc =
-        CloudStoriesBloc(localStories: _localStories, storage: _googleDrive);
-    _commentHandler =
-        CommentHandlerBloc(localStories: _localStories, storage: _googleDrive);
-    _cookieNoticeBloc = CookieNoticeBloc();
+        CloudStoriesBloc(cloudStories: _cloudStories, storage: _googleDrive);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _navigationBloc.close();
-    _authenticationBloc.close();
     _driveBloc.close();
-    _localStoriesBloc.close();
+    _navigationBloc.close();
     _cloudStoriesBloc.close();
-    _commentHandler.close();
-    _cookieNoticeBloc.close();
   }
 
   @override
@@ -81,19 +68,23 @@ class _MyAppState extends State<MyApp> {
           create: (BuildContext context) => _navigationBloc,
         ),
         BlocProvider<AuthenticationBloc>(
-          create: (BuildContext context) => _authenticationBloc,
+          create: (BuildContext context) => AuthenticationBloc(),
         ),
         BlocProvider<CloudStoriesBloc>(
           create: (BuildContext context) => _cloudStoriesBloc,
         ),
-        BlocProvider<LocalStoriesBloc>(
-          create: (BuildContext context) => _localStoriesBloc,
-        ),
         BlocProvider<CommentHandlerBloc>(
-          create: (BuildContext context) => _commentHandler,
+          create: (BuildContext context) => CommentHandlerBloc(
+              cloudStories: _cloudStories, storage: _googleDrive),
         ),
+        BlocProvider<EditorBloc>(
+            create: (BuildContext context) => EditorBloc(
+                cloudStories: _cloudStories,
+                storage: _googleDrive,
+                navigationBloc: _navigationBloc,
+                cloudStoriesBloc: _cloudStoriesBloc)),
         BlocProvider<CookieNoticeBloc>(
-          create: (BuildContext context) => _cookieNoticeBloc,
+          create: (BuildContext context) => CookieNoticeBloc(),
         ),
       ],
       child: MultiBlocListener(

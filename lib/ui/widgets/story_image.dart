@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
@@ -59,8 +62,8 @@ class _StoryImageState extends State<StoryImage> {
       child: showPlaceholder
           ? _backgroundImage(showPlaceholder, imageKey, media, null)
           : SizedBox(
-              height: 150.0,
-              width: 150.0,
+              height: widget.locked == false ? 80 : 150.0,
+              width: widget.locked == false ? 80 : 150.0,
               child: CachedNetworkImage(
                 imageUrl: media.thumbnailURL,
                 placeholder: (BuildContext context, String url) =>
@@ -160,11 +163,11 @@ class _StoryImageState extends State<StoryImage> {
                       if (widget.saving) {
                         return;
                       }
-                      BlocProvider.of<LocalStoriesBloc>(context).add(
-                          LocalStoriesEvent(LocalStoriesType.deleteImage,
-                              folderID: widget.folderID,
-                              data: imageKey,
-                              parentID: widget.storyFolderID));
+//                      BlocProvider.of<CloudStoriesBloc>(context).add(
+//                          CloudStoriesEvent(CloudStoriesType.deleteImage,
+//                              folderID: widget.folderID,
+//                              data: imageKey,
+//                              parentID: widget.storyFolderID));
                     },
                   ),
                 ),

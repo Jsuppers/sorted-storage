@@ -5,7 +5,6 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -38,14 +37,12 @@ class _ViewPageState extends State<ViewPage> {
   Widget build(BuildContext context) {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (BuildContext context, CloudStoriesState state) {
-        if (state.type == CloudStoriesType.updateUI) {
+        if (state.type == CloudStoriesType.refresh) {
           if (state.error != null) {
             setState(() => error = true);
-          } else {
+          } else if (state.storyTimelineData != null){
             setState(() {
-              timelineData = BlocProvider.of<LocalStoriesBloc>(context)
-                  .state
-                  .localStories[widget._destination];
+              timelineData = state.storyTimelineData;
               timelineData.subEvents.sort((StoryContent a, StoryContent b) =>
                   b.timestamp.compareTo(a.timestamp));
             });

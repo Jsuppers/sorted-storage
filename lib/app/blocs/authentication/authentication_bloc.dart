@@ -8,6 +8,9 @@ import 'package:web/app/models/user.dart' as usr;
 class AuthenticationBloc extends Bloc<AuthenticationEvent, usr.User> {
   /// constructor creates the bloc and listens for user changes
   AuthenticationBloc() : super(null) {
+    // attempt to sign in automatically
+    add(AuthenticationSilentSignInEvent());
+
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount user) {
       add(AuthenticationNewUserEvent(user));
     });

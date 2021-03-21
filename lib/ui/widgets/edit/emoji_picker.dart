@@ -1,22 +1,26 @@
 import 'package:emojis/emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
-import 'package:web/app/blocs/local_stories/local_stories_event.dart';
-import 'package:web/app/blocs/local_stories/local_stories_type.dart';
+import 'package:web/app/blocs/editor/editor_bloc.dart';
+import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/story_settings.dart';
 
 /// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EmojiPicker({Key key, this.folderID, this.parentID}) : super(key: key);
+  const EmojiPicker({Key key, this.folderID, this.parentID, this.metadata})
+      : super(key: key);
 
   // ignore: public_member_api_docs
   final String folderID;
 
   // ignore: public_member_api_docs
   final String parentID;
+
+  final StoryMetadata metadata;
 
   @override
   State createState() => EmojiPickerState();
@@ -46,7 +50,7 @@ class EmojiPickerState extends State<EmojiPicker> {
       _possibleMatches = <String>[];
       _filter = _controller.text;
       setState(() {
-        for(final Emoji element in _flags) {
+        for (final Emoji element in _flags) {
           if (element.name.contains(_filter)) {
             _possibleMatches.add(element.char);
           }
@@ -54,7 +58,7 @@ class EmojiPickerState extends State<EmojiPicker> {
 
         final Iterable<Emoji> emojis = Emoji.byKeyword(_filter);
         if (emojis != null) {
-          for(final Emoji element in emojis) {
+          for (final Emoji element in emojis) {
             _possibleMatches.add(element.char);
           }
         }
@@ -113,11 +117,12 @@ class EmojiPickerState extends State<EmojiPicker> {
         MaterialButton(
           height: 40,
           onPressed: () {
-            BlocProvider.of<LocalStoriesBloc>(context).add(LocalStoriesEvent(
-                LocalStoriesType.editEmoji,
+              widget.metadata.emoji = element;
+            BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                EditorType.updateMetadata,
                 parentID: widget.parentID,
                 folderID: widget.folderID,
-                data: element));
+                data: widget.metadata));
             BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
           },
           child: Text(

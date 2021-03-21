@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
+import 'package:web/app/blocs/editor/editor_bloc.dart';
+import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/blocs/navigation/navigation_bloc.dart';
+import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/routing_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
@@ -18,7 +25,8 @@ class LayoutWrapper extends StatelessWidget {
       {Key key,
       this.widget,
       this.requiresAuthentication = false,
-      this.targetRoute,
+      this.showAddButton = false,
+      this.routingData,
       this.isViewMode = false})
       : super(key: key);
 
@@ -32,7 +40,10 @@ class LayoutWrapper extends StatelessWidget {
   final bool isViewMode;
 
   /// the targeted route
-  final String targetRoute;
+  final RoutingData routingData;
+
+  /// ability to add a story
+  final bool showAddButton;
 
   @override
   Widget build(BuildContext context) {
@@ -40,17 +51,21 @@ class LayoutWrapper extends StatelessWidget {
         builder: (BuildContext context, usr.User user) {
       if (requiresAuthentication && user == null) {
         Widget redirectWidget;
-        if (targetRoute == '/') {
+        if (routingData.route == '/') {
           redirectWidget = HomePage();
         } else {
           redirectWidget = LoginPage();
         }
-        return Content(widget: redirectWidget);
+        return Content(
+          widget: redirectWidget,
+          showAddButton: showAddButton,
+        );
       }
       return Content(
-        widget: widget,
-        includeNavigation: !isViewMode,
-      );
+          widget: widget,
+          includeNavigation: !isViewMode,
+          showAddButton: showAddButton,
+          routingData: routingData);
     });
   }
 }
@@ -62,6 +77,8 @@ class Content extends StatefulWidget {
     Key key,
     @required this.widget,
     this.includeNavigation = true,
+    this.showAddButton,
+    this.routingData
   }) : super(key: key);
 
   /// main widget
@@ -69,6 +86,13 @@ class Content extends StatefulWidget {
 
   /// should include the navigation bar
   final bool includeNavigation;
+
+  /// ability to add a story
+  final bool showAddButton;
+
+
+  /// the targeted route
+  final RoutingData routingData;
 
   @override
   _ContentState createState() => _ContentState();
@@ -105,6 +129,27 @@ class _ContentState extends State<Content> {
                 ],
               )
             ],
+          ),
+        ),
+      ),
+      floatingActionButton: Visibility(
+        visible: widget.showAddButton,
+        child: FloatingActionButton(
+          onPressed: () {
+
+            // StaticLoadingLogo()
+
+            final String mediaFile =
+                BlocProvider.of<CloudStoriesBloc>(context).currentMediaFileId;
+            BlocProvider.of<EditorBloc>(context)
+                .add(EditorEvent(EditorType.createStory,
+                parentID: mediaFile,
+            mainEvent: true));
+          },
+          backgroundColor: myThemeData.primaryColorDark,
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
           ),
         ),
       ),

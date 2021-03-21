@@ -12,24 +12,10 @@ enum CloudStoriesType {
   /// retrieve a specific story from storage
   retrieveStory,
 
-  /// create a single story
-  createStory,
-
-  /// update the progress of uploading
-  progressUpload,
+  editStory,
 
   /// update ui of current state of the local copy
-  updateUI,
+  refresh,
 
-  /// syncing of a story has started
-  syncingStart,
 
-  /// syncing of a story has ended
-  syncingEnd,
-
-  /// update the state of syncing
-  syncingState,
-
-  /// delete a story
-  deleteStory
 }

@@ -2,14 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/timeline_data.dart';
-import 'package:web/constants.dart';
-import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
@@ -47,8 +43,8 @@ class _TimelineLayoutState extends State<TimelineLayout> {
         BlocProvider.of<CloudStoriesBloc>(context).state;
     loaded = timelineState.type != CloudStoriesType.initialState;
     _timelineData =
-        BlocProvider.of<LocalStoriesBloc>(context).state.localStories;
-    final List<Widget> eventDisplay = <Widget>[];
+        BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
+    final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
     _timelineData.forEach((String folderId, StoryTimelineData event) {
@@ -68,11 +64,14 @@ class _TimelineLayoutState extends State<TimelineLayout> {
         b.timestamp.compareTo(a.timestamp));
     for (final _TimeLineEventEntry element in timeLineEvents) {
       widgetKey.write(element.timestamp.toString());
-      eventDisplay.add(element.event);
+      children.add(element.event);
     }
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (BuildContext context, CloudStoriesState state) {
-        if (state.type == CloudStoriesType.updateUI) {
+        if (state.type == CloudStoriesType.refresh) {
+
+          print('refresh');
+          print(_timelineData.length);
           if (state.error != null) {
             final SnackBar snackBar = SnackBar(
               content: Text(state.error, textAlign: TextAlign.center),
@@ -95,31 +94,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           ? StaticLoadingLogo()
           : Column(
               key: Key(widgetKey.toString()),
-              children: <Widget>[
-                SizedBox(
-                  width: 150,
-                  child: addingStory
-                      ? StaticLoadingLogo()
-                      : ButtonWithIcon(
-                          icon: Icons.add,
-                          text: 'add story',
-                          width: Constants.minScreenWidth,
-                          backgroundColor: Colors.white,
-                          textColor: Colors.black,
-                          iconColor: Colors.black,
-                          onPressed: () async {
-                            final int timestamp =
-                                DateTime.now().millisecondsSinceEpoch;
-                            BlocProvider.of<CloudStoriesBloc>(context).add(
-                                CloudStoriesEvent(CloudStoriesType.createStory,
-                                    data: timestamp, mainEvent: true));
-                            setState(() => addingStory = true);
-                          },
-                        ),
-                ),
-                const SizedBox(height: 20),
-                ...eventDisplay,
-              ],
+              children: children,
             ),
     );
   }

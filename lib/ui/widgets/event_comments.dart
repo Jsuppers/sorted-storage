@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_state.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/constants.dart';
@@ -51,9 +51,9 @@ class _CommentWidgetState extends State<CommentWidget> {
   @override
   void initState() {
     super.initState();
-    adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
+    adventureComments = BlocProvider.of<CloudStoriesBloc>(context)
         .state
-        .localStories[widget.folderID]
+        .cloudStories[widget.folderID]
         .mainStory
         .comments
         .comments;
@@ -94,9 +94,9 @@ class _CommentWidgetState extends State<CommentWidget> {
           }
 
           setState(() {
-            adventureComments = BlocProvider.of<LocalStoriesBloc>(context)
+            adventureComments = BlocProvider.of<CloudStoriesBloc>(context)
                 .state
-                .localStories[widget.folderID]
+                .cloudStories[widget.folderID]
                 .mainStory
                 .comments
                 .comments;

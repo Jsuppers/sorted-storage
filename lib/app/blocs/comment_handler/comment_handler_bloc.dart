@@ -11,14 +11,14 @@ class CommentHandlerBloc
     extends Bloc<CommentHandlerEvent, CommentHandlerState> {
   /// sets the current state to not uploading
   CommentHandlerBloc(
-      {Map<String, StoryTimelineData> localStories, GoogleDrive storage})
+      {Map<String, StoryTimelineData> cloudStories, GoogleDrive storage})
       : super(const CommentHandlerState(uploading: false)) {
-    _localStories = localStories;
+    _cloudStories = cloudStories;
     _storage = storage;
   }
 
   GoogleDrive _storage;
-  Map<String, StoryTimelineData> _localStories;
+  Map<String, StoryTimelineData> _cloudStories;
 
   @override
   Stream<CommentHandlerState> mapEventToState(
@@ -27,7 +27,7 @@ class CommentHandlerBloc
 
     String error;
     try {
-      final StoryTimelineData timelineEvent = _localStories[event.folderID];
+      final StoryTimelineData timelineEvent = _cloudStories[event.folderID];
       final CommentsResponse commentsResponse =
           await _storage.uploadCommentsFile(
               commentsID: timelineEvent.mainStory.commentsID,
