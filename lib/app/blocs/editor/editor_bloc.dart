@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
@@ -18,6 +17,7 @@ import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
+import 'package:web/ui/helpers/property.dart' as Prop;
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
 /// the user to easily edit and reset the state of the timeline
@@ -45,7 +45,9 @@ class EditorBloc extends Bloc<EditorEvent, String> {
   Stream<String> mapEventToState(EditorEvent event) async* {
     switch (event.type) {
       case EditorType.createStory:
-        yield await _createEventFolder(event.parentID, event.mainEvent);
+        final bool mainEvent =
+          Prop.Property.getValueOrDefault(event.mainEvent, false);
+        yield await _createEventFolder(event.parentID, mainEvent);
         break;
       case EditorType.deleteStory:
         final String error = await _deleteEvent(event.folderID);
@@ -141,7 +143,7 @@ class EditorBloc extends Bloc<EditorEvent, String> {
             null, metadata.id, Media(mediaStream, fileContent.length));
       } else {
         metadata.id = await _storage.uploadMedia(
-            parentId, Constants.settingsFile, fileContent.length, mediaStream,
+            folderId, Constants.settingsFile, fileContent.length, mediaStream,
             mimeType: 'application/json');
       }
 
@@ -176,18 +178,18 @@ class EditorBloc extends Bloc<EditorEvent, String> {
             StoryTimelineData(mainStory: event);
         _cloudStories.putIfAbsent(folderID, () => timelineEvent);
       } else {
-        final StoryTimelineData story = _cloudStories[folderID];
+        final StoryTimelineData story = _cloudStories[parentId];
         story.subEvents.add(StoryContent(
             folderID: event.folderID,
             timestamp: story.mainStory.timestamp,
             comments: StoryComments()));
       }
-      print('2 refresh');
-      print(_cloudStories.length);
       _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
 
       return null;
     } catch (e) {
+      print('Error');
+      print(e);
       return 'Error when creating story';
     }
   }

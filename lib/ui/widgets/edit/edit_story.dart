@@ -52,35 +52,23 @@ class _EditStoryState extends State<EditStory> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<EditorBloc, String>(
-            listener: (BuildContext context, String error) {
-          setState(() {
-            // get copy of new data
-            timelineData = StoryTimelineData.clone(
-                BlocProvider.of<CloudStoriesBloc>(context)
-                    .state
-                    .cloudStories[widget._destination]);
-            timelineData.subEvents.sort((StoryContent a, StoryContent b) =>
-                b.timestamp.compareTo(a.timestamp));
-          });
-        }),
-        BlocListener<CloudStoriesBloc, CloudStoriesState>(
-            listener: (BuildContext context, CloudStoriesState state) {
-          if (state.type == CloudStoriesType.refresh) {
-            if (state.error != null) {
-              setState(() => error = true);
-            } else if (state.storyTimelineData != null) {
-              setState(() {
-                timelineData = StoryTimelineData.clone(state.storyTimelineData);
-                timelineData.subEvents.sort((StoryContent a, StoryContent b) =>
-                    b.timestamp.compareTo(a.timestamp));
-              });
-            }
+    return BlocListener<CloudStoriesBloc, CloudStoriesState>(
+      listener: (BuildContext context, CloudStoriesState state) {
+        if (state.type == CloudStoriesType.refresh) {
+          if (state.error != null) {
+            setState(() => error = true);
+          } else {
+            setState(() {
+              timelineData = StoryTimelineData.clone(
+                  BlocProvider.of<CloudStoriesBloc>(context)
+                      .state
+                      .cloudStories[widget._destination]);
+              timelineData.subEvents.sort((StoryContent a, StoryContent b) =>
+                  b.timestamp.compareTo(a.timestamp));
+            });
           }
-        })
-      ],
+        }
+      },
       child: ResponsiveBuilder(
           builder: (BuildContext context, SizingInformation info) {
         if (error) {
@@ -102,7 +90,10 @@ class _EditStoryState extends State<EditStory> {
         if (timelineData == null) {
           return const FullPageLoadingLogo(backgroundColor: Colors.white);
         }
+        print('timelineData.subEvents.length');
+        print(timelineData.subEvents.length);
         return Padding(
+            key: Key(timelineData.subEvents.length.toString()),
             padding: const EdgeInsets.all(20.0),
             child: SingleChildScrollView(
               child: EditStoryContent(
@@ -192,36 +183,6 @@ class _EditStoryContentState extends State<EditStoryContent> {
 //            }
           },
         ),
-//        BlocListener<LocalStoriesBloc, LocalStoriesState>(
-//          listener: (BuildContext context, LocalStoriesState state) {
-//            if (state.type == LocalStoriesType.editStory &&
-//                state.folderID == widget.folderId) {
-//              setState(() {
-//                locked = state.localStories[state.folderID].locked;
-//              });
-//            } else if ((state.type == LocalStoriesType.cancelStory ||
-//                    state.type == LocalStoriesType.updateUI) &&
-//                state.folderID == widget.folderId) {
-//              setState(() {
-//                adventure = state.localStories[state.folderID];
-//                adventure.subEvents.sort((StoryContent a, StoryContent b) =>
-//                    b.timestamp.compareTo(a.timestamp));
-//                locked = adventure.locked;
-//                saving = adventure.saving;
-//              });
-//            } else if (state.type == LocalStoriesType.updateUI) {
-//              final StoryContent subEvent = adventure.subEvents.firstWhere(
-//                  (StoryContent element) => element.folderID == state.folderID,
-//                  orElse: () {
-//                return;
-//              });
-//              if (subEvent == null) {
-//                return;
-//              }
-//              setState(() {});
-//            }
-//          },
-//        ),
       ],
       child: Padding(
         padding: const EdgeInsets.only(bottom: 20.0),
@@ -265,6 +226,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                 child: EventCard(
                     storyFolderID: adventure.mainStory.folderID,
                     saving: saving,
+                    controls: Container(),
                     width: widget.width,
                     height: widget.height,
                     story: adventure.subEvents[index]),

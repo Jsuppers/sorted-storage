@@ -84,19 +84,18 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   Future<void> _getStoriesFromFolder(String folderID) async {
     final FileList eventList = await _storage.listFiles(
         "mimeType='application/vnd.google-apps.folder' and '$folderID' in parents and trashed=false");
-    final List<String> folderIds = <String>[];
     final List<Future<dynamic>> tasks = <Future<dynamic>>[];
     for (final File file in eventList.files) {
       final int timestamp = int.tryParse(file.name);
 
       if (timestamp != null) {
-        folderIds.add(file.id);
         tasks.add(_createEventFromFolder(file.id, timestamp)
             .then((StoryContent mainEvent) async {
           final List<StoryContent> subEvents = <StoryContent>[];
           for (final SubEvent subEvent in mainEvent.subEvents) {
-            subEvents.add(
-                await _createEventFromFolder(subEvent.id, subEvent.timestamp));
+            StoryContent subStoryContent =
+              await _createEventFromFolder(subEvent.id, subEvent.timestamp);
+            subEvents.add(subStoryContent);
           }
 
           final StoryTimelineData data =
