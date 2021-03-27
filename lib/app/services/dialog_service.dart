@@ -4,6 +4,7 @@ import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/edit_story_dialog.dart';
 import 'package:web/ui/widgets/dialogs/emoji_dialog.dart';
 import 'package:web/ui/widgets/dialogs/error_dialog.dart';
+import 'package:web/ui/widgets/dialogs/image_upload_dialog.dart';
 import 'package:web/ui/widgets/dialogs/share_dialog.dart';
 
 /// Service to open dialogs
@@ -16,6 +17,18 @@ class DialogService {
       useRootNavigator: true,
       builder: (BuildContext context) {
         return CookieDialog();
+      },
+    );
+  }
+
+  static void imageUploadDialog(BuildContext context,
+      {String folderID, String parentID}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (BuildContext context) {
+        return ImageUploadDialog(folderID: folderID, parentID: parentID);
       },
     );
   }

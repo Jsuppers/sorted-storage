@@ -575,15 +575,10 @@ class _TimelineEventCardState extends State<EventCard> {
                             if (widget.saving) {
                               return;
                             }
-                            // TODO add image
-//                                BlocProvider.of<LocalStoriesBloc>(context)
-//                                    .add(
-//                                  LocalStoriesEvent(
-//                                    LocalStoriesType.addImage,
-//                                    parentID: widget.storyFolderID,
-//                                    folderID: widget.story.folderID,
-//                                  ),
-//                                );
+                            DialogService.imageUploadDialog(context,
+                              folderID: widget.story.folderID,
+                              parentID: widget.storyFolderID,
+                            );
                           },
                           width: Constants.minScreenWidth,
                           backgroundColor: Colors.white,

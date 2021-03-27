@@ -19,12 +19,12 @@ class GoogleDrive {
 
   /// upload a data stream to a file, and return the file's id
   Future<String> uploadMediaToFolder(
-      StoryContent eventContent,
+      String folderID,
       String imageName,
       StoryMedia storyMedia,
       Stream<List<int>> dataStream) async {
     final File mediaFile = File();
-    mediaFile.parents = <String>[eventContent.folderID];
+    mediaFile.parents = <String>[folderID];
     mediaFile.name = imageName;
     mediaFile.description = storyMedia.index.toString();
 

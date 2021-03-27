@@ -6,5 +6,7 @@ enum EditorType {
   deleteStory,
   syncingStart,
   syncingEnd,
-  syncingState
+  syncingState,
+  uploadImages,
+  uploadStatus
 }
