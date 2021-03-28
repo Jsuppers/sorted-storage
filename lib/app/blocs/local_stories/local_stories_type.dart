@@ -24,9 +24,6 @@ enum LocalStoriesType {
   /// edit the title
   editTitle,
 
-  /// delete a image
-  deleteImage,
-
   /// event to start adding images
   addImage,
 

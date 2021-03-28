@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
@@ -23,14 +26,24 @@ class DialogService {
 
   static void imageUploadDialog(BuildContext context,
       {String folderID, String parentID}) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      useRootNavigator: true,
-      builder: (BuildContext context) {
-        return ImageUploadDialog(folderID: folderID, parentID: parentID);
-      },
-    );
+    FilePicker.platform
+        .pickFiles(
+            type: FileType.media, allowMultiple: true, withReadStream: true)
+        .then((file) => {
+              if (file != null && file.files != null && file.files.isNotEmpty)
+                {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    useRootNavigator: true,
+                    builder: (BuildContext context) {
+                      return ImageUploadDialog(
+                        file: file,
+                          folderID: folderID, parentID: parentID);
+                    },
+                  )
+                }
+            });
   }
 
   /// dialog to share a folder

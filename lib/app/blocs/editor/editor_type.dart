@@ -7,6 +7,9 @@ enum EditorType {
   syncingStart,
   syncingEnd,
   syncingState,
+  /// delete a image
+  deleteImage,
+  ignoreImage,
   uploadImages,
   uploadStatus
 }

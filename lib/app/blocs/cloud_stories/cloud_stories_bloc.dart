@@ -12,6 +12,7 @@ import 'package:web/app/models/story_settings.dart';
 import 'package:web/app/models/sub_event.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/google_drive.dart';
+import 'package:web/app/services/retry_service.dart';
 import 'package:web/constants.dart';
 
 /// CloudStoriesBloc handles all the cloud changes of the timeline.
@@ -55,11 +56,13 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     if (folderID != null) {
       if (_cloudStories.isEmpty || _cloudStories[folderID] == null) {
         _getViewEvent(folderID).then(
-                (data) => add(CloudStoriesEvent(CloudStoriesType.refresh,
+                (data) =>
+                add(CloudStoriesEvent(CloudStoriesType.refresh,
                     folderID: folderID, storyTimelineData: data)),
-            onError: (dynamic error) => add(CloudStoriesEvent(
-                CloudStoriesType.refresh,
-                error: error.toString())));
+            onError: (dynamic error) =>
+                add(CloudStoriesEvent(
+                    CloudStoriesType.refresh,
+                    error: error.toString())));
       } else {
         add(CloudStoriesEvent(CloudStoriesType.refresh,
             folderID: folderID, storyTimelineData: _cloudStories[folderID]));
@@ -69,13 +72,15 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       _getMediaFolder().then((String value) {
         currentMediaFileId = value;
         _getStoriesFromFolder(value).then(
-            (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh)),
-            onError: (_) => add(const CloudStoriesEvent(
-                CloudStoriesType.refresh,
-                error: 'Error retrieving stories')));
+                (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh)),
+            onError: (_) =>
+                add(const CloudStoriesEvent(
+                    CloudStoriesType.refresh,
+                    error: 'Error retrieving stories')));
       },
-          onError: (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh,
-              error: 'Error retrieving media')));
+          onError: (_) =>
+              add(const CloudStoriesEvent(CloudStoriesType.refresh,
+                  error: 'Error retrieving media')));
     } else {
       add(const CloudStoriesEvent(CloudStoriesType.refresh));
     }
@@ -94,12 +99,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           final List<StoryContent> subEvents = <StoryContent>[];
           for (final SubEvent subEvent in mainEvent.subEvents) {
             StoryContent subStoryContent =
-              await _createEventFromFolder(subEvent.id, subEvent.timestamp);
+            await _createEventFromFolder(subEvent.id, subEvent.timestamp);
             subEvents.add(subStoryContent);
           }
 
           final StoryTimelineData data =
-              StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
+          StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
           _cloudStories.putIfAbsent(file.id, () => data);
         }));
       }
@@ -117,7 +122,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       return null;
     }
     final StoryContent mainEvent =
-        await _createEventFromFolder(folderID, timestamp);
+    await _createEventFromFolder(folderID, timestamp);
 
     final List<StoryContent> subEvents = <StoryContent>[];
     for (final SubEvent subEvent in mainEvent.subEvents) {
@@ -131,7 +136,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     String mediaFolderID;
 
     final String query =
-        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants
+        .rootFolder}' and trashed=false";
     final FileList folderParent = await _storage.listFiles(query);
     String parentId;
 
@@ -147,7 +153,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
 
     final String query2 =
-        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.mediaFolder}' and '$parentId' in parents and trashed=false";
+        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants
+        .mediaFolder}' and '$parentId' in parents and trashed=false";
     final FileList folder = await _storage.listFiles(query2);
 
     if (folder.files.isEmpty) {
@@ -166,12 +173,12 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     return mediaFolderID;
   }
 
-  Future<StoryContent> _createEventFromFolder(
-      String folderID, int timestamp) async {
+  Future<StoryContent> _createEventFromFolder(String folderID,
+      int timestamp) async {
     final FileList filesInFolder = await _storage.listFiles(
         "'$folderID' in parents and trashed=false",
         filter:
-            'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
+        'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
 
     String settingsID;
     String commentsID;
@@ -215,10 +222,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
 
     final StoryMetadata metadata =
-        StoryMetadata.fromJson(settingsID, await _storage.getJsonFile(settingsID));
+    StoryMetadata.fromJson(settingsID, await _storage.getJsonFile(settingsID));
 
     final StoryComments comments =
-        StoryComments.fromJson(await _storage.getJsonFile(commentsID));
+    StoryComments.fromJson(await _storage.getJsonFile(commentsID));
 
     return StoryContent(
         timestamp: timestamp,

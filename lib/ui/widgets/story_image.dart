@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/editor/editor_bloc.dart';
+import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/local_stories/local_stories_event.dart';
 import 'package:web/app/blocs/local_stories/local_stories_type.dart';
@@ -163,11 +166,12 @@ class _StoryImageState extends State<StoryImage> {
                       if (widget.saving) {
                         return;
                       }
-//                      BlocProvider.of<CloudStoriesBloc>(context).add(
-//                          CloudStoriesEvent(CloudStoriesType.deleteImage,
-//                              folderID: widget.folderID,
-//                              data: imageKey,
-//                              parentID: widget.storyFolderID));
+                      BlocProvider.of<EditorBloc>(context).add(
+                          EditorEvent(EditorType.deleteImage,
+                              folderID: widget.folderID,
+                              data: imageKey,
+                              parentID: widget.storyFolderID));
+
                     },
                   ),
                 ),

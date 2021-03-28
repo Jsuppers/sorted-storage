@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,15 +8,17 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/story_media.dart';
 
 /// image upload dialog
 class ImageUploadDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ImageUploadDialog({Key key, this.folderID, this.parentID})
+  const ImageUploadDialog({Key key, this.folderID, this.parentID, this.file })
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -23,34 +27,28 @@ class ImageUploadDialog extends StatelessWidget {
   // ignore: public_member_api_docs
   final String parentID;
 
+  final FilePickerResult file;
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<FilePickerResult>(
-        future: FilePicker.platform.pickFiles(
-            type: FileType.media, allowMultiple: true, withReadStream: true),
-        builder: (BuildContext context, AsyncSnapshot<FilePickerResult> file) {
-          if (file.data == null ||
-              file.data.files == null ||
-              file.data.files.isEmpty) {
-            return Container();
-          }
           Map<String, StoryMedia> images = {};
-          for (int i = 0; i < file.data.files.length; i++) {
-            final PlatformFile element = file.data.files[i];
+          for (int i = 0; i < file.files.length; i++) {
+            final PlatformFile element = file.files[i];
             final String mime = lookupMimeType(element.name);
 
             final StoryMedia media = StoryMedia(
                 stream: element.readStream,
                 contentSize: element.size,
                 isVideo: mime.startsWith('video/'),
-                isDocument: !mime.startsWith('video/') &&
-                    !mime.startsWith('image/'));
-            images.putIfAbsent(
-                element.name,
-                () => media);
+                isDocument:
+                !mime.startsWith('video/') && !mime.startsWith('image/'));
+            images.putIfAbsent(element.name, () => media);
           }
-          BlocProvider.of<EditorBloc>(context).add(
-              EditorEvent(EditorType.uploadImages, parentID: parentID, folderID: folderID, data: images));
+          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+              EditorType.uploadImages,
+              parentID: parentID,
+              folderID: folderID,
+              data: images));
 
           return Dialog(
             shape: const RoundedRectangleBorder(
@@ -69,7 +67,7 @@ class ImageUploadDialog extends StatelessWidget {
                           scrollDirection: Axis.vertical, //.horizontal
                           child: Column(
                             children: [
-                            for (int i = 0; i < images.keys.length; i++) 
+                              for (int i = 0; i < images.keys.length; i++)
                                 ImageUpload(
                                   name: images.keys.elementAt(i),
                                   index: i,
@@ -109,23 +107,36 @@ class ImageUploadDialog extends StatelessWidget {
               ),
             ),
           );
-        });
   }
 }
 
-class ImageUpload extends StatelessWidget {
+class ImageUpload extends StatefulWidget {
   ImageUpload({Key key, this.name, this.index}) : super(key: key);
 
   String name;
   int index;
 
   @override
+  _ImageUploadState createState() => _ImageUploadState();
+}
+
+class _ImageUploadState extends State<ImageUpload> {
+  double percent;
+  bool error;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    percent = 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    
-    double percent = 0;
-    
     Color progressColor;
-    if (percent == 0) {
+    if (error == true) {
+      progressColor = Colors.red;
+    } else if (percent == 0) {
       progressColor = Colors.grey;
     } else if (percent < 1) {
       progressColor = Colors.orangeAccent;
@@ -133,31 +144,60 @@ class ImageUpload extends StatelessWidget {
       progressColor = Colors.green;
     }
 
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            name,
-            style: new TextStyle(
-              fontSize: 16.0,
-              color: Colors.black,
+    return BlocListener<EditorBloc, EditorState>(
+      listener: (context, state) {
+        if (state.type == EditorType.uploadStatus) {
+          MediaProgress progress = state.data as MediaProgress;
+          if (progress.index == widget.index) {
+            if (state.error != null) {
+              setState(() {
+                error = true;
+                percent = 0;
+              });
+            } else {
+              setState(() {
+                percent = progress.sent / progress.total;
+              });
+            }
+          }
+        }
+      },
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              widget.name,
+              style: TextStyle(
+                fontSize: 16.0,
+                color: progressColor,
+              ),
             ),
-          ),
-          SizedBox(width: 20),
-          percent == 1
-              ? Icon(Icons.check, color: progressColor, size: 16)
-              : CircularPercentIndicator(
-                  radius: 28.0,
-                  lineWidth: 5.0,
-                  percent: percent,
-                  center: IconButton(
-                      icon: Icon(Icons.close, color: progressColor, size: 12),
-                      onPressed: () => {}),
-                  circularStrokeCap: CircularStrokeCap.round,
-                  progressColor: progressColor,
-                  backgroundColor: Colors.grey[200],
+            const SizedBox(width: 20),
+            if (error == true) Icon(
+                Icons.error_outline, color: progressColor, size: 16) else
+              percent == 1
+                  ? Icon(Icons.check, color: progressColor, size: 16)
+                  : CircularPercentIndicator(
+                radius: 28.0,
+                lineWidth: 5.0,
+                percent: percent,
+                center: IconButton(
+                    icon: Icon(Icons.close, color: progressColor, size: 12),
+                    onPressed: () => {
+
+                    BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                    EditorType.ignoreImage,
+                    data: widget.index))
+                }
+
+
                 ),
-        ]);
+                circularStrokeCap: CircularStrokeCap.round,
+                progressColor: progressColor,
+                backgroundColor: Colors.grey[200],
+              ),
+          ]),
+    );
   }
 }

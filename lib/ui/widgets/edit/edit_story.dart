@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:date_field/date_field.dart';
 import 'package:flutter/foundation.dart';
@@ -90,10 +91,8 @@ class _EditStoryState extends State<EditStory> {
         if (timelineData == null) {
           return const FullPageLoadingLogo(backgroundColor: Colors.white);
         }
-        print('timelineData.subEvents.length');
-        print(timelineData.subEvents.length);
         return Padding(
-            key: Key(timelineData.subEvents.length.toString()),
+            key: Key(DateTime.now().toString()),
             padding: const EdgeInsets.all(20.0),
             child: SingleChildScrollView(
               child: EditStoryContent(
@@ -226,7 +225,39 @@ class _EditStoryContentState extends State<EditStoryContent> {
                 child: EventCard(
                     storyFolderID: adventure.mainStory.folderID,
                     saving: saving,
-                    controls: Container(),
+                    controls: Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 3, top: 3),
+                        child: Container(
+                          height: 34,
+                          width: 34,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(40))),
+                          child: IconButton(
+                            iconSize: 18,
+                            splashRadius: 18,
+                            icon: Icon(
+                              Icons.clear,
+                              color: Colors.redAccent,
+                              size: 18,
+                            ),
+                            onPressed: () {
+                              if (saving) {
+                                return;
+                              }
+                              BlocProvider.of<EditorBloc>(context).add(
+                                  EditorEvent(EditorType.deleteStory,
+                                      parentID: adventure.mainStory.folderID,
+                                      folderID:
+                                      adventure.subEvents[index].folderID));
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
                     width: widget.width,
                     height: widget.height,
                     story: adventure.subEvents[index]),

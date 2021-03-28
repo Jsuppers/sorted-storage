@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
@@ -7,6 +8,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
@@ -24,7 +26,7 @@ import 'package:web/ui/helpers/property.dart' as Prop;
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
 /// the user to easily edit and reset the state of the timeline
-class EditorBloc extends Bloc<EditorEvent, dynamic> {
+class EditorBloc extends Bloc<EditorEvent, EditorState> {
   /// The constructor sets the private timeline data and sets the state to
   /// initial_state
   EditorBloc(
@@ -32,7 +34,7 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
       NavigationBloc navigationBloc,
       Map<String, StoryTimelineData> cloudStories,
       CloudStoriesBloc cloudStoriesBloc})
-      : super('') {
+      : super(null) {
     _cloudStoriesBloc = cloudStoriesBloc;
     _cloudStories = cloudStories;
     _storage = storage;
@@ -43,30 +45,54 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
   GoogleDrive _storage;
   NavigationBloc _navigationBloc;
   CloudStoriesBloc _cloudStoriesBloc;
+  List<int> imageIndexesToIgnore;
 
   @override
-  Stream<dynamic> mapEventToState(EditorEvent event) async* {
+  Stream<EditorState> mapEventToState(EditorEvent event) async* {
     switch (event.type) {
       case EditorType.createStory:
         final bool mainEvent =
-          Prop.Property.getValueOrDefault(event.mainEvent, false);
-        yield await _createEventFolder(event.parentID, mainEvent);
+            Prop.Property.getValueOrDefault(event.mainEvent, false);
+        String error = await _createEventFolder(event.parentID, mainEvent);
+        yield EditorState(EditorType.createStory, error: error);
         break;
       case EditorType.uploadImages:
-        await this.uploadImages(
-            event.data as Map<String, StoryMedia>,
-            event.folderID,
-            event.parentID,
+        imageIndexesToIgnore = <int>[];
+        uploadImages(
+          event.data as Map<String, StoryMedia>,
+          event.folderID,
+          event.parentID,
         );
         break;
+      case EditorType.ignoreImage:
+        imageIndexesToIgnore = <int>[];
+        imageIndexesToIgnore.add(event.data as int);
+        break;
       case EditorType.uploadStatus:
+        yield EditorState(EditorType.uploadStatus,
+            folderID: event.folderID,
+            parentID: event.parentID,
+            data: event.data,
+            error: event.error);
         break;
       case EditorType.deleteStory:
-        final String error = await _deleteEvent(event.folderID);
+        final String error = await _deleteEvent(event.folderID, event.parentID);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopEvent());
         } else {
-          yield error;
+          yield EditorState(EditorType.deleteStory, error: error);
+        }
+        break;
+      case EditorType.deleteImage:
+        final StoryContent eventData = TimelineService.getStoryWithFolderID(
+            event.parentID, event.folderID, _cloudStories);
+        final String error = await _deleteFile(event.data as String);
+        if (error == null) {
+          eventData.images.remove(event.data);
+          _cloudStoriesBloc
+              .add(const CloudStoriesEvent(CloudStoriesType.refresh));
+        } else {
+          yield EditorState(EditorType.deleteStory, error: error);
         }
         break;
       case EditorType.updateTimestamp:
@@ -78,14 +104,16 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
           eventData.timestamp = timestamp;
           _cloudStoriesBloc
               .add(const CloudStoriesEvent(CloudStoriesType.refresh));
-          yield null;
+          yield EditorState(EditorType.updateTimestamp);
         } catch (e) {
-          yield 'Could not update timestamp';
+          yield EditorState(EditorType.updateTimestamp,
+              error: 'Could not update timestamp');
         }
         break;
       case EditorType.updateMetadata:
-        yield await _uploadSettingsFile(
+        String error = await _uploadSettingsFile(
             event.folderID, event.parentID, event.data as StoryMetadata);
+        yield EditorState(EditorType.updateMetadata, error: error);
         break;
 //      case CloudStoriesType.progressUpload:
 //        yield CloudStoriesState(CloudStoriesType.progressUpload, _cloudStories,
@@ -132,9 +160,24 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
     }
   }
 
-  Future<String> _deleteEvent(String fileID) async {
+  Future<String> _deleteEvent(String fileID, String parentID) async {
     _storage.delete(fileID).then((dynamic value) {
-      _cloudStories.remove(fileID);
+      if (parentID != null) {
+        final StoryTimelineData story = _cloudStories[parentID];
+        story.subEvents
+            .removeWhere((StoryContent element) => element.folderID == fileID);
+      } else {
+        _cloudStories.remove(fileID);
+      }
+      _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
+      return null;
+    }, onError: (_) {
+      return 'Error when deleting story';
+    });
+  }
+
+  Future<String> _deleteFile(String fileID) async {
+    _storage.delete(fileID).then((dynamic value) {
       _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
       return null;
     }, onError: (_) {
@@ -179,8 +222,6 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
           comments: StoryComments(), folderID: folderID, timestamp: timestamp);
       await _uploadSettingsFile(folderID, parentId, event.metadata);
 
-      print('1 refresh');
-      print(_cloudStories.length);
       if (mainEvent) {
         final CommentsResponse commentsResponse =
             await _storage.uploadCommentsFile(folderID: event.folderID);
@@ -200,61 +241,80 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
 
       return null;
     } catch (e) {
-      print('Error');
-      print(e);
       return 'Error when creating story';
     }
   }
 
-  Future<void> uploadImages(Map<String, StoryMedia> images, String folderID, String parentID) {
-    Map<String, StoryMedia> images = {};
-    for (MapEntry<String, StoryMedia> entry in images.entries) {
-      uploadMedia(entry.key, entry.value, folderID, parentID);
+  Future<void> uploadImages(
+      Map<String, StoryMedia> images, String folderID, String parentID) async {
+    List<MapEntry<String, StoryMedia>> entries = images.entries.toList();
+    final int length = entries.length;
+    bool errors = false;
+    for (int i = 0; i < length; i++) {
+      final MapEntry<String, StoryMedia> entry = entries[i];
+      try {
+        await uploadImage(i, entry.key, entry.value, folderID, parentID);
+      } catch (e) {
+        errors = true;
+        add(EditorEvent(EditorType.uploadStatus,
+            folderID: folderID,
+            parentID: parentID,
+            data: MediaProgress(i, 0, 0),
+            error: 'Could not upload'));
+      }
+    }
+
+    _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
+
+    if (!errors) {
+      _navigationBloc.add(NavigatorPopEvent());
     }
   }
 
-  Future<void> uploadMedia(
-      String name,
-      StoryMedia storyMedia,
-      String folderID,
-      String parentID,
-      ) async {
-          final StreamController<List<int>> streamController =
-          StreamController<List<int>>();
-      final int totalSize = storyMedia.contentSize;
-      int sent = 0;
+  Future<void> uploadImage(
+    int index,
+    String name,
+    StoryMedia storyMedia,
+    String folderID,
+    String parentID,
+  ) async {
+    final StreamController<List<int>> streamController =
+        StreamController<List<int>>();
+    final int totalSize = storyMedia.contentSize;
+    int sent = 0;
 
-          storyMedia.stream.listen((List<int> event) {
-            sent += event.length;
-            add(EditorEvent(EditorType.uploadStatus,
-                folderID: folderID,
-                parentID: parentID,
-                data: MediaProgress(totalSize, sent)));
-            streamController.add(event);
-          }, onDone: () {
-            streamController.close();
-          }, onError: (dynamic error) {
-            streamController.close();
-          });
+    storyMedia.stream.listen((List<int> event) {
+      if (imageIndexesToIgnore.contains(index)) {
+        streamController.addError('canceled');
+      } else {
+        sent += event.length;
+        add(EditorEvent(EditorType.uploadStatus,
+            folderID: folderID,
+            parentID: parentID,
+            data: MediaProgress(index, totalSize, sent)));
+        streamController.add(event);
+      }
+    }, onDone: () {
+      streamController.close();
+    }, onError: (dynamic error) {
+      streamController.close();
+    });
 
-          await _storage.uploadMediaToFolder(
-              folderID, name, storyMedia, streamController.stream)
-              .then((String imageID) {
-            if (imageID != null) {
-              final StoryContent eventData = TimelineService.getStoryWithFolderID(
-                  parentID, folderID, _cloudStories);
-              eventData.images.putIfAbsent(imageID, () => storyMedia);
-              _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
-            }
-          }, onError: (dynamic error) {
+    final String imageID = await _storage.uploadMediaToFolder(
+        folderID, name, storyMedia, streamController.stream);
 
-          });
+    if (imageID != null) {
+      final StoryContent eventData = TimelineService.getStoryWithFolderID(
+          parentID, folderID, _cloudStories);
+      eventData.images.putIfAbsent(imageID, () => storyMedia);
 
-//          uploadingImages.update(localCopy.folderID, (List<String> value) {
-//            value.remove(image.key);
-//            return value;
-//          });
-
+      add(EditorEvent(EditorType.uploadStatus,
+          folderID: folderID,
+          parentID: parentID,
+          data: MediaProgress(index, totalSize, sent)));
+    } else {
+      throw 'Error when creating image';
+    }
   }
 
 //
@@ -264,33 +324,6 @@ class EditorBloc extends Bloc<EditorEvent, dynamic> {
 //    List<Future<dynamic>> tasks = <Future<dynamic>>[];
 //    final Map<String, List<String>> uploadingImages = <String, List<String>>{};
 //
-//    if (localCopy.timestamp != cloudCopy.timestamp) {
-//      tasks.add(_storage
-//          .updateEventFolderTimestamp(localCopy.folderID, localCopy.timestamp)
-//          .then((String value) {
-//        cloudCopy.timestamp = localCopy.timestamp;
-//      }, onError: (dynamic error) {
-//        localCopy.timestamp = cloudCopy.timestamp;
-//        errorMessages.add('Edit the date');
-//      }));
-//    }
-//
-//    if (localCopy.title != cloudCopy.title ||
-//        localCopy.description != cloudCopy.description ||
-//        localCopy.emoji != cloudCopy.emoji) {
-//      tasks.add(_uploadSettingsFile(cloudCopy.folderID, localCopy).then(
-//              (String settingsID) {
-//            cloudCopy.settingsID = settingsID;
-//            cloudCopy.title = localCopy.title;
-//            cloudCopy.description = localCopy.description;
-//            cloudCopy.emoji = localCopy.emoji;
-//          }, onError: (_) {
-//        localCopy.title = cloudCopy.title;
-//        localCopy.description = cloudCopy.description;
-//        localCopy.emoji = cloudCopy.emoji;
-//        errorMessages.add('Edit title, description, and/or story emoji');
-//      }));
-//    }
 //
 //    await Future.wait(tasks);
 //    tasks = <Future<dynamic>>[];
