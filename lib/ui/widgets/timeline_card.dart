@@ -101,7 +101,6 @@ class _TimelineCardState extends State<TimelineCard> {
           children: <Widget>[
             EventCard(
               storyFolderID: widget.event.mainStory.folderID,
-              saving: false,
               locked: true,
               controls: widget.viewMode
                   ? Container()
@@ -116,7 +115,6 @@ class _TimelineCardState extends State<TimelineCard> {
                 padding: const EdgeInsets.all(20.0),
                 child: EventCard(
                     storyFolderID: widget.event.mainStory.folderID,
-                    saving: false,
                     locked: true,
                     controls: Container(),
                     width: widget.width,

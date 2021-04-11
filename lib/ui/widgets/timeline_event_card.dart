@@ -19,7 +19,6 @@ class EventCard extends StatefulWidget {
       this.height = double.infinity,
       this.story,
       this.controls,
-      this.saving,
       this.storyFolderID,
       this.locked})
       : super(key: key);
@@ -36,9 +35,6 @@ class EventCard extends StatefulWidget {
   /// the story this card is related to
   final StoryContent story;
 
-  /// whether we are currently saving
-  final bool saving;
-
   /// whether the card is locked
   final bool locked;
 
@@ -53,12 +49,10 @@ class _TimelineEventCardState extends State<EventCard> {
   final GlobalKey _formKey = GlobalKey<FormState>();
   final DateFormat formatter = DateFormat('dd MMMM, yyyy');
   List<String> uploadingImages;
-  bool saving;
 
   @override
   void initState() {
     super.initState();
-    saving = widget.saving;
     uploadingImages = <String>[];
   }
 
@@ -104,7 +98,6 @@ class _TimelineEventCardState extends State<EventCard> {
           in widget.story.images.entries) {
         cards.add(StoryImage(
           locked: widget.locked,
-          saving: widget.saving,
           uploadingImages: uploadingImages,
           storyMedia: image.value,
           imageKey: image.key,
@@ -118,7 +111,6 @@ class _TimelineEventCardState extends State<EventCard> {
         a.storyMedia.index.compareTo(b.storyMedia.index));
 
     return Form(
-      key: _formKey,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: <Widget>[

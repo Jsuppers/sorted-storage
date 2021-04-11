@@ -15,6 +15,9 @@ class NavigationBloc extends Bloc<NavigationEvent, dynamic> {
   @override
   Stream<dynamic> mapEventToState(NavigationEvent event) async* {
     switch (event.runtimeType) {
+      case NavigatorPopDialogEvent:
+        _navigatorKey.currentState.pop('dialog');
+        break;
       case NavigatorPopEvent:
         _navigatorKey.currentState.pop();
         break;

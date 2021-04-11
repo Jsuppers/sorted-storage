@@ -12,6 +12,9 @@ abstract class NavigationEvent {
   final bool requiresAuthentication;
 }
 
+/// pop dialog
+class NavigatorPopDialogEvent extends NavigationEvent {}
+
 /// pops the current route
 class NavigatorPopEvent extends NavigationEvent {}
 

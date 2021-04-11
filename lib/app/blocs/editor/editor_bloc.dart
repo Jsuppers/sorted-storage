@@ -23,6 +23,7 @@ import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/helpers/property.dart' as Prop;
+import 'package:web/ui/widgets/story_image.dart';
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
 /// the user to easily edit and reset the state of the timeline
@@ -78,47 +79,59 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       case EditorType.deleteStory:
         final String error = await _deleteEvent(event.folderID, event.parentID);
         if (error == null && event.closeDialog) {
-          _navigationBloc.add(NavigatorPopEvent());
+          _navigationBloc.add(NavigatorPopDialogEvent());
         } else {
           yield EditorState(EditorType.deleteStory, error: error);
         }
         break;
       case EditorType.deleteImage:
+        add(const EditorEvent(EditorType.syncingState,
+            data: SavingState.saving));
         final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _cloudStories);
         final String error = await _deleteFile(event.data as String);
         if (error == null) {
           eventData.images.remove(event.data);
-          _cloudStoriesBloc
-              .add(const CloudStoriesEvent(CloudStoriesType.refresh));
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.success));
+          yield EditorState(EditorType.deleteImage, data: event.data);
         } else {
-          yield EditorState(EditorType.deleteStory, error: error);
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.error));
         }
         break;
+
+      case EditorType.syncingState:
+        yield EditorState(EditorType.syncingState, data: event.data);
+        break;
       case EditorType.updateTimestamp:
+        add(const EditorEvent(EditorType.syncingState,
+            data: SavingState.saving));
         final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _cloudStories);
         final int timestamp = event.data as int;
         try {
           await _storage.updateEventFolderTimestamp(event.folderID, timestamp);
           eventData.timestamp = timestamp;
-          _cloudStoriesBloc
-              .add(const CloudStoriesEvent(CloudStoriesType.refresh));
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.success));
           yield EditorState(EditorType.updateTimestamp);
         } catch (e) {
-          yield EditorState(EditorType.updateTimestamp,
-              error: 'Could not update timestamp');
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.error));
         }
         break;
       case EditorType.updateMetadata:
-        String error = await _uploadSettingsFile(
+        add(const EditorEvent(EditorType.syncingState,
+            data: SavingState.saving));
+        _uploadSettingsFile(
             event.folderID, event.parentID, event.data as StoryMetadata);
-        yield EditorState(EditorType.updateMetadata, error: error);
         break;
-//      case CloudStoriesType.progressUpload:
-//        yield CloudStoriesState(CloudStoriesType.progressUpload, _cloudStories,
-//            folderID: event.folderID, data: event.data);
-//        break;
+      case EditorType.updateImagePosition:
+        add(const EditorEvent(EditorType.syncingState,
+            data: SavingState.saving));
+        _updatePosition(event.data as List<StoryImage>, event.parentID);
+        break;
 //      case CloudStoriesType.deleteImage:
 //        final StoryContent eventData = TimelineService.getStoryWithFolderID(
 //            event.parentID, event.folderID, _localStories);
@@ -177,12 +190,20 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
   }
 
   Future<String> _deleteFile(String fileID) async {
-    _storage.delete(fileID).then((dynamic value) {
-      _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
-      return null;
-    }, onError: (_) {
-      return 'Error when deleting story';
-    });
+    _storage.delete(fileID);
+  }
+
+  Future<void> _updatePosition(List<StoryImage> images, String parentID) async {
+    // TODO error
+    for (int i = 0; i < images.length; i++) {
+      // TODO transactions
+      await _storage.updatePosition(
+          images[i].imageKey, images[i].storyMedia.index);
+      TimelineService.updateImage(images[i].imageKey,
+          images[i].storyMedia.index, _cloudStories[parentID]);
+    }
+    add(const EditorEvent(EditorType.syncingState,
+        data: SavingState.success));
   }
 
   Future<String> _uploadSettingsFile(
@@ -205,8 +226,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       final StoryContent eventData = TimelineService.getStoryWithFolderID(
           parentId, folderId, _cloudStories);
       eventData.metadata = metadata;
-
-      _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
+      add(const EditorEvent(EditorType.syncingState,
+          data: SavingState.success));
       return null;
     } catch (e) {
       return 'Sorry! Could not update';
@@ -265,7 +286,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     }
 
     _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
-
     if (!errors) {
       _navigationBloc.add(NavigatorPopEvent());
     }

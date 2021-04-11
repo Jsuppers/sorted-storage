@@ -11,5 +11,6 @@ enum EditorType {
   deleteImage,
   ignoreImage,
   uploadImages,
-  uploadStatus
+  uploadStatus,
+  updateImagePosition
 }

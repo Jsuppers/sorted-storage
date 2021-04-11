@@ -1,15 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
-import 'package:web/app/blocs/local_stories/local_stories_event.dart';
-import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/ui/widgets/loading.dart';
@@ -20,7 +14,6 @@ class StoryImage extends StatefulWidget {
   const StoryImage(
       {Key key,
         this.locked,
-        this.saving,
         this.uploadingImages,
         this.storyMedia,
         this.imageKey,
@@ -30,8 +23,6 @@ class StoryImage extends StatefulWidget {
 
   // ignore: public_member_api_docs
   final bool locked;
-  // ignore: public_member_api_docs
-  final bool saving;
   // ignore: public_member_api_docs
   final List<String> uploadingImages;
   // ignore: public_member_api_docs
@@ -153,19 +144,11 @@ class _StoryImageState extends State<StoryImage> {
                   child: IconButton(
                     iconSize: 18,
                     splashRadius: 18,
-                    icon: Icon(
-                      widget.saving ? Icons.cloud_upload : Icons.clear,
-                      color: widget.saving
-                          ? (widget.uploadingImages.contains(imageKey)
-                              ? Colors.orange
-                              : Colors.green)
-                          : Colors.redAccent,
+                    icon: Icon(Icons.clear,
+                      color: Colors.redAccent,
                       size: 18,
                     ),
                     onPressed: () {
-                      if (widget.saving) {
-                        return;
-                      }
                       BlocProvider.of<EditorBloc>(context).add(
                           EditorEvent(EditorType.deleteImage,
                               folderID: widget.folderID,
@@ -188,10 +171,7 @@ class _StoryImageState extends State<StoryImage> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  if (widget.saving)
-                    Container()
-                  else
-                    const Icon(Icons.insert_drive_file),
+                  Icon(Icons.insert_drive_file),
                   Center(child: Text(imageKey)),
                 ],
               )

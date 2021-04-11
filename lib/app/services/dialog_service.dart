@@ -1,7 +1,9 @@
-import 'dart:developer';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/edit_story_dialog.dart';
@@ -55,6 +57,10 @@ class DialogService {
       builder: (BuildContext context) {
         return EditStoryDialog(folderID: folderID);
       },
+    ).then((_) =>
+      // update the ui with any changes made in the edit dialog
+      BlocProvider.of<CloudStoriesBloc>(context)
+          .add(const CloudStoriesEvent(CloudStoriesType.refresh))
     );
   }
 
