@@ -91,15 +91,13 @@ class _EditStoryState extends State<EditStory> {
         if (timelineData == null) {
           return const FullPageLoadingLogo(backgroundColor: Colors.white);
         }
+
         return Padding(
-            key: Key(DateTime.now().toString()),
             padding: const EdgeInsets.all(20.0),
-            child: SingleChildScrollView(
-              child: EditStoryContent(
-                width: info.screenSize.width,
-                event: timelineData,
-                height: info.screenSize.height,
-              ),
+            child: EditStoryContent(
+              width: info.screenSize.width,
+              event: timelineData,
+              height: info.screenSize.height,
             ));
       }),
     );
@@ -134,111 +132,126 @@ class _EditStoryContentState extends State<EditStoryContent> {
     if (widget.event == null) {
       return const FullPageLoadingLogo(backgroundColor: Colors.white);
     }
-    return MultiBlocListener(
-      listeners: <BlocListener<dynamic, dynamic>>[
-        BlocListener<EditorBloc, EditorState>(
-          listener: (BuildContext context, EditorState state) {
-            if (state.type == EditorType.syncingState) {
-              setState(() {
-                savingState = state.data as SavingState;
-              });
-            }
-            if (state.type == EditorType.deleteImage) {
-              setState(() {
-                TimelineService.removeImage(state.data as String, widget.event);
-              });
-            }
-          },
-        ),
-      ],
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            EventCard(
-              savingState: savingState,
-              storyFolderID: widget.event.mainStory.folderID,
-              controls: EditHeader(
+
+    return CustomScrollView(slivers: [
+      SliverAppBar(
+        // toolbarHeight: 50,
+        floating: true,
+        backgroundColor: Colors.white,
+        pinned: true,
+        elevation: 0.0,
+        title: EditHeader(
+            savingState: savingState,
+            width: widget.width,
+            adventure: widget.event),
+      ),
+      SliverToBoxAdapter(
+        child: MultiBlocListener(
+          listeners: <BlocListener<dynamic, dynamic>>[
+            BlocListener<EditorBloc, EditorState>(
+              listener: (BuildContext context, EditorState state) {
+                if (state.type == EditorType.syncingState) {
+                  setState(() {
+                    savingState = state.data as SavingState;
+                  });
+                }
+                if (state.type == EditorType.deleteImage) {
+                  setState(() {
+                    TimelineService.removeImage(
+                        state.data as String, widget.event);
+                  });
+                }
+              },
+            ),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EventCard(
                   savingState: savingState,
+                  storyFolderID: widget.event.mainStory.folderID,
                   width: widget.width,
-                  adventure: widget.event),
-              width: widget.width,
-              height: widget.height,
-              story: widget.event.mainStory,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: SizedBox(
-                height: 40,
-                width: 140,
-                child: ButtonWithIcon(
-                    text: 'add sub-event',
-                    icon: Icons.add,
-                    onPressed: () async {
-                      if (savingState == SavingState.saving) {
-                        print('still saving');
-                        return;
-                      }
-                      BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                          EditorType.createStory,
-                          parentID: widget.event.mainStory.folderID));
-                    },
-                    width: Constants.minScreenWidth,
-                    backgroundColor: Colors.white,
-                    textColor: Colors.black,
-                    iconColor: Colors.black),
-              ),
-            ),
-            ...List<Widget>.generate(widget.event.subEvents.length,
-                (int index) {
-              return Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: EventCard(
-                    savingState: savingState,
-                    storyFolderID: widget.event.mainStory.folderID,
-                    controls: Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 3, top: 3),
-                        child: Container(
-                          height: 34,
-                          width: 34,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(40))),
-                          child: IconButton(
-                            iconSize: 18,
-                            splashRadius: 18,
-                            icon: Icon(
-                              Icons.clear,
-                              color: Colors.redAccent,
-                              size: 18,
+                  controls: Container(),
+                  height: widget.height,
+                  story: widget.event.mainStory,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: SizedBox(
+                    height: 40,
+                    width: 140,
+                    child: ButtonWithIcon(
+                        text: 'add sub-event',
+                        icon: Icons.add,
+                        onPressed: () async {
+                          if (savingState == SavingState.saving) {
+                            print('still saving');
+                            return;
+                          }
+                          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                              EditorType.createStory,
+                              parentID: widget.event.mainStory.folderID));
+                        },
+                        width: Constants.minScreenWidth,
+                        backgroundColor: Colors.white,
+                        textColor: Colors.black,
+                        iconColor: Colors.black),
+                  ),
+                ),
+                ...List<Widget>.generate(widget.event.subEvents.length,
+                    (int index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: EventCard(
+                        savingState: savingState,
+                        storyFolderID: widget.event.mainStory.folderID,
+                        controls: Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 3, top: 3),
+                            child: Container(
+                              height: 34,
+                              width: 34,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(40))),
+                              child: IconButton(
+                                iconSize: 18,
+                                splashRadius: 18,
+                                icon: Icon(
+                                  Icons.clear,
+                                  color: Colors.redAccent,
+                                  size: 18,
+                                ),
+                                onPressed: () {
+                                  if (savingState == SavingState.saving) {
+                                    return;
+                                  }
+                                  BlocProvider.of<EditorBloc>(context).add(
+                                      EditorEvent(EditorType.deleteStory,
+                                          parentID:
+                                              widget.event.mainStory.folderID,
+                                          folderID: widget.event
+                                              .subEvents[index].folderID));
+                                },
+                              ),
                             ),
-                            onPressed: () {
-                              if (savingState == SavingState.saving) {
-                                return;
-                              }
-                              BlocProvider.of<EditorBloc>(context).add(
-                                  EditorEvent(EditorType.deleteStory,
-                                      parentID: widget.event.mainStory.folderID,
-                                      folderID: widget
-                                          .event.subEvents[index].folderID));
-                            },
                           ),
                         ),
-                      ),
-                    ),
-                    width: widget.width,
-                    height: widget.height,
-                    story: widget.event.subEvents[index]),
-              );
-            }),
-          ],
+                        width: widget.width,
+                        height: widget.height,
+                        story: widget.event.subEvents[index]),
+                  );
+                }),
+              ],
+            ),
+          ),
         ),
       ),
-    );
+    ]);
   }
 }
 
@@ -466,7 +479,6 @@ class _TimelineEventCardState extends State<EventCard> {
                           EditorType.updateImagePosition,
                           parentID: widget.storyFolderID,
                           data: cards));
-
                     },
                     children: cards)),
             const SizedBox(height: 10),

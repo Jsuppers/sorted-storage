@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -31,6 +29,7 @@ class _EditHeaderState extends State<EditHeader> {
   Widget build(BuildContext context) {
     return Container(
             height: 60,
+            color: Colors.white,
             padding: EdgeInsets.zero,
             alignment: Alignment.centerRight,
             child: Row(
@@ -70,37 +69,38 @@ class _EditHeaderState extends State<EditHeader> {
                         width: widget.width,
                         backgroundColor: Colors.redAccent),
                     const SizedBox(width: 10),
-                    ButtonWithIcon(
-                        text: 'close',
-                        icon: Icons.cancel,
-                        onPressed: () {
-                          if(widget.savingState == SavingState.saving) {
-                            return;
-                          }
-                          BlocProvider.of<NavigationBloc>(context)
-                              .add(NavigatorPopDialogEvent());
-                        },
-                        width: widget.width,
-                        backgroundColor: Colors.white,
-                        textColor: Colors.black,
-                        iconColor: Colors.black),
-                    const SizedBox(width: 10),
                   ],
                 ),
-                Visibility(
-                    visible: widget.savingState == SavingState.saving,
-                    child:
-                    const IconSpinner(
-                      icon: Icons.sync,
-                      isSpinning: true,  // change it to true or false
-                    )),
-                Visibility(
-                    visible: widget.savingState == SavingState.success,
-                    child: const Icon(Icons.done, color: Colors.green)),
-                Visibility(
-                    visible: widget.savingState == SavingState.error,
-                    child: const Icon(Icons.error, color: Colors.red))
+                Align(
+                    alignment: Alignment.centerRight,
+                    child: SyncingIcon(savingState: widget.savingState)),
               ],
             ));
   }
 }
+
+class SyncingIcon extends StatelessWidget {
+
+  const SyncingIcon({Key key, this.savingState}) : super(key: key);
+
+  final SavingState savingState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (savingState == SavingState.saving) {
+      return const IconSpinner(
+          icon: Icons.sync,
+          isSpinning: true,  // change it to true or false
+        );
+    }
+    if (savingState == SavingState.success) {
+      return const Icon(Icons.done, color: Colors.green);
+    }
+    if (savingState == SavingState.error) {
+      return const Icon(Icons.error, color: Colors.red);
+    }
+
+    return Container();
+  }
+}
+
