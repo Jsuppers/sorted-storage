@@ -31,7 +31,7 @@ class DialogService {
     FilePicker.platform
         .pickFiles(
             type: FileType.media, allowMultiple: true, withReadStream: true)
-        .then((file) => {
+        .then((FilePickerResult file) => {
               if (file != null && file.files != null && file.files.isNotEmpty)
                 {
                   showDialog(

@@ -56,7 +56,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
             data: SavingState.saving));
         final bool mainEvent =
             Prop.Property.getValueOrDefault(event.mainEvent, false);
-        String error = await _createEventFolder(event.parentID, mainEvent);
+        final String error =
+        await _createEventFolder(event.parentID, mainEvent);
         if (error == null) {
           add(const EditorEvent(EditorType.syncingState,
               data: SavingState.success));
@@ -67,7 +68,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         break;
       case EditorType.uploadImages:
         imageIndexesToIgnore = <int>[];
-        uploadImages(
+        _uploadImages(
           event.data as Map<String, StoryMedia>,
           event.folderID,
           event.parentID,
@@ -123,7 +124,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
           eventData.timestamp = timestamp;
           add(const EditorEvent(EditorType.syncingState,
               data: SavingState.success));
-          yield EditorState(EditorType.updateTimestamp);
+          yield const EditorState(EditorType.updateTimestamp);
         } catch (e) {
           add(const EditorEvent(EditorType.syncingState,
               data: SavingState.error));
@@ -274,15 +275,15 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     }
   }
 
-  Future<void> uploadImages(
+  Future<void> _uploadImages(
       Map<String, StoryMedia> images, String folderID, String parentID) async {
-    List<MapEntry<String, StoryMedia>> entries = images.entries.toList();
+    final List<MapEntry<String, StoryMedia>> entries = images.entries.toList();
     final int length = entries.length;
     bool errors = false;
     for (int i = 0; i < length; i++) {
       final MapEntry<String, StoryMedia> entry = entries[i];
       try {
-        await uploadImage(i, entry.key, entry.value, folderID, parentID);
+        await _uploadImage(i, entry.key, entry.value, folderID, parentID);
       } catch (e) {
         errors = true;
         add(EditorEvent(EditorType.uploadStatus,
@@ -299,7 +300,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     }
   }
 
-  Future<void> uploadImage(
+  Future<void> _uploadImage(
     int index,
     String name,
     StoryMedia storyMedia,

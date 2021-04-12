@@ -29,7 +29,9 @@ class StoryComments {
   /// list of all comments
   List<StoryComment> comments;
 
+  /// convert comments to json file
   Map<String, dynamic> toJson() {
+    // ignore: always_specify_types
     return {
       'c': comments,
     };

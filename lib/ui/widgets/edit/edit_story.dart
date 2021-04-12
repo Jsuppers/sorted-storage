@@ -214,14 +214,14 @@ class _EditStoryContentState extends State<EditStoryContent> {
                             child: Container(
                               height: 34,
                               width: 34,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(40))),
                               child: IconButton(
                                 iconSize: 18,
                                 splashRadius: 18,
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.clear,
                                   color: Colors.redAccent,
                                   size: 18,

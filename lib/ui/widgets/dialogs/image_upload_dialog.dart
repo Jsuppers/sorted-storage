@@ -31,7 +31,7 @@ class ImageUploadDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-          Map<String, StoryMedia> images = {};
+          final Map<String, StoryMedia> images = <String, StoryMedia>{};
           for (int i = 0; i < file.files.length; i++) {
             final PlatformFile element = file.files[i];
             final String mime = lookupMimeType(element.name);
@@ -59,8 +59,8 @@ class ImageUploadDialog extends StatelessWidget {
               child: ResponsiveBuilder(
                 builder: (BuildContext context, SizingInformation constraints) {
                   return Column(
-                    children: [
-                      Container(
+                    children: <Widget>[
+                      SizedBox(
                         height: constraints.localWidgetSize.height - 50,
                         width: constraints.localWidgetSize.width,
                         child: SingleChildScrollView(

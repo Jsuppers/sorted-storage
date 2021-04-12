@@ -13,14 +13,16 @@ main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   test(
-    'Given a empty images map When a getThumbnail request is made than we should return before requesting the file',
+    'Given a empty images map When a getThumbnail request '
+    'is made than we should return before requesting the file',
     () async {
-      MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
+      final MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
 
-      String folderID = "mockFolder";
-      String imageKey = "mockKey";
-      Map<String, StoryMedia> images = Map();
-      Map<String, List<String>> uploadingImages = Map();
+      const String folderID = 'mockFolder';
+      const String imageKey = 'mockKey';
+      final Map<String, StoryMedia> images = <String, StoryMedia>{};
+      final Map<String, List<String>> uploadingImages =
+          <String, List<String>>{};
       Function successCallback = () {};
 
       await RetryService.getThumbnail(mockGoogleDrive, folderID, imageKey,
@@ -34,12 +36,13 @@ main() {
   test(
     'Given tries is 0 When a getThumbnail request is made than return',
     () async {
-      MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
+      final MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
 
-      String folderID = "mockFolder";
-      String imageKey = "mockKey";
-      Map<String, StoryMedia> images = Map();
-      Map<String, List<String>> uploadingImages = Map();
+      const String folderID = 'mockFolder';
+      const String imageKey = 'mockKey';
+      final Map<String, StoryMedia> images = <String, StoryMedia>{};
+      final Map<String, List<String>> uploadingImages =
+          <String, List<String>>{};
       Function successCallback = () {};
 
       await RetryService.getThumbnail(mockGoogleDrive, folderID, imageKey,
@@ -52,31 +55,33 @@ main() {
   );
 
   test(
-    'Given a second retry When the second request has a thumbnail link than return',
+    'Given a second retry When the second '
+    'request has a thumbnail link than return',
     () async {
-      MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
+      final MockGoogleDrive mockGoogleDrive = MockGoogleDrive();
 
-      String expectedLink = "mockLink";
-      String folderID = "mockFolder";
-      String imageKey = "mockKey";
-      Map<String, StoryMedia> images = Map();
-      StoryMedia storyMedia = StoryMedia();
+      const String expectedLink = 'mockLink';
+      const String folderID = 'mockFolder';
+      const String imageKey = 'mockKey';
+      final Map<String, StoryMedia> images = <String, StoryMedia>{};
+      final StoryMedia storyMedia = StoryMedia();
       images.putIfAbsent(imageKey, () => storyMedia);
-      Map<String, List<String>> uploadingImages = Map();
+      final Map<String, List<String>> uploadingImages =
+          <String, List<String>>{};
       bool successCalled = false;
       Function successCallback = () {
         successCalled = true;
       };
 
-      File firstResponse = File();
+      final File firstResponse = File();
       firstResponse.hasThumbnail = false;
-      File secondResponse = File();
+      final File secondResponse = File();
       secondResponse.hasThumbnail = true;
       secondResponse.thumbnailLink = expectedLink;
-      var answers = [firstResponse, secondResponse];
+      final List<File> answers = <File>[firstResponse, secondResponse];
       when(mockGoogleDrive.getFile(imageKey,
               filter: 'id,hasThumbnail,thumbnailLink'))
-          .thenAnswer((_) => Future.value(answers.removeAt(0)));
+          .thenAnswer((_) => Future<File>.value(answers.removeAt(0)));
 
       await RetryService.getThumbnail(mockGoogleDrive, folderID, imageKey,
           images, uploadingImages, successCallback);
@@ -90,14 +95,16 @@ main() {
   );
 
   test(
-    'Given a checkNeedsRefreshing request When value stays null than successCallback does not get called',
+    'Given a checkNeedsRefreshing request'
+    ' When value stays null than successCallback does not get called',
     () async {
-      String folderID = "mockFolderID";
-      String imageKey = "mockImageKey";
-      Map<String, List<String>> uploadingImages = Map();
-      StoryContent localCopy = StoryContent();
-      Map<String, StoryMedia> images = Map();
-      StoryMedia storyMedia = StoryMedia();
+      const String folderID = 'mockFolderID';
+      const String imageKey = 'mockImageKey';
+      final Map<String, List<String>> uploadingImages =
+          <String, List<String>>{};
+      final StoryContent localCopy = StoryContent();
+      final Map<String, StoryMedia> images = <String, StoryMedia>{};
+      final StoryMedia storyMedia = StoryMedia();
       images.putIfAbsent(imageKey, () => storyMedia);
       localCopy.images = images;
       bool successCalled = false;
@@ -114,15 +121,17 @@ main() {
   );
 
   test(
-    'Given a checkNeedsRefreshing request When image has url than successCallback gets called',
+    'Given a checkNeedsRefreshing request '
+    'When image has url than successCallback gets called',
     () async {
-      String folderID = "mockFolderID";
-      String imageKey = "mockImageKey";
-      Map<String, List<String>> uploadingImages = Map();
-      StoryContent localCopy = StoryContent();
-      Map<String, StoryMedia> images = Map();
-      StoryMedia storyMedia = StoryMedia();
-      storyMedia.thumbnailURL = "validImageURL";
+      const String folderID = 'mockFolderID';
+      const String imageKey = 'mockImageKey';
+      final Map<String, List<String>> uploadingImages =
+          <String, List<String>>{};
+      final StoryContent localCopy = StoryContent();
+      final Map<String, StoryMedia> images = <String, StoryMedia>{};
+      final StoryMedia storyMedia = StoryMedia();
+      storyMedia.thumbnailURL = 'validImageURL';
       images.putIfAbsent(imageKey, () => storyMedia);
       localCopy.images = images;
       bool successCalled = false;

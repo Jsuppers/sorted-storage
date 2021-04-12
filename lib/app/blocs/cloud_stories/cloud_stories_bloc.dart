@@ -56,7 +56,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     if (folderID != null) {
       if (_cloudStories.isEmpty || _cloudStories[folderID] == null) {
         _getViewEvent(folderID).then(
-                (data) =>
+                (StoryTimelineData data) =>
                 add(CloudStoriesEvent(CloudStoriesType.refresh,
                     folderID: folderID, storyTimelineData: data)),
             onError: (dynamic error) =>
@@ -98,7 +98,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             .then((StoryContent mainEvent) async {
           final List<StoryContent> subEvents = <StoryContent>[];
           for (final SubEvent subEvent in mainEvent.subEvents) {
-            StoryContent subStoryContent =
+            final StoryContent subStoryContent =
             await _createEventFromFolder(subEvent.id, subEvent.timestamp);
             subEvents.add(subStoryContent);
           }
