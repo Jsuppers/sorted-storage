@@ -6,10 +6,10 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/routing_data.dart';
+import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
@@ -17,6 +17,7 @@ import 'package:web/ui/navigation/navigation_bar/navigation.dart';
 import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:web/ui/widgets/sync_icon.dart';
 
 /// layout widget
 class LayoutWrapper extends StatelessWidget {
@@ -73,13 +74,13 @@ class LayoutWrapper extends StatelessWidget {
 /// content styling
 class Content extends StatefulWidget {
   // ignore: public_member_api_docs
-  const Content({
-    Key key,
-    @required this.widget,
-    this.includeNavigation = true,
-    this.showAddButton,
-    this.routingData
-  }) : super(key: key);
+  const Content(
+      {Key key,
+      @required this.widget,
+      this.includeNavigation = true,
+      this.showAddButton,
+      this.routingData})
+      : super(key: key);
 
   /// main widget
   final Widget widget;
@@ -89,7 +90,6 @@ class Content extends StatefulWidget {
 
   /// ability to add a story
   final bool showAddButton;
-
 
   /// the targeted route
   final RoutingData routingData;
@@ -134,24 +134,55 @@ class _ContentState extends State<Content> {
       ),
       floatingActionButton: Visibility(
         visible: widget.showAddButton,
-        child: FloatingActionButton(
-          onPressed: () {
+        child: ActionButton(),
+      ),
+    );
+  }
+}
 
-            // StaticLoadingLogo()
+class ActionButton extends StatefulWidget {
+  @override
+  _ActionButtonState createState() => _ActionButtonState();
+}
 
-            final String mediaFile =
-                BlocProvider.of<CloudStoriesBloc>(context).currentMediaFileId;
-            BlocProvider.of<EditorBloc>(context)
-                .add(EditorEvent(EditorType.createStory,
-                parentID: mediaFile,
-            mainEvent: true));
-          },
-          backgroundColor: myThemeData.primaryColorDark,
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
-        ),
+class _ActionButtonState extends State<ActionButton> {
+  bool saving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<EditorBloc, EditorState>(
+      listener: (BuildContext context, EditorState state) {
+        if (state.type == EditorType.syncingState) {
+          setState(() {
+            saving = state.data == SavingState.saving;
+          });
+        }
+      },
+      child: FloatingActionButton(
+        onPressed: () {
+          if (saving == true) {
+            return;
+          }
+          setState(() {
+            saving = true;
+          });
+          final String mediaFile =
+              BlocProvider.of<CloudStoriesBloc>(context).currentMediaFileId;
+          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+              EditorType.createStory,
+              parentID: mediaFile,
+              mainEvent: true));
+        },
+        backgroundColor: myThemeData.primaryColorDark,
+        child: saving
+            ? const IconSpinner(
+                icon: Icons.sync,
+                isSpinning: true, // change it to true or false
+              )
+            : const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
       ),
     );
   }

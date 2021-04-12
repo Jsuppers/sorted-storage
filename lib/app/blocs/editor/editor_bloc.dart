@@ -52,10 +52,18 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
   Stream<EditorState> mapEventToState(EditorEvent event) async* {
     switch (event.type) {
       case EditorType.createStory:
+        add(const EditorEvent(EditorType.syncingState,
+            data: SavingState.saving));
         final bool mainEvent =
             Prop.Property.getValueOrDefault(event.mainEvent, false);
         String error = await _createEventFolder(event.parentID, mainEvent);
-        yield EditorState(EditorType.createStory, error: error);
+        if (error == null) {
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.success));
+        } else {
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.error));
+        }
         break;
       case EditorType.uploadImages:
         imageIndexesToIgnore = <int>[];
