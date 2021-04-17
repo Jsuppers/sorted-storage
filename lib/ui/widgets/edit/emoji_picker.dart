@@ -122,6 +122,7 @@ class EmojiPickerState extends State<EmojiPicker> {
                 EditorType.updateMetadata,
                 parentID: widget.parentID,
                 folderID: widget.folderID,
+                refreshUI: true,
                 data: widget.metadata));
             BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
           },

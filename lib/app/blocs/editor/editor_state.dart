@@ -7,7 +7,8 @@ class EditorState {
       {this.parentID,
         this.folderID,
         this.error,
-        this.data});
+        this.data,
+        this.refreshUI = false});
 
   /// represents which story this event is for, this can also be a sub event
   final String folderID;
@@ -19,6 +20,9 @@ class EditorState {
   final EditorType type;
 
   final dynamic data;
+
+  /// should refresh ui after save
+  final bool refreshUI;
 
   /// error message to pass on to the front end
   final String error;

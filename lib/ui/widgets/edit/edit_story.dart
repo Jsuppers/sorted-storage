@@ -151,9 +151,10 @@ class _EditStoryContentState extends State<EditStoryContent> {
             BlocListener<EditorBloc, EditorState>(
               listener: (BuildContext context, EditorState state) {
                 if (state.type == EditorType.syncingState) {
-                  setState(() {
-                    savingState = state.data as SavingState;
-                  });
+                  savingState   = state.data as SavingState;
+                  if(state.refreshUI) {
+                    setState(() {});
+                  }
                 }
                 if (state.type == EditorType.deleteImage) {
                   setState(() {
@@ -293,8 +294,6 @@ class _TimelineEventCardState extends State<EventCard> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   DateTime selectedDate;
-  final GlobalKey _formKey = GlobalKey<FormState>();
-  final DateFormat formatter = DateFormat('dd MMMM, yyyy');
   String formattedDate;
   List<String> uploadingImages;
   Timer _debounce;
@@ -310,7 +309,7 @@ class _TimelineEventCardState extends State<EventCard> {
     super.initState();
     selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.story.timestamp);
     uploadingImages = <String>[];
-    formattedDate = formatter.format(selectedDate);
+    formattedDate = DateFormat('dd MMMM, yyyy').format(selectedDate);
   }
 
   Widget title(String text) {
@@ -320,7 +319,7 @@ class _TimelineEventCardState extends State<EventCard> {
   Widget emoji() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         title('Emoji'),
         MaterialButton(
           minWidth: 40,
@@ -350,7 +349,7 @@ class _TimelineEventCardState extends State<EventCard> {
   Widget timeStamp() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         title('Date'),
         Container(
           padding: EdgeInsets.zero,

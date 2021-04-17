@@ -4,8 +4,6 @@ enum EditorType {
   updateTimestamp,
   createStory,
   deleteStory,
-  syncingStart,
-  syncingEnd,
   syncingState,
   /// delete a image
   deleteImage,

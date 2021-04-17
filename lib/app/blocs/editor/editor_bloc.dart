@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
@@ -52,18 +51,18 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
   Stream<EditorState> mapEventToState(EditorEvent event) async* {
     switch (event.type) {
       case EditorType.createStory:
-        add(const EditorEvent(EditorType.syncingState,
-            data: SavingState.saving));
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
         final bool mainEvent =
             Prop.Property.getValueOrDefault(event.mainEvent, false);
         final String error =
-        await _createEventFolder(event.parentID, mainEvent);
+            await _createEventFolder(event.parentID, mainEvent);
         if (error == null) {
-          add(const EditorEvent(EditorType.syncingState,
-              data: SavingState.success));
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.success, refreshUI: event.refreshUI));
         } else {
-          add(const EditorEvent(EditorType.syncingState,
-              data: SavingState.error));
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.error, refreshUI: event.refreshUI));
         }
         break;
       case EditorType.uploadImages:
@@ -94,52 +93,61 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         }
         break;
       case EditorType.deleteImage:
-        add(const EditorEvent(EditorType.syncingState,
-            data: SavingState.saving));
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
         final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _cloudStories);
         final String error = await _deleteFile(event.data as String);
         if (error == null) {
           eventData.images.remove(event.data);
-          add(const EditorEvent(EditorType.syncingState,
-              data: SavingState.success));
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.success, refreshUI: event.refreshUI));
           yield EditorState(EditorType.deleteImage, data: event.data);
         } else {
-          add(const EditorEvent(EditorType.syncingState,
-              data: SavingState.error));
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.error, refreshUI: event.refreshUI));
         }
         break;
 
       case EditorType.syncingState:
-        yield EditorState(EditorType.syncingState, data: event.data);
+        yield EditorState(EditorType.syncingState,
+            data: event.data, refreshUI: event.refreshUI);
         break;
       case EditorType.updateTimestamp:
-        add(const EditorEvent(EditorType.syncingState,
-            data: SavingState.saving));
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
         final StoryContent eventData = TimelineService.getStoryWithFolderID(
             event.parentID, event.folderID, _cloudStories);
         final int timestamp = event.data as int;
         try {
           await _storage.updateEventFolderTimestamp(event.folderID, timestamp);
           eventData.timestamp = timestamp;
-          add(const EditorEvent(EditorType.syncingState,
-              data: SavingState.success));
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.success, refreshUI: event.refreshUI));
           yield const EditorState(EditorType.updateTimestamp);
         } catch (e) {
-          add(const EditorEvent(EditorType.syncingState,
-              data: SavingState.error));
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.error, refreshUI: event.refreshUI));
         }
         break;
       case EditorType.updateMetadata:
-        add(const EditorEvent(EditorType.syncingState,
-            data: SavingState.saving));
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
         _uploadSettingsFile(
-            event.folderID, event.parentID, event.data as StoryMetadata);
+                event.folderID, event.parentID, event.data as StoryMetadata)
+            .then((value) => {
+                  add(EditorEvent(EditorType.syncingState,
+                      data: SavingState.success, refreshUI: event.refreshUI))
+                });
         break;
       case EditorType.updateImagePosition:
-        add(const EditorEvent(EditorType.syncingState,
-            data: SavingState.saving));
-        _updatePosition(event.data as List<StoryImage>, event.parentID);
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
+        _updatePosition(event.data as List<StoryImage>, event.parentID)
+            .then((value) => {
+                  add(EditorEvent(EditorType.syncingState,
+                      data: SavingState.success, refreshUI: event.refreshUI))
+                });
         break;
 //      case CloudStoriesType.deleteImage:
 //        final StoryContent eventData = TimelineService.getStoryWithFolderID(
@@ -211,14 +219,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       TimelineService.updateImage(images[i].imageKey,
           images[i].storyMedia.index, _cloudStories[parentID]);
     }
-    add(const EditorEvent(EditorType.syncingState,
-        data: SavingState.success));
   }
 
   Future<String> _uploadSettingsFile(
       String folderId, String parentId, StoryMetadata metadata) async {
-    final String jsonString = jsonEncode(metadata);
-    final List<int> fileContent = utf8.encode(jsonString);
+    final List<int> fileContent = utf8.encode(jsonEncode(metadata));
     final Stream<List<int>> mediaStream =
         Future<List<int>>.value(fileContent).asStream().asBroadcastStream();
 
@@ -235,8 +240,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       final StoryContent eventData = TimelineService.getStoryWithFolderID(
           parentId, folderId, _cloudStories);
       eventData.metadata = metadata;
-      add(const EditorEvent(EditorType.syncingState,
-          data: SavingState.success));
       return null;
     } catch (e) {
       return 'Sorry! Could not update';
