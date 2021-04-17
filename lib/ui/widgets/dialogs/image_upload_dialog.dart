@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,11 +12,12 @@ import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/story_media.dart';
+import 'package:web/ui/helpers/text_display.dart';
 
 /// image upload dialog
 class ImageUploadDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ImageUploadDialog({Key key, this.folderID, this.parentID, this.file })
+  const ImageUploadDialog({Key key, this.folderID, this.parentID, this.file})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -31,82 +30,81 @@ class ImageUploadDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-          final Map<String, StoryMedia> images = <String, StoryMedia>{};
-          for (int i = 0; i < file.files.length; i++) {
-            final PlatformFile element = file.files[i];
-            final String mime = lookupMimeType(element.name);
+    final Map<String, StoryMedia> images = <String, StoryMedia>{};
+    for (int i = 0; i < file.files.length; i++) {
+      final PlatformFile element = file.files[i];
+      final String mime = lookupMimeType(element.name);
 
-            final StoryMedia media = StoryMedia(
-                stream: element.readStream,
-                contentSize: element.size,
-                isVideo: mime.startsWith('video/'),
-                isDocument:
-                !mime.startsWith('video/') && !mime.startsWith('image/'));
-            images.putIfAbsent(element.name, () => media);
-          }
-          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-              EditorType.uploadImages,
-              parentID: parentID,
-              folderID: folderID,
-              data: images));
+      final StoryMedia media = StoryMedia(
+          name: element.name,
+          stream: element.readStream,
+          contentSize: element.size,
+          isVideo: mime.startsWith('video/'),
+          isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
+      images.putIfAbsent(element.name, () => media);
+    }
+    BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+        EditorType.uploadImages,
+        parentID: parentID,
+        folderID: folderID,
+        data: images));
 
-          return Dialog(
-            shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(4.0))),
-            elevation: 1,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ResponsiveBuilder(
-                builder: (BuildContext context, SizingInformation constraints) {
-                  return Column(
+    return Dialog(
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ResponsiveBuilder(
+          builder: (BuildContext context, SizingInformation constraints) {
+            return Column(
+              children: <Widget>[
+                SizedBox(
+                  height: constraints.localWidgetSize.height - 50,
+                  width: constraints.localWidgetSize.width,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        for (int i = 0; i < images.keys.length; i++)
+                          ImageUpload(
+                            name: images.keys.elementAt(i),
+                            index: i,
+                          )
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      SizedBox(
-                        height: constraints.localWidgetSize.height - 50,
-                        width: constraints.localWidgetSize.width,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical, //.horizontal
-                          child: Column(
-                            children: [
-                              for (int i = 0; i < images.keys.length; i++)
-                                ImageUpload(
-                                  name: images.keys.elementAt(i),
-                                  index: i,
-                                )
+                      MaterialButton(
+                          minWidth: 100,
+                          color: Colors.white,
+                          textColor: Colors.black,
+                          onPressed: () =>
+                              BlocProvider.of<NavigationBloc>(context)
+                                  .add(NavigatorPopEvent()),
+                          child: Row(
+                            children: const <Widget>[
+                              Icon(
+                                Icons.cancel,
+                                color: Colors.black,
+                              ),
+                              SizedBox(width: 5),
+                              Text('cancel'),
                             ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            MaterialButton(
-                                minWidth: 100,
-                                color: Colors.white,
-                                textColor: Colors.black,
-                                onPressed: () =>
-                                    BlocProvider.of<NavigationBloc>(context)
-                                        .add(NavigatorPopEvent()),
-                                child: Row(
-                                  children: const <Widget>[
-                                    Icon(
-                                      Icons.cancel,
-                                      color: Colors.black,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text('cancel'),
-                                  ],
-                                )),
-                          ],
-                        ),
-                      ),
+                          )),
                     ],
-                  );
-                },
-              ),
-            ),
-          );
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -126,7 +124,6 @@ class _ImageUploadState extends State<ImageUpload> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     percent = 0;
   }
@@ -145,9 +142,9 @@ class _ImageUploadState extends State<ImageUpload> {
     }
 
     return BlocListener<EditorBloc, EditorState>(
-      listener: (context, state) {
+      listener: (BuildContext context, EditorState state) {
         if (state.type == EditorType.uploadStatus) {
-          MediaProgress progress = state.data as MediaProgress;
+          final MediaProgress progress = state.data as MediaProgress;
           if (progress.index == widget.index) {
             if (state.error != null) {
               setState(() {
@@ -164,39 +161,35 @@ class _ImageUploadState extends State<ImageUpload> {
       },
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Text(
-              widget.name,
+              TextDisplay.shortenFilename(widget.name),
               style: TextStyle(
                 fontSize: 16.0,
                 color: progressColor,
               ),
             ),
             const SizedBox(width: 20),
-            if (error == true) Icon(
-                Icons.error_outline, color: progressColor, size: 16) else
+            if (error == true)
+              Icon(Icons.error_outline, color: progressColor, size: 16)
+            else
               percent == 1
                   ? Icon(Icons.check, color: progressColor, size: 16)
                   : CircularPercentIndicator(
-                radius: 28.0,
-                lineWidth: 5.0,
-                percent: percent,
-                center: IconButton(
-                    icon: Icon(Icons.close, color: progressColor, size: 12),
-                    onPressed: () => {
-
-                    BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                    EditorType.ignoreImage,
-                    data: widget.index))
-                }
-
-
-                ),
-                circularStrokeCap: CircularStrokeCap.round,
-                progressColor: progressColor,
-                backgroundColor: Colors.grey[200],
-              ),
+                      radius: 28.0,
+                      percent: percent,
+                      center: IconButton(
+                          icon:
+                              Icon(Icons.close, color: progressColor, size: 12),
+                          onPressed: () => {
+                                BlocProvider.of<EditorBloc>(context).add(
+                                    EditorEvent(EditorType.ignoreImage,
+                                        data: widget.index))
+                              }),
+                      circularStrokeCap: CircularStrokeCap.round,
+                      progressColor: progressColor,
+                      backgroundColor: Colors.grey[200],
+                    ),
           ]),
     );
   }

@@ -36,4 +36,7 @@ class Constants {
 
   /// minimum width of a screen
   static const double minScreenWidth = 600;
+
+  /// maximum size of a filename (for the ui so it doesn't overflow)
+  static const int maxFileName = 30;
 }

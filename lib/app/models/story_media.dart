@@ -2,12 +2,15 @@
 class StoryMedia {
   // ignore: public_member_api_docs
   StoryMedia({
+    this.fileID,
     this.thumbnailURL,
     this.stream,
     this.isVideo = false,
     this.isDocument = false,
     this.contentSize,
     this.index = highIntValue,
+    this.name,
+    this.retrieveThumbnail = false,
   });
 
   /// clone the media file
@@ -17,17 +20,29 @@ class StoryMedia {
         isVideo = media.isVideo,
         isDocument = media.isDocument,
         contentSize = media.contentSize,
+        retrieveThumbnail = media.retrieveThumbnail,
+        fileID = media.fileID,
+        name = media.name,
         index = media.index;
 
   /// and index which will ensure the media without an index will be at the end
   /// of the list hopefully no one uploads this much media in one story..
   static const int highIntValue = 65536;
 
+  /// name of the file
+  String name;
+
+  /// id of this file
+  String fileID;
+
   /// the url for the thumbnail
   String thumbnailURL;
 
   /// if this media is a video
   bool isVideo;
+
+  /// should retrieve the thumbnail
+  bool retrieveThumbnail;
 
   /// if this media is a document
   bool isDocument;

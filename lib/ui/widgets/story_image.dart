@@ -1,39 +1,46 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/models/story_media.dart';
+import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/ui/widgets/loading.dart';
+import 'package:web/ui/widgets/media_card.dart';
 
 /// image in the story
 class StoryImage extends StatefulWidget {
   // ignore: public_member_api_docs
   const StoryImage(
       {Key key,
-        this.locked,
-        this.uploadingImages,
-        this.storyMedia,
-        this.imageKey,
-        this.storyFolderID,
-        this.folderID})
+      this.locked,
+      this.uploadingImages,
+      this.storyMedia,
+      this.imageKey,
+      this.storyFolderID,
+      this.folderID})
       : super(key: key);
 
   // ignore: public_member_api_docs
   final bool locked;
+
   // ignore: public_member_api_docs
   final List<String> uploadingImages;
+
   // ignore: public_member_api_docs
   final StoryMedia storyMedia;
+
   // ignore: public_member_api_docs
   final String imageKey;
+
   // ignore: public_member_api_docs
   final String storyFolderID;
+
   // ignore: public_member_api_docs
   final String folderID;
-
 
   @override
   _StoryImageState createState() => _StoryImageState();
@@ -42,37 +49,30 @@ class StoryImage extends StatefulWidget {
 class _StoryImageState extends State<StoryImage> {
   @override
   Widget build(BuildContext context) {
-    return imageWidget(widget.imageKey, widget.storyMedia);
-  }
-
-  Widget imageWidget(String imageKey, StoryMedia media) {
-    final bool showPlaceholder = media.thumbnailURL == null;
-    return RawMaterialButton(
-      onPressed: () {
-        if (widget.locked) {
-          URLService.openDriveMedia(imageKey);
-        }
-      },
-      child: showPlaceholder
-          ? _backgroundImage(showPlaceholder, imageKey, media, null)
-          : SizedBox(
-              height: widget.locked == false ? 80 : 150.0,
-              width: widget.locked == false ? 80 : 150.0,
-              child: CachedNetworkImage(
-                imageUrl: media.thumbnailURL,
-                placeholder: (BuildContext context, String url) =>
-                    StaticLoadingLogo(),
-                errorWidget:
-                    (BuildContext context, String url, dynamic error) =>
-                        _backgroundImage(showPlaceholder, imageKey, media,
-                            const AssetImage('assets/images/error.png')),
-                imageBuilder: (BuildContext context,
-                        ImageProvider<Object> image) =>
-                    _backgroundImage(showPlaceholder, imageKey, media, image),
-              ),
-            ),
+    return RetryMediaWidget(
+      folderId: widget.folderID,
+      locked: widget.locked,
+      media: widget.storyMedia,
+      storyFolderID: widget.storyFolderID,
     );
   }
+}
+
+class RetryMediaWidget extends StatefulWidget {
+  RetryMediaWidget({this.folderId, this.locked, this.media, this.storyFolderID})
+      : super();
+
+  @override
+  _RetryMediaWidgetState createState() => _RetryMediaWidgetState();
+
+  String folderId;
+  StoryMedia media;
+  bool locked;
+  String storyFolderID;
+}
+
+class _RetryMediaWidgetState extends State<RetryMediaWidget> {
+  bool showPlaceholder;
 
   Widget _backgroundImage(bool showPlaceholder, String imageKey,
       StoryMedia media, ImageProvider image) {
@@ -86,21 +86,18 @@ class _StoryImageState extends State<StoryImage> {
             : DecorationImage(image: image, fit: BoxFit.cover),
       ),
       child: !widget.locked
-          ? _createEditControls(imageKey, showPlaceholder)
-          : _createNonEditControls(imageKey, showPlaceholder, media),
+          ? _createEditControls(
+          widget.media.fileID,
+          widget.media.name,
+          showPlaceholder)
+          : _createNonEditControls(widget.media.fileID, showPlaceholder, media),
     );
   }
 
   Widget _createNonEditControls(
       String imageKey, bool showPlaceholder, StoryMedia media) {
     if (showPlaceholder) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Icon(Icons.insert_drive_file),
-          Center(child: Text(imageKey)),
-        ],
-      );
+      return MediaCard(media);
     }
     if (!media.isVideo && !media.isDocument) {
       return Container();
@@ -124,11 +121,8 @@ class _StoryImageState extends State<StoryImage> {
     );
   }
 
-  Widget _createEditControls(String imageKey, bool showPlaceholder) {
+  Widget _createEditControls(String imageKey, String imagename, bool showPlaceholder) {
     return Container(
-      color: widget.uploadingImages.contains(imageKey)
-          ? Colors.white.withOpacity(0.5)
-          : null,
       child: Column(
         children: <Widget>[
           Align(
@@ -144,42 +138,77 @@ class _StoryImageState extends State<StoryImage> {
                   child: IconButton(
                     iconSize: 18,
                     splashRadius: 18,
-                    icon: Icon(Icons.clear,
+                    icon: const Icon(
+                      Icons.clear,
                       color: Colors.redAccent,
                       size: 18,
                     ),
                     onPressed: () {
-                      BlocProvider.of<EditorBloc>(context).add(
-                          EditorEvent(EditorType.deleteImage,
-                              folderID: widget.folderID,
-                              data: imageKey,
-                              parentID: widget.storyFolderID));
-
+                      BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                          EditorType.deleteImage,
+                          folderID: widget.folderId,
+                          data: imageKey,
+                          parentID: widget.storyFolderID));
                     },
                   ),
                 ),
               )),
           Column(children: <Widget>[
-            if (widget.uploadingImages.contains(imageKey))
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: StaticLoadingLogo(),
-              )
-            else
-              Container(),
             if (showPlaceholder)
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(Icons.insert_drive_file),
-                  Center(child: Text(imageKey)),
-                ],
-              )
+              MediaCard(widget.media)
             else
               Container()
           ])
         ],
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+        future: RetryService.getThumbnail(
+          BlocProvider.of<CloudStoriesBloc>(context).storage,
+          widget.media.thumbnailURL,
+          widget.folderId,
+          widget.media.fileID,
+          retrieveThumbnail: widget.media.retrieveThumbnail,
+        ),
+        builder: (BuildContext context, AsyncSnapshot<String> thumbnailURL) {
+          showPlaceholder = thumbnailURL.data == null;
+          return RawMaterialButton(
+            onPressed: () {
+              if (widget.locked) {
+                URLService.openDriveMedia(widget.media.fileID);
+              }
+            },
+            child: showPlaceholder
+                ? _backgroundImage(
+                    showPlaceholder, widget.media.fileID, widget.media, null)
+                : SizedBox(
+                    height: widget.locked == false ? 80 : 150.0,
+                    width: widget.locked == false ? 80 : 150.0,
+                    child: thumbnailURL.data == null
+                        ? StaticLoadingLogo()
+                        : CachedNetworkImage(
+                            imageUrl: thumbnailURL.data,
+                            placeholder: (BuildContext context, String url) =>
+                                StaticLoadingLogo(),
+                            errorWidget: (BuildContext context, String url,
+                                    dynamic error) =>
+                                _backgroundImage(
+                                    showPlaceholder,
+                                    widget.media.fileID,
+                                    widget.media,
+                                    const AssetImage(
+                                        'assets/images/error.png')),
+                            imageBuilder: (BuildContext context,
+                                    ImageProvider<Object> image) =>
+                                _backgroundImage(showPlaceholder,
+                                    widget.media.fileID, widget.media, image),
+                          ),
+                  ),
+          );
+        });
   }
 }

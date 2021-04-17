@@ -69,9 +69,6 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (BuildContext context, CloudStoriesState state) {
         if (state.type == CloudStoriesType.refresh) {
-
-          print('refresh');
-          print(_timelineData.length);
           if (state.error != null) {
             final SnackBar snackBar = SnackBar(
               content: Text(state.error, textAlign: TextAlign.center),
