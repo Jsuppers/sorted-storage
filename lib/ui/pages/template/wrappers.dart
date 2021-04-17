@@ -8,6 +8,8 @@ import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/blocs/navigation/navigation_bloc.dart';
+import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
@@ -61,6 +63,9 @@ class LayoutWrapper extends StatelessWidget {
           widget: redirectWidget,
           showAddButton: showAddButton,
         );
+      }
+      if (routingData.route == '/' && user != null) {
+        BlocProvider.of<NavigationBloc>(context).add(NavigateToMediaEvent());
       }
       return Content(
           widget: widget,
@@ -177,6 +182,7 @@ class _ActionButtonState extends State<ActionButton> {
         child: saving
             ? const IconSpinner(
                 icon: Icons.sync,
+                color: Colors.white,
                 isSpinning: true, // change it to true or false
               )
             : const Icon(

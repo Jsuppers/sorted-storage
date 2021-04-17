@@ -27,7 +27,7 @@ linter:
     prefer_single_quotes: true
 
     # Good packages document everything
-    public_member_api_docs: true
+    public_member_api_docs: false
 
     # Blindly follow the Flutter code style, which prefers types everywhere
     always_specify_types: true

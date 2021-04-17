@@ -1,23 +1,26 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
+/// A widget which shows a spinning icon for a duration
 class IconSpinner extends StatefulWidget {
-  final IconData icon;
-
-  final Duration duration;
-  final bool isSpinning;
-
   const IconSpinner({
     Key key,
     @required this.icon,
-    this.duration = const Duration(milliseconds: 1800),
+    this.duration = const Duration(milliseconds: 3600),
     this.isSpinning = false,
+    this.color = Colors.black,
   }) : super(key: key);
+
+  final IconData icon;
+  final Duration duration;
+  final bool isSpinning;
+  final Color color;
 
   @override
   _IconSpinnerState createState() => _IconSpinnerState();
 }
 
-class _IconSpinnerState extends State<IconSpinner> with SingleTickerProviderStateMixin {
+class _IconSpinnerState extends State<IconSpinner>
+    with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Widget _child;
 
@@ -25,20 +28,16 @@ class _IconSpinnerState extends State<IconSpinner> with SingleTickerProviderStat
   void initState() {
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 2000),
+      duration: widget.duration,
     );
-    _child = Icon(widget.icon);
+    _child = Icon(widget.icon, color: widget.color);
 
     super.initState();
   }
 
-  stopRotation() {
-    _controller.stop();
-  }
+  void _stopRotation() => _controller.stop();
+  void _startRotation() => _controller.repeat();
 
-  startRotation() {
-    _controller.repeat();
-  }
 
   @override
   void dispose() {
@@ -48,7 +47,7 @@ class _IconSpinnerState extends State<IconSpinner> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    widget.isSpinning ? startRotation() : stopRotation();
+    widget.isSpinning ? _startRotation() : _stopRotation();
 
     return RotationTransition(
       turns: _controller,
