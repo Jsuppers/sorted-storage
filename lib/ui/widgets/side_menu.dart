@@ -20,9 +20,13 @@ import 'package:web/ui/widgets/usage_indicator.dart';
 
 // ignore: public_member_api_docs
 class AvatarWithMenu extends StatelessWidget {
+
+  const AvatarWithMenu({this.user}): super();
+
+  final User user;
+
   @override
   Widget build(BuildContext context) {
-    final User user = BlocProvider.of<AuthenticationBloc>(context).state;
 
     // ignore: avoid_void_async
     void _showPopupMenu() async {
@@ -32,7 +36,7 @@ class AvatarWithMenu extends StatelessWidget {
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0))),
         context: context,
-        position: const RelativeRect.fromLTRB(double.maxFinite, 120, 24, 0),
+        position: const RelativeRect.fromLTRB(double.maxFinite, 80, 24, 0),
         items: <PopupMenuEntry<dynamic>>[
           PopupMenuItem<dynamic>(
             enabled: false,
@@ -73,7 +77,7 @@ class AvatarWithMenu extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        Avatar(url: user.photoUrl, size: 100.0),
+                        Avatar(url: user.photoUrl, size: 30.0),
                         const SizedBox(height: 10),
                         Text(
                             user.email.toLowerCase().substring(
@@ -123,7 +127,7 @@ class AvatarWithMenu extends StatelessWidget {
         onTap: () {
           _showPopupMenu();
         },
-        child: Avatar(url: user.photoUrl, size: 45.0),
+        child: Avatar(url: user != null ? user.photoUrl : '', size: 30.0),
       ),
     );
   }

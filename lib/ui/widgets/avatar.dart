@@ -19,13 +19,9 @@ class Avatar extends StatefulWidget {
 class _AvatarState extends State<Avatar> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget.size,
-      height: widget.size,
-      decoration: const BoxDecoration(
-        color: Color(0xFFdedee0),
-        shape: BoxShape.circle,
-      ),
+    return
+      CircleAvatar(
+        radius: widget.size,
       child: ClipOval(
           child: CachedNetworkImage(
         imageUrl: widget.url,

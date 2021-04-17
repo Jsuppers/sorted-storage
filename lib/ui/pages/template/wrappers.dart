@@ -15,10 +15,12 @@ import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
-import 'package:web/ui/navigation/navigation_bar/navigation.dart';
+import 'package:web/app/models/user.dart';
+import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
 import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:web/ui/widgets/side_menu.dart';
 import 'package:web/ui/widgets/sync_icon.dart';
 
 /// layout widget
@@ -113,8 +115,22 @@ class _ContentState extends State<Content> {
 
   @override
   Widget build(BuildContext context) {
+    final User user = BlocProvider.of<AuthenticationBloc>(context).state;
     return Scaffold(
       drawer: NavigationDrawer(),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0.0,
+        toolbarHeight: 60,
+        backgroundColor: Colors.transparent,
+        actions: <Widget>[
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: user != null ? AvatarWithMenu(user: user) : NavigationLogin(),
+          )
+
+        ],
+      ),
       body: ResponsiveBuilder(
         builder: (BuildContext context, SizingInformation sizingInformation) =>
             Container(
@@ -125,10 +141,6 @@ class _ContentState extends State<Content> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  if (widget.includeNavigation)
-                    NavigationBar()
-                  else
-                    Container(),
                   widget.widget,
                   Footer(sizingInformation.screenSize.width)
                 ],
