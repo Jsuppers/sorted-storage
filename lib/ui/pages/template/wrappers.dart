@@ -1,12 +1,12 @@
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/icons/my_flutter_app_icons.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/url_service.dart';
@@ -145,7 +145,7 @@ class _CustomActionButtonState extends State<CustomActionButton>
     with SingleTickerProviderStateMixin {
   late Animation<double> _animation;
   late AnimationController _animationController;
-  IconData iconData = MyFlutterApp.privacy;
+  IconData iconData = FontAwesomeIcons.smile;
   usr.User? user;
 
   @override
@@ -211,19 +211,18 @@ class _CustomActionButtonState extends State<CustomActionButton>
           onPress: () {
             setState(() {
               if (_animationController.isCompleted) {
-                iconData = MyFlutterApp.privacy;
+                iconData = FontAwesomeIcons.smile;
                 _animationController.reverse();
               } else {
-                iconData = MyFlutterApp.open_source;
+                iconData = FontAwesomeIcons.grin;
                 _animationController.forward();
               }
             });
           },
 
-          // Floating Action button Icon color
           backGroundColor: Colors.white,
           iconData: iconData,
-          iconColor: Colors.black,
+          iconColor: myThemeData.primaryColorDark,
         ),
       ),
     );

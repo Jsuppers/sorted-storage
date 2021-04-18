@@ -30,6 +30,7 @@ dependencies:
   emojis:
     git:
       url: git://github.com/Parkar99/emojis.git
+  font_awesome_flutter: ^9.0.0
   envify: ^2.0.0
   reorderables: ^0.4.1
   page_transition: ^2.0.1-nullsafety.0
@@ -96,9 +97,6 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family:  MyFlutterApp
-      fonts:
-        - asset: assets/fonts/MyFlutterApp.ttf
     - family: Roboto
       fonts:
         - asset: assets/fonts/Roboto-Regular.ttf
