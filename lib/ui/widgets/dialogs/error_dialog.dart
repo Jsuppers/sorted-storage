@@ -8,7 +8,7 @@ import 'package:web/ui/theme/theme.dart';
 /// dialog to show errors
 class ErrorDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ErrorDialog({Key key, this.errorMessages}) : super(key: key);
+  const ErrorDialog({Key? key, required this.errorMessages}) : super(key: key);
 
   // ignore: public_member_api_docs
   final List<String> errorMessages;

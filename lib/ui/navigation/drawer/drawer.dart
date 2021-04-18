@@ -15,7 +15,7 @@ import 'package:web/ui/theme/theme.dart';
 class NavigationDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final User user = BlocProvider.of<AuthenticationBloc>(context).state;
+    final User? user = BlocProvider.of<AuthenticationBloc>(context).state;
 
     return ResponsiveBuilder(
       builder: (BuildContext context, SizingInformation info) => Container(
@@ -77,13 +77,13 @@ class NavigationDrawer extends StatelessWidget {
     );
   }
 
-  List<Widget> _createDrawerMenu(User user) {
+  List<Widget> _createDrawerMenu(User? user) {
     if (user == null) {
       return <Widget>[DrawerItem('Login', Icons.login, NavigateToLoginEvent())];
     }
     final List<Widget> widgets = <Widget>[];
     widgets.add(DrawerItem('Home', Icons.home, NavigateToHomeEvent()));
-    widgets.add(DrawerItem('Add', Icons.add, null));
+    widgets.add(DrawerItem('Add', Icons.add, NavigateToHomeEvent()));
 
     return widgets;
   }

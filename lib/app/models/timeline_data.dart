@@ -11,7 +11,7 @@ enum SavingState {
 class StoryTimelineData {
   /// constructor which sets the default values
   StoryTimelineData(
-      {this.mainStory,
+      {required this.mainStory,
       this.subEvents}) {
     subEvents ??= <StoryContent>[];
   }
@@ -19,13 +19,13 @@ class StoryTimelineData {
   /// clone story data
   StoryTimelineData.clone(StoryTimelineData timelineEvent)
       : mainStory = StoryContent.clone(timelineEvent.mainStory),
-        subEvents = List<StoryContent>.generate(timelineEvent.subEvents.length,
-            (int index) => StoryContent.clone(timelineEvent.subEvents[index]));
+        subEvents = List<StoryContent>.generate(timelineEvent.subEvents!.length,
+            (int index) => StoryContent.clone(timelineEvent.subEvents![index]));
 
 
   /// the content for the main story
   StoryContent mainStory;
 
   /// content for any sub stories
-  List<StoryContent> subEvents;
+  List<StoryContent>? subEvents;
 }

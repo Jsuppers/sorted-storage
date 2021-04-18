@@ -2,12 +2,12 @@
 class StoryMetadata {
   // ignore: public_member_api_docs
   StoryMetadata(
-      {this.id, this.title = '', this.description = '', this.emoji = ''});
+      {required this.id, this.title = '', this.description = '', this.emoji = ''});
 
   // ignore: public_member_api_docs, prefer_constructors_over_static_methods
-  static StoryMetadata fromJson(String id, Map<String, dynamic> json) {
+  static StoryMetadata fromJson(String? id, Map<String, dynamic>? json) {
     if (json == null) {
-      return StoryMetadata();
+      return StoryMetadata(id: id ?? '');
     }
 
     String title = '';
@@ -24,7 +24,7 @@ class StoryMetadata {
     }
 
     return StoryMetadata(
-        id: id, title: title, description: description, emoji: emoji);
+        id: id ?? '', title: title, description: description, emoji: emoji);
   }
 
   StoryMetadata.clone(StoryMetadata metadata)

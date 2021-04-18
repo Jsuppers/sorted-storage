@@ -20,7 +20,10 @@ class _TimeLineEventEntry {
 // ignore: public_member_api_docs
 class TimelineLayout extends StatefulWidget {
   // ignore: public_member_api_docs
-  const TimelineLayout({Key key, this.width, this.height}) : super(key: key);
+  const TimelineLayout({Key? key,
+    required this.width,
+    required this.height})
+      : super(key: key);
 
   // ignore: public_member_api_docs
   final double width;
@@ -33,7 +36,7 @@ class TimelineLayout extends StatefulWidget {
 }
 
 class _TimelineLayoutState extends State<TimelineLayout> {
-  Map<String, StoryTimelineData> _timelineData;
+  late Map<String, StoryTimelineData> _timelineData;
   bool loaded = true;
   bool addingStory = false;
 
@@ -71,7 +74,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
         if (state.type == CloudStoriesType.refresh) {
           if (state.error != null) {
             final SnackBar snackBar = SnackBar(
-              content: Text(state.error, textAlign: TextAlign.center),
+              content: Text(state.error!, textAlign: TextAlign.center),
             );
 
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -80,8 +83,8 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           setState(() {
             addingStory = false;
             _timelineData.forEach((String key, StoryTimelineData story) =>
-              story.subEvents.sort((StoryContent a, StoryContent b) =>
-                  b.timestamp.compareTo(a.timestamp)));
+                story.subEvents!.sort((StoryContent a, StoryContent b) =>
+                    b.timestamp.compareTo(a.timestamp)));
 
             loaded = true;
           });

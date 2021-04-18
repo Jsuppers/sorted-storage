@@ -2,9 +2,10 @@
 class PageItemContent {
   // ignore: public_member_api_docs
   PageItemContent(
-      {this.title,
-      this.text,
-      this.imageURL,
+      {
+      required this.title,
+      required this.text,
+      required this.imageURL,
       this.callToActionButtonText,
       this.callToActionCallback});
 
@@ -18,8 +19,8 @@ class PageItemContent {
   String imageURL;
 
   /// text for the call to action button
-  String callToActionButtonText;
+  String? callToActionButtonText;
 
   /// function which is called when the user clicks the call to action button
-  Function callToActionCallback;
+  Function? callToActionCallback;
 }

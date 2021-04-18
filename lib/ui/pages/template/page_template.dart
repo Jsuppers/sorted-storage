@@ -64,13 +64,13 @@ class PageTemplate extends StatelessWidget {
 
 class _BorderlessContent extends StatelessWidget {
   const _BorderlessContent(
-      {Key key,
-      this.width,
-      this.content,
-      this.widthText,
-      this.widthImage,
-      this.horizontalPadding,
-      this.mobile})
+      {Key? key,
+      required this.width,
+      required this.content,
+      required this.widthText,
+      required this.widthImage,
+      required this.horizontalPadding,
+      required this.mobile})
       : super(key: key);
 
   final double width;
@@ -108,12 +108,12 @@ class _BorderlessContent extends StatelessWidget {
 
 class _BorderedContent extends StatelessWidget {
   const _BorderedContent(
-      {this.width,
-      this.content,
-      this.widthText,
-      this.widthImage,
-      this.horizontalPadding,
-      this.mobile});
+      {required this.width,
+      required this.content,
+      required this.widthText,
+      required this.widthImage,
+      required this.horizontalPadding,
+      required this.mobile});
 
   final double width;
   final double widthText;
@@ -164,8 +164,8 @@ class _BorderedContent extends StatelessWidget {
 
 class _CallToActionButton extends StatelessWidget {
   const _CallToActionButton({
-    Key key,
-    @required this.content,
+    Key? key,
+    required this.content,
   }) : super(key: key);
 
   final PageItemContent content;
@@ -179,14 +179,14 @@ class _CallToActionButton extends StatelessWidget {
     return MaterialButton(
       onPressed: () {
         if (content.callToActionCallback != null) {
-          content.callToActionCallback();
+          content.callToActionCallback!();
         }
       },
       color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 40.0),
         child: Text(
-          content.callToActionButtonText,
+          content.callToActionButtonText!,
           style: Theme.of(context).textTheme.headline5,
         ),
       ),
@@ -195,7 +195,8 @@ class _CallToActionButton extends StatelessWidget {
 }
 
 class _TextWidget extends StatelessWidget {
-  const _TextWidget({Key key, this.width, this.content}) : super(key: key);
+  const _TextWidget({Key? key, required this.width, required this.content})
+      : super(key: key);
   final double width;
   final PageItemContent content;
 
@@ -227,7 +228,9 @@ class _TextWidget extends StatelessWidget {
 }
 
 class _ImageWidget extends StatelessWidget {
-  const _ImageWidget({Key key, this.imageUri, this.width}) : super(key: key);
+  const _ImageWidget({Key? key,
+    required this.imageUri,
+    required this.width}) : super(key: key);
   final String imageUri;
   final double width;
 

@@ -15,20 +15,16 @@ import 'package:web/ui/widgets/media_card.dart';
 class StoryImage extends StatefulWidget {
   // ignore: public_member_api_docs
   const StoryImage(
-      {Key key,
-      this.locked,
-      this.uploadingImages,
-      this.storyMedia,
-      this.imageKey,
-      this.storyFolderID,
-      this.folderID})
+      {Key? key,
+      required this.locked,
+      required this.storyMedia,
+      required this.imageKey,
+      required this.storyFolderID,
+      required this.folderID})
       : super(key: key);
 
   // ignore: public_member_api_docs
   final bool locked;
-
-  // ignore: public_member_api_docs
-  final List<String> uploadingImages;
 
   // ignore: public_member_api_docs
   final StoryMedia storyMedia;
@@ -59,7 +55,11 @@ class _StoryImageState extends State<StoryImage> {
 }
 
 class RetryMediaWidget extends StatefulWidget {
-  RetryMediaWidget({this.folderId, this.locked, this.media, this.storyFolderID})
+  RetryMediaWidget(
+      {required this.folderId,
+      required this.locked,
+      required this.media,
+      required this.storyFolderID})
       : super();
 
   @override
@@ -72,24 +72,22 @@ class RetryMediaWidget extends StatefulWidget {
 }
 
 class _RetryMediaWidgetState extends State<RetryMediaWidget> {
-  bool showPlaceholder;
+  bool showPlaceholder = false;
 
-  Widget _backgroundImage(bool showPlaceholder, String imageKey,
-      StoryMedia media, ImageProvider image) {
+  Widget _backgroundImage(String imageKey,
+      StoryMedia media, ImageProvider? image) {
     return Container(
       height: 150.0,
       width: 150.0,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(6)),
-        image: showPlaceholder
+        image: image == null
             ? null
             : DecorationImage(image: image, fit: BoxFit.cover),
       ),
       child: !widget.locked
           ? _createEditControls(
-          widget.media.fileID,
-          widget.media.name,
-          showPlaceholder)
+              widget.media.fileID, widget.media.name, showPlaceholder)
           : _createNonEditControls(widget.media.fileID, showPlaceholder, media),
     );
   }
@@ -121,7 +119,8 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
     );
   }
 
-  Widget _createEditControls(String imageKey, String imagename, bool showPlaceholder) {
+  Widget _createEditControls(
+      String imageKey, String imagename, bool showPlaceholder) {
     return Container(
       child: Column(
         children: <Widget>[
@@ -154,10 +153,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                 ),
               )),
           Column(children: <Widget>[
-            if (showPlaceholder)
-              MediaCard(widget.media)
-            else
-              Container()
+            if (showPlaceholder) MediaCard(widget.media) else Container()
           ])
         ],
       ),
@@ -166,7 +162,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
+    return FutureBuilder<String?>(
         future: RetryService.getThumbnail(
           BlocProvider.of<CloudStoriesBloc>(context).storage,
           widget.media.thumbnailURL,
@@ -174,7 +170,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
           widget.media.fileID,
           retrieveThumbnail: widget.media.retrieveThumbnail,
         ),
-        builder: (BuildContext context, AsyncSnapshot<String> thumbnailURL) {
+        builder: (BuildContext context, AsyncSnapshot<String?> thumbnailURL) {
           showPlaceholder = thumbnailURL.data == null;
           return RawMaterialButton(
             onPressed: () {
@@ -183,28 +179,26 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
               }
             },
             child: showPlaceholder
-                ? _backgroundImage(
-                    showPlaceholder, widget.media.fileID, widget.media, null)
+                ? _backgroundImage(widget.media.fileID, widget.media, null)
                 : SizedBox(
                     height: widget.locked == false ? 80 : 150.0,
                     width: widget.locked == false ? 80 : 150.0,
                     child: thumbnailURL.data == null
                         ? StaticLoadingLogo()
                         : CachedNetworkImage(
-                            imageUrl: thumbnailURL.data,
+                            imageUrl: thumbnailURL.data!,
                             placeholder: (BuildContext context, String url) =>
                                 StaticLoadingLogo(),
                             errorWidget: (BuildContext context, String url,
                                     dynamic error) =>
                                 _backgroundImage(
-                                    showPlaceholder,
                                     widget.media.fileID,
                                     widget.media,
                                     const AssetImage(
                                         'assets/images/error.png')),
                             imageBuilder: (BuildContext context,
                                     ImageProvider<Object> image) =>
-                                _backgroundImage(showPlaceholder,
+                                _backgroundImage(
                                     widget.media.fileID, widget.media, image),
                           ),
                   ),

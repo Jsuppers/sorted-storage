@@ -6,13 +6,18 @@ import 'package:web/ui/theme/theme.dart';
 class UsageIndicator extends StatelessWidget {
   // ignore: public_member_api_docs
   const UsageIndicator(
-      {@required this.limit, @required this.usage, Key key, this.percent})
+      {Key? key,
+      required this.limit,
+      required this.usage,
+      required this.percent})
       : super(key: key);
 
   // ignore: public_member_api_docs
   final String limit;
+
   // ignore: public_member_api_docs
   final String usage;
+
   // ignore: public_member_api_docs
   final double percent;
 

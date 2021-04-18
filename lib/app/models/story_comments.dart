@@ -9,10 +9,10 @@ class StoryComments {
 
   /// clone the list of comments
   StoryComments.clone(StoryComments comment)
-      : comments = List<StoryComment>.from(comment.comments);
+      : comments = List<StoryComment>.from(comment.comments ?? []);
 
   // ignore: public_member_api_docs, prefer_constructors_over_static_methods
-  static StoryComments fromJson(Map<String, dynamic> json) {
+  static StoryComments fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return StoryComments();
     }
@@ -27,7 +27,7 @@ class StoryComments {
   }
 
   /// list of all comments
-  List<StoryComment> comments;
+  List<StoryComment>? comments;
 
   /// convert comments to json file
   Map<String, dynamic> toJson() {

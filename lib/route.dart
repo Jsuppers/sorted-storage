@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:web/app/extensions/string_extensions.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/ui/pages/dynamic/documents.dart';
 import 'package:web/ui/pages/dynamic/media.dart';
@@ -29,9 +28,12 @@ const Map<route, String> routePaths = <route, String>{
 
 /// class for various routing methods
 class RouteConfiguration {
+  static const String _uriRegex = '(/.*?)(/.*)';
+
   /// create a page depending on route
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    final RoutingData routingData = settings.name.getRoutingData;
+    final RoutingData routingData =
+        RouteConfiguration.getRoutingData(settings.name);
     final String baseRoute = routingData.baseRoute;
 
     return PageTransition<dynamic>(
@@ -82,5 +84,25 @@ class RouteConfiguration {
       return HomePage();
     }
     return MediaPage();
+  }
+
+  static RoutingData getRoutingData(String? path) {
+    final Uri uriData = Uri.parse(path ?? '');
+    final RegExp regExp = RegExp(_uriRegex);
+    final Iterable<RegExpMatch> matches = regExp.allMatches(uriData.path);
+    String baseRoute = uriData.path;
+    String destination = '';
+    if (matches.isNotEmpty) {
+      final RegExpMatch match = matches.elementAt(0);
+      baseRoute = match.group(1)!;
+      destination = match.group(2)!.replaceFirst('/', '');
+    }
+
+    return RoutingData(
+      queryParameters: uriData.queryParameters,
+      route: uriData.path,
+      baseRoute: baseRoute,
+      destination: destination,
+    );
   }
 }

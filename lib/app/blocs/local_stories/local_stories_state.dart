@@ -17,5 +17,5 @@ class LocalStoriesState {
   final dynamic data;
 
   /// the folder ID for the related story
-  final String folderID;
+  final String? folderID;
 }

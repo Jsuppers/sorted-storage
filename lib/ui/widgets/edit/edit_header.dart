@@ -11,12 +11,15 @@ import 'package:web/ui/widgets/sync_icon.dart';
 
 class EditHeader extends StatefulWidget {
   // ignore: public_member_api_docs, lines_longer_than_80_chars
-  EditHeader({Key key, this.savingState, this.adventure, this.width})
+  EditHeader({Key? key,
+    this.savingState,
+    required this.adventure,
+    required this.width})
       : super(key: key);
 
   final StoryTimelineData adventure;
   final double width;
-  final SavingState savingState;
+  final SavingState? savingState;
 
   @override
   _EditHeaderState createState() => _EditHeaderState();
@@ -78,14 +81,14 @@ class _EditHeaderState extends State<EditHeader> {
 }
 
 class SyncingIcon extends StatefulWidget {
-  const SyncingIcon({Key key}) : super(key: key);
+  const SyncingIcon({Key? key}) : super(key: key);
 
   @override
   _SyncingIconState createState() => _SyncingIconState();
 }
 
 class _SyncingIconState extends State<SyncingIcon> {
-  SavingState savingState;
+  SavingState? savingState;
 
   @override
   void initState() {
@@ -113,8 +116,11 @@ class _SyncingIconState extends State<SyncingIcon> {
     }
 
     return MultiBlocListener(listeners: <BlocListener<dynamic, dynamic>>[
-      BlocListener<EditorBloc, EditorState>(
-          listener: (BuildContext context, EditorState state) {
+      BlocListener<EditorBloc, EditorState?>(
+          listener: (BuildContext context, EditorState? state) {
+            if (state == null) {
+              return;
+            }
             if (state.type == EditorType.syncingState) {
               setState(() {
                 savingState = state.data as SavingState;

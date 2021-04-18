@@ -16,15 +16,15 @@ import 'package:web/ui/widgets/loading.dart';
 class CommentWidget extends StatefulWidget {
   // ignore: public_member_api_docs
   const CommentWidget(
-      {Key key,
-      this.sendComment,
-      this.width,
-      this.height,
+      {Key? key,
+      required this.sendComment,
+      required this.width,
+      required this.height,
       this.user,
-      this.folderID})
+      required this.folderID})
       : super(key: key);
 
-  final Function(BuildContext context, usr.User user, String comment)
+  final Function(BuildContext context, usr.User? user, String comment)
       // ignore: public_member_api_docs
       sendComment;
 
@@ -35,7 +35,7 @@ class CommentWidget extends StatefulWidget {
   final double height;
 
   // ignore: public_member_api_docs
-  final usr.User user;
+  final usr.User? user;
 
   // ignore: public_member_api_docs
   final String folderID;
@@ -45,7 +45,7 @@ class CommentWidget extends StatefulWidget {
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
-  List<StoryComment> adventureComments = <StoryComment>[];
+  List<StoryComment>? adventureComments = <StoryComment>[];
   bool uploading = false;
 
   @override
@@ -53,9 +53,9 @@ class _CommentWidgetState extends State<CommentWidget> {
     super.initState();
     adventureComments = BlocProvider.of<CloudStoriesBloc>(context)
         .state
-        .cloudStories[widget.folderID]
+        .cloudStories[widget.folderID]!
         .mainStory
-        .comments
+        .comments!
         .comments;
   }
 
@@ -63,8 +63,8 @@ class _CommentWidgetState extends State<CommentWidget> {
   Widget build(BuildContext context) {
     final TextEditingController controller = TextEditingController();
     final List<Widget> comments = <Widget>[];
-    for (int i = 0; i < adventureComments.length; i++) {
-      String user = adventureComments[i].user;
+    for (int i = 0; i < adventureComments!.length; i++) {
+      String? user = adventureComments![i].user;
       if (user == null || user.isEmpty) {
         user = 'Anonymous';
       }
@@ -76,7 +76,7 @@ class _CommentWidgetState extends State<CommentWidget> {
           ),
           const SizedBox(width: 10),
           Text(
-            adventureComments[i].comment,
+            adventureComments![i].comment,
             style: myThemeData.textTheme.bodyText1,
           ),
         ],
@@ -87,7 +87,7 @@ class _CommentWidgetState extends State<CommentWidget> {
         if (state.folderID == widget.folderID) {
           if (state.error != null) {
             final SnackBar snackBar = SnackBar(
-              content: Text(state.error, textAlign: TextAlign.center),
+              content: Text(state.error!, textAlign: TextAlign.center),
             );
 
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -96,16 +96,16 @@ class _CommentWidgetState extends State<CommentWidget> {
           setState(() {
             adventureComments = BlocProvider.of<CloudStoriesBloc>(context)
                 .state
-                .cloudStories[widget.folderID]
+                .cloudStories[widget.folderID]!
                 .mainStory
-                .comments
+                .comments!
                 .comments;
-            uploading = state.uploading;
+            uploading = state.uploading!;
           });
         }
       },
       child: SizedBox(
-        key: Key(adventureComments.length.toString()),
+        key: Key(adventureComments!.length.toString()),
         width: widget.width,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -147,10 +147,10 @@ class _CommentWidgetState extends State<CommentWidget> {
 class CommentSection extends StatefulWidget {
   // ignore: public_member_api_docs
   const CommentSection({
-    Key key,
-    @required this.controller,
-    @required this.widget,
-    this.uploading,
+    Key? key,
+    required this.controller,
+    required this.widget,
+    required this.uploading,
   }) : super(key: key);
 
   // ignore: public_member_api_docs

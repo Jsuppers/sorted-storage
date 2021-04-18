@@ -5,18 +5,18 @@ class EditorEvent {
   /// The constructor requires a CloudStories type
   const EditorEvent(this.type,
       {this.parentID,
-      this.folderID,
-      this.error,
-      this.mainEvent,
-      this.closeDialog,
-      this.data,
-      this.refreshUI = false});
+       this.folderID,
+       this.mainEvent,
+       this.error,
+       this.data,
+       this.closeDialog = false,
+       this.refreshUI = false});
 
   /// represents which story this event is for, this can also be a sub event
-  final String folderID;
+  final String? folderID;
 
   /// usually set to the main story folderID, used to find a sub folder
-  final String parentID;
+  final String? parentID;
 
   /// used to tell the bloc which type of event this is
   final EditorType type;
@@ -30,7 +30,7 @@ class EditorEvent {
   final bool refreshUI;
 
   /// error message to pass on to the front end
-  final String error;
+  final String? error;
 
-  final bool mainEvent;
+  final bool? mainEvent;
 }

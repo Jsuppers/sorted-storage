@@ -18,5 +18,5 @@ class AuthenticationNewUserEvent extends AuthenticationEvent {
   AuthenticationNewUserEvent(this.user);
 
   /// user
-  GoogleSignInAccount user;
+  GoogleSignInAccount? user;
 }

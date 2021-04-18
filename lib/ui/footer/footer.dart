@@ -6,7 +6,7 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 /// The footer which contains the privacy policy and terms of conditions
 class Footer extends StatelessWidget {
   /// constructor which sets the width
-  const Footer(this._width, {Key key}) : super(key: key);
+  const Footer(this._width, {Key? key}) : super(key: key);
 
   final double _width;
 

@@ -11,7 +11,11 @@ import 'package:web/app/models/story_settings.dart';
 /// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EmojiPicker({Key key, this.folderID, this.parentID, this.metadata})
+  const EmojiPicker({
+    Key? key,
+    required this.folderID,
+    required this.parentID,
+    required this.metadata})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -30,15 +34,13 @@ class EmojiPicker extends StatefulWidget {
 class EmojiPickerState extends State<EmojiPicker> {
   final TextEditingController _controller = TextEditingController();
   List<String> _possibleMatches = <String>[];
-  String _filter;
-  List<Emoji> _flags;
+  late String _filter;
+  final List<Emoji> _flags = Emoji.byGroup(EmojiGroup.flags).toList();
 
   @override
   void initState() {
-    _flags = Emoji.byGroup(EmojiGroup.flags).toList();
-
     Emoji.byGroup(EmojiGroup.travelPlaces).forEach((Emoji element) {
-      _possibleMatches.add(element.char);
+      _possibleMatches.add(element.char!);
     });
     super.initState();
 
@@ -51,20 +53,20 @@ class EmojiPickerState extends State<EmojiPicker> {
       _filter = _controller.text;
       setState(() {
         for (final Emoji element in _flags) {
-          if (element.name.contains(_filter)) {
-            _possibleMatches.add(element.char);
+          if (element.name!.contains(_filter)) {
+            _possibleMatches.add(element.char!);
           }
         }
 
-        final Iterable<Emoji> emojis = Emoji.byKeyword(_filter);
+        final Iterable<Emoji>? emojis = Emoji.byKeyword(_filter);
         if (emojis != null) {
           for (final Emoji element in emojis) {
-            _possibleMatches.add(element.char);
+            _possibleMatches.add(element.char!);
           }
         }
-        final Emoji emoji = Emoji.byName(_filter);
+        final Emoji? emoji = Emoji.byName(_filter);
         if (emoji != null) {
-          _possibleMatches.insert(0, emoji.char);
+          _possibleMatches.insert(0, emoji.char!);
         }
       });
     });

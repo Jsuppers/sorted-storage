@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 /// avatar of the user
 class Avatar extends StatefulWidget {
   // ignore: public_member_api_docs
-  const Avatar({this.url, this.size});
+  const Avatar({
+    required this.url,
+    required this.size});
 
   // ignore: public_member_api_docs
   final String url;

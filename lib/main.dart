@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
@@ -32,11 +30,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
-  GoogleDrive _googleDrive;
-  DriveBloc _driveBloc;
-  NavigationBloc _navigationBloc;
-  CloudStoriesBloc _cloudStoriesBloc;
-  Map<String, StoryTimelineData> _cloudStories;
+  late GoogleDrive _googleDrive;
+  late DriveBloc _driveBloc;
+  late NavigationBloc _navigationBloc;
+  late CloudStoriesBloc _cloudStoriesBloc;
+  late Map<String, StoryTimelineData> _cloudStories;
 
   @override
   void initState() {
@@ -89,13 +87,13 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MultiBlocListener(
         listeners: <BlocListener<dynamic, dynamic>>[
-          BlocListener<AuthenticationBloc, usr.User>(
-            listener: (BuildContext context, usr.User user) {
+          BlocListener<AuthenticationBloc, usr.User?>(
+            listener: (BuildContext context, usr.User? user) {
               _driveBloc.add(InitialDriveEvent(user: user));
             },
           ),
-          BlocListener<DriveBloc, DriveApi>(
-            listener: (BuildContext context, DriveApi driveApi) {
+          BlocListener<DriveBloc, DriveApi?>(
+            listener: (BuildContext context, DriveApi? driveApi) {
               _googleDrive.driveApi = driveApi;
             },
           ),

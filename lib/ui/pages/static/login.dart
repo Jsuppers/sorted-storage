@@ -1,13 +1,12 @@
+import 'package:auth_buttons/auth_buttons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/user.dart';
-import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
 
 /// Login page
@@ -15,8 +14,8 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthenticationBloc, User>(
-      builder: (BuildContext context, User user) {
+    return BlocBuilder<AuthenticationBloc, User?>(
+      builder: (BuildContext context, User? user) {
         if (user != null) {
           BlocProvider.of<NavigationBloc>(context).add(NavigateToMediaEvent());
         }
@@ -32,7 +31,7 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 7.0),
                   const SizedBox(width: 100, child: Divider(thickness: 1)),
                   const SizedBox(height: 7.0),
-                  GoogleSignInButton(
+                  GoogleAuthButton(
                     onPressed: () async {
                       BlocProvider.of<AuthenticationBloc>(context)
                           .add(AuthenticationSignInEvent());

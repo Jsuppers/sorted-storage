@@ -26,14 +26,14 @@ import 'package:web/ui/widgets/story_image.dart';
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
 /// the user to easily edit and reset the state of the timeline
-class EditorBloc extends Bloc<EditorEvent, EditorState> {
+class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   /// The constructor sets the private timeline data and sets the state to
   /// initial_state
   EditorBloc(
-      {GoogleDrive storage,
-      NavigationBloc navigationBloc,
-      Map<String, StoryTimelineData> cloudStories,
-      CloudStoriesBloc cloudStoriesBloc})
+      {required GoogleDrive storage,
+       required NavigationBloc navigationBloc,
+       required Map<String, StoryTimelineData> cloudStories,
+       required CloudStoriesBloc cloudStoriesBloc})
       : super(null) {
     _cloudStoriesBloc = cloudStoriesBloc;
     _cloudStories = cloudStories;
@@ -41,11 +41,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     _navigationBloc = navigationBloc;
   }
 
-  Map<String, StoryTimelineData> _cloudStories;
-  GoogleDrive _storage;
-  NavigationBloc _navigationBloc;
-  CloudStoriesBloc _cloudStoriesBloc;
-  List<int> imageIndexesToIgnore;
+  late Map<String, StoryTimelineData> _cloudStories;
+  late GoogleDrive _storage;
+  late NavigationBloc _navigationBloc;
+  late CloudStoriesBloc _cloudStoriesBloc;
+  late List<int> imageIndexesToIgnore;
 
   @override
   Stream<EditorState> mapEventToState(EditorEvent event) async* {
@@ -54,9 +54,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
         final bool mainEvent =
-            Prop.Property.getValueOrDefault(event.mainEvent, false);
-        final String error =
-            await _createEventFolder(event.parentID, mainEvent);
+            Prop.Property.getValueOrDefault(event.mainEvent ?? false, false);
+        final String? error =
+            await _createEventFolder(event.parentID!, mainEvent);
         if (error == null) {
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
@@ -69,8 +69,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         imageIndexesToIgnore = <int>[];
         _uploadImages(
           event.data as Map<String, StoryMedia>,
-          event.folderID,
-          event.parentID,
+          event.folderID!,
+          event.parentID!,
         );
         break;
       case EditorType.ignoreImage:
@@ -85,7 +85,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
             error: event.error);
         break;
       case EditorType.deleteStory:
-        final String error = await _deleteEvent(event.folderID, event.parentID);
+        final String? error = await _deleteEvent(
+            event.folderID!,
+            event.parentID!);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopDialogEvent());
         } else {
@@ -96,10 +98,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
         final StoryContent eventData = TimelineService.getStoryWithFolderID(
-            event.parentID, event.folderID, _cloudStories);
-        final String error = await _deleteFile(event.data as String);
+            event.parentID!, event.folderID!, _cloudStories)!;
+        final String? error = await _deleteFile(event.data as String);
         if (error == null) {
-          eventData.images.remove(event.data);
+          eventData.images!.remove(event.data);
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
           yield EditorState(EditorType.deleteImage, data: event.data);
@@ -117,10 +119,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
         final StoryContent eventData = TimelineService.getStoryWithFolderID(
-            event.parentID, event.folderID, _cloudStories);
+            event.parentID!, event.folderID!, _cloudStories)!;
         final int timestamp = event.data as int;
         try {
-          await _storage.updateEventFolderTimestamp(event.folderID, timestamp);
+          await _storage.updateEventFolderTimestamp(event.folderID!, timestamp);
           eventData.timestamp = timestamp;
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
@@ -134,7 +136,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
         _uploadSettingsFile(
-                event.folderID, event.parentID, event.data as StoryMetadata)
+                event.folderID!, event.parentID!, event.data as StoryMetadata)
             .then((value) => {
                   add(EditorEvent(EditorType.syncingState,
                       data: SavingState.success, refreshUI: event.refreshUI))
@@ -143,7 +145,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       case EditorType.updateImagePosition:
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        _updatePosition(event.data as List<StoryImage>, event.parentID)
+        _updatePosition(event.data as List<StoryImage>, event.parentID!)
             .then((value) => {
                   add(EditorEvent(EditorType.syncingState,
                       data: SavingState.success, refreshUI: event.refreshUI))
@@ -154,11 +156,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     }
   }
 
-  Future<String> _deleteEvent(String fileID, String parentID) async {
+  Future<String?> _deleteEvent(String fileID, String parentID) async {
     _storage.delete(fileID).then((dynamic value) {
       if (parentID != null) {
-        final StoryTimelineData story = _cloudStories[parentID];
-        story.subEvents
+        final StoryTimelineData story = _cloudStories[parentID]!;
+        story.subEvents!
             .removeWhere((StoryContent element) => element.folderID == fileID);
       } else {
         _cloudStories.remove(fileID);
@@ -170,8 +172,13 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     });
   }
 
-  Future<String> _deleteFile(String fileID) async {
-    _storage.delete(fileID);
+  Future<String?> _deleteFile(String fileID) async {
+    try {
+      _storage.delete(fileID);
+      return null;
+    } catch (e) {
+      return 'could not delete $fileID';
+    }
   }
 
   Future<void> _updatePosition(List<StoryImage> images, String parentID) async {
@@ -181,11 +188,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       await _storage.updatePosition(
           images[i].imageKey, images[i].storyMedia.index);
       TimelineService.updateImage(images[i].imageKey,
-          images[i].storyMedia.index, _cloudStories[parentID]);
+          images[i].storyMedia.index, _cloudStories[parentID]!);
     }
   }
 
-  Future<String> _uploadSettingsFile(
+  Future<String?> _uploadSettingsFile(
       String folderId, String parentId, StoryMetadata metadata) async {
     final List<int> fileContent = utf8.encode(jsonEncode(metadata));
     final Stream<List<int>> mediaStream =
@@ -194,15 +201,15 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     try {
       if (metadata.id != null) {
         await _storage.updateFile(
-            null, metadata.id, Media(mediaStream, fileContent.length));
+            metadata.id, Media(mediaStream, fileContent.length));
       } else {
-        metadata.id = await _storage.uploadMedia(
+        metadata.id = (await _storage.uploadMedia(
             folderId, Constants.settingsFile, fileContent.length, mediaStream,
-            mimeType: 'application/json');
+            mimeType: 'application/json'))!;
       }
 
       final StoryContent eventData = TimelineService.getStoryWithFolderID(
-          parentId, folderId, _cloudStories);
+          parentId, folderId, _cloudStories)!;
       eventData.metadata = metadata;
       return null;
     } catch (e) {
@@ -210,29 +217,29 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
     }
   }
 
-  Future<String> _createEventFolder(String parentId, bool mainEvent) async {
+  Future<String?> _createEventFolder(String parentId, bool mainEvent) async {
     try {
       final int timestamp = DateTime.now().millisecondsSinceEpoch;
-      final String folderID = await _storage.createStory(parentId, timestamp);
+      final String? folderID = await _storage.createStory(parentId, timestamp);
 
       final StoryContent event = StoryContent(
-          comments: StoryComments(), folderID: folderID, timestamp: timestamp);
-      await _uploadSettingsFile(folderID, parentId, event.metadata);
+          comments: StoryComments(), folderID: folderID!, timestamp: timestamp, commentsID: '');
+      await _uploadSettingsFile(folderID, parentId, event.metadata!);
 
       if (mainEvent) {
         final CommentsResponse commentsResponse =
             await _storage.uploadCommentsFile(folderID: event.folderID);
         event.comments = commentsResponse.comments;
-        event.commentsID = commentsResponse.commentsID;
+        event.commentsID = commentsResponse.commentsID!;
         final StoryTimelineData timelineEvent =
             StoryTimelineData(mainStory: event);
         _cloudStories.putIfAbsent(folderID, () => timelineEvent);
       } else {
-        final StoryTimelineData story = _cloudStories[parentId];
-        story.subEvents.add(StoryContent(
+        final StoryTimelineData story = _cloudStories[parentId]!;
+        story.subEvents!.add(StoryContent(
             folderID: event.folderID,
             timestamp: story.mainStory.timestamp,
-            comments: StoryComments()));
+            comments: StoryComments(), commentsID: ''));
       }
       _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
 
@@ -276,10 +283,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
   ) async {
     final StreamController<List<int>> streamController =
         StreamController<List<int>>();
-    final int totalSize = storyMedia.contentSize;
+    final int totalSize = storyMedia.contentSize ?? 100;
     int sent = 0;
 
-    storyMedia.stream.listen((List<int> event) {
+    storyMedia.stream!.listen((List<int> event) {
       if (imageIndexesToIgnore.contains(index)) {
         streamController.addError('canceled');
       } else {
@@ -296,15 +303,15 @@ class EditorBloc extends Bloc<EditorEvent, EditorState> {
       streamController.close();
     });
 
-    final String imageID = await _storage.uploadMediaToFolder(
+    final String? imageID = await _storage.uploadMediaToFolder(
         folderID, name, storyMedia, streamController.stream);
 
     if (imageID != null) {
-      final StoryContent eventData = TimelineService.getStoryWithFolderID(
+      final StoryContent? eventData = TimelineService.getStoryWithFolderID(
           parentID, folderID, _cloudStories);
       storyMedia.fileID = imageID;
       storyMedia.retrieveThumbnail = true;
-      eventData.images.putIfAbsent(imageID, () => storyMedia);
+      eventData!.images!.putIfAbsent(imageID, () => storyMedia);
 
       add(EditorEvent(EditorType.uploadStatus,
           folderID: folderID,

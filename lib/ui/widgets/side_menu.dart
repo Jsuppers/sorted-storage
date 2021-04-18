@@ -23,11 +23,10 @@ class AvatarWithMenu extends StatelessWidget {
 
   const AvatarWithMenu({this.user}): super();
 
-  final User user;
+  final User? user;
 
   @override
   Widget build(BuildContext context) {
-
     // ignore: avoid_void_async
     void _showPopupMenu() async {
       await showMenu(
@@ -42,7 +41,7 @@ class AvatarWithMenu extends StatelessWidget {
             enabled: false,
             child: Column(
               children: <Widget>[
-                FutureBuilder<StorageInformation>(
+                FutureBuilder<StorageInformation?>(
                   future: GoogleStorageService.getStorageInformation(
                       BlocProvider.of<DriveBloc>(context).state),
                   builder:
@@ -77,17 +76,17 @@ class AvatarWithMenu extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        Avatar(url: user.photoUrl, size: 30.0),
+                        Avatar(url: user?.photoUrl ?? '', size: 30.0),
                         const SizedBox(height: 10),
-                        Text(
-                            user.email.toLowerCase().substring(
+                        Text( user?.email == null ? '' :
+                            user!.email.toLowerCase().substring(
                                 0,
-                                user.email.length > 30
+                                user!.email.length > 30
                                     ? 30
-                                    : user.email.length),
+                                    : user!.email.length),
                             style: myThemeData.textTheme.caption),
                         const SizedBox(height: 10),
-                        Text(user.displayName,
+                        Text(user?.displayName ?? '',
                             style: myThemeData.textTheme.bodyText1),
                       ],
                     ),
@@ -127,7 +126,7 @@ class AvatarWithMenu extends StatelessWidget {
         onTap: () {
           _showPopupMenu();
         },
-        child: Avatar(url: user != null ? user.photoUrl : '', size: 30.0),
+        child: Avatar(url: user?.photoUrl ?? '', size: 30.0),
       ),
     );
   }

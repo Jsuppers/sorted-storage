@@ -10,15 +10,17 @@ import 'package:web/ui/widgets/share_widget.dart';
 /// dialog to share or stop sharing a story
 class ShareDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ShareDialog({Key key, this.commentsID, this.folderID})
+  const ShareDialog(
+      {Key? key,
+        this.commentsID,
+        required this.folderID})
       : super(key: key);
 
   // ignore: public_member_api_docs
-  final String commentsID;
+  final String? commentsID;
 
   // ignore: public_member_api_docs
   final String folderID;
-
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +33,8 @@ class ShareDialog extends StatelessWidget {
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0))),
         elevation: 1,
-        child: BlocBuilder<SharingBloc, SharingState>(
-          builder: (BuildContext context, SharingState state) {
+        child: BlocBuilder<SharingBloc, SharingState?>(
+          builder: (BuildContext context, SharingState? state) {
             if (state == null) {
               return const FullPageLoadingLogo(backgroundColor: Colors.white);
             }

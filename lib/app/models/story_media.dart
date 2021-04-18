@@ -2,14 +2,14 @@
 class StoryMedia {
   // ignore: public_member_api_docs
   StoryMedia({
-    this.fileID,
+    required this.fileID,
     this.thumbnailURL,
     this.stream,
     this.isVideo = false,
     this.isDocument = false,
     this.contentSize,
     this.index = highIntValue,
-    this.name,
+    required this.name,
     this.retrieveThumbnail = false,
   });
 
@@ -36,7 +36,7 @@ class StoryMedia {
   String fileID;
 
   /// the url for the thumbnail
-  String thumbnailURL;
+  String? thumbnailURL;
 
   /// if this media is a video
   bool isVideo;
@@ -48,10 +48,10 @@ class StoryMedia {
   bool isDocument;
 
   /// content size of this media
-  int contentSize;
+  int? contentSize;
 
   /// byte stream of this media
-  Stream<List<int>> stream;
+  Stream<List<int>>? stream;
 
   /// index of this media
   int index;

@@ -2,10 +2,10 @@
 class User {
   // ignore: public_member_api_docs
   User(
-      {this.displayName,
-        this.headers,
-        this.photoUrl,
-        this.email});
+      { required this.displayName,
+        required this.headers,
+        required this.photoUrl,
+        required this.email});
 
   /// email address of this user
   final String email;

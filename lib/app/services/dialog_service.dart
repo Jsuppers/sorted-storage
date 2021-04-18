@@ -27,11 +27,11 @@ class DialogService {
   }
 
   static void imageUploadDialog(BuildContext context,
-      {String folderID, String parentID}) {
+      {required String folderID, required String parentID}) {
     FilePicker.platform
         .pickFiles(
             type: FileType.media, allowMultiple: true, withReadStream: true)
-        .then((FilePickerResult file) => {
+        .then((FilePickerResult? file) => {
               if (file != null && file.files != null && file.files.isNotEmpty)
                 {
                   showDialog(
@@ -40,8 +40,7 @@ class DialogService {
                     useRootNavigator: true,
                     builder: (BuildContext context) {
                       return ImageUploadDialog(
-                        file: file,
-                          folderID: folderID, parentID: parentID);
+                          file: file, folderID: folderID, parentID: parentID);
                     },
                   )
                 }
@@ -58,15 +57,14 @@ class DialogService {
         return EditStoryDialog(folderID: folderID);
       },
     ).then((_) =>
-      // update the ui with any changes made in the edit dialog
-      BlocProvider.of<CloudStoriesBloc>(context)
-          .add(const CloudStoriesEvent(CloudStoriesType.refresh))
-    );
+        // update the ui with any changes made in the edit dialog
+        BlocProvider.of<CloudStoriesBloc>(context)
+            .add(const CloudStoriesEvent(CloudStoriesType.refresh)));
   }
 
   /// dialog to share a folder
   static void shareDialog(
-      BuildContext context, String folderID, String commentsID) {
+      BuildContext context, String folderID, String? commentsID) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -79,7 +77,9 @@ class DialogService {
 
   /// dialog to allow the user to select a emoji
   static void emojiDialog(BuildContext context,
-      {String folderID, String parentID, StoryMetadata metadata}) {
+      {required String folderID,
+      required String parentID,
+      required StoryMetadata metadata}) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -93,7 +93,7 @@ class DialogService {
 
   /// dialog to show error messages when syncing
   static void errorSyncingDialog(BuildContext context,
-      {List<String> errorMessages}) {
+      {required List<String> errorMessages}) {
     showDialog(
       context: context,
       barrierDismissible: true,

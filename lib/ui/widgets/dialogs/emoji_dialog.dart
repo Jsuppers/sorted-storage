@@ -6,7 +6,9 @@ import 'package:web/ui/widgets/edit/emoji_picker.dart';
 /// emoji dialog
 class EmojiDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EmojiDialog({Key key, this.parentID, this.folderID, this.metadata})
+  const EmojiDialog({Key? key,
+    required this.parentID,
+    required this.folderID, required this.metadata})
       : super(key: key);
 
   // ignore: public_member_api_docs

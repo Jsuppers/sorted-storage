@@ -14,13 +14,13 @@ import 'package:web/ui/widgets/story_image.dart';
 class EventCard extends StatefulWidget {
   // ignore: public_member_api_docs
   const EventCard(
-      {Key key,
-      this.width,
-      this.height = double.infinity,
-      this.story,
-      this.controls,
-      this.storyFolderID,
-      this.locked})
+      {Key? key,
+      required this.width,
+      required this.story,
+      required this.controls,
+      required this.storyFolderID,
+      required this.locked,
+      this.height = double.infinity})
       : super(key: key);
 
   /// controls of the card e.g. save, edit, cancel
@@ -46,18 +46,10 @@ class EventCard extends StatefulWidget {
 }
 
 class _TimelineEventCardState extends State<EventCard> {
-  final GlobalKey _formKey = GlobalKey<FormState>();
   final DateFormat formatter = DateFormat('dd MMMM, yyyy');
-  List<String> uploadingImages;
-
-  @override
-  void initState() {
-    super.initState();
-    uploadingImages = <String>[];
-  }
 
   Widget emoji() {
-    return widget.story.metadata.emoji.isEmpty
+    return widget.story.metadata!.emoji.isEmpty
         ? const Text(
             '📅',
             style: TextStyle(
@@ -65,7 +57,7 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
           )
         : Text(
-            widget.story.metadata.emoji,
+            widget.story.metadata!.emoji,
             style: const TextStyle(
               height: 1.2,
             ),
@@ -95,10 +87,9 @@ class _TimelineEventCardState extends State<EventCard> {
     final List<StoryImage> cards = <StoryImage>[];
     if (widget.story.images != null) {
       for (final MapEntry<String, StoryMedia> image
-          in widget.story.images.entries) {
+          in widget.story.images!.entries) {
         cards.add(StoryImage(
           locked: widget.locked,
-          uploadingImages: uploadingImages,
           storyMedia: image.value,
           imageKey: image.key,
           storyFolderID: widget.storyFolderID,
@@ -147,8 +138,8 @@ class _TimelineEventCardState extends State<EventCard> {
             children: <Widget>[
               Text(
                 Property.getValueOrDefault(
-                    widget.story.metadata.title,
-                    'No title given',
+                  widget.story.metadata!.title,
+                  'No title given',
                 ),
                 style: TextStyle(
                     fontSize: 18.0,
@@ -174,7 +165,7 @@ class _TimelineEventCardState extends State<EventCard> {
                       children: cards)),
               Text(
                 Property.getValueOrDefault(
-                  widget.story.metadata.description,
+                  widget.story.metadata!.description,
                   'No description given',
                 ),
                 textAlign: TextAlign.center,

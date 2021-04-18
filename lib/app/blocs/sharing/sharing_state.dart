@@ -4,17 +4,17 @@ abstract class SharingState {
   SharingState(this.errorMessage);
 
   /// error message
-  final String errorMessage;
+  final String? errorMessage;
 }
 
 /// story is shared
 class SharingSharedState extends SharingState {
   /// constructor which allows setting the error message
-  SharingSharedState({String errorMessage}) : super(errorMessage);
+  SharingSharedState({String? errorMessage}) : super(errorMessage);
 }
 
 /// story is not shared
 class SharingNotSharedState extends SharingState {
   /// constructor which allows setting the error message
-  SharingNotSharedState({String errorMessage}) : super(errorMessage);
+  SharingNotSharedState({String? errorMessage}) : super(errorMessage);
 }

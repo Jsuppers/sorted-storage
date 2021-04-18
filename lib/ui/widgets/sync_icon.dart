@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 /// A widget which shows a spinning icon for a duration
 class IconSpinner extends StatefulWidget {
   const IconSpinner({
-    Key key,
-    @required this.icon,
+    Key? key,
+    required this.icon,
     this.duration = const Duration(milliseconds: 3600),
     this.isSpinning = false,
     this.color = Colors.black,
@@ -21,8 +21,8 @@ class IconSpinner extends StatefulWidget {
 
 class _IconSpinnerState extends State<IconSpinner>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Widget _child;
+  late AnimationController _controller;
+  late Widget _child;
 
   @override
   void initState() {

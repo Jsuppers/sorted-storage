@@ -13,8 +13,8 @@ class ClientWithAuthHeaders extends http.BaseClient {
     _headers = headers;
   }
 
-  Map<String, String> _headers;
-  http.Client _client;
+  late Map<String, String> _headers;
+  late http.Client _client;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -34,7 +34,7 @@ class ClientWithGoogleDriveKey extends http.BaseClient {
         when: (http.BaseResponse r) => r.statusCode >= 400, retries: 5);
   }
 
-  http.Client _client;
+  late http.Client _client;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {

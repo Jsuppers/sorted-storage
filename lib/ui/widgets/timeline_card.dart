@@ -21,11 +21,11 @@ import 'package:web/ui/widgets/timeline_event_card.dart';
 class TimelineCard extends StatefulWidget {
   // ignore: public_member_api_docs
   const TimelineCard(
-      {Key key,
-      @required this.width,
-      this.height,
-      @required this.event,
-      this.folderId,
+      {Key? key,
+      required this.width,
+      required this.folderId,
+      required this.height,
+      required this.event,
       this.viewMode = false})
       : super(key: key);
 
@@ -96,7 +96,7 @@ class _TimelineCardState extends State<TimelineCard> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Card(
-        key: Key(widget.event.subEvents.length.toString()),
+        key: Key(widget.event.subEvents!.length.toString()),
         child: Column(
           children: <Widget>[
             EventCard(
@@ -109,7 +109,7 @@ class _TimelineCardState extends State<TimelineCard> {
               height: widget.height,
               story: widget.event.mainStory,
             ),
-            ...List<Widget>.generate(widget.event.subEvents.length,
+            ...List<Widget>.generate(widget.event.subEvents!.length,
                 (int index) {
               return Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -119,17 +119,17 @@ class _TimelineCardState extends State<TimelineCard> {
                     controls: Container(),
                     width: widget.width,
                     height: widget.height,
-                    story: widget.event.subEvents[index]),
+                    story: widget.event.subEvents![index]),
               );
             }),
-            BlocBuilder<AuthenticationBloc, usr.User>(
-                builder: (BuildContext context, usr.User user) {
+            BlocBuilder<AuthenticationBloc, usr.User?>(
+                builder: (BuildContext context, usr.User? user) {
               return CommentWidget(
                 folderID: widget.folderId,
                 user: user,
                 width: widget.width,
                 height: widget.height,
-                sendComment: (BuildContext context, usr.User currentUser,
+                sendComment: (BuildContext context, usr.User? currentUser,
                     String comment) async {
                   String user = 'Anonymous';
                   if (currentUser != null) {

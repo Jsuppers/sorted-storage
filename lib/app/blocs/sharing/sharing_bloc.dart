@@ -7,9 +7,9 @@ import 'package:web/app/services/google_drive.dart';
 
 /// SharingBloc handles creating and delete permissions for a folder to allow
 /// This folder to be shared or un-shared
-class SharingBloc extends Bloc<ShareEvent, SharingState> {
+class SharingBloc extends Bloc<ShareEvent, SharingState?> {
   /// constructor
-  SharingBloc(String folderID, String commentsID, GoogleDrive storage)
+  SharingBloc(String folderID, String? commentsID, GoogleDrive storage)
       : super(null) {
     _folderID = folderID;
     _commentsID = commentsID;
@@ -17,11 +17,11 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
     add(InitialEvent());
   }
 
-  String _folderID;
-  String _commentsID;
-  GoogleDrive _storage;
-  String _folderPermissionID;
-  String _commentsPermissionID;
+  late String _folderID;
+  String? _commentsID;
+  late GoogleDrive _storage;
+  String? _folderPermissionID;
+  String? _commentsPermissionID;
 
   @override
   Stream<SharingState> mapEventToState(ShareEvent event) async* {
@@ -42,7 +42,7 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
       _folderPermissionID =
           await _getPermissions(_folderID, 'anyone', 'reader');
       _commentsPermissionID =
-          await _getPermissions(_commentsID, 'anyone', 'writer');
+          await _getPermissions(_commentsID!, 'anyone', 'writer');
     } catch (e) {
       return SharingNotSharedState(errorMessage: 'cannot retrieve permissions');
     }
@@ -58,11 +58,11 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
     _commentsID = commentsResponse.commentsID;
   }
 
-  Future<String> _getPermissions(
+  Future<String?> _getPermissions(
       String folderID, String type, String role) async {
     final PermissionList list = await _storage.listPermissions(folderID);
 
-    for (final Permission permission in list.permissions) {
+    for (final Permission permission in list.permissions!) {
       if (permission.type == type && permission.role == role) {
         return permission.id;
       }
@@ -73,9 +73,9 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
   Future<SharingState> _shareFolder() async {
     try {
       _folderPermissionID =
-          await _shareFile(_folderPermissionID, _folderID, 'anyone', 'reader');
+          await _shareFile(_folderPermissionID!, _folderID, 'anyone', 'reader');
       _commentsPermissionID = await _shareFile(
-          _commentsPermissionID, _commentsID, 'anyone', 'writer');
+          _commentsPermissionID!, _commentsID!, 'anyone', 'writer');
     } catch (e) {
       return SharingNotSharedState(
           errorMessage: 'error while sharing folder, please try again');
@@ -89,13 +89,13 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
   Future<String> _shareFile(
       String permissionID, String fileID, String type, String role) async {
     if (permissionID == null) {
-      String perm = await _getPermissions(fileID, type, role);
-      return perm ??= await _createPermission(fileID, type, role);
+      String? perm = await _getPermissions(fileID, type, role);
+      return perm ??= await _createPermission(fileID, type, role) ?? '';
     }
     return permissionID;
   }
 
-  Future<String> _createPermission(
+  Future<String?> _createPermission(
       String fileID, String type, String role) async {
     final Permission anyone = Permission();
     anyone.type = type;
@@ -108,9 +108,9 @@ class SharingBloc extends Bloc<ShareEvent, SharingState> {
 
   Future<SharingState> _stopSharingFolder() async {
     try {
-      await _storage.deletePermission(_commentsID, _commentsPermissionID);
+      await _storage.deletePermission(_commentsID!, _commentsPermissionID!);
       _commentsPermissionID = null;
-      await _storage.deletePermission(_folderID, _folderPermissionID);
+      await _storage.deletePermission(_folderID, _folderPermissionID!);
       _folderPermissionID = null;
     } catch (e) {
       return SharingSharedState(

@@ -14,11 +14,11 @@ class CloudStoriesState {
   final Map<String, StoryTimelineData> cloudStories;
 
   /// data returned from the state
-  final StoryTimelineData storyTimelineData;
+  final StoryTimelineData? storyTimelineData;
 
   /// the folder ID for the related story
-  final String folderID;
+  final String? folderID;
 
   /// error message
-  final String error;
+  final String? error;
 }

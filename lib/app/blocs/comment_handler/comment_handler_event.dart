@@ -6,10 +6,10 @@ class CommentHandlerEvent {
   CommentHandlerEvent(this.type, {this.folderID, this.data});
 
   /// the type of event
-  final CommentHandlerType type;
+  final CommentHandlerType? type;
 
   /// folder ID is the stories folder ID
-  final String folderID;
+  final String? folderID;
 
   /// data which is passed in the event
   final dynamic data;

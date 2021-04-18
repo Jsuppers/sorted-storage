@@ -8,21 +8,21 @@ class CloudStoriesEvent {
       {this.storyTimelineData, this.parentID, this.mainEvent, this.folderID, this.error});
 
   /// represents which story this event is for, this can also be a sub event
-  final String folderID;
+  final String? folderID;
 
   /// usually set to the main story folderID, used to find a sub folder
-  final String parentID;
+  final String? parentID;
 
   /// used to tell the bloc which type of event this is
-  final CloudStoriesType type;
+  final CloudStoriesType? type;
 
   /// flag to indicate if this is a main event
-  final bool mainEvent;
+  final bool? mainEvent;
 
   /// data which the bloc will read
-  final StoryTimelineData storyTimelineData;
+  final StoryTimelineData? storyTimelineData;
 
   /// error message to pass on to the front end
-  final String error;
+  final String? error;
 
 }

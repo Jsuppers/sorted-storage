@@ -11,31 +11,32 @@ class CommentHandlerBloc
     extends Bloc<CommentHandlerEvent, CommentHandlerState> {
   /// sets the current state to not uploading
   CommentHandlerBloc(
-      {Map<String, StoryTimelineData> cloudStories, GoogleDrive storage})
+      { required Map<String, StoryTimelineData> cloudStories,
+        required GoogleDrive storage})
       : super(const CommentHandlerState(uploading: false)) {
     _cloudStories = cloudStories;
     _storage = storage;
   }
 
-  GoogleDrive _storage;
-  Map<String, StoryTimelineData> _cloudStories;
+  late GoogleDrive _storage;
+  late Map<String, StoryTimelineData> _cloudStories;
 
   @override
   Stream<CommentHandlerState> mapEventToState(
       CommentHandlerEvent event) async* {
     yield CommentHandlerState(uploading: true, folderID: event.folderID);
 
-    String error;
+    String? error;
     try {
-      final StoryTimelineData timelineEvent = _cloudStories[event.folderID];
+      final StoryTimelineData timelineEvent = _cloudStories[event.folderID]!;
       final CommentsResponse commentsResponse =
           await _storage.uploadCommentsFile(
               commentsID: timelineEvent.mainStory.commentsID,
-              folderID: event.folderID,
+              folderID: event.folderID!,
               comment: event.data as StoryComment);
 
       timelineEvent.mainStory.comments = commentsResponse.comments;
-      timelineEvent.mainStory.commentsID = commentsResponse.commentsID;
+      timelineEvent.mainStory.commentsID = commentsResponse.commentsID!;
     } catch (e) {
       error = 'Error sending comment';
     }

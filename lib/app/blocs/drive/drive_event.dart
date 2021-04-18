@@ -9,5 +9,5 @@ class InitialDriveEvent extends DriveEvent{
   InitialDriveEvent({this.user});
 
   /// the user
-  final usr.User user;
+  final usr.User? user;
 }

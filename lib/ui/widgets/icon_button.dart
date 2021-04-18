@@ -5,14 +5,15 @@ import 'package:web/constants.dart';
 class ButtonWithIcon extends StatelessWidget {
   // ignore: public_member_api_docs
   const ButtonWithIcon(
-      {Key key,
-      this.text,
-      this.icon,
-      this.onPressed,
+      {Key? key,
+      required this.text,
+      required this.icon,
+      required this.width,
+      required this.onPressed,
+      required this.backgroundColor,
       this.iconColor = Colors.white,
-      this.backgroundColor,
-      this.textColor = Colors.white,
-      this.width})
+      this.textColor = Colors.white
+      })
       : super(key: key);
 
   // ignore: public_member_api_docs

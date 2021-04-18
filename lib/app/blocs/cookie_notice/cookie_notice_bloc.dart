@@ -6,7 +6,7 @@ import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 
 ///
-class CookieNoticeBloc extends Cubit<CookieNoticeEvent> {
+class CookieNoticeBloc extends Cubit<CookieNoticeEvent?> {
 
   ///
   CookieNoticeBloc() : super(null) {
@@ -15,10 +15,10 @@ class CookieNoticeBloc extends Cubit<CookieNoticeEvent> {
   }
 
   /// is the notice showing or not
-  bool showing;
+  late bool showing;
 
   /// local storage to store if the cookie notice has already been accepted
-  Future<SharedPreferences> sharedPreferenceInstance;
+  late Future<SharedPreferences> sharedPreferenceInstance;
 
   /// show the cookie notice if needed
   Future<void> showCookie(BuildContext context) async {

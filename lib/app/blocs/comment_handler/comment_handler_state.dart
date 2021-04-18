@@ -5,11 +5,11 @@ class CommentHandlerState {
   const CommentHandlerState({this.error, this.uploading, this.folderID});
 
   /// holds the current state of uploading comments
-  final bool uploading;
+  final bool? uploading;
 
   /// holds the folder ID where the comments are related to
-  final String folderID;
+  final String? folderID;
 
   /// error message to send
-  final String error;
+  final String? error;
 }

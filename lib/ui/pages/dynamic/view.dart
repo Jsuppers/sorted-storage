@@ -13,7 +13,7 @@ import 'package:web/ui/widgets/timeline_card.dart';
 /// page which shows a single story
 class ViewPage extends StatefulWidget {
   // ignore: public_member_api_docs
-  const ViewPage(this._destination, {Key key}) : super(key: key);
+  const ViewPage(this._destination, {Key? key}) : super(key: key);
 
   final String _destination;
 
@@ -22,7 +22,7 @@ class ViewPage extends StatefulWidget {
 }
 
 class _ViewPageState extends State<ViewPage> {
-  StoryTimelineData timelineData;
+  StoryTimelineData? timelineData;
   bool error = false;
 
   @override
@@ -43,7 +43,7 @@ class _ViewPageState extends State<ViewPage> {
           } else if (state.storyTimelineData != null){
             setState(() {
               timelineData = state.storyTimelineData;
-              timelineData.subEvents.sort((StoryContent a, StoryContent b) =>
+              timelineData!.subEvents!.sort((StoryContent a, StoryContent b) =>
                   b.timestamp.compareTo(a.timestamp));
             });
           }
@@ -71,7 +71,8 @@ class _ViewPageState extends State<ViewPage> {
                       key: Key(timelineData.toString()),
                       viewMode: true,
                       width: info.screenSize.width,
-                      event: timelineData,
+                      height: info.screenSize.height,
+                      event: timelineData!,
                       folderId: widget._destination),
                 );
         },

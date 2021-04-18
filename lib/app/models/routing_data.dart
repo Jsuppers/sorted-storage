@@ -2,7 +2,10 @@
 class RoutingData {
   // ignore: public_member_api_docs
   RoutingData(
-      {this.destination, this.baseRoute, this.route, this.queryParameters});
+      {required this.destination,
+      required this.baseRoute,
+      required this.route,
+      required this.queryParameters});
 
   /// full route
   final String route;

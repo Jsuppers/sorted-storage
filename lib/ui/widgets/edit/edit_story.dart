@@ -31,7 +31,7 @@ import 'package:web/ui/widgets/story_image.dart';
 /// page which shows a single story
 class EditStory extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditStory(this._destination, {Key key}) : super(key: key);
+  const EditStory(this._destination, {Key? key}) : super(key: key);
 
   final String _destination;
 
@@ -40,7 +40,7 @@ class EditStory extends StatefulWidget {
 }
 
 class _EditStoryState extends State<EditStory> {
-  StoryTimelineData timelineData;
+  StoryTimelineData? timelineData;
   bool error = false;
 
   @override
@@ -59,14 +59,18 @@ class _EditStoryState extends State<EditStory> {
           if (state.error != null) {
             setState(() => error = true);
           } else {
-            setState(() {
-              timelineData = StoryTimelineData.clone(
-                  BlocProvider.of<CloudStoriesBloc>(context)
-                      .state
-                      .cloudStories[widget._destination]);
-              timelineData.subEvents.sort((StoryContent a, StoryContent b) =>
-                  b.timestamp.compareTo(a.timestamp));
-            });
+            StoryTimelineData? data = BlocProvider.of<CloudStoriesBloc>(context)
+                .state
+                .cloudStories[widget._destination];
+
+            if (data != null) {
+              setState(() {
+                timelineData = StoryTimelineData.clone(data);
+                timelineData!.subEvents!.sort(
+                    (StoryContent a, StoryContent b) =>
+                        b.timestamp.compareTo(a.timestamp));
+              });
+            }
           }
         }
       },
@@ -96,7 +100,7 @@ class _EditStoryState extends State<EditStory> {
             padding: const EdgeInsets.all(20.0),
             child: EditStoryContent(
               width: info.screenSize.width,
-              event: timelineData,
+              event: timelineData!,
               height: info.screenSize.height,
             ));
       }),
@@ -108,7 +112,10 @@ class _EditStoryState extends State<EditStory> {
 class EditStoryContent extends StatefulWidget {
   // ignore: public_member_api_docs
   const EditStoryContent(
-      {Key key, @required this.width, this.height, @required this.event})
+      {Key? key,
+      required this.width,
+      required this.height,
+      required this.event})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -125,7 +132,7 @@ class EditStoryContent extends StatefulWidget {
 }
 
 class _EditStoryContentState extends State<EditStoryContent> {
-  SavingState savingState;
+  SavingState? savingState;
 
   @override
   Widget build(BuildContext context) {
@@ -148,11 +155,14 @@ class _EditStoryContentState extends State<EditStoryContent> {
       SliverToBoxAdapter(
         child: MultiBlocListener(
           listeners: <BlocListener<dynamic, dynamic>>[
-            BlocListener<EditorBloc, EditorState>(
-              listener: (BuildContext context, EditorState state) {
+            BlocListener<EditorBloc, EditorState?>(
+              listener: (BuildContext context, EditorState? state) {
+                if (state == null) {
+                  return;
+                }
                 if (state.type == EditorType.syncingState) {
-                  savingState   = state.data as SavingState;
-                  if(state.refreshUI) {
+                  savingState = state.data as SavingState;
+                  if (state.refreshUI) {
                     setState(() {});
                   }
                 }
@@ -201,7 +211,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                         iconColor: Colors.black),
                   ),
                 ),
-                ...List<Widget>.generate(widget.event.subEvents.length,
+                ...List<Widget>.generate(widget.event.subEvents!.length,
                     (int index) {
                   return Padding(
                     padding: const EdgeInsets.all(20.0),
@@ -236,7 +246,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                                           parentID:
                                               widget.event.mainStory.folderID,
                                           folderID: widget.event
-                                              .subEvents[index].folderID));
+                                              .subEvents![index].folderID));
                                 },
                               ),
                             ),
@@ -244,7 +254,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                         ),
                         width: widget.width,
                         height: widget.height,
-                        story: widget.event.subEvents[index]),
+                        story: widget.event.subEvents![index]),
                   );
                 }),
               ],
@@ -260,13 +270,13 @@ class _EditStoryContentState extends State<EditStoryContent> {
 class EventCard extends StatefulWidget {
   // ignore: public_member_api_docs
   const EventCard(
-      {Key key,
-      this.width,
+      {Key? key,
+      required this.width,
+      required this.story,
+      required this.controls,
+      required this.storyFolderID,
       this.height = double.infinity,
-      this.story,
-      this.savingState,
-      this.controls,
-      this.storyFolderID})
+      this.savingState})
       : super(key: key);
 
   /// controls of the card e.g. save, edit, cancel
@@ -275,7 +285,7 @@ class EventCard extends StatefulWidget {
   /// width of the card
   final double width;
 
-  final SavingState savingState;
+  final SavingState? savingState;
 
   /// height of the card
   final double height;
@@ -293,10 +303,9 @@ class EventCard extends StatefulWidget {
 class _TimelineEventCardState extends State<EventCard> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  DateTime selectedDate;
-  String formattedDate;
-  List<String> uploadingImages;
-  Timer _debounce;
+  late DateTime selectedDate;
+  late String formattedDate;
+  Timer? _debounce;
 
   @override
   void dispose() {
@@ -308,7 +317,6 @@ class _TimelineEventCardState extends State<EventCard> {
   void initState() {
     super.initState();
     selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.story.timestamp);
-    uploadingImages = <String>[];
     formattedDate = DateFormat('dd MMMM, yyyy').format(selectedDate);
   }
 
@@ -327,8 +335,8 @@ class _TimelineEventCardState extends State<EventCard> {
           onPressed: () => DialogService.emojiDialog(context,
               parentID: widget.storyFolderID,
               folderID: widget.story.folderID,
-              metadata: widget.story.metadata),
-          child: widget.story.metadata.emoji.isEmpty
+              metadata: widget.story.metadata!),
+          child: widget.story.metadata!.emoji.isEmpty
               ? const Text(
                   '📅',
                   style: TextStyle(
@@ -336,7 +344,7 @@ class _TimelineEventCardState extends State<EventCard> {
                   ),
                 )
               : Text(
-                  widget.story.metadata.emoji,
+                  widget.story.metadata!.emoji,
                   style: const TextStyle(
                     height: 1.2,
                   ),
@@ -363,13 +371,12 @@ class _TimelineEventCardState extends State<EventCard> {
                 enabledBorder: InputBorder.none,
                 disabledBorder: InputBorder.none,
                 contentPadding: EdgeInsets.zero),
-            textStyle: TextStyle(
+            dateTextStyle: TextStyle(
               fontSize: 12.0,
               fontFamily: 'Roboto',
               fontWeight: FontWeight.normal,
               color: myThemeData.primaryColorLight,
             ),
-            label: null,
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
               BlocProvider.of<EditorBloc>(context).add(
@@ -387,11 +394,11 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    titleController.text = widget.story.metadata.title;
+    titleController.text = widget.story.metadata!.title;
     // TODO save position
     titleController.selection =
         TextSelection.collapsed(offset: titleController.text.length);
-    descriptionController.text = widget.story.metadata.description;
+    descriptionController.text = widget.story.metadata!.description;
     // TODO save position
     descriptionController.selection =
         TextSelection.collapsed(offset: descriptionController.text.length);
@@ -399,10 +406,9 @@ class _TimelineEventCardState extends State<EventCard> {
     final List<StoryImage> cards = <StoryImage>[];
     if (widget.story.images != null) {
       for (final MapEntry<String, StoryMedia> image
-          in widget.story.images.entries) {
+          in widget.story.images!.entries) {
         cards.add(StoryImage(
           locked: false,
-          uploadingImages: uploadingImages,
           storyMedia: image.value,
           imageKey: image.key,
           storyFolderID: widget.storyFolderID,
@@ -447,9 +453,9 @@ class _TimelineEventCardState extends State<EventCard> {
                         hintText: 'Enter a title'),
                     controller: titleController,
                     onChanged: (String content) {
-                      if (_debounce?.isActive ?? false) _debounce.cancel();
+                      if (_debounce?.isActive ?? false) _debounce?.cancel();
                       _debounce = Timer(const Duration(milliseconds: 500), () {
-                        widget.story.metadata.title = content;
+                        widget.story.metadata!.title = content;
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.updateMetadata,
                             parentID: widget.storyFolderID,
@@ -525,9 +531,9 @@ class _TimelineEventCardState extends State<EventCard> {
                         contentPadding: EdgeInsets.zero,
                         hintText: 'Enter a description'),
                     onChanged: (String content) {
-                      if (_debounce?.isActive ?? false) _debounce.cancel();
+                      if (_debounce?.isActive ?? false) _debounce?.cancel();
                       _debounce = Timer(const Duration(milliseconds: 500), () {
-                        widget.story.metadata.description = content;
+                        widget.story.metadata!.description = content;
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.updateMetadata,
                             parentID: widget.storyFolderID,

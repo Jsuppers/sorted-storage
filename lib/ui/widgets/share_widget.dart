@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/blocs/sharing/sharing_state.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -11,7 +8,11 @@ import 'package:web/ui/widgets/share_button.dart';
 // ignore: public_member_api_docs
 class ShareWidget extends StatefulWidget {
   // ignore: public_member_api_docs
-  const ShareWidget({Key key, this.folderID, this.state}) : super(key: key);
+  const ShareWidget({
+    Key? key,
+    required this.folderID,
+    required this.state})
+      : super(key: key);
 
   // ignore: public_member_api_docs
   final String folderID;
@@ -54,7 +55,7 @@ class _ShareWidgetState extends State<ShareWidget> {
                   children: <Widget>[
                     const Icon(Icons.error),
                     const SizedBox(width: 5),
-                    Text(widget.state.errorMessage),
+                    Text(widget.state.errorMessage!),
                   ],
                 )
               else
@@ -95,8 +96,7 @@ class _ShareWidgetState extends State<ShareWidget> {
                 ),
               ShareButton(
                   key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-                  shared: shared,
-                  loading: false),
+                  shared: shared),
               Container(
                 padding: const EdgeInsets.all(20),
                 child: shared

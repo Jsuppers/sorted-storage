@@ -1,17 +1,13 @@
+import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
-import 'package:web/app/blocs/editor/editor_bloc.dart';
-import 'package:web/app/blocs/editor/editor_event.dart';
-import 'package:web/app/blocs/editor/editor_state.dart';
-import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/icons/my_flutter_app_icons.dart';
 import 'package:web/app/models/routing_data.dart';
-import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
@@ -21,14 +17,13 @@ import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/side_menu.dart';
-import 'package:web/ui/widgets/sync_icon.dart';
 
 /// layout widget
 class LayoutWrapper extends StatelessWidget {
   // ignore: public_member_api_docs
   const LayoutWrapper(
-      {Key key,
-      this.widget,
+      {Key? key,
+      required this.widget,
       this.requiresAuthentication = false,
       this.showAddButton = false,
       this.routingData,
@@ -45,18 +40,18 @@ class LayoutWrapper extends StatelessWidget {
   final bool isViewMode;
 
   /// the targeted route
-  final RoutingData routingData;
+  final RoutingData? routingData;
 
   /// ability to add a story
   final bool showAddButton;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthenticationBloc, usr.User>(
-        builder: (BuildContext context, usr.User user) {
+    return BlocBuilder<AuthenticationBloc, usr.User?>(
+        builder: (BuildContext context, usr.User? user) {
       if (requiresAuthentication && user == null) {
         Widget redirectWidget;
-        if (routingData.route == '/') {
+        if (routingData?.route == '/') {
           redirectWidget = HomePage();
         } else {
           redirectWidget = LoginPage();
@@ -66,7 +61,7 @@ class LayoutWrapper extends StatelessWidget {
           showAddButton: showAddButton,
         );
       }
-      if (routingData.route == '/' && user != null) {
+      if (routingData?.route == '/' && user != null) {
         BlocProvider.of<NavigationBloc>(context).add(NavigateToMediaEvent());
       }
       return Content(
@@ -82,11 +77,11 @@ class LayoutWrapper extends StatelessWidget {
 class Content extends StatefulWidget {
   // ignore: public_member_api_docs
   const Content(
-      {Key key,
-      @required this.widget,
+      {Key? key,
+      required this.widget,
+      this.routingData,
       this.includeNavigation = true,
-      this.showAddButton,
-      this.routingData})
+      this.showAddButton = false})
       : super(key: key);
 
   /// main widget
@@ -99,23 +94,23 @@ class Content extends StatefulWidget {
   final bool showAddButton;
 
   /// the targeted route
-  final RoutingData routingData;
+  final RoutingData? routingData;
 
   @override
   _ContentState createState() => _ContentState();
 }
 
-class _ContentState extends State<Content> {
+class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
   @override
   void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
+    WidgetsBinding.instance?.addPostFrameCallback(
         (_) => BlocProvider.of<CookieNoticeBloc>(context).showCookie(context));
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final User user = BlocProvider.of<AuthenticationBloc>(context).state;
+    final User? user = BlocProvider.of<AuthenticationBloc>(context).state;
     return Scaffold(
       drawer: NavigationDrawer(),
       extendBodyBehindAppBar: true,
@@ -126,9 +121,9 @@ class _ContentState extends State<Content> {
         actions: <Widget>[
           Container(
             padding: const EdgeInsets.all(10),
-            child: user != null ? AvatarWithMenu(user: user) : NavigationLogin(),
+            child:
+                user != null ? AvatarWithMenu(user: user) : NavigationLogin(),
           )
-
         ],
       ),
       body: ResponsiveBuilder(
@@ -149,59 +144,152 @@ class _ContentState extends State<Content> {
           ),
         ),
       ),
-      floatingActionButton: Visibility(
-        visible: widget.showAddButton,
-        child: ActionButton(),
-      ),
+      floatingActionButton: CustomActionButton(),
     );
   }
 }
 
-class ActionButton extends StatefulWidget {
+class CustomActionButton extends StatefulWidget {
   @override
-  _ActionButtonState createState() => _ActionButtonState();
+  _CustomActionButtonState createState() => _CustomActionButtonState();
 }
 
-class _ActionButtonState extends State<ActionButton> {
-  bool saving = false;
+class _CustomActionButtonState extends State<CustomActionButton>
+    with SingleTickerProviderStateMixin {
+  late Animation<double> _animation;
+  late AnimationController _animationController;
+  IconData iconData = MyFlutterApp.privacy;
+
+  @override
+  void initState() {
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 260),
+    );
+
+    final CurvedAnimation curvedAnimation =
+        CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
+    _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<EditorBloc, EditorState>(
-      listener: (BuildContext context, EditorState state) {
-        if (state.type == EditorType.syncingState) {
-          setState(() {
-            saving = state.data == SavingState.saving;
-          });
-        }
-      },
-      child: FloatingActionButton(
-        onPressed: () {
-          if (saving == true) {
-            return;
+    return FloatingActionBubble(
+      // Menu items
+      items: <Bubble>[
+        // Floating action menu item
+        Bubble(
+          title: 'Donate',
+          iconColor: Colors.pink,
+          bubbleColor: Colors.white,
+          icon: Icons.favorite,
+          titleStyle: TextStyle(fontSize: 16, color: Colors.pink),
+          onPress: () {},
+        ),
+
+        // Floating action menu item
+        Bubble(
+          title: 'Settings',
+          iconColor: Colors.orange,
+          bubbleColor: Colors.white,
+          icon: Icons.settings,
+          titleStyle: TextStyle(fontSize: 16, color: Colors.orange),
+          onPress: () {},
+        ),
+        // Floating action menu item
+        Bubble(
+          title: 'Profile',
+          iconColor: Colors.green,
+          bubbleColor: Colors.white,
+          icon: Icons.person,
+          titleStyle: TextStyle(fontSize: 16, color: Colors.green),
+          onPress: () {},
+        ),
+        //Floating action menu item
+        Bubble(
+          title: 'Home',
+          iconColor: Colors.blue,
+          bubbleColor: Colors.white,
+          icon: Icons.home,
+          titleStyle: TextStyle(fontSize: 16, color: Colors.blue),
+          onPress: () {},
+        ),
+      ],
+
+      // animation controller
+      animation: _animation,
+
+      // On pressed change animation state
+      onPress: () {
+        setState(() {
+          if (_animationController.isCompleted) {
+            iconData = MyFlutterApp.privacy;
+            _animationController.reverse();
+          } else {
+            iconData = MyFlutterApp.open_source;
+            _animationController.forward();
           }
-          setState(() {
-            saving = true;
-          });
-          final String mediaFile =
-              BlocProvider.of<CloudStoriesBloc>(context).currentMediaFileId;
-          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-              EditorType.createStory,
-              parentID: mediaFile,
-              mainEvent: true));
-        },
-        backgroundColor: myThemeData.primaryColorDark,
-        child: saving
-            ? const IconSpinner(
-                icon: Icons.sync,
-                color: Colors.white,
-                isSpinning: true, // change it to true or false
-              )
-            : const Icon(
-                Icons.add,
-                color: Colors.white,
-              ),
-      ),
+        });
+      },
+
+      // Floating Action button Icon color
+      backGroundColor: Colors.white,
+      iconData: iconData,
+      iconColor: Colors.black,
     );
   }
 }
+
+//
+//class ActionButton extends StatefulWidget {
+//  @override
+//  _ActionButtonState createState() => _ActionButtonState();
+//}
+//
+//class _ActionButtonState extends State<ActionButton> {
+//  bool saving = false;
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    return BlocListener<EditorBloc, EditorState>(
+//      listener: (BuildContext context, EditorState state) {
+//        if (state.type == EditorType.syncingState) {
+//          setState(() {
+//            saving = state.data == SavingState.saving;
+//          });
+//        }
+//      },
+//      child: FloatingActionButton(
+//        onPressed: () {
+//          if (saving == true) {
+//            return;
+//          }
+//          setState(() {
+//            saving = true;
+//          });
+//          final String mediaFile =
+//              BlocProvider
+//                  .of<CloudStoriesBloc>(context)
+//                  .currentMediaFileId;
+//          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+//              EditorType.createStory,
+//              parentID: mediaFile,
+//              mainEvent: true));
+//        },
+//        backgroundColor: myThemeData.primaryColorDark,
+//        child: saving
+//            ? const IconSpinner(
+//          icon: Icons.sync,
+//          color: Colors.white,
+//          isSpinning: true, // change it to true or false
+//        )
+//            : const Icon(
+//          Icons.add,
+//          color: Colors.white,
+//        ),
+//      ),
+//    );
+//  }
+//}
