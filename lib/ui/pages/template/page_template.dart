@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:web/app/models/page_content.dart';
+import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
 
 /// template for displaying a page
 class PageTemplate extends StatelessWidget {
@@ -31,7 +32,14 @@ class PageTemplate extends StatelessWidget {
       mobile = true;
     }
 
-    final List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[
+      Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Align(
+          alignment: Alignment.centerRight,
+            child: NavigationLogin()),
+      )
+    ];
     for (final PageItemContent content in _contentList) {
       if (borderless) {
         children.add(
@@ -138,7 +146,7 @@ class _BorderedContent extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(10.0),

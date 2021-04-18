@@ -20,7 +20,7 @@ class LoginPage extends StatelessWidget {
           BlocProvider.of<NavigationBloc>(context).add(NavigateToMediaEvent());
         }
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(20.0),

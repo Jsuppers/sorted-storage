@@ -9,14 +9,14 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/icons/my_flutter_app_icons.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/app/models/user.dart' as usr;
+import 'package:web/app/services/url_service.dart';
+import 'package:web/constants.dart';
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
 import 'package:web/app/models/user.dart';
-import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
 import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
-import 'package:web/ui/widgets/side_menu.dart';
 
 /// layout widget
 class LayoutWrapper extends StatelessWidget {
@@ -113,19 +113,6 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
     final User? user = BlocProvider.of<AuthenticationBloc>(context).state;
     return Scaffold(
       drawer: NavigationDrawer(),
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        elevation: 0.0,
-        toolbarHeight: 60,
-        backgroundColor: Colors.transparent,
-        actions: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(10),
-            child:
-                user != null ? AvatarWithMenu(user: user) : NavigationLogin(),
-          )
-        ],
-      ),
       body: ResponsiveBuilder(
         builder: (BuildContext context, SizingInformation sizingInformation) =>
             Container(
@@ -159,12 +146,14 @@ class _CustomActionButtonState extends State<CustomActionButton>
   late Animation<double> _animation;
   late AnimationController _animationController;
   IconData iconData = MyFlutterApp.privacy;
+  usr.User? user;
 
   @override
   void initState() {
+    user = BlocProvider.of<AuthenticationBloc>(context).state;
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 260),
+      duration: const Duration(milliseconds: 260),
     );
 
     final CurvedAnimation curvedAnimation =
@@ -176,68 +165,67 @@ class _CustomActionButtonState extends State<CustomActionButton>
 
   @override
   Widget build(BuildContext context) {
-    return FloatingActionBubble(
-      // Menu items
-      items: <Bubble>[
-        // Floating action menu item
-        Bubble(
-          title: 'Donate',
-          iconColor: Colors.pink,
-          bubbleColor: Colors.white,
-          icon: Icons.favorite,
-          titleStyle: TextStyle(fontSize: 16, color: Colors.pink),
-          onPress: () {},
-        ),
-
-        // Floating action menu item
-        Bubble(
-          title: 'Settings',
-          iconColor: Colors.orange,
-          bubbleColor: Colors.white,
-          icon: Icons.settings,
-          titleStyle: TextStyle(fontSize: 16, color: Colors.orange),
-          onPress: () {},
-        ),
-        // Floating action menu item
-        Bubble(
-          title: 'Profile',
-          iconColor: Colors.green,
-          bubbleColor: Colors.white,
-          icon: Icons.person,
-          titleStyle: TextStyle(fontSize: 16, color: Colors.green),
-          onPress: () {},
-        ),
-        //Floating action menu item
-        Bubble(
-          title: 'Home',
-          iconColor: Colors.blue,
-          bubbleColor: Colors.white,
-          icon: Icons.home,
-          titleStyle: TextStyle(fontSize: 16, color: Colors.blue),
-          onPress: () {},
-        ),
-      ],
-
-      // animation controller
-      animation: _animation,
-
-      // On pressed change animation state
-      onPress: () {
-        setState(() {
-          if (_animationController.isCompleted) {
-            iconData = MyFlutterApp.privacy;
-            _animationController.reverse();
-          } else {
-            iconData = MyFlutterApp.open_source;
-            _animationController.forward();
-          }
-        });
+    return BlocListener<AuthenticationBloc, usr.User?>(
+      listener: (BuildContext context, usr.User? user) {
+        setState(() => this.user = user);
       },
+      child: Visibility(
+        visible: user != null,
+        child: FloatingActionBubble(
+          // Menu items
+          items: <Bubble>[
+            // Floating action menu item
+            Bubble(
+              title: 'Donate',
+              iconColor: Colors.pink,
+              bubbleColor: Colors.white,
+              icon: Icons.favorite,
+              titleStyle: const TextStyle(fontSize: 16, color: Colors.pink),
+              onPress: () => URLService.openURL(Constants.donateURL),
+            ),
+            Bubble(
+              title: 'Profile',
+              iconColor: Colors.green,
+              bubbleColor: Colors.white,
+              icon: Icons.person,
+              titleStyle: const TextStyle(fontSize: 16, color: Colors.green),
+              onPress: () => BlocProvider.of<NavigationBloc>(context)
+                  .add(NavigateToProfileEvent()),
+            ),
+            //Floating action menu item
+            Bubble(
+              title: 'Home',
+              iconColor: Colors.blue,
+              bubbleColor: Colors.white,
+              icon: Icons.home,
+              titleStyle: const TextStyle(fontSize: 16, color: Colors.blue),
+              onPress: () => BlocProvider.of<NavigationBloc>(context)
+                  .add(NavigateToMediaEvent()),
+            ),
+          ],
 
-      // Floating Action button Icon color
-      backGroundColor: Colors.white,
-      iconData: iconData,
-      iconColor: Colors.black,
+          // animation controller
+          animation: _animation,
+
+          // On pressed change animation state
+          onPress: () {
+            setState(() {
+              if (_animationController.isCompleted) {
+                iconData = MyFlutterApp.privacy;
+                _animationController.reverse();
+              } else {
+                iconData = MyFlutterApp.open_source;
+                _animationController.forward();
+              }
+            });
+          },
+
+          // Floating Action button Icon color
+          backGroundColor: Colors.white,
+          iconData: iconData,
+          iconColor: Colors.black,
+        ),
+      ),
     );
   }
 }

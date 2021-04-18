@@ -37,6 +37,14 @@ class NavigateToMediaEvent extends NavigationEvent {
       : super(route: routePaths[route.media]!, requiresAuthentication: true);
 }
 
+/// event to navigate to the media page
+class NavigateToProfileEvent extends NavigationEvent {
+  /// constructor which sets route to the media page
+  NavigateToProfileEvent()
+      : super(route: routePaths[route.profile]!, requiresAuthentication: true);
+}
+
+
 /// event to navigate to the documents page
 class NavigateToDocumentsEvent extends NavigationEvent {
   /// constructor which sets route to the documents page
