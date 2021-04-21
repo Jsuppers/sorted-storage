@@ -5,10 +5,12 @@ import 'package:web/app/models/timeline_data.dart';
 class CloudStoriesState {
   /// The state contains the type of state and a copy of the cloud timeline
   const CloudStoriesState(this.type, this.cloudStories,
-      {this.storyTimelineData, this.folderID, this.error});
+      {this.storyTimelineData, this.folderID, this.error, this.data});
 
   /// type of state
   final CloudStoriesType type;
+
+  final dynamic data;
 
   /// cloud copy of the timeline
   final Map<String, StoryTimelineData> cloudStories;

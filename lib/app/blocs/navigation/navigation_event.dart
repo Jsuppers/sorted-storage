@@ -38,6 +38,13 @@ class NavigateToMediaEvent extends NavigationEvent {
 }
 
 /// event to navigate to the media page
+class NavigateToFolderEvent extends NavigationEvent {
+  /// constructor which sets route to the media page
+  NavigateToFolderEvent()
+      : super(route: routePaths[route.folders]!, requiresAuthentication: true);
+}
+
+/// event to navigate to the media page
 class NavigateToProfileEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToProfileEvent()

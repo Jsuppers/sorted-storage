@@ -17,7 +17,7 @@ class LoginPage extends StatelessWidget {
     return BlocBuilder<AuthenticationBloc, User?>(
       builder: (BuildContext context, User? user) {
         if (user != null) {
-          BlocProvider.of<NavigationBloc>(context).add(NavigateToMediaEvent());
+          BlocProvider.of<NavigationBloc>(context).add(NavigateToFolderEvent());
         }
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),

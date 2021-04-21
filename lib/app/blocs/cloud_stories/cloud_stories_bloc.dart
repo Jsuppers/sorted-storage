@@ -5,6 +5,7 @@ import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/models/folder_properties.dart';
 import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
@@ -23,8 +24,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       required this.storage})
       : super(CloudStoriesState(CloudStoriesType.initialState, cloudStories)) {
     _cloudStories = cloudStories;
+    _folders = <FolderProperties>[];
   }
 
+  late List<FolderProperties> _folders;
   late Map<String, StoryTimelineData> _cloudStories;
   GoogleDrive storage;
   late String currentMediaFileId;
@@ -32,6 +35,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   @override
   Stream<CloudStoriesState> mapEventToState(CloudStoriesEvent event) async* {
     switch (event.type) {
+      case CloudStoriesType.retrieveFolders:
+        _folders = await _getFolders();
+        yield CloudStoriesState(CloudStoriesType.retrieveFolders, _cloudStories,
+            data: _folders);
+        break;
       case CloudStoriesType.retrieveStory:
       case CloudStoriesType.retrieveStories:
         _getStories(folderID: event.folderID);
@@ -237,5 +245,43 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         commentsID: commentsID,
         subEvents: subEvents,
         folderID: folderID);
+  }
+
+  Future<List<FolderProperties>> _getFolders() async {
+    if (_folders.isNotEmpty) {
+      return _folders;
+    }
+    final String query =
+        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+    final FileList folderParent = await storage.listFiles(query);
+    String parentId;
+
+    if (folderParent.files!.isEmpty) {
+      final File fileMetadata = File();
+      fileMetadata.name = Constants.rootFolder;
+      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+      fileMetadata.description = "please don't modify this folder";
+      final File rt = await storage.createFile(fileMetadata);
+      parentId = rt.id!;
+    } else {
+      parentId = folderParent.files!.first.id!;
+    }
+
+    final FileList filesInFolder = await storage.listFiles(
+        "'$parentId' in parents and trashed=false",
+        filter: 'files(id,name)');
+
+    List<FolderProperties> output = <FolderProperties>[];
+
+    if (filesInFolder.files != null) {
+      filesInFolder.files!.forEach((element) {
+        FolderProperties? fp =
+            FolderProperties.extractProperties(element.name!, element.id!);
+        if (fp != null) {
+          output.add(fp);
+        }
+      });
+    }
+    return output;
   }
 }

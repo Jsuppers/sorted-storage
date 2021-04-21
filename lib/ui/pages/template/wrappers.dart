@@ -62,7 +62,7 @@ class LayoutWrapper extends StatelessWidget {
         );
       }
       if (routingData?.route == '/' && user != null) {
-        BlocProvider.of<NavigationBloc>(context).add(NavigateToMediaEvent());
+        BlocProvider.of<NavigationBloc>(context).add(NavigateToFolderEvent());
       }
       return Content(
           widget: widget,
@@ -200,7 +200,7 @@ class _CustomActionButtonState extends State<CustomActionButton>
               icon: Icons.home,
               titleStyle: const TextStyle(fontSize: 16, color: Colors.blue),
               onPress: () => BlocProvider.of<NavigationBloc>(context)
-                  .add(NavigateToMediaEvent()),
+                  .add(NavigateToFolderEvent()),
             ),
           ],
 

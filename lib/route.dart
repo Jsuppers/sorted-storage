@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/ui/pages/dynamic/documents.dart';
+import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/pages/dynamic/media.dart';
 import 'package:web/ui/pages/dynamic/profile.dart';
 import 'package:web/ui/pages/dynamic/view.dart';
@@ -13,7 +14,7 @@ import 'package:web/ui/pages/static/terms_of_conditions.dart';
 import 'package:web/ui/pages/template/wrappers.dart';
 
 /// route enums
-enum route { documents, media, view, login, policy, terms, error, home, profile }
+enum route { documents, media, view, login, policy, terms, error, home, profile, folders }
 
 /// map of route paths
 const Map<route, String> routePaths = <route, String>{
@@ -25,6 +26,7 @@ const Map<route, String> routePaths = <route, String>{
   route.terms: '/terms',
   route.error: '/error',
   route.home: '/home',
+  route.folders: '/folders',
   route.profile: '/profile'
 };
 
@@ -54,6 +56,7 @@ class RouteConfiguration {
     return baseRoute == routePaths[route.media] ||
         baseRoute == routePaths[route.documents] ||
         baseRoute == routePaths[route.profile] ||
+        baseRoute == routePaths[route.folders] ||
         baseRoute == '/';
   }
 
@@ -86,10 +89,13 @@ class RouteConfiguration {
     if (baseRoute == routePaths[route.error]) {
       return ErrorPage();
     }
+    if (baseRoute == routePaths[route.folders]) {
+      return FolderPage();
+    }
     if (baseRoute == routePaths[route.home]) {
       return HomePage();
     }
-    return MediaPage();
+    return FolderPage();
   }
 
   static RoutingData getRoutingData(String? path) {
