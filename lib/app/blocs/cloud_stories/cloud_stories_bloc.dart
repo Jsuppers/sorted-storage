@@ -31,18 +31,24 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   late Map<String, StoryTimelineData> _cloudStories;
   GoogleDrive storage;
   late String currentMediaFileId;
+  late String rootFolderID;
 
   @override
   Stream<CloudStoriesState> mapEventToState(CloudStoriesEvent event) async* {
     switch (event.type) {
+      case CloudStoriesType.rootFolder:
+        rootFolderID = await _getCurrentUserRootFolderID();
+        yield CloudStoriesState(CloudStoriesType.rootFolder, _cloudStories,
+            data: rootFolderID);
+        break;
       case CloudStoriesType.retrieveFolders:
-        _folders = await _getFolders();
+        _folders = await _getFolders(event.folderID);
         yield CloudStoriesState(CloudStoriesType.retrieveFolders, _cloudStories,
             data: _folders);
         break;
       case CloudStoriesType.retrieveStory:
       case CloudStoriesType.retrieveStories:
-        _getStories(folderID: event.folderID);
+        _getStories(event.folderID);
         break;
       case CloudStoriesType.refresh:
         yield CloudStoriesState(CloudStoriesType.refresh, _cloudStories,
@@ -59,33 +65,34 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
   }
 
-  void _getStories({String? folderID}) {
-    if (folderID != null) {
-      if (_cloudStories.isEmpty || _cloudStories[folderID] == null) {
-        _getViewEvent(folderID).then(
-            (StoryTimelineData? data) => add(CloudStoriesEvent(
-                CloudStoriesType.refresh,
-                folderID: folderID,
-                storyTimelineData: data)),
-            onError: (dynamic error) => add(CloudStoriesEvent(
-                CloudStoriesType.refresh,
-                error: error.toString())));
-      } else {
-        add(CloudStoriesEvent(CloudStoriesType.refresh,
-            folderID: folderID, storyTimelineData: _cloudStories[folderID]));
-      }
+  void _getStories(String? folderID) {
+    if (folderID == null) {
+      return;
+//      if (_cloudStories.isEmpty || _cloudStories[folderID] == null) {
+//        _getViewEvent(folderID).then(
+//            (StoryTimelineData? data) => add(CloudStoriesEvent(
+//                CloudStoriesType.refresh,
+//                folderID: folderID,
+//                storyTimelineData: data)),
+//            onError: (dynamic error) => add(CloudStoriesEvent(
+//                CloudStoriesType.refresh,
+//                error: error.toString())));
+//      } else {
+//        add(CloudStoriesEvent(CloudStoriesType.refresh,
+//            folderID: folderID, storyTimelineData: _cloudStories[folderID]));
+//      }
     }
     if (_cloudStories.isEmpty) {
-      _getMediaFolder().then((String value) {
-        currentMediaFileId = value;
-        _getStoriesFromFolder(value).then(
+//      _getMediaFolder(folderID).then((String value) {
+//        currentMediaFileId = value;
+        _getStoriesFromFolder(folderID).then(
             (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh)),
             onError: (_) => add(const CloudStoriesEvent(
                 CloudStoriesType.refresh,
                 error: 'Error retrieving stories')));
-      },
-          onError: (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh,
-              error: 'Error retrieving media')));
+//      },
+//          onError: (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh,
+//              error: 'Error retrieving media')));
     } else {
       add(const CloudStoriesEvent(CloudStoriesType.refresh));
     }
@@ -137,44 +144,44 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     return StoryTimelineData(mainStory: mainEvent, subEvents: subEvents);
   }
 
-  Future<String> _getMediaFolder() async {
-    String mediaFolderID;
-
-    final String query =
-        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
-    final FileList folderParent = await storage.listFiles(query);
-    String parentId;
-
-    if (folderParent.files!.isEmpty) {
-      final File fileMetadata = File();
-      fileMetadata.name = Constants.rootFolder;
-      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-      fileMetadata.description = "please don't modify this folder";
-      final File rt = await storage.createFile(fileMetadata);
-      parentId = rt.id!;
-    } else {
-      parentId = folderParent.files!.first.id!;
-    }
-
-    final String query2 =
-        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.mediaFolder}' and '$parentId' in parents and trashed=false";
-    final FileList folder = await storage.listFiles(query2);
-
-    if (folder.files!.isEmpty) {
-      final File mediaFolder = File();
-      mediaFolder.name = Constants.mediaFolder;
-      mediaFolder.parents = <String>[parentId];
-      mediaFolder.mimeType = 'application/vnd.google-apps.folder';
-      mediaFolder.description = "please don't modify this folder";
-
-      final File folder = await storage.createFile(mediaFolder);
-      mediaFolderID = folder.id!;
-    } else {
-      mediaFolderID = folder.files!.first.id!;
-    }
-
-    return mediaFolderID;
-  }
+//  Future<String> _getMediaFolder() async {
+//    String mediaFolderID;
+//
+//    final String query =
+//        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+//    final FileList folderParent = await storage.listFiles(query);
+//    String parentId;
+//
+//    if (folderParent.files!.isEmpty) {
+//      final File fileMetadata = File();
+//      fileMetadata.name = Constants.rootFolder;
+//      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+//      fileMetadata.description = "please don't modify this folder";
+//      final File rt = await storage.createFile(fileMetadata);
+//      parentId = rt.id!;
+//    } else {
+//      parentId = folderParent.files!.first.id!;
+//    }
+//
+//    final String query2 =
+//        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.mediaFolder}' and '$parentId' in parents and trashed=false";
+//    final FileList folder = await storage.listFiles(query2);
+//
+//    if (folder.files!.isEmpty) {
+//      final File mediaFolder = File();
+//      mediaFolder.name = Constants.mediaFolder;
+//      mediaFolder.parents = <String>[parentId];
+//      mediaFolder.mimeType = 'application/vnd.google-apps.folder';
+//      mediaFolder.description = "please don't modify this folder";
+//
+//      final File folder = await storage.createFile(mediaFolder);
+//      mediaFolderID = folder.id!;
+//    } else {
+//      mediaFolderID = folder.files!.first.id!;
+//    }
+//
+//    return mediaFolderID;
+//  }
 
   Future<StoryContent> _createEventFromFolder(
       String folderID, int timestamp) async {
@@ -247,15 +254,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         folderID: folderID);
   }
 
-  Future<List<FolderProperties>> _getFolders() async {
-    if (_folders.isNotEmpty) {
-      return _folders;
-    }
+  Future<String> _getCurrentUserRootFolderID() async {
     final String query =
         "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
     final FileList folderParent = await storage.listFiles(query);
     String parentId;
-
     if (folderParent.files!.isEmpty) {
       final File fileMetadata = File();
       fileMetadata.name = Constants.rootFolder;
@@ -266,9 +269,16 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     } else {
       parentId = folderParent.files!.first.id!;
     }
+    return parentId;
+  }
+
+  Future<List<FolderProperties>> _getFolders(String? folderID) async {
+    if (folderID == null) {
+      return [];
+    }
 
     final FileList filesInFolder = await storage.listFiles(
-        "'$parentId' in parents and trashed=false",
+        "'$folderID' in parents and trashed=false",
         filter: 'files(id,name)');
 
     List<FolderProperties> output = <FolderProperties>[];

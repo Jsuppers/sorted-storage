@@ -3,13 +3,23 @@ import 'package:web/route.dart';
 /// abstract class for navigation events
 abstract class NavigationEvent {
   /// constructor
-  const NavigationEvent({this.route = '', this.requiresAuthentication = false});
+  const NavigationEvent(
+      {this.route = '',
+      this.requiresAuthentication = false,
+      this.arguments});
 
   /// route where to navigate to
   final String route;
 
+  final Object? arguments;
+
   /// if this pages requires a signed in user
   final bool requiresAuthentication;
+}
+
+class NavigateToRoute extends NavigationEvent {
+  /// constructor which sets route to the home page
+  NavigateToRoute(String route) : super(route: route);
 }
 
 /// pop dialog
@@ -27,14 +37,17 @@ class NavigateToHomeEvent extends NavigationEvent {
 /// event to navigate to the login page
 class NavigateToLoginEvent extends NavigationEvent {
   /// constructor which sets route to the login page
-  NavigateToLoginEvent() : super(route: routePaths[route.login]!);
+  NavigateToLoginEvent({Object? arguments})
+      : super(route: routePaths[route.login]!, arguments: arguments);
 }
 
 /// event to navigate to the media page
 class NavigateToMediaEvent extends NavigationEvent {
   /// constructor which sets route to the media page
-  NavigateToMediaEvent()
-      : super(route: routePaths[route.media]!, requiresAuthentication: true);
+  NavigateToMediaEvent({required String folderId})
+      : super(
+            route: '${routePaths[route.media]!}/$folderId',
+            requiresAuthentication: true);
 }
 
 /// event to navigate to the media page
@@ -51,12 +64,12 @@ class NavigateToProfileEvent extends NavigationEvent {
       : super(route: routePaths[route.profile]!, requiresAuthentication: true);
 }
 
-
 /// event to navigate to the documents page
 class NavigateToDocumentsEvent extends NavigationEvent {
   /// constructor which sets route to the documents page
   NavigateToDocumentsEvent()
-      : super(route: routePaths[route.documents]!, requiresAuthentication: true);
+      : super(
+            route: routePaths[route.documents]!, requiresAuthentication: true);
 }
 
 /// event to navigate to the terms page

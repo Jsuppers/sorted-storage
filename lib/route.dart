@@ -72,7 +72,7 @@ class RouteConfiguration {
       return LoginPage();
     }
     if (baseRoute == routePaths[route.media]) {
-      return MediaPage();
+      return MediaPage(destination);
     }
     if (baseRoute == routePaths[route.profile]) {
       return ProfilePage();
@@ -90,12 +90,12 @@ class RouteConfiguration {
       return ErrorPage();
     }
     if (baseRoute == routePaths[route.folders]) {
-      return FolderPage();
+      return FolderPage(destination);
     }
     if (baseRoute == routePaths[route.home]) {
       return HomePage();
     }
-    return FolderPage();
+    return HomePage();
   }
 
   static RoutingData getRoutingData(String? path) {

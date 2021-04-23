@@ -7,17 +7,21 @@ import 'package:web/ui/widgets/timeline.dart';
 
 /// Page which contains all the stories
 class MediaPage extends StatefulWidget {
+  MediaPage(this.folderID);
+
+  String folderID;
+
   @override
   _MediaPageState createState() => _MediaPageState();
 }
 
 class _MediaPageState extends State<MediaPage> {
-
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CloudStoriesBloc>(context)
-        .add(const CloudStoriesEvent(CloudStoriesType.retrieveStories));
+    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+        CloudStoriesType.retrieveStories,
+        folderID: widget.folderID));
   }
 
   @override

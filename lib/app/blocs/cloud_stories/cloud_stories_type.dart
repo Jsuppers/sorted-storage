@@ -12,6 +12,8 @@ enum CloudStoriesType {
   /// retrieve a specific story from storage
   retrieveFolders,
 
+  rootFolder,
+
   /// retrieve a specific story from storage
   retrieveStory,
 

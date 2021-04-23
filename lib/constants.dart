@@ -1,5 +1,6 @@
 /// Constant files which holds various constants
 class Constants {
+  static const String originalValueKey = 'originalRoute';
   /// url of sorted storage website
   static const String websiteURL = 'https://sortedstorage.com/#';
 

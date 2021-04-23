@@ -14,9 +14,8 @@ import 'package:web/constants.dart';
 import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/drawer/drawer.dart';
 import 'package:web/app/models/user.dart';
-import 'package:web/ui/pages/static/home.dart';
-import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:web/ui/widgets/loading.dart';
 
 /// layout widget
 class LayoutWrapper extends StatelessWidget {
@@ -50,19 +49,15 @@ class LayoutWrapper extends StatelessWidget {
     return BlocBuilder<AuthenticationBloc, usr.User?>(
         builder: (BuildContext context, usr.User? user) {
       if (requiresAuthentication && user == null) {
-        Widget redirectWidget;
-        if (routingData?.route == '/') {
-          redirectWidget = HomePage();
-        } else {
-          redirectWidget = LoginPage();
+        final Map<String, String> queryParameters = <String, String>{};
+        if (routingData?.queryParameters != null) {
+          routingData?.queryParameters.forEach((String key, String value) {
+            queryParameters.putIfAbsent(key, () => value);
+          });
         }
-        return Content(
-          widget: redirectWidget,
-          showAddButton: showAddButton,
-        );
-      }
-      if (routingData?.route == '/' && user != null) {
-        BlocProvider.of<NavigationBloc>(context).add(NavigateToFolderEvent());
+        queryParameters.putIfAbsent(Constants.originalValueKey, () => routingData!.route);
+        BlocProvider.of<NavigationBloc>(context).add(NavigateToLoginEvent(arguments: queryParameters));
+        return StaticLoadingLogo();
       }
       return Content(
           widget: widget,
