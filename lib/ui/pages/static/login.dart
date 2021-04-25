@@ -2,6 +2,7 @@ import 'package:auth_buttons/auth_buttons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
@@ -32,30 +33,38 @@ class LoginPage extends StatelessWidget {
           BlocProvider.of<NavigationBloc>(context)
               .add(NavigateToRoute(redirectRoute!));
         }
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: <Widget>[
-                  Text('Please sign in',
-                      style: myThemeData.textTheme.headline3),
-                  const SizedBox(height: 7.0),
-                  const SizedBox(width: 100, child: Divider(thickness: 1)),
-                  const SizedBox(height: 7.0),
-                  GoogleAuthButton(
-                    onPressed: () async {
-                      BlocProvider.of<AuthenticationBloc>(context)
-                          .add(AuthenticationSignInEvent());
-                    },
-                    darkMode: true,
+        return ResponsiveBuilder(
+            builder: (BuildContext context, SizingInformation constraints) {
+          return SizedBox(
+            height: constraints.screenSize.height / 2,
+            child: Center(
+              child: SizedBox(
+                height: 150,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: <Widget>[
+                        Text('Please sign in',
+                            style: myThemeData.textTheme.headline3),
+                        const SizedBox(height: 7.0),
+                        const SizedBox(width: 100, child: Divider(thickness: 1)),
+                        const SizedBox(height: 7.0),
+                        GoogleAuthButton(
+                          onPressed: () =>
+                            BlocProvider.of<AuthenticationBloc>(context)
+                                .add(AuthenticationSignInEvent())
+                          ,
+                          darkMode: true,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        );
+          );
+        });
       },
     );
   }

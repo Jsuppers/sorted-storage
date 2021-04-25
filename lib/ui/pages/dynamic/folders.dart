@@ -46,12 +46,7 @@ class _FolderPageState extends State<FolderPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
           alignment: Alignment.topLeft,
-          child: Column(
-            children: [
-              NavBarLogo(),
-              FolderView(),
-            ],
-          )),
+          child: FolderView()),
     );
   }
 }
@@ -82,7 +77,7 @@ class _FolderViewState extends State<FolderView> {
             borderRadius: const BorderRadius.all(Radius.circular(6)),
             color: Colors.white,
             boxShadow: [
-              BoxShadow(color: Colors.black12, blurRadius: 1),
+              const BoxShadow(color: Colors.black12, blurRadius: 1),
             ],
             border: Border.all(color: myThemeData.dividerColor, width: 1)),
         child: GestureDetector(
@@ -93,7 +88,10 @@ class _FolderViewState extends State<FolderView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(width: 30, child: Center(child: Text(folder.emoji))),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: SizedBox(width: 30, child: Center(child: Text(folder.emoji))),
+              ),
               Text(_shortenText(folder.title)),
               PopUpOptions(folderID: folder.id!, folder: folder),
             ],
@@ -136,6 +134,8 @@ class _FolderViewState extends State<FolderView> {
                         backgroundColor: Colors.transparent,
                         textColor: Colors.black,
                         iconColor: Colors.black),
+
+                    NavBarLogo(height: 40),
 
                   ],
                 ),

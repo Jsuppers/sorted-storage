@@ -105,7 +105,6 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final User? user = BlocProvider.of<AuthenticationBloc>(context).state;
     return Scaffold(
       drawer: NavigationDrawer(),
       body: ResponsiveBuilder(
@@ -114,14 +113,20 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
           width: sizingInformation.screenSize.width,
           height: sizingInformation.screenSize.height,
           decoration: myBackgroundDecoration,
-          child: ListView(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  widget.widget,
-                  Footer(sizingInformation.screenSize.width)
-                ],
-              )
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: widget.widget,
+              ),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: Footer(sizingInformation.screenSize.width)),
+                  ),
+                )
             ],
           ),
         ),

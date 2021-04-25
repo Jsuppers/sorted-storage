@@ -16,7 +16,8 @@ class Footer extends StatelessWidget {
       padding: const EdgeInsets.all(12.0),
       child: SizedBox(
         width: _width,
-        child: Center(
+        child: Align(
+          alignment: Alignment.bottomCenter,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
