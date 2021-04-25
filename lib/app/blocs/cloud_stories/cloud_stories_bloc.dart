@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:emojis/emojis.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/navigation/navigation_bloc.dart';
+import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_properties.dart';
 import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
@@ -12,6 +15,7 @@ import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/app/models/sub_event.dart';
 import 'package:web/app/models/timeline_data.dart';
+import 'package:web/app/models/update_index.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/constants.dart';
 
@@ -21,13 +25,15 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   /// initial_state
   CloudStoriesBloc(
       {required Map<String, StoryTimelineData> cloudStories,
-      required this.storage})
+      required this.storage,
+      required this.navigationBloc})
       : super(CloudStoriesState(CloudStoriesType.initialState, cloudStories)) {
     _cloudStories = cloudStories;
     _folders = <FolderProperties>[];
   }
 
   late List<FolderProperties> _folders;
+  late NavigationBloc navigationBloc;
   late Map<String, StoryTimelineData> _cloudStories;
   GoogleDrive storage;
   late String currentMediaFileId;
@@ -36,10 +42,31 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   @override
   Stream<CloudStoriesState> mapEventToState(CloudStoriesEvent event) async* {
     switch (event.type) {
+      case CloudStoriesType.updateAllFolders:
+        _updatePositions().then((value) =>
+            add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders))
+        );
+        break;
+      case CloudStoriesType.updateFolderPosition:
+        _updatePosition(event.data as UpdateIndex).then((value) =>
+          add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders))
+        );
+        break;
       case CloudStoriesType.rootFolder:
         rootFolderID = await _getCurrentUserRootFolderID();
         yield CloudStoriesState(CloudStoriesType.rootFolder, _cloudStories,
             data: rootFolderID);
+        break;
+      case CloudStoriesType.deleteFolder:
+        _deleteFolder(event.data as FolderProperties);
+        break;
+      case CloudStoriesType.createFolder:
+        FolderProperties? fp = await _createFolder(event.folderID);
+        if (fp != null) {
+          _folders.add(fp);
+        }
+        yield CloudStoriesState(CloudStoriesType.createFolder, _cloudStories,
+            data: fp);
         break;
       case CloudStoriesType.retrieveFolders:
         _folders = await _getFolders(event.folderID);
@@ -65,6 +92,40 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
   }
 
+  Future<FolderProperties?> _createFolder(String? folderID) async {
+    folderID ??= rootFolderID;
+    final File fileMetadata = File();
+    String title = '${Emojis.alienMonster} New Event';
+    FolderProperties fp =
+        FolderProperties.extractProperties('${Emojis.alienMonster} New Event');
+    fileMetadata.name = title;
+    fileMetadata.parents = [folderID];
+    fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+    fileMetadata.description = fp.order.toString();
+    final File rt = await storage.createFile(fileMetadata);
+    fp.id = rt.id;
+    return fp;
+  }
+
+  Future<void> _updatePositions() async {
+    for (int i = 0; i < _folders.length; i++) {
+      await storage.updatePosition(_folders[i].id!, _folders[i].order);
+    }
+  }
+
+
+  Future<void> _updatePosition(UpdateIndex updateIndex) async {
+      await storage.updatePosition(
+          _folders[updateIndex.oldIndex].id!,
+          _folders[updateIndex.newIndex].order);
+      await storage.updatePosition(
+          _folders[updateIndex.newIndex].id!,
+          _folders[updateIndex.oldIndex].order);
+      double? oldIndex = _folders[updateIndex.oldIndex].order;
+      _folders[updateIndex.oldIndex].order = _folders[updateIndex.newIndex].order;
+      _folders[updateIndex.newIndex].order = oldIndex;
+  }
+
   void _getStories(String? folderID) {
     if (folderID == null) {
       return;
@@ -85,17 +146,27 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     if (_cloudStories.isEmpty) {
 //      _getMediaFolder(folderID).then((String value) {
 //        currentMediaFileId = value;
-        _getStoriesFromFolder(folderID).then(
-            (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh)),
-            onError: (_) => add(const CloudStoriesEvent(
-                CloudStoriesType.refresh,
-                error: 'Error retrieving stories')));
+      _getStoriesFromFolder(folderID).then(
+          (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh)),
+          onError: (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh,
+              error: 'Error retrieving stories')));
 //      },
 //          onError: (_) => add(const CloudStoriesEvent(CloudStoriesType.refresh,
 //              error: 'Error retrieving media')));
     } else {
       add(const CloudStoriesEvent(CloudStoriesType.refresh));
     }
+  }
+
+  Future<String?> _deleteFolder(FolderProperties fp) async {
+    storage.delete(fp.id!).then((dynamic value) {
+      _folders.remove(fp);
+      navigationBloc.add(NavigatorPopEvent());
+      add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders));
+      return null;
+    }, onError: (_) {
+      return 'Error when deleting story';
+    });
   }
 
   Future<void> _getStoriesFromFolder(String folderID) async {
@@ -273,20 +344,24 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   }
 
   Future<List<FolderProperties>> _getFolders(String? folderID) async {
+    if (_folders != null && _folders.isNotEmpty) {
+      return _folders;
+    }
     if (folderID == null) {
       return [];
     }
 
     final FileList filesInFolder = await storage.listFiles(
         "'$folderID' in parents and trashed=false",
-        filter: 'files(id,name)');
+        filter: 'files(id,name,description)');
 
     List<FolderProperties> output = <FolderProperties>[];
 
     if (filesInFolder.files != null) {
       filesInFolder.files!.forEach((element) {
-        FolderProperties? fp =
-            FolderProperties.extractProperties(element.name!, element.id!);
+        double? order = double.tryParse(element.description!);
+        FolderProperties? fp = FolderProperties.extractProperties(element.name!,
+            id: element.id, order: order);
         if (fp != null) {
           output.add(fp);
         }

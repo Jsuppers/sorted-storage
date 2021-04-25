@@ -1,6 +1,7 @@
 /// possible types used for states and events
 enum EditorType {
   updateMetadata,
+  updateName,
   updateTimestamp,
   createStory,
   deleteStory,

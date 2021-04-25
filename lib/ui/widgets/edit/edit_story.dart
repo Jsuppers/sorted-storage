@@ -150,7 +150,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
         title: EditHeader(
             savingState: savingState,
             width: widget.width,
-            adventure: widget.event),
+            folderID: widget.event.mainStory.folderID),
       ),
       SliverToBoxAdapter(
         child: MultiBlocListener(

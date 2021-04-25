@@ -32,7 +32,7 @@ class GoogleDrive {
   }
 
   /// update a media file index
-  Future<void> updatePosition(String imageID, int position) async {
+  Future<void> updatePosition(String imageID, dynamic position) async {
     final File mediaFile = File();
     mediaFile.description = position.toString();
 
@@ -113,11 +113,11 @@ class GoogleDrive {
     return folder.id;
   }
 
-  Future<String?> updateEventFolderTimestamp(
-      String fileID, int timestamp) async {
+  Future<String?> updateFileName(
+      String fileID, String name) async {
     try {
       final File eventToUpload = File();
-      eventToUpload.name = timestamp.toString();
+      eventToUpload.name = name;
 
       final File folder = await driveApi!.files.update(eventToUpload, fileID);
 

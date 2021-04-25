@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/models/folder_properties.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -11,13 +15,16 @@ import 'package:web/ui/widgets/sync_icon.dart';
 
 class EditHeader extends StatefulWidget {
   // ignore: public_member_api_docs, lines_longer_than_80_chars
-  EditHeader({Key? key,
-    this.savingState,
-    required this.adventure,
-    required this.width})
+  EditHeader(
+      {Key? key,
+      this.savingState,
+      required this.folderID,
+      required this.width,
+      this.folder})
       : super(key: key);
 
-  final StoryTimelineData adventure;
+  final String folderID;
+  final FolderProperties? folder;
   final double width;
   final SavingState? savingState;
 
@@ -45,10 +52,7 @@ class _EditHeaderState extends State<EditHeader> {
                       if (widget.savingState == SavingState.saving) {
                         return;
                       }
-                      DialogService.shareDialog(
-                          context,
-                          widget.adventure.mainStory.folderID,
-                          widget.adventure.mainStory.commentsID);
+                      DialogService.shareDialog(context, widget.folderID);
                     },
                     width: widget.width,
                     backgroundColor: Colors.white,
@@ -62,22 +66,32 @@ class _EditHeaderState extends State<EditHeader> {
                       if (widget.savingState == SavingState.saving) {
                         return;
                       }
-                      BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                          EditorType.deleteStory,
-                          closeDialog: true,
-                          folderID: widget.adventure.mainStory.folderID));
+                      Function callback = () {
+                        if (widget.folder != null) {
+                          BlocProvider.of<CloudStoriesBloc>(context).add(
+                              CloudStoriesEvent(CloudStoriesType.deleteFolder,
+                                  data: widget.folder));
+                        } else {
+                          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                              EditorType.deleteStory,
+                              closeDialog: true,
+                              folderID: widget.folderID));
+                        }
+                      };
+                      DialogService.showAlertDialog(context,
+                          message: 'Are you sure you want to delete?',
+                          callback: callback);
                     },
                     width: widget.width,
                     backgroundColor: Colors.redAccent),
                 const SizedBox(width: 10),
               ],
             ),
-            const Align(
-                alignment: Alignment.centerRight,
-                child: SyncingIcon()),
+            const Align(alignment: Alignment.centerRight, child: SyncingIcon()),
           ],
         ));
   }
+
 }
 
 class SyncingIcon extends StatefulWidget {
@@ -99,7 +113,6 @@ class _SyncingIconState extends State<SyncingIcon> {
 
   @override
   Widget build(BuildContext context) {
-
     Widget icon;
     if (savingState == SavingState.saving) {
       icon = const IconSpinner(
@@ -108,8 +121,7 @@ class _SyncingIconState extends State<SyncingIcon> {
       );
     } else if (savingState == SavingState.success) {
       icon = const Icon(Icons.done, color: Colors.green);
-    }
-    else if (savingState == SavingState.error) {
+    } else if (savingState == SavingState.error) {
       icon = const Icon(Icons.error, color: Colors.red);
     } else {
       icon = Container();
@@ -118,15 +130,16 @@ class _SyncingIconState extends State<SyncingIcon> {
     return MultiBlocListener(listeners: <BlocListener<dynamic, dynamic>>[
       BlocListener<EditorBloc, EditorState?>(
           listener: (BuildContext context, EditorState? state) {
-            if (state == null) {
-              return;
-            }
-            if (state.type == EditorType.syncingState) {
-              setState(() {
-                savingState = state.data as SavingState;
-              });
-            }
-          })
+        if (state == null) {
+          return;
+        }
+        if (state.type == EditorType.syncingState) {
+          setState(() {
+            savingState = state.data as SavingState;
+          });
+        }
+      })
     ], child: icon);
   }
 }
+

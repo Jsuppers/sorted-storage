@@ -34,6 +34,12 @@ class ButtonWithIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      elevation: 0,
+      hoverElevation: 0,
+      focusElevation: 0,
+      highlightElevation: 0,
       minWidth: width >= Constants.minScreenWidth ? 100 : 30,
       color: backgroundColor,
       textColor: textColor,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
@@ -87,7 +88,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       case EditorType.deleteStory:
         final String? error = await _deleteEvent(
             event.folderID!,
-            event.parentID!);
+            event.parentID);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopDialogEvent());
         } else {
@@ -111,6 +112,14 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         }
         break;
 
+      case EditorType.updateName:
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
+        _storage.updateFileName(event.folderID!, event.data as String).then((value) => {
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.success, refreshUI: event.refreshUI))
+        });
+        break;
       case EditorType.syncingState:
         yield EditorState(EditorType.syncingState,
             data: event.data, refreshUI: event.refreshUI);
@@ -122,7 +131,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             event.parentID!, event.folderID!, _cloudStories)!;
         final int timestamp = event.data as int;
         try {
-          await _storage.updateEventFolderTimestamp(event.folderID!, timestamp);
+          await _storage.updateFileName(event.folderID!, timestamp.toString());
           eventData.timestamp = timestamp;
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
@@ -156,7 +165,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     }
   }
 
-  Future<String?> _deleteEvent(String fileID, String parentID) async {
+  Future<String?> _deleteEvent(String fileID, String? parentID) async {
     _storage.delete(fileID).then((dynamic value) {
       if (parentID != null) {
         final StoryTimelineData story = _cloudStories[parentID]!;

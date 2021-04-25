@@ -21,6 +21,7 @@ class LoginPage extends StatelessWidget {
     if (redirectRoute == null ||
         redirectRoute == routePaths[route.login] ||
         redirectRoute == routePaths[route.home] ||
+        redirectRoute == routePaths[route.profile] ||
         redirectRoute == '/') {
       redirectRoute = routePaths[route.folders]!;
     }

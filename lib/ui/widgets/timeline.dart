@@ -42,11 +42,11 @@ class _TimelineLayoutState extends State<TimelineLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final CloudStoriesState timelineState =
-        BlocProvider.of<CloudStoriesBloc>(context).state;
-    loaded = timelineState.type != CloudStoriesType.initialState;
-    _timelineData =
-        BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
+    _timelineData = BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
+    if (_timelineData.isEmpty) {
+      loaded = false;
+    }
+
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 

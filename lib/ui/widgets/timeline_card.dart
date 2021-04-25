@@ -6,15 +6,12 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_type.dart';
-import 'package:web/app/blocs/editor/editor_bloc.dart';
-import 'package:web/app/blocs/editor/editor_event.dart';
-import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
-import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/widgets/event_comments.dart';
 import 'package:web/ui/widgets/loading.dart';
+import 'package:web/ui/widgets/pop_up_options.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
 // ignore: public_member_api_docs
@@ -49,45 +46,6 @@ class TimelineCard extends StatefulWidget {
 }
 
 class _TimelineCardState extends State<TimelineCard> {
-  Widget createHeader(double width, BuildContext context) {
-    return Container(
-      height: 30,
-      padding: EdgeInsets.zero,
-      alignment: Alignment.centerRight,
-      child: PopupMenuButton<String>(
-        onSelected: (String value) {
-          switch (value) {
-            case 'Edit':
-              DialogService.editDialog(context, widget.folderId);
-              break;
-            case 'Delete':
-              BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                  EditorType.deleteStory,
-                  closeDialog: false,
-                  folderID: widget.event.mainStory.folderID));
-              break;
-            case 'Share':
-              DialogService.shareDialog(
-                  context,
-                  widget.event.mainStory.folderID,
-                  widget.event.mainStory.commentsID);
-              break;
-            default:
-              break;
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return {'Edit', 'Delete', 'Share', 'Cancel'}.map((String choice) {
-            return PopupMenuItem<String>(
-              value: choice,
-              child: Text(choice),
-            );
-          }).toList();
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.event == null) {
@@ -104,7 +62,9 @@ class _TimelineCardState extends State<TimelineCard> {
               locked: true,
               controls: widget.viewMode
                   ? Container()
-                  : createHeader(widget.width, context),
+                  : PopUpOptions(
+                      folderID: widget.folderId,
+                      subFolderID: widget.event.mainStory.folderID),
               width: widget.width,
               height: widget.height,
               story: widget.event.mainStory,
