@@ -56,8 +56,7 @@ class RouteConfiguration {
     return baseRoute == routePaths[route.media] ||
         baseRoute == routePaths[route.documents] ||
         baseRoute == routePaths[route.profile] ||
-        baseRoute == routePaths[route.folders] ||
-        baseRoute == '/';
+        baseRoute == routePaths[route.folders];
   }
 
   static bool _showAddButton(String baseRoute) {

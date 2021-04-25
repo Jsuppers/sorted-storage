@@ -22,16 +22,9 @@ class NavBarLogo extends StatelessWidget {
       },
       child: SizedBox(
         height: height,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            children: <Widget>[
-              Image.asset(showText
-                  ? 'assets/images/logo_tiny.png'
-                  : 'assets/images/logo_no_text.png'),
-            ],
-          ),
-        ),
+        child: Image.asset(showText
+            ? 'assets/images/logo_tiny.png'
+            : 'assets/images/logo_no_text.png'),
       ),
     );
   }

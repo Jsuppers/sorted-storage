@@ -11,10 +11,10 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_properties.dart';
 import 'package:web/app/models/update_index.dart';
 import 'package:web/app/services/dialog_service.dart';
-import 'package:web/constants.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/icon_button.dart';
+import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 
 class FolderPage extends StatefulWidget {
@@ -44,9 +44,7 @@ class _FolderPageState extends State<FolderPage> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-          alignment: Alignment.topLeft,
-          child: FolderView()),
+      child: Container(alignment: Alignment.topLeft, child: FolderView()),
     );
   }
 }
@@ -57,7 +55,7 @@ class FolderView extends StatefulWidget {
 }
 
 class _FolderViewState extends State<FolderView> {
-  List<FolderProperties> folders = [];
+  List<FolderProperties>? folders;
 
   String _shortenText(String text) {
     if (text.length <= 20) {
@@ -69,35 +67,38 @@ class _FolderViewState extends State<FolderView> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    for (FolderProperties folder in folders) {
-      children.add(Container(
-        height: 40.0,
-        width: 220.0,
-        decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(6)),
-            color: Colors.white,
-            boxShadow: [
-              const BoxShadow(color: Colors.black12, blurRadius: 1),
-            ],
-            border: Border.all(color: myThemeData.dividerColor, width: 1)),
-        child: GestureDetector(
-          onTap: () => {
-            BlocProvider.of<NavigationBloc>(context)
-                .add(NavigateToMediaEvent(folderId: folder.id!))
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: SizedBox(width: 30, child: Center(child: Text(folder.emoji))),
-              ),
-              Text(_shortenText(folder.title)),
-              PopUpOptions(folderID: folder.id!, folder: folder),
-            ],
+    if (folders != null) {
+      for (FolderProperties folder in folders!) {
+        children.add(Container(
+          height: 40.0,
+          width: 220.0,
+          decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
+              color: Colors.white,
+              boxShadow: [
+                const BoxShadow(color: Colors.black12, blurRadius: 1),
+              ],
+              border: Border.all(color: myThemeData.dividerColor, width: 1)),
+          child: GestureDetector(
+            onTap: () => {
+              BlocProvider.of<NavigationBloc>(context)
+                  .add(NavigateToMediaEvent(folderId: folder.id!))
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: SizedBox(
+                      width: 30, child: Center(child: Text(folder.emoji))),
+                ),
+                Text(_shortenText(folder.title)),
+                PopUpOptions(folderID: folder.id!, folder: folder),
+              ],
+            ),
           ),
-        ),
-      ));
+        ));
+      }
     }
 
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
@@ -110,7 +111,7 @@ class _FolderViewState extends State<FolderView> {
       if (state.type == CloudStoriesType.retrieveFolders) {
         setState(() {
           folders = state.data as List<FolderProperties>;
-          folders.sort((a, b) => a.order!.compareTo(b.order!));
+          folders!.sort((a, b) => a.order!.compareTo(b.order!));
         });
       }
     }, child: LayoutBuilder(
@@ -118,29 +119,30 @@ class _FolderViewState extends State<FolderView> {
       return Column(
         children: [
           ReorderableWrap(
-            header: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ButtonWithIcon(
-                        text: 'New Folder',
-                        icon: Icons.create_new_folder_outlined,
-                        onPressed: () async {
-                          DialogService.editFolderDialog(context);
-                        },
-                        width: constraints.maxWidth,
-                        backgroundColor: Colors.transparent,
-                        textColor: Colors.black,
-                        iconColor: Colors.black),
-
-                    NavBarLogo(height: 40),
-
-                  ],
+              header: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ButtonWithIcon(
+                          text: 'New Folder',
+                          icon: Icons.create_new_folder_outlined,
+                          onPressed: () async {
+                            if (folders == null) {
+                              return;
+                            }
+                            DialogService.editFolderDialog(context);
+                          },
+                          width: constraints.maxWidth,
+                          backgroundColor: Colors.transparent,
+                          textColor: Colors.black,
+                          iconColor: Colors.black),
+                      NavBarLogo(height: 40),
+                    ],
+                  ),
                 ),
-              ),],
-
+              ],
               spacing: 8.0,
               runSpacing: 4.0,
               padding: const EdgeInsets.all(8),
@@ -151,22 +153,35 @@ class _FolderViewState extends State<FolderView> {
                     CloudStoriesEvent(CloudStoriesType.updateFolderPosition,
                         data: ui));
                 setState(() {
-                  final FolderProperties image = folders.removeAt(oldIndex);
-                  folders.insert(newIndex, image);
+                  final FolderProperties image = folders!.removeAt(oldIndex);
+                  folders!.insert(newIndex, image);
                 });
               },
               children: children),
+          if (folders == null)
+            const FullPageLoadingLogo(backgroundColor: Colors.transparent),
+          if (folders != null && folders!.isEmpty)
+            Column(
+              children: [
+                Image.asset('assets/images/error.png'),
+                const SizedBox(height: 10),
+                const Text('It looks pretty sad here!'),
+                const SizedBox(height: 10),
+                const Text(
+                    "Click 'New Folder' and create something special."),
+              ],
+            )
         ],
       );
     }));
   }
 
   void updateAllFolders(BuildContext context, int oldIndex, int newIndex) {
-    final FolderProperties image = folders.removeAt(oldIndex);
-    folders.insert(newIndex, image);
+    final FolderProperties image = folders!.removeAt(oldIndex);
+    folders!.insert(newIndex, image);
 
-    for (int i = 0; i < folders.length; i++) {
-      folders[i].order = i.toDouble();
+    for (int i = 0; i < folders!.length; i++) {
+      folders![i].order = i.toDouble();
     }
     BlocProvider.of<CloudStoriesBloc>(context)
         .add(CloudStoriesEvent(CloudStoriesType.updateAllFolders));

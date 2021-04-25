@@ -22,11 +22,7 @@ class NavigationBloc extends Bloc<NavigationEvent, dynamic> {
         _navigatorKey.currentState!.pop();
         break;
       default:
-        if (!_navigatorKey.currentState!.canPop()) {
           _navigatorKey.currentState!.pushNamed(event.route, arguments: event.arguments);
-        } else {
-          _navigatorKey.currentState!.pushReplacementNamed(event.route, arguments: event.arguments);
-        }
         break;
     }
   }

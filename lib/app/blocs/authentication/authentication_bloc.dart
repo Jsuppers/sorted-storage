@@ -30,7 +30,11 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, usr.User?> {
     }
     switch (event.runtimeType) {
       case AuthenticationSignInEvent:
-        _googleSignIn.signIn();
+        if(await _googleSignIn.isSignedIn()) {
+          yield state;
+        } else {
+          _googleSignIn.signIn();
+        }
         break;
       case AuthenticationSilentSignInEvent:
         _googleSignIn.signInSilently();
