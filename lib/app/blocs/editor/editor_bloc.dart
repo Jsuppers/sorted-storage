@@ -240,6 +240,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             await _storage.uploadCommentsFile(folderID: event.folderID);
         event.comments = commentsResponse.comments;
         event.commentsID = commentsResponse.commentsID!;
+
+        // TODO send folderID to edit_story to rewrite _destination
+
+
         final StoryTimelineData timelineEvent =
             StoryTimelineData(mainStory: event);
         _cloudStories.putIfAbsent(folderID, () => timelineEvent);

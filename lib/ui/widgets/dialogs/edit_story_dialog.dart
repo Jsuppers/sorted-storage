@@ -5,10 +5,11 @@ import 'package:web/ui/widgets/edit/edit_story.dart';
 /// emoji dialog
 class EditStoryDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EditStoryDialog({Key? key, required this.folderID}) : super(key: key);
+  const EditStoryDialog({Key? key, this.folderID, this.parentID}) : super(key: key);
 
   // ignore: public_member_api_docs
-  final String folderID;
+  final String? folderID;
+  final String? parentID;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class EditStoryDialog extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ResponsiveBuilder(
           builder: (BuildContext context, SizingInformation constraints) {
-            return EditStory(folderID);
+            return EditStory(folderID, parentID: parentID);
           },
         ),
       ),

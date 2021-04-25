@@ -31,9 +31,10 @@ import 'package:web/ui/widgets/story_image.dart';
 /// page which shows a single story
 class EditStory extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditStory(this._destination, {Key? key}) : super(key: key);
+  const EditStory(this._destination, {Key? key, this.parentID}) : super(key: key);
 
-  final String _destination;
+  final String? _destination;
+  final String? parentID;
 
   @override
   _EditStoryState createState() => _EditStoryState();
@@ -46,9 +47,16 @@ class _EditStoryState extends State<EditStory> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-        CloudStoriesType.retrieveStory,
-        folderID: widget._destination));
+    if (widget._destination != null) {
+      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+          CloudStoriesType.retrieveStory,
+          folderID: widget._destination));
+    } else {
+      BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+              EditorType.createStory,
+              parentID: widget.parentID,
+              mainEvent: true));
+    }
   }
 
   @override

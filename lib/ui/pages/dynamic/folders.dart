@@ -138,7 +138,7 @@ class _FolderViewState extends State<FolderView> {
                           backgroundColor: Colors.transparent,
                           textColor: Colors.black,
                           iconColor: Colors.black),
-                      NavBarLogo(height: 40),
+                      const NavBarLogo(height: 30),
                     ],
                   ),
                 ),

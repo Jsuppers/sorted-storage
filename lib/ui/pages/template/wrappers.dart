@@ -12,8 +12,6 @@ import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/footer/footer.dart';
-import 'package:web/ui/navigation/drawer/drawer.dart';
-import 'package:web/app/models/user.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
 
@@ -106,7 +104,6 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationDrawer(),
       body: ResponsiveBuilder(
         builder: (BuildContext context, SizingInformation sizingInformation) =>
             Container(

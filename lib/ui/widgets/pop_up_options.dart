@@ -22,7 +22,7 @@ class PopUpOptions extends StatelessWidget {
               if (folder != null) {
                 DialogService.editFolderDialog(context, folder: folder);
               } else {
-                DialogService.editDialog(context, folderID);
+                DialogService.editDialog(context, folderID: folderID);
               }
               break;
             case 'Share':

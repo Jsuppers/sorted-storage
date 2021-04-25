@@ -34,7 +34,7 @@ class LoginPage extends StatelessWidget {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: <Widget>[
-                        NavBarLogo(height: 40),
+                        const NavBarLogo(height: 40),
                         const SizedBox(
                           width: 100,
                           child: Divider(thickness: 1),

@@ -37,15 +37,12 @@ class TimelineLayout extends StatefulWidget {
 
 class _TimelineLayoutState extends State<TimelineLayout> {
   late Map<String, StoryTimelineData> _timelineData;
-  bool loaded = true;
+  bool loaded = false;
   bool addingStory = false;
 
   @override
   Widget build(BuildContext context) {
     _timelineData = BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
-    if (_timelineData.isEmpty) {
-      loaded = false;
-    }
 
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];

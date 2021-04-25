@@ -50,13 +50,13 @@ class DialogService {
   }
 
   /// dialog to share a folder
-  static void editDialog(BuildContext context, String folderID) {
+  static void editDialog(BuildContext context, {String? folderID, String? parentID}) {
     showDialog(
       context: context,
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext context) {
-        return EditStoryDialog(folderID: folderID);
+        return EditStoryDialog(folderID: folderID, parentID: parentID);
       },
     ).then((_) =>
         // update the ui with any changes made in the edit dialog
