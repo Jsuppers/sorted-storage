@@ -89,10 +89,34 @@ class _TimelineLayoutState extends State<TimelineLayout> {
       },
       child: !loaded
           ? StaticLoadingLogo()
-          : Column(
-              key: Key(widgetKey.toString()),
-              children: children,
-            ),
+          : content( children, widgetKey)
+    );
+  }
+
+  Widget content(List<Widget> children, StringBuffer widgetKey) {
+    if (children.isNotEmpty) {
+      return Column(
+        key: Key(widgetKey.toString()),
+        children: children,
+      );
+    }
+    return Container(
+      height: widget.height / 1.5,
+      child: Center(
+        child: SizedBox(
+          height: 300,
+          child: Column(
+            children: [
+              Image.asset('assets/images/no_story.png', height: 150,),
+              const SizedBox(height: 10),
+              const Text('It also looks pretty sad here!'),
+              const SizedBox(height: 10),
+              const Text(
+                  "Click 'Add' and start your journey!"),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

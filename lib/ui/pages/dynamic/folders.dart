@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reorderables/reorderables.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
@@ -114,8 +115,8 @@ class _FolderViewState extends State<FolderView> {
           folders!.sort((a, b) => a.order!.compareTo(b.order!));
         });
       }
-    }, child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
+    }, child: ResponsiveBuilder(
+            builder: (BuildContext context, SizingInformation constraints) {
       return Column(
         children: [
           ReorderableWrap(
@@ -134,7 +135,7 @@ class _FolderViewState extends State<FolderView> {
                             }
                             DialogService.editFolderDialog(context);
                           },
-                          width: constraints.maxWidth,
+                          width: constraints.screenSize.width,
                           backgroundColor: Colors.transparent,
                           textColor: Colors.black,
                           iconColor: Colors.black),
@@ -161,15 +162,23 @@ class _FolderViewState extends State<FolderView> {
           if (folders == null)
             const FullPageLoadingLogo(backgroundColor: Colors.transparent),
           if (folders != null && folders!.isEmpty)
-            Column(
-              children: [
-                Image.asset('assets/images/error.png'),
-                const SizedBox(height: 10),
-                const Text('It looks pretty sad here!'),
-                const SizedBox(height: 10),
-                const Text(
-                    "Click 'New Folder' and create something special."),
-              ],
+            SizedBox(
+              height: constraints.screenSize.height / 1.5,
+              child: Center(
+                child: SizedBox(
+                  height: 300,
+                  child: Column(
+                    children: [
+                      Image.asset('assets/images/no_folders.png', height: 150,),
+                      const SizedBox(height: 10),
+                      const Text('It looks pretty sad here!'),
+                      const SizedBox(height: 10),
+                      const Text(
+                          "Click 'New Folder' and create something special."),
+                    ],
+                  ),
+                ),
+              ),
             )
         ],
       );

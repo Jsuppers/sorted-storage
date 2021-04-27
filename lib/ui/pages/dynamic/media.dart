@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
@@ -13,7 +14,7 @@ import 'package:web/ui/widgets/timeline.dart';
 class MediaPage extends StatefulWidget {
   MediaPage(this.folderID);
 
-  String folderID;
+  String? folderID;
 
   @override
   _MediaPageState createState() => _MediaPageState();
@@ -23,20 +24,23 @@ class _MediaPageState extends State<MediaPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-        CloudStoriesType.retrieveStories,
-        folderID: widget.folderID));
+    if (widget.folderID != null) {
+      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+          CloudStoriesType.retrieveStories,
+          folderID: widget.folderID));
+
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return Row(
+    return ResponsiveBuilder(
+      builder: (BuildContext context, SizingInformation constraints) {
+        return Column(
           children: [
             Container(
               height: 50,
-              width: constraints.maxWidth,
+              width: constraints.screenSize.width,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
@@ -48,7 +52,7 @@ class _MediaPageState extends State<MediaPage> {
                         onPressed: () =>
                           DialogService.editDialog(context, parentID: widget.folderID)
                         ,
-                        width: constraints.maxWidth,
+                        width:  constraints.screenSize.width,
                         backgroundColor: Colors.transparent,
                         textColor: Colors.black,
                         iconColor: Colors.black),
@@ -58,7 +62,7 @@ class _MediaPageState extends State<MediaPage> {
               ),
             ),
             TimelineLayout(
-                width: constraints.maxWidth, height: constraints.maxHeight),
+                width:  constraints.screenSize.width, height:  constraints.screenSize.height,),
           ],
         );
       },

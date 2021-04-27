@@ -43,14 +43,16 @@ class EditStory extends StatefulWidget {
 class _EditStoryState extends State<EditStory> {
   StoryTimelineData? timelineData;
   bool error = false;
+  late String? folderID;
 
   @override
   void initState() {
     super.initState();
-    if (widget._destination != null) {
+    folderID = widget._destination;
+    if (folderID != null) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
           CloudStoriesType.retrieveStory,
-          folderID: widget._destination));
+          folderID: folderID));
     } else {
       BlocProvider.of<EditorBloc>(context).add(EditorEvent(
               EditorType.createStory,
@@ -67,9 +69,12 @@ class _EditStoryState extends State<EditStory> {
           if (state.error != null) {
             setState(() => error = true);
           } else {
+            if (state.folderID != null) {
+              folderID = state.folderID;
+            }
             StoryTimelineData? data = BlocProvider.of<CloudStoriesBloc>(context)
                 .state
-                .cloudStories[widget._destination];
+                .cloudStories[folderID];
 
             if (data != null) {
               setState(() {

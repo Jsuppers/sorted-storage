@@ -254,7 +254,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             timestamp: story.mainStory.timestamp,
             comments: StoryComments(), commentsID: ''));
       }
-      _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
+      _cloudStoriesBloc.add(CloudStoriesEvent(CloudStoriesType.refresh, folderID: folderID));
 
       return null;
     } catch (e) {
