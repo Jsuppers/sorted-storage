@@ -7,9 +7,9 @@ import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/user.dart';
 import 'package:web/constants.dart';
-import 'package:web/route.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/theme/theme.dart';
 
@@ -37,8 +37,8 @@ class LoginPage extends StatelessWidget {
                         const NavBarLogo(height: 40),
                         const SizedBox(
                           width: 100,
-                          child: Divider(thickness: 1),
                           height: 20,
+                          child: Divider(thickness: 1),
                         ),
                         GoogleAuthButton(
                           onPressed: () {
@@ -49,8 +49,8 @@ class LoginPage extends StatelessWidget {
                         ),
                         const SizedBox(
                           width: 100,
-                          child: Divider(thickness: 1),
                           height: 20,
+                          child: Divider(thickness: 1),
                         ),
                         Text('By signing up you agree to our',
                             style: myThemeData.textTheme.caption),
@@ -69,18 +69,18 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  _redirect(BuildContext context) {
-    Map<String, String>? arguments =
+  void _redirect(BuildContext context) {
+    final Map<String, String>? arguments =
         ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
     String? redirectRoute = arguments?[Constants.originalValueKey];
     if (redirectRoute == null ||
-        redirectRoute == routePaths[route.login] ||
-        redirectRoute == routePaths[route.home] ||
-        redirectRoute == routePaths[route.profile] ||
+        redirectRoute == BaseRoute.login.toRouteString() ||
+        redirectRoute == BaseRoute.home.toRouteString() ||
+        redirectRoute == BaseRoute.profile.toRouteString() ||
         redirectRoute == '/') {
-      redirectRoute = routePaths[route.folders];
+      redirectRoute = BaseRoute.folders.toRouteString();
     }
     BlocProvider.of<NavigationBloc>(context)
-        .add(NavigateToRoute(redirectRoute!));
+        .add(NavigateToRoute(redirectRoute));
   }
 }

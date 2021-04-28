@@ -1,4 +1,4 @@
-import 'package:web/route.dart';
+import 'package:web/app/models/base_route.dart';
 
 /// abstract class for navigation events
 abstract class NavigationEvent {
@@ -29,14 +29,14 @@ class NavigatorPopEvent extends NavigationEvent {}
 /// event to navigate to the home page
 class NavigateToHomeEvent extends NavigationEvent {
   /// constructor which sets route to the home page
-  NavigateToHomeEvent() : super(route: routePaths[route.home]!);
+  NavigateToHomeEvent() : super(route: BaseRoute.home.toRouteString());
 }
 
 /// event to navigate to the login page
 class NavigateToLoginEvent extends NavigationEvent {
   /// constructor which sets route to the login page
   NavigateToLoginEvent({Object? arguments})
-      : super(route: routePaths[route.login]!, arguments: arguments);
+      : super(route: BaseRoute.login.toRouteString(), arguments: arguments);
 }
 
 /// event to navigate to the media page
@@ -44,7 +44,7 @@ class NavigateToMediaEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToMediaEvent({required String folderId})
       : super(
-            route: '${routePaths[route.media]!}/$folderId',
+            route: '${BaseRoute.media.toRouteString()}/$folderId',
             requiresAuthentication: true);
 }
 
@@ -52,14 +52,18 @@ class NavigateToMediaEvent extends NavigationEvent {
 class NavigateToFolderEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToFolderEvent()
-      : super(route: routePaths[route.folders]!, requiresAuthentication: true);
+      : super(
+            route: BaseRoute.folders.toRouteString(),
+            requiresAuthentication: true);
 }
 
 /// event to navigate to the media page
 class NavigateToProfileEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToProfileEvent()
-      : super(route: routePaths[route.profile]!, requiresAuthentication: true);
+      : super(
+            route: BaseRoute.profile.toRouteString(),
+            requiresAuthentication: true);
 }
 
 /// event to navigate to the documents page
@@ -67,17 +71,18 @@ class NavigateToDocumentsEvent extends NavigationEvent {
   /// constructor which sets route to the documents page
   NavigateToDocumentsEvent()
       : super(
-            route: routePaths[route.documents]!, requiresAuthentication: true);
+            route: BaseRoute.documents.toRouteString(),
+            requiresAuthentication: true);
 }
 
 /// event to navigate to the terms page
 class NavigateToTermsEvent extends NavigationEvent {
   /// constructor which sets route to the terms page
-  NavigateToTermsEvent() : super(route: routePaths[route.terms]!);
+  NavigateToTermsEvent() : super(route: BaseRoute.terms.toRouteString());
 }
 
 /// event to navigate to the privacy page
 class NavigateToPrivacyEvent extends NavigationEvent {
   /// constructor which sets route to the privacy page
-  NavigateToPrivacyEvent() : super(route: routePaths[route.policy]!);
+  NavigateToPrivacyEvent() : super(route: BaseRoute.policy.toRouteString());
 }

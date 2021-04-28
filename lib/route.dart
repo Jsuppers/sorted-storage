@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/ui/pages/dynamic/documents.dart';
 import 'package:web/ui/pages/dynamic/folders.dart';
@@ -12,34 +13,6 @@ import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/pages/static/privacy_policy.dart';
 import 'package:web/ui/pages/static/terms_of_conditions.dart';
 import 'package:web/ui/pages/template/wrappers.dart';
-
-/// route enums
-enum route {
-  documents,
-  media,
-  view,
-  login,
-  policy,
-  terms,
-  error,
-  home,
-  profile,
-  folders
-}
-
-/// map of route paths
-const Map<route, String> routePaths = <route, String>{
-  route.documents: '/documents',
-  route.media: '/media',
-  route.view: '/view',
-  route.login: '/login',
-  route.policy: '/policy',
-  route.terms: '/terms',
-  route.error: '/error',
-  route.home: '/home',
-  route.folders: '/folders',
-  route.profile: '/profile'
-};
 
 /// class for various routing methods
 class RouteConfiguration {
@@ -56,56 +29,46 @@ class RouteConfiguration {
       settings: settings,
       child: LayoutWrapper(
           widget: _getPageContent(baseRoute, routingData.destination),
-          isViewMode: baseRoute == routePaths[route.view],
+          isViewMode: baseRoute == BaseRoute.view.toRouteString(),
           requiresAuthentication: _pageRequiresAuthentication(baseRoute),
-          showAddButton: _showAddButton(baseRoute),
           routingData: routingData),
     );
   }
 
   static bool _pageRequiresAuthentication(String baseRoute) {
-    return baseRoute == routePaths[route.media] ||
-        baseRoute == routePaths[route.documents] ||
-        baseRoute == routePaths[route.profile] ||
-        baseRoute == routePaths[route.folders];
-  }
-
-  static bool _showAddButton(String baseRoute) {
-    return baseRoute == routePaths[route.media];
+    return baseRoute == BaseRoute.media.toRouteString() ||
+        baseRoute == BaseRoute.documents.toRouteString() ||
+        baseRoute == BaseRoute.profile.toRouteString() ||
+        baseRoute == BaseRoute.folders.toRouteString();
   }
 
   static Widget _getPageContent(String baseRoute, String destination) {
-    if (baseRoute == routePaths[route.view]) {
-      return ViewPage(destination);
+    final BaseRoute currentRoute = BaseRoute.values.firstWhere(
+        (BaseRoute br) => br.toRouteString() == baseRoute,
+        orElse: () => BaseRoute.home);
+
+    switch (currentRoute) {
+      case BaseRoute.view:
+        return ViewPage(destination);
+      case BaseRoute.documents:
+        return DocumentsPage();
+      case BaseRoute.media:
+        return MediaPage(destination);
+      case BaseRoute.login:
+        return LoginPage();
+      case BaseRoute.policy:
+        return PolicyPage();
+      case BaseRoute.terms:
+        return TermsPage();
+      case BaseRoute.error:
+        return ErrorPage();
+      case BaseRoute.home:
+        return HomePage();
+      case BaseRoute.profile:
+        return ProfilePage();
+      case BaseRoute.folders:
+        return FolderPage(destination);
     }
-    if (baseRoute == routePaths[route.login]) {
-      return LoginPage();
-    }
-    if (baseRoute == routePaths[route.media]) {
-      return MediaPage(destination);
-    }
-    if (baseRoute == routePaths[route.profile]) {
-      return ProfilePage();
-    }
-    if (baseRoute == routePaths[route.documents]) {
-      return DocumentsPage();
-    }
-    if (baseRoute == routePaths[route.policy]) {
-      return PolicyPage();
-    }
-    if (baseRoute == routePaths[route.terms]) {
-      return TermsPage();
-    }
-    if (baseRoute == routePaths[route.error]) {
-      return ErrorPage();
-    }
-    if (baseRoute == routePaths[route.folders]) {
-      return FolderPage(destination);
-    }
-    if (baseRoute == routePaths[route.home]) {
-      return HomePage();
-    }
-    return HomePage();
   }
 
   static RoutingData getRoutingData(String? path) {

@@ -22,7 +22,6 @@ class LayoutWrapper extends StatelessWidget {
       {Key? key,
       required this.widget,
       this.requiresAuthentication = false,
-      this.showAddButton = false,
       this.routingData,
       this.isViewMode = false})
       : super(key: key);
@@ -38,9 +37,6 @@ class LayoutWrapper extends StatelessWidget {
 
   /// the targeted route
   final RoutingData? routingData;
-
-  /// ability to add a story
-  final bool showAddButton;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +58,6 @@ class LayoutWrapper extends StatelessWidget {
       return Content(
           widget: widget,
           includeNavigation: !isViewMode,
-          showAddButton: showAddButton,
           routingData: routingData);
     });
   }
@@ -75,8 +70,7 @@ class Content extends StatefulWidget {
       {Key? key,
       required this.widget,
       this.routingData,
-      this.includeNavigation = true,
-      this.showAddButton = false})
+      this.includeNavigation = true})
       : super(key: key);
 
   /// main widget
@@ -84,9 +78,6 @@ class Content extends StatefulWidget {
 
   /// should include the navigation bar
   final bool includeNavigation;
-
-  /// ability to add a story
-  final bool showAddButton;
 
   /// the targeted route
   final RoutingData? routingData;
