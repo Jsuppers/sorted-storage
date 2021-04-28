@@ -4,9 +4,7 @@ import 'package:web/route.dart';
 abstract class NavigationEvent {
   /// constructor
   const NavigationEvent(
-      {this.route = '',
-      this.requiresAuthentication = false,
-      this.arguments});
+      {this.route = '', this.requiresAuthentication = false, this.arguments});
 
   /// route where to navigate to
   final String route;

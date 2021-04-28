@@ -14,7 +14,18 @@ import 'package:web/ui/pages/static/terms_of_conditions.dart';
 import 'package:web/ui/pages/template/wrappers.dart';
 
 /// route enums
-enum route { documents, media, view, login, policy, terms, error, home, profile, folders }
+enum route {
+  documents,
+  media,
+  view,
+  login,
+  policy,
+  terms,
+  error,
+  home,
+  profile,
+  folders
+}
 
 /// map of route paths
 const Map<route, String> routePaths = <route, String>{

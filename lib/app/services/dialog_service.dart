@@ -50,7 +50,8 @@ class DialogService {
   }
 
   /// dialog to share a folder
-  static void editDialog(BuildContext context, {String? folderID, String? parentID}) {
+  static void editDialog(BuildContext context,
+      {String? folderID, String? parentID}) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -65,7 +66,8 @@ class DialogService {
   }
 
   /// dialog to share a folder
-  static void editFolderDialog(BuildContext context, {FolderProperties? folder}) {
+  static void editFolderDialog(BuildContext context,
+      {FolderProperties? folder}) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -74,12 +76,10 @@ class DialogService {
         return EditFolderDialog(folder: folder);
       },
     ).then((_) =>
-    // update the ui with any changes made in the edit dialog
-    BlocProvider.of<CloudStoriesBloc>(context)
-        .add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders)));
+        // update the ui with any changes made in the edit dialog
+        BlocProvider.of<CloudStoriesBloc>(context)
+            .add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders)));
   }
-
-
 
   /// dialog to share a folder
   static void shareDialog(BuildContext context, String folderID) {
@@ -126,18 +126,18 @@ class DialogService {
     );
   }
 
-
-  static showAlertDialog(BuildContext context, {required String message, required Function callback}) {
+  static showAlertDialog(BuildContext context,
+      {required String message, required Function callback}) {
     // set up the buttons
     Widget cancelButton = FlatButton(
       child: Text("Cancel"),
-      onPressed:  () {
+      onPressed: () {
         Navigator.of(context).pop();
       },
     );
     Widget continueButton = FlatButton(
       child: Text("Confirm"),
-      onPressed:  () {
+      onPressed: () {
         Navigator.of(context).pop();
         callback();
       },

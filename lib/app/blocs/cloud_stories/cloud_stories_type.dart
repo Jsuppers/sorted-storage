@@ -26,6 +26,4 @@ enum CloudStoriesType {
 
   /// update ui of current state of the local copy
   refresh,
-
-
 }

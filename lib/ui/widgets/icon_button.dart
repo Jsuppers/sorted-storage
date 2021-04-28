@@ -12,8 +12,7 @@ class ButtonWithIcon extends StatelessWidget {
       required this.onPressed,
       required this.backgroundColor,
       this.iconColor = Colors.white,
-      this.textColor = Colors.white
-      })
+      this.textColor = Colors.white})
       : super(key: key);
 
   // ignore: public_member_api_docs

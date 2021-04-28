@@ -38,7 +38,6 @@ class _IconSpinnerState extends State<IconSpinner>
   void _stopRotation() => _controller.stop();
   void _startRotation() => _controller.repeat();
 
-
   @override
   void dispose() {
     _controller.dispose();

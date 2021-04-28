@@ -20,9 +20,7 @@ class _TimeLineEventEntry {
 // ignore: public_member_api_docs
 class TimelineLayout extends StatefulWidget {
   // ignore: public_member_api_docs
-  const TimelineLayout({Key? key,
-    required this.width,
-    required this.height})
+  const TimelineLayout({Key? key, required this.width, required this.height})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -42,7 +40,8 @@ class _TimelineLayoutState extends State<TimelineLayout> {
 
   @override
   Widget build(BuildContext context) {
-    _timelineData = BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
+    _timelineData =
+        BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
 
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
@@ -67,30 +66,27 @@ class _TimelineLayoutState extends State<TimelineLayout> {
       children.add(element.event);
     }
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
-      listener: (BuildContext context, CloudStoriesState state) {
-        if (state.type == CloudStoriesType.refresh) {
-          if (state.error != null) {
-            final SnackBar snackBar = SnackBar(
-              content: Text(state.error!, textAlign: TextAlign.center),
-            );
+        listener: (BuildContext context, CloudStoriesState state) {
+          if (state.type == CloudStoriesType.refresh) {
+            if (state.error != null) {
+              final SnackBar snackBar = SnackBar(
+                content: Text(state.error!, textAlign: TextAlign.center),
+              );
 
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
+
+            setState(() {
+              addingStory = false;
+              _timelineData.forEach((String key, StoryTimelineData story) =>
+                  story.subEvents!.sort((StoryContent a, StoryContent b) =>
+                      b.timestamp.compareTo(a.timestamp)));
+
+              loaded = true;
+            });
           }
-
-          setState(() {
-            addingStory = false;
-            _timelineData.forEach((String key, StoryTimelineData story) =>
-                story.subEvents!.sort((StoryContent a, StoryContent b) =>
-                    b.timestamp.compareTo(a.timestamp)));
-
-            loaded = true;
-          });
-        }
-      },
-      child: !loaded
-          ? StaticLoadingLogo()
-          : content( children, widgetKey)
-    );
+        },
+        child: !loaded ? StaticLoadingLogo() : content(children, widgetKey));
   }
 
   Widget content(List<Widget> children, StringBuffer widgetKey) {
@@ -107,12 +103,14 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           height: 300,
           child: Column(
             children: [
-              Image.asset('assets/images/no_story.png', height: 150,),
+              Image.asset(
+                'assets/images/no_story.png',
+                height: 150,
+              ),
               const SizedBox(height: 10),
               const Text('It also looks pretty sad here!'),
               const SizedBox(height: 10),
-              const Text(
-                  "Click 'Add' and start your journey!"),
+              const Text("Click 'Add' and start your journey!"),
             ],
           ),
         ),

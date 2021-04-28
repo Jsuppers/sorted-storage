@@ -31,7 +31,8 @@ import 'package:web/ui/widgets/story_image.dart';
 /// page which shows a single story
 class EditStory extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditStory(this._destination, {Key? key, this.parentID}) : super(key: key);
+  const EditStory(this._destination, {Key? key, this.parentID})
+      : super(key: key);
 
   final String? _destination;
   final String? parentID;
@@ -55,9 +56,9 @@ class _EditStoryState extends State<EditStory> {
           folderID: folderID));
     } else {
       BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-              EditorType.createStory,
-              parentID: widget.parentID,
-              mainEvent: true));
+          EditorType.createStory,
+          parentID: widget.parentID,
+          mainEvent: true));
     }
   }
 

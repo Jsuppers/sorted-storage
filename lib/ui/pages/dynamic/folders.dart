@@ -169,7 +169,10 @@ class _FolderViewState extends State<FolderView> {
                   height: 300,
                   child: Column(
                     children: [
-                      Image.asset('assets/images/no_folders.png', height: 150,),
+                      Image.asset(
+                        'assets/images/no_folders.png',
+                        height: 150,
+                      ),
                       const SizedBox(height: 10),
                       const Text('It looks pretty sad here!'),
                       const SizedBox(height: 10),

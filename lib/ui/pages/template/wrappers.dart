@@ -53,8 +53,10 @@ class LayoutWrapper extends StatelessWidget {
             queryParameters.putIfAbsent(key, () => value);
           });
         }
-        queryParameters.putIfAbsent(Constants.originalValueKey, () => routingData!.route);
-        BlocProvider.of<NavigationBloc>(context).add(NavigateToLoginEvent(arguments: queryParameters));
+        queryParameters.putIfAbsent(
+            Constants.originalValueKey, () => routingData!.route);
+        BlocProvider.of<NavigationBloc>(context)
+            .add(NavigateToLoginEvent(arguments: queryParameters));
         return StaticLoadingLogo();
       }
       return Content(
@@ -120,10 +122,10 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Footer(sizingInformation.screenSize.width)),
-                  ),
-                )
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Footer(sizingInformation.screenSize.width)),
+                ),
+              )
             ],
           ),
         ),

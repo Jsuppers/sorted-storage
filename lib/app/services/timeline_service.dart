@@ -39,9 +39,9 @@ class TimelineService {
     }
   }
 
-
   /// Removes a image with the given key
-  static void updateImage(String imageKey, int newIndex, StoryTimelineData folder) {
+  static void updateImage(
+      String imageKey, int newIndex, StoryTimelineData folder) {
     if (folder.mainStory.images!.containsKey(imageKey)) {
       folder.mainStory.images!.update(imageKey, (value) {
         value.index = newIndex;

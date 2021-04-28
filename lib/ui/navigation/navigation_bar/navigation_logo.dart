@@ -6,13 +6,13 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 /// Navigation logo which shows a logo without or with text
 class NavBarLogo extends StatelessWidget {
   // ignore: public_member_api_docs
-  const NavBarLogo({Key? key, this.showText = true, this.height = 60}) : super(key: key);
+  const NavBarLogo({Key? key, this.showText = true, this.height = 60})
+      : super(key: key);
 
   /// should show logo with text
   final bool showText;
 
   final double height;
-
 
   @override
   Widget build(BuildContext context) {

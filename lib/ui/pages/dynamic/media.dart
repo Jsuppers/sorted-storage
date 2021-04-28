@@ -48,10 +48,9 @@ class _MediaPageState extends State<MediaPage> {
                     ButtonWithIcon(
                         text: 'Add',
                         icon: Icons.create_new_folder_outlined,
-                        onPressed: () =>
-                          DialogService.editDialog(context, parentID: widget.folderID)
-                        ,
-                        width:  constraints.screenSize.width,
+                        onPressed: () => DialogService.editDialog(context,
+                            parentID: widget.folderID),
+                        width: constraints.screenSize.width,
                         backgroundColor: Colors.transparent,
                         textColor: Colors.black,
                         iconColor: Colors.black),

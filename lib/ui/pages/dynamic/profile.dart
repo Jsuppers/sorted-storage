@@ -23,7 +23,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   @override
   Widget build(BuildContext context) {
     final User? user = BlocProvider.of<AuthenticationBloc>(context).state;
@@ -32,82 +31,85 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Card(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Column(children: [
-      Column(
-            children: <Widget>[
-              FutureBuilder<StorageInformation?>(
-                future: GoogleStorageService.getStorageInformation(
-                    BlocProvider.of<DriveBloc>(context).state),
-                builder:
-                    (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(child: Icon(Icons.error));
-                  }
-                  // Once complete, show your application
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    final StorageInformation information =
-                    snapshot.data as StorageInformation;
-                    return MaterialButton(
-                      onPressed: () =>
-                          URLService.openURL(Constants.upgradeURL),
-                      child: UsageIndicator(
-                        usage: information.usage,
-                        limit: information.limit,
-                        percent: information.percent,
+            child: Column(
+              children: [
+                Column(
+                  children: <Widget>[
+                    FutureBuilder<StorageInformation?>(
+                      future: GoogleStorageService.getStorageInformation(
+                          BlocProvider.of<DriveBloc>(context).state),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<dynamic> snapshot) {
+                        if (snapshot.hasError) {
+                          return const Center(child: Icon(Icons.error));
+                        }
+                        // Once complete, show your application
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          final StorageInformation information =
+                              snapshot.data as StorageInformation;
+                          return MaterialButton(
+                            onPressed: () =>
+                                URLService.openURL(Constants.upgradeURL),
+                            child: UsageIndicator(
+                              usage: information.usage,
+                              limit: information.limit,
+                              percent: information.percent,
+                            ),
+                          );
+                        }
+                        return const CircularProgressIndicator();
+                      },
+                    ),
+                    const SizedBox(height: 15),
+                    Center(
+                      child: MaterialButton(
+                        hoverElevation: 1.0,
+                        shape: const RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(8.0))),
+                        onPressed: () =>
+                            URLService.openURL(Constants.profileURL),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Avatar(url: user?.photoUrl ?? '', size: 30.0),
+                            const SizedBox(height: 10),
+                            Text(
+                                user?.email == null
+                                    ? ''
+                                    : user!.email.toLowerCase().substring(
+                                        0,
+                                        user.email.length > 30
+                                            ? 30
+                                            : user.email.length),
+                                style: myThemeData.textTheme.caption),
+                            const SizedBox(height: 10),
+                            Text(user?.displayName ?? '',
+                                style: myThemeData.textTheme.bodyText1),
+                          ],
+                        ),
                       ),
-                    );
-                  }
-                  return const CircularProgressIndicator();
-                },
-              ),
-              const SizedBox(height: 15),
-              Center(
-                child: MaterialButton(
-                  hoverElevation: 1.0,
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                  onPressed: () => URLService.openURL(Constants.profileURL),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      Avatar(url: user?.photoUrl ?? '', size: 30.0),
-                      const SizedBox(height: 10),
-                      Text( user?.email == null ? '' :
-                      user!.email.toLowerCase().substring(
-                          0,
-                          user.email.length > 30
-                              ? 30
-                              : user.email.length),
-                          style: myThemeData.textTheme.caption),
-                      const SizedBox(height: 10),
-                      Text(user?.displayName ?? '',
-                          style: myThemeData.textTheme.bodyText1),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-      ),
-      Divider(),
-      Center(
-            child: MaterialButton(
-              minWidth: 190,
-              onPressed: () {
-                BlocProvider.of<NavigationBloc>(context)
-                    .add(NavigatorPopEvent());
-                BlocProvider.of<CloudStoriesBloc>(context)
-                    .add(const CloudStoriesEvent(CloudStoriesType.newUser));
-                BlocProvider.of<AuthenticationBloc>(context)
-                    .add(AuthenticationSignOutEvent());
-              },
-              child: const Text('Logout'),
+                Divider(),
+                Center(
+                  child: MaterialButton(
+                    minWidth: 190,
+                    onPressed: () {
+                      BlocProvider.of<NavigationBloc>(context)
+                          .add(NavigatorPopEvent());
+                      BlocProvider.of<CloudStoriesBloc>(context).add(
+                          const CloudStoriesEvent(CloudStoriesType.newUser));
+                      BlocProvider.of<AuthenticationBloc>(context)
+                          .add(AuthenticationSignOutEvent());
+                    },
+                    child: const Text('Logout'),
+                  ),
+                )
+              ],
             ),
-      )
-
-
-    ],),
           ),
         ));
   }
 }
-

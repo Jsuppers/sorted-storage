@@ -74,8 +74,8 @@ class RetryMediaWidget extends StatefulWidget {
 class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
 
-  Widget _backgroundImage(String imageKey,
-      StoryMedia media, ImageProvider? image) {
+  Widget _backgroundImage(
+      String imageKey, StoryMedia media, ImageProvider? image) {
     return Container(
       height: 150.0,
       width: 150.0,

@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
           imageURL: 'assets/images/about.png'),
       PageItemContent(
           title: 'Privacy',
-          text:  'SortedStorage.com simply acts as a middleman between you and '
+          text: 'SortedStorage.com simply acts as a middleman between you and '
               'your cloud storage provider. We cannot see and do not store any '
               'account information or anything you upload, this is between you '
               'and your cloud storage provider. Are you sceptical? good you sh '
@@ -29,8 +29,7 @@ class HomePage extends StatelessWidget {
           imageURL: 'assets/images/privacy.png'),
       PageItemContent(
           title: 'Open Source',
-          text:
-              'If you are a developer or just curious about the code please '
+          text: 'If you are a developer or just curious about the code please '
               'visit https://github.com/Jsuppers/sorted-storage. There are '
               'still many features this project wants to achieve, so if you '
               'are a developer please consider contributing.',
@@ -39,8 +38,7 @@ class HomePage extends StatelessWidget {
           callToActionButtonText: 'Github'),
       PageItemContent(
           title: 'Free',
-          text:
-              'This site does not charge you anything, it only asks you use '
+          text: 'This site does not charge you anything, it only asks you use '
               'this site with a smile :). If you want to support this project '
               'and help fund further improvements and features please consider '
               'donating!',

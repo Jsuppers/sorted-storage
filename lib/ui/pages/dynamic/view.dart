@@ -40,7 +40,7 @@ class _ViewPageState extends State<ViewPage> {
         if (state.type == CloudStoriesType.refresh) {
           if (state.error != null) {
             setState(() => error = true);
-          } else if (state.storyTimelineData != null){
+          } else if (state.storyTimelineData != null) {
             setState(() {
               timelineData = state.storyTimelineData;
               timelineData!.subEvents!.sort((StoryContent a, StoryContent b) =>
@@ -60,8 +60,10 @@ class _ViewPageState extends State<ViewPage> {
                       'Error getting content',
                       style: myThemeData.textTheme.headline3,
                     ),
-                    Text('are you sure the link is correct?',
-                      style: myThemeData.textTheme.bodyText1,),
+                    Text(
+                      'are you sure the link is correct?',
+                      style: myThemeData.textTheme.bodyText1,
+                    ),
                     Image.asset('assets/images/error.png'),
                   ],
                 )

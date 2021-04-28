@@ -91,7 +91,6 @@ class _EditHeaderState extends State<EditHeader> {
           ],
         ));
   }
-
 }
 
 class SyncingIcon extends StatefulWidget {
@@ -142,4 +141,3 @@ class _SyncingIconState extends State<SyncingIcon> {
     ], child: icon);
   }
 }
-

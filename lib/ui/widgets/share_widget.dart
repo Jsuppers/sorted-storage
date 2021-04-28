@@ -8,10 +8,7 @@ import 'package:web/ui/widgets/share_button.dart';
 // ignore: public_member_api_docs
 class ShareWidget extends StatefulWidget {
   // ignore: public_member_api_docs
-  const ShareWidget({
-    Key? key,
-    required this.folderID,
-    required this.state})
+  const ShareWidget({Key? key, required this.folderID, required this.state})
       : super(key: key);
 
   // ignore: public_member_api_docs

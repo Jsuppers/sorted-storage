@@ -3,8 +3,7 @@ import 'package:web/app/blocs/local_stories/local_stories_type.dart';
 /// Event for the LocalStoriesBloc
 class LocalStoriesEvent {
   /// The constructor requires a LocalStories type
-  const LocalStoriesEvent(this.type,
-      {this.data, this.parentID, this.folderID});
+  const LocalStoriesEvent(this.type, {this.data, this.parentID, this.folderID});
 
   /// represents which story this event is for, this can also be a sub event
   final String? folderID;

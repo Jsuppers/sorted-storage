@@ -11,8 +11,8 @@ class CommentHandlerBloc
     extends Bloc<CommentHandlerEvent, CommentHandlerState> {
   /// sets the current state to not uploading
   CommentHandlerBloc(
-      { required Map<String, StoryTimelineData> cloudStories,
-        required GoogleDrive storage})
+      {required Map<String, StoryTimelineData> cloudStories,
+      required GoogleDrive storage})
       : super(const CommentHandlerState(uploading: false)) {
     _cloudStories = cloudStories;
     _storage = storage;

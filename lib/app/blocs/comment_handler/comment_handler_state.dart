@@ -1,4 +1,3 @@
-
 /// response state of the comment bloc
 class CommentHandlerState {
   /// constructor

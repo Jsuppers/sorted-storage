@@ -5,7 +5,8 @@ import 'package:web/ui/widgets/edit/edit_story.dart';
 /// emoji dialog
 class EditStoryDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EditStoryDialog({Key? key, this.folderID, this.parentID}) : super(key: key);
+  const EditStoryDialog({Key? key, this.folderID, this.parentID})
+      : super(key: key);
 
   // ignore: public_member_api_docs
   final String? folderID;

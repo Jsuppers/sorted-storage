@@ -1,18 +1,11 @@
 import 'package:web/app/models/story_content.dart';
 
-enum SavingState {
-  none,
-  saving,
-  success,
-  error
-}
+enum SavingState { none, saving, success, error }
 
 /// contains the data for all stories
 class StoryTimelineData {
   /// constructor which sets the default values
-  StoryTimelineData(
-      {required this.mainStory,
-      this.subEvents}) {
+  StoryTimelineData({required this.mainStory, this.subEvents}) {
     subEvents ??= <StoryContent>[];
   }
 
@@ -21,7 +14,6 @@ class StoryTimelineData {
       : mainStory = StoryContent.clone(timelineEvent.mainStory),
         subEvents = List<StoryContent>.generate(timelineEvent.subEvents!.length,
             (int index) => StoryContent.clone(timelineEvent.subEvents![index]));
-
 
   /// the content for the main story
   StoryContent mainStory;

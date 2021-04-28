@@ -4,7 +4,7 @@ import 'package:web/app/models/user.dart' as usr;
 abstract class DriveEvent {}
 
 /// Initial event which sets the user
-class InitialDriveEvent extends DriveEvent{
+class InitialDriveEvent extends DriveEvent {
   /// constructor which optionally sets the user
   InitialDriveEvent({this.user});
 

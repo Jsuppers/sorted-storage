@@ -2,8 +2,7 @@
 class PageItemContent {
   // ignore: public_member_api_docs
   PageItemContent(
-      {
-      required this.title,
+      {required this.title,
       required this.text,
       required this.imageURL,
       this.callToActionButtonText,

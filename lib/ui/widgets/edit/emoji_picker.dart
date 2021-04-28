@@ -12,12 +12,12 @@ import 'package:web/app/models/story_settings.dart';
 /// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EmojiPicker({
-    Key? key,
-    required this.folderID,
-    this.parentID,
-    this.metadata,
-    this.folder})
+  const EmojiPicker(
+      {Key? key,
+      required this.folderID,
+      this.parentID,
+      this.metadata,
+      this.folder})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -91,16 +91,15 @@ class EmojiPickerState extends State<EmojiPicker> {
           children: <Widget>[
             Padding(
                 padding:
-                const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
+                    const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
                 child: TextField(
                   style: const TextStyle(fontSize: 18.0, color: Colors.black),
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () =>
-                          BlocProvider.of<NavigationBloc>(context)
-                              .add(NavigatorPopEvent()),
+                      onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                          .add(NavigatorPopEvent()),
                     ),
                     hintText: 'Search...',
                   ),

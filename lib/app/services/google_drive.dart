@@ -113,8 +113,7 @@ class GoogleDrive {
     return folder.id;
   }
 
-  Future<String?> updateFileName(
-      String fileID, String name) async {
+  Future<String?> updateFileName(String fileID, String name) async {
     try {
       final File eventToUpload = File();
       eventToUpload.name = name;
@@ -127,7 +126,7 @@ class GoogleDrive {
     }
   }
 
-  Future<File> createFile(File request, { Media? media}) async {
+  Future<File> createFile(File request, {Media? media}) async {
     return driveApi!.files.create(request, uploadMedia: media);
   }
 

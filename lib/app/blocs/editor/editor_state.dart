@@ -4,11 +4,11 @@ import 'package:web/app/blocs/editor/editor_type.dart';
 class EditorState {
   /// The constructor requires a CloudStories type
   const EditorState(this.type,
-      { this.parentID,
-        this.folderID,
-        this.error,
-        this.data,
-        this.refreshUI = false});
+      {this.parentID,
+      this.folderID,
+      this.error,
+      this.data,
+      this.refreshUI = false});
 
   /// represents which story this event is for, this can also be a sub event
   final String? folderID;
@@ -26,5 +26,4 @@ class EditorState {
 
   /// error message to pass on to the front end
   final String? error;
-
 }

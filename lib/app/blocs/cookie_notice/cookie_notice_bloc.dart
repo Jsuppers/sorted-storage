@@ -7,7 +7,6 @@ import 'package:web/constants.dart';
 
 ///
 class CookieNoticeBloc extends Cubit<CookieNoticeEvent?> {
-
   ///
   CookieNoticeBloc() : super(null) {
     showing = false;
@@ -37,5 +36,4 @@ class CookieNoticeBloc extends Cubit<CookieNoticeEvent?> {
     final SharedPreferences pref = await sharedPreferenceInstance;
     pref.setBool(Constants.acceptedCookieVariable, true);
   }
-
 }

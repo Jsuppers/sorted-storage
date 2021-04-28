@@ -32,9 +32,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   /// initial_state
   EditorBloc(
       {required GoogleDrive storage,
-       required NavigationBloc navigationBloc,
-       required Map<String, StoryTimelineData> cloudStories,
-       required CloudStoriesBloc cloudStoriesBloc})
+      required NavigationBloc navigationBloc,
+      required Map<String, StoryTimelineData> cloudStories,
+      required CloudStoriesBloc cloudStoriesBloc})
       : super(null) {
     _cloudStoriesBloc = cloudStoriesBloc;
     _cloudStories = cloudStories;
@@ -86,9 +86,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             error: event.error);
         break;
       case EditorType.deleteStory:
-        final String? error = await _deleteEvent(
-            event.folderID!,
-            event.parentID);
+        final String? error =
+            await _deleteEvent(event.folderID!, event.parentID);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopDialogEvent());
         } else {
@@ -115,10 +114,12 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       case EditorType.updateName:
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        _storage.updateFileName(event.folderID!, event.data as String).then((value) => {
-          add(EditorEvent(EditorType.syncingState,
-              data: SavingState.success, refreshUI: event.refreshUI))
-        });
+        _storage
+            .updateFileName(event.folderID!, event.data as String)
+            .then((value) => {
+                  add(EditorEvent(EditorType.syncingState,
+                      data: SavingState.success, refreshUI: event.refreshUI))
+                });
         break;
       case EditorType.syncingState:
         yield EditorState(EditorType.syncingState,
@@ -232,7 +233,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       final String? folderID = await _storage.createStory(parentId, timestamp);
 
       final StoryContent event = StoryContent(
-          comments: StoryComments(), folderID: folderID!, timestamp: timestamp, commentsID: '');
+          comments: StoryComments(),
+          folderID: folderID!,
+          timestamp: timestamp,
+          commentsID: '');
       await _uploadSettingsFile(folderID, parentId, event.metadata!);
 
       if (mainEvent) {
@@ -249,9 +253,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         story.subEvents!.add(StoryContent(
             folderID: event.folderID,
             timestamp: story.mainStory.timestamp,
-            comments: StoryComments(), commentsID: ''));
+            comments: StoryComments(),
+            commentsID: ''));
       }
-      _cloudStoriesBloc.add(CloudStoriesEvent(CloudStoriesType.refresh, folderID: folderID));
+      _cloudStoriesBloc
+          .add(CloudStoriesEvent(CloudStoriesType.refresh, folderID: folderID));
 
       return null;
     } catch (e) {
@@ -331,5 +337,4 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       throw 'Error when creating image';
     }
   }
-
 }

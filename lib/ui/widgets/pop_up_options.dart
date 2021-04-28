@@ -26,8 +26,7 @@ class PopUpOptions extends StatelessWidget {
               }
               break;
             case 'Share':
-              DialogService.shareDialog(
-                  context, subFolderID ?? folderID);
+              DialogService.shareDialog(context, subFolderID ?? folderID);
               break;
             default:
               break;

@@ -35,9 +35,8 @@ class PageTemplate extends StatelessWidget {
     final List<Widget> children = <Widget>[
       Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Align(
-          alignment: Alignment.centerRight,
-            child: NavigationLogin()),
+        child:
+            Align(alignment: Alignment.centerRight, child: NavigationLogin()),
       )
     ];
     for (final PageItemContent content in _contentList) {
@@ -236,9 +235,8 @@ class _TextWidget extends StatelessWidget {
 }
 
 class _ImageWidget extends StatelessWidget {
-  const _ImageWidget({Key? key,
-    required this.imageUri,
-    required this.width}) : super(key: key);
+  const _ImageWidget({Key? key, required this.imageUri, required this.width})
+      : super(key: key);
   final String imageUri;
   final double width;
 

@@ -44,13 +44,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     switch (event.type) {
       case CloudStoriesType.updateAllFolders:
         _updatePositions().then((value) =>
-            add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders))
-        );
+            add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders)));
         break;
       case CloudStoriesType.updateFolderPosition:
         _updatePosition(event.data as UpdateIndex).then((value) =>
-          add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders))
-        );
+            add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders)));
         break;
       case CloudStoriesType.rootFolder:
         rootFolderID = await _getCurrentUserRootFolderID();
@@ -114,15 +112,13 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
   }
 
   Future<void> _updatePosition(UpdateIndex updateIndex) async {
-      await storage.updatePosition(
-          _folders[updateIndex.oldIndex].id!,
-          _folders[updateIndex.newIndex].order);
-      await storage.updatePosition(
-          _folders[updateIndex.newIndex].id!,
-          _folders[updateIndex.oldIndex].order);
-      double? oldIndex = _folders[updateIndex.oldIndex].order;
-      _folders[updateIndex.oldIndex].order = _folders[updateIndex.newIndex].order;
-      _folders[updateIndex.newIndex].order = oldIndex;
+    await storage.updatePosition(_folders[updateIndex.oldIndex].id!,
+        _folders[updateIndex.newIndex].order);
+    await storage.updatePosition(_folders[updateIndex.newIndex].id!,
+        _folders[updateIndex.oldIndex].order);
+    double? oldIndex = _folders[updateIndex.oldIndex].order;
+    _folders[updateIndex.oldIndex].order = _folders[updateIndex.newIndex].order;
+    _folders[updateIndex.newIndex].order = oldIndex;
   }
 
   void _getStories(String? folderID) {

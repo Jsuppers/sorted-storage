@@ -10,10 +10,7 @@ import 'package:web/ui/widgets/share_widget.dart';
 /// dialog to share or stop sharing a story
 class ShareDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ShareDialog(
-      {Key? key,
-        this.commentsID,
-        required this.folderID})
+  const ShareDialog({Key? key, this.commentsID, required this.folderID})
       : super(key: key);
 
   // ignore: public_member_api_docs

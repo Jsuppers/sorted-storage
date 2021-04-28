@@ -48,13 +48,14 @@ class LoginPage extends StatelessWidget {
                           darkMode: true,
                         ),
                         const SizedBox(
-                            width: 100, child: Divider(thickness: 1), height: 20,),
-                        Text(
-                            'By signing up you agree to our',
+                          width: 100,
+                          child: Divider(thickness: 1),
+                          height: 20,
+                        ),
+                        Text('By signing up you agree to our',
                             style: myThemeData.textTheme.caption),
                         const SizedBox(height: 5),
-                        Text(
-                          'Privacy Policy and Terms of Conditions',
+                        Text('Privacy Policy and Terms of Conditions',
                             style: myThemeData.textTheme.caption)
                       ],
                     ),

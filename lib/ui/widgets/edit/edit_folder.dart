@@ -35,14 +35,13 @@ class _EditFolderState extends State<EditFolder> {
   bool error = false;
   FolderProperties? folderProperties;
 
-
   @override
   void initState() {
     folderProperties = widget._folderProperties;
     super.initState();
     if (folderProperties == null) {
-      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.createFolder));
+      BlocProvider.of<CloudStoriesBloc>(context)
+          .add(CloudStoriesEvent(CloudStoriesType.createFolder));
     }
   }
 
@@ -64,34 +63,34 @@ class _EditFolderState extends State<EditFolder> {
       },
       child: ResponsiveBuilder(
           builder: (BuildContext context, SizingInformation info) {
-            if (error) {
-              return Column(
-                children: <Widget>[
-                  const SizedBox(height: 20),
-                  Text(
-                    'Error getting content',
-                    style: myThemeData.textTheme.headline3,
-                  ),
-                  Text(
-                    'are you sure the link is correct?',
-                    style: myThemeData.textTheme.bodyText1,
-                  ),
-                  Image.asset('assets/images/error.png'),
-                ],
-              );
-            }
-            if (folderProperties == null) {
-              return const FullPageLoadingLogo(backgroundColor: Colors.white);
-            }
+        if (error) {
+          return Column(
+            children: <Widget>[
+              const SizedBox(height: 20),
+              Text(
+                'Error getting content',
+                style: myThemeData.textTheme.headline3,
+              ),
+              Text(
+                'are you sure the link is correct?',
+                style: myThemeData.textTheme.bodyText1,
+              ),
+              Image.asset('assets/images/error.png'),
+            ],
+          );
+        }
+        if (folderProperties == null) {
+          return const FullPageLoadingLogo(backgroundColor: Colors.white);
+        }
 
-            return Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: EditFolderContent(
-                  width: info.screenSize.width,
-                  folder: folderProperties!,
-                  height: info.screenSize.height,
-                ));
-          }),
+        return Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: EditFolderContent(
+              width: info.screenSize.width,
+              folder: folderProperties!,
+              height: info.screenSize.height,
+            ));
+      }),
     );
   }
 }
@@ -101,9 +100,9 @@ class EditFolderContent extends StatefulWidget {
   // ignore: public_member_api_docs
   const EditFolderContent(
       {Key? key,
-        required this.width,
-        required this.height,
-        required this.folder})
+      required this.width,
+      required this.height,
+      required this.folder})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -180,11 +179,11 @@ class EventCard extends StatefulWidget {
   // ignore: public_member_api_docs
   const EventCard(
       {Key? key,
-        required this.width,
-        required this.folder,
-        required this.controls,
-        this.height = double.infinity,
-        this.savingState})
+      required this.width,
+      required this.folder,
+      required this.controls,
+      this.height = double.infinity,
+      this.savingState})
       : super(key: key);
 
   /// controls of the card e.g. save, edit, cancel
@@ -229,21 +228,20 @@ class _TimelineEventCardState extends State<EventCard> {
           minWidth: 40,
           height: 40,
           onPressed: () => DialogService.emojiDialog(context,
-              folderID: widget.folder.id!,
-              folder: widget.folder),
+              folderID: widget.folder.id!, folder: widget.folder),
           child: widget.folder.emoji.isEmpty
               ? const Text(
-            '📅',
-            style: TextStyle(
-              height: 1.2,
-            ),
-          )
+                  '📅',
+                  style: TextStyle(
+                    height: 1.2,
+                  ),
+                )
               : Text(
-            widget.folder.emoji,
-            style: const TextStyle(
-              height: 1.2,
-            ),
-          ),
+                  widget.folder.emoji,
+                  style: const TextStyle(
+                    height: 1.2,
+                  ),
+                ),
         ),
       ],
     );

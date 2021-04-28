@@ -6,6 +6,7 @@ enum EditorType {
   createStory,
   deleteStory,
   syncingState,
+
   /// delete a image
   deleteImage,
   ignoreImage,

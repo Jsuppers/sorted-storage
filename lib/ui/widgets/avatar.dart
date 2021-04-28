@@ -4,9 +4,7 @@ import 'package:flutter/material.dart';
 /// avatar of the user
 class Avatar extends StatefulWidget {
   // ignore: public_member_api_docs
-  const Avatar({
-    required this.url,
-    required this.size});
+  const Avatar({required this.url, required this.size});
 
   // ignore: public_member_api_docs
   final String url;
@@ -21,9 +19,8 @@ class Avatar extends StatefulWidget {
 class _AvatarState extends State<Avatar> {
   @override
   Widget build(BuildContext context) {
-    return
-      CircleAvatar(
-        radius: widget.size,
+    return CircleAvatar(
+      radius: widget.size,
       child: ClipOval(
           child: CachedNetworkImage(
         imageUrl: widget.url,

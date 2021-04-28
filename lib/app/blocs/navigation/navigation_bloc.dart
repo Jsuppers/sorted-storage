@@ -22,7 +22,8 @@ class NavigationBloc extends Bloc<NavigationEvent, dynamic> {
         _navigatorKey.currentState!.pop();
         break;
       default:
-          _navigatorKey.currentState!.pushNamed(event.route, arguments: event.arguments);
+        _navigatorKey.currentState!
+            .pushNamed(event.route, arguments: event.arguments);
         break;
     }
   }

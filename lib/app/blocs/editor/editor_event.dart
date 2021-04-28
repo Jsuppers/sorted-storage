@@ -5,12 +5,12 @@ class EditorEvent {
   /// The constructor requires a CloudStories type
   const EditorEvent(this.type,
       {this.parentID,
-       this.folderID,
-       this.mainEvent,
-       this.error,
-       this.data,
-       this.closeDialog = false,
-       this.refreshUI = false});
+      this.folderID,
+      this.mainEvent,
+      this.error,
+      this.data,
+      this.closeDialog = false,
+      this.refreshUI = false});
 
   /// represents which story this event is for, this can also be a sub event
   final String? folderID;
