@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:responsive_builder/responsive_builder.dart';
+
+// Project imports:
 import 'package:web/app/models/folder_properties.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/ui/widgets/edit/emoji_picker.dart';

@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:bloc/bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart';
+
+// Project imports:
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/models/user.dart' as usr;
 

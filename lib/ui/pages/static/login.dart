@@ -1,8 +1,13 @@
-import 'package:auth_buttons/auth_buttons.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:auth_buttons/auth_buttons.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+
+// Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';

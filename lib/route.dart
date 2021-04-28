@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:page_transition/page_transition.dart';
+
+// Project imports:
 import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/ui/pages/dynamic/documents.dart';

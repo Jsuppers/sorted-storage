@@ -1,10 +1,15 @@
-import 'package:file_picker/file_picker.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/admob/v1.dart';
 import 'package:mime/mime.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+
+// Project imports:
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';

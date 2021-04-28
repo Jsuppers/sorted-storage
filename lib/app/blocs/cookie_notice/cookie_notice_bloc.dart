@@ -1,6 +1,11 @@
-import 'package:bloc/bloc.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:bloc/bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'package:web/app/blocs/cookie_notice/cookie_notice_event.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';

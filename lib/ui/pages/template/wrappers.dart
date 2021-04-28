@@ -1,8 +1,13 @@
-import 'package:floating_action_bubble/floating_action_bubble.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+
+// Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';

@@ -27,3 +27,8 @@ from [Google credentials](https://console.cloud.google.com/apis/credentials) (cr
 
 Then you can open the file coverage/index.html
 
+### Useful commands
+1. dart analyze
+2. dart format --fix .
+3. flutter pub run import_sorter:main
+

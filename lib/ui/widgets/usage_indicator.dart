@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:percent_indicator/percent_indicator.dart';
+
+// Project imports:
 import 'package:web/ui/theme/theme.dart';
 
 /// shows the cloud storage usage

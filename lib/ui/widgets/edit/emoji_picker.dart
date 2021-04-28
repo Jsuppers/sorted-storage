@@ -1,6 +1,11 @@
-import 'package:emojis/emoji.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:emojis/emoji.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Project imports:
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';

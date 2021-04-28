@@ -1,9 +1,12 @@
+// Package imports:
 import 'package:bloc/bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:http/http.dart' as http;
+
+// Project imports:
+import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/models/http_client.dart';
 import 'package:web/app/models/user.dart' as usr;
-import 'package:web/app/blocs/drive/drive_event.dart';
 
 /// bloc which handles creating the connection between Google drive
 class DriveBloc extends Bloc<DriveEvent, DriveApi?> {

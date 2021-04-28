@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:google_sign_in/google_sign_in.dart';
 
 /// Abstract class for Authentication events

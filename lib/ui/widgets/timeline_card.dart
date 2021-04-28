@@ -1,7 +1,12 @@
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';

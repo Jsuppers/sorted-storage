@@ -1,5 +1,10 @@
-import 'package:bloc/bloc.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:bloc/bloc.dart';
+
+// Project imports:
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
 /// NavigationBloc handles all internal navigation between pages

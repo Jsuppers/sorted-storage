@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// A widget which shows a spinning icon for a duration

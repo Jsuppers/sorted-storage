@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:web/app/models/folder_properties.dart';
 import 'package:web/app/services/dialog_service.dart';
 

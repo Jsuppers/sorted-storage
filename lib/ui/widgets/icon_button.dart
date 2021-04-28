@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:web/constants.dart';
 
 /// A button which is responsive and shows a icon with a text

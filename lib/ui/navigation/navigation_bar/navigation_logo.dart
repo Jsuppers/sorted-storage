@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Project imports:
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
