@@ -113,7 +113,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     }
   }
 
-
   Future<void> _updatePosition(UpdateIndex updateIndex) async {
       await storage.updatePosition(
           _folders[updateIndex.oldIndex].id!,

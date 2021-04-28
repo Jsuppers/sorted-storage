@@ -28,7 +28,6 @@ class _MediaPageState extends State<MediaPage> {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
           CloudStoriesType.retrieveStories,
           folderID: widget.folderID));
-
     }
   }
 
@@ -61,8 +60,12 @@ class _MediaPageState extends State<MediaPage> {
                 ),
               ),
             ),
-            TimelineLayout(
-                width:  constraints.screenSize.width, height:  constraints.screenSize.height,),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: TimelineLayout(
+                  width: constraints.screenSize.width,
+                  height: constraints.screenSize.height),
+            ),
           ],
         );
       },

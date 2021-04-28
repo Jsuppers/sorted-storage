@@ -210,11 +210,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     try {
       if (metadata.id != null) {
         await _storage.updateFile(
-            metadata.id, Media(mediaStream, fileContent.length));
+            metadata.id!, Media(mediaStream, fileContent.length));
       } else {
-        metadata.id = (await _storage.uploadMedia(
+        metadata.id = await _storage.uploadMedia(
             folderId, Constants.settingsFile, fileContent.length, mediaStream,
-            mimeType: 'application/json'))!;
+            mimeType: 'application/json');
       }
 
       final StoryContent eventData = TimelineService.getStoryWithFolderID(
@@ -240,9 +240,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             await _storage.uploadCommentsFile(folderID: event.folderID);
         event.comments = commentsResponse.comments;
         event.commentsID = commentsResponse.commentsID!;
-
-        // TODO send folderID to edit_story to rewrite _destination
-
 
         final StoryTimelineData timelineEvent =
             StoryTimelineData(mainStory: event);

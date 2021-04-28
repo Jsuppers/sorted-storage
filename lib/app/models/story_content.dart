@@ -17,7 +17,7 @@ class StoryContent {
     images ??= <String, StoryMedia>{};
     subEvents ??= <SubEvent>[];
     comments ??= StoryComments();
-    metadata ??= StoryMetadata(id: '');
+    metadata ??= StoryMetadata();
   }
 
   /// clones a story content
