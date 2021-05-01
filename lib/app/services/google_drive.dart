@@ -10,6 +10,7 @@ import 'package:web/app/models/comments_response.dart';
 import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_media.dart';
+import 'package:web/app/models/update_position.dart';
 import 'package:web/constants.dart';
 
 /// service which communicates with google drive
@@ -20,13 +21,56 @@ class GoogleDrive {
   /// drive api
   DriveApi? driveApi;
 
+  Future<double?> updatePosition(UpdatePosition updatePosition) async {
+    double? order = _getOrder(updatePosition, updatePosition.currentIndex);
+
+    if (updatePosition.targetIndex == updatePosition.items.length - 1) {
+      order = DateTime.now().millisecondsSinceEpoch.toDouble();
+    } else if (updatePosition.targetIndex == 0) {
+      order = _getOrder(updatePosition, 0);
+      if (order != null) {
+        order -= 1;
+      }
+    } else {
+      final double? orderAbove =
+          _getOrder(updatePosition, updatePosition.targetIndex);
+      final double? orderBelow =
+          _getOrder(updatePosition, updatePosition.targetIndex + 1);
+      if (orderAbove != null && orderBelow != null) {
+        order = (orderAbove + orderBelow) / 2;
+      }
+    }
+    final String? id = _getId(updatePosition, updatePosition.currentIndex);
+    if (id != null) {
+      await _updatePosition(id, order);
+    } else {
+      throw 'error';
+    }
+
+    return order;
+  }
+
+  double? _getOrder(UpdatePosition updatePosition, int index) {
+    if (updatePosition.media != null) {
+      return updatePosition.items[index]?.storyMedia?.order as double?;
+    }
+    return updatePosition.items[index]?.order as double?;
+  }
+
+  String? _getId(UpdatePosition updatePosition, int index) {
+    if (updatePosition.media != null) {
+      return updatePosition.items[index]?.storyMedia?.id as String?;
+    }
+    return updatePosition.items[index]?.id as String?;
+  }
+
   /// upload a data stream to a file, and return the file's id
   Future<String?> uploadMediaToFolder(String folderID, String imageName,
       StoryMedia storyMedia, Stream<List<int>> dataStream) async {
     final File mediaFile = File();
     mediaFile.parents = <String>[folderID];
     mediaFile.name = imageName;
-    mediaFile.description = storyMedia.index.toString();
+    mediaFile.description = storyMedia.order.toString();
 
     final Media image = Media(dataStream, storyMedia.contentSize);
     final File uploadMedia =
@@ -36,11 +80,11 @@ class GoogleDrive {
   }
 
   /// update a media file index
-  Future<void> updatePosition(String imageID, dynamic position) async {
+  Future<File> _updatePosition(String imageID, dynamic position) async {
     final File mediaFile = File();
     mediaFile.description = position.toString();
 
-    await driveApi!.files.update(mediaFile, imageID);
+    return driveApi!.files.update(mediaFile, imageID);
   }
 
   /// read and return the contents of a json file

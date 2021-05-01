@@ -39,27 +39,4 @@ class TimelineService {
       }
     }
   }
-
-  /// Removes a image with the given key
-  static void updateImage(
-      String imageKey, int newIndex, StoryTimelineData folder) {
-    if (folder.mainStory.images!.containsKey(imageKey)) {
-      folder.mainStory.images!.update(imageKey, (value) {
-        value.index = newIndex;
-        return value;
-      });
-      return;
-    } else {
-      for (int i = 0; i < folder.subEvents!.length; i++) {
-        final StoryContent element = folder.subEvents![i];
-        if (element.images!.containsKey(imageKey)) {
-          element.images!.update(imageKey, (value) {
-            value.index = newIndex;
-            return value;
-          });
-          return;
-        }
-      }
-    }
-  }
 }

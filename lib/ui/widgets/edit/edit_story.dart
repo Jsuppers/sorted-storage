@@ -25,6 +25,7 @@ import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/timeline_data.dart';
+import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
@@ -432,13 +433,13 @@ class _TimelineEventCardState extends State<EventCard> {
           storyMedia: image.value,
           imageKey: image.key,
           storyFolderID: widget.storyFolderID,
-          folderID: widget.story.folderID,
+          id: widget.story.folderID,
         ));
       }
     }
 
     cards.sort((StoryImage a, StoryImage b) =>
-        a.storyMedia.index.compareTo(b.storyMedia.index));
+        a.storyMedia.order!.compareTo(b.storyMedia.order!));
 
     return Form(
       child: Padding(
@@ -486,26 +487,10 @@ class _TimelineEventCardState extends State<EventCard> {
               ],
             ),
             const SizedBox(height: 10),
-            Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: ReorderableWrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
-                    padding: const EdgeInsets.all(8),
-                    onReorder: (int oldIndex, int newIndex) {
-                      setState(() {
-                        final StoryImage image = cards.removeAt(oldIndex);
-                        cards.insert(newIndex, image);
-                        for (int i = 0; i < cards.length; i++) {
-                          cards[i].storyMedia.index = i;
-                        }
-                      });
-                      BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                          EditorType.updateImagePosition,
-                          parentID: widget.storyFolderID,
-                          data: cards));
-                    },
-                    children: cards)),
+            ReordableImages(
+                cards: cards,
+                parentID: widget.storyFolderID,
+                folderID: widget.story.folderID),
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -569,5 +554,47 @@ class _TimelineEventCardState extends State<EventCard> {
         ),
       ),
     );
+  }
+}
+
+class ReordableImages extends StatefulWidget {
+  ReordableImages(
+      {required this.cards, required this.parentID, required this.folderID});
+
+  List<StoryImage> cards;
+  String parentID;
+  String folderID;
+
+  @override
+  _ReordableImagesState createState() => _ReordableImagesState();
+}
+
+class _ReordableImagesState extends State<ReordableImages> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        key: Key(DateTime.now().toString()),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: ReorderableWrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            padding: const EdgeInsets.all(8),
+            onReorder: (int oldIndex, int newIndex) {
+              BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                  EditorType.updateImagePosition,
+                  folderID: widget.folderID,
+                  parentID: widget.parentID,
+                  data: UpdatePosition(
+                      media: true,
+                      currentIndex: oldIndex,
+                      targetIndex: newIndex,
+                      items: <StoryImage>[...widget.cards])));
+
+              setState(() {
+                final StoryImage image = widget.cards.removeAt(oldIndex);
+                widget.cards.insert(newIndex, image);
+              });
+            },
+            children: widget.cards));
   }
 }

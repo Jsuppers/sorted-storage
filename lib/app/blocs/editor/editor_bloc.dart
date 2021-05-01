@@ -1,7 +1,6 @@
 // Dart imports:
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +22,7 @@ import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/app/models/timeline_data.dart';
+import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
@@ -157,13 +157,29 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
                 });
         break;
       case EditorType.updateImagePosition:
-        add(EditorEvent(EditorType.syncingState,
-            data: SavingState.saving, refreshUI: event.refreshUI));
-        _updatePosition(event.data as List<StoryImage>, event.parentID!)
-            .then((value) => {
-                  add(EditorEvent(EditorType.syncingState,
-                      data: SavingState.success, refreshUI: event.refreshUI))
-                });
+        UpdatePosition uip = event.data as UpdatePosition;
+        List<StoryImage> images = uip.items as List<StoryImage>;
+        int currentIndex = uip.currentIndex;
+
+        add(const EditorEvent(EditorType.syncingState,
+            data: SavingState.saving));
+
+        _storage.updatePosition(uip).then((newOrder) {
+          final StoryContent? eventData = TimelineService.getStoryWithFolderID(
+              event.parentID!, event.folderID!, _cloudStories);
+
+          if (eventData != null) {
+            final StoryMedia? oldItem =
+                eventData.images?[images[currentIndex].imageKey];
+            if (oldItem != null) {
+              oldItem.order = newOrder;
+            }
+          }
+
+          add(const EditorEvent(EditorType.syncingState,
+              data: SavingState.success));
+        });
+
         break;
       default:
         break;
@@ -192,17 +208,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       return null;
     } catch (e) {
       return 'could not delete $fileID';
-    }
-  }
-
-  Future<void> _updatePosition(List<StoryImage> images, String parentID) async {
-    // TODO error
-    for (int i = 0; i < images.length; i++) {
-      // TODO transactions
-      await _storage.updatePosition(
-          images[i].imageKey, images[i].storyMedia.index);
-      TimelineService.updateImage(images[i].imageKey,
-          images[i].storyMedia.index, _cloudStories[parentID]!);
     }
   }
 
@@ -329,7 +334,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     if (imageID != null) {
       final StoryContent? eventData = TimelineService.getStoryWithFolderID(
           parentID, folderID, _cloudStories);
-      storyMedia.fileID = imageID;
+      storyMedia.id = imageID;
       storyMedia.retrieveThumbnail = true;
       eventData!.images!.putIfAbsent(imageID, () => storyMedia);
 

@@ -15,7 +15,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_properties.dart';
-import 'package:web/app/models/update_index.dart';
+import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -117,7 +117,6 @@ class _FolderViewState extends State<FolderView> {
       if (state.type == CloudStoriesType.retrieveFolders) {
         setState(() {
           folders = state.data as List<FolderProperties>;
-          folders!.sort((a, b) => a.order!.compareTo(b.order!));
         });
       }
     }, child: ResponsiveBuilder(
@@ -153,11 +152,15 @@ class _FolderViewState extends State<FolderView> {
               runSpacing: 4.0,
               padding: const EdgeInsets.all(8),
               onReorder: (int oldIndex, int newIndex) {
-                UpdateIndex ui =
-                    UpdateIndex(oldIndex: oldIndex, newIndex: newIndex);
+                UpdatePosition ui = UpdatePosition(
+                    currentIndex: oldIndex,
+                    targetIndex: newIndex,
+                    items: <FolderProperties>[...folders!]);
+
                 BlocProvider.of<CloudStoriesBloc>(context).add(
                     CloudStoriesEvent(CloudStoriesType.updateFolderPosition,
                         data: ui));
+
                 setState(() {
                   final FolderProperties image = folders!.removeAt(oldIndex);
                   folders!.insert(newIndex, image);
@@ -191,16 +194,5 @@ class _FolderViewState extends State<FolderView> {
         ],
       );
     }));
-  }
-
-  void updateAllFolders(BuildContext context, int oldIndex, int newIndex) {
-    final FolderProperties image = folders!.removeAt(oldIndex);
-    folders!.insert(newIndex, image);
-
-    for (int i = 0; i < folders!.length; i++) {
-      folders![i].order = i.toDouble();
-    }
-    BlocProvider.of<CloudStoriesBloc>(context)
-        .add(CloudStoriesEvent(CloudStoriesType.updateAllFolders));
   }
 }

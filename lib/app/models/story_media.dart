@@ -2,16 +2,18 @@
 class StoryMedia {
   // ignore: public_member_api_docs
   StoryMedia({
-    required this.fileID,
+    required this.id,
     this.thumbnailURL,
     this.stream,
     this.isVideo = false,
     this.isDocument = false,
     this.contentSize,
-    this.index = highIntValue,
+    this.order,
     required this.name,
     this.retrieveThumbnail = false,
-  });
+  }) {
+    order ??= DateTime.now().millisecondsSinceEpoch.toDouble();
+  }
 
   /// clone the media file
   StoryMedia.clone(StoryMedia media)
@@ -21,9 +23,9 @@ class StoryMedia {
         isDocument = media.isDocument,
         contentSize = media.contentSize,
         retrieveThumbnail = media.retrieveThumbnail,
-        fileID = media.fileID,
+        id = media.id,
         name = media.name,
-        index = media.index;
+        order = media.order;
 
   /// and index which will ensure the media without an index will be at the end
   /// of the list hopefully no one uploads this much media in one story..
@@ -33,7 +35,7 @@ class StoryMedia {
   String name;
 
   /// id of this file
-  String fileID;
+  String id;
 
   /// the url for the thumbnail
   String? thumbnailURL;
@@ -54,5 +56,5 @@ class StoryMedia {
   Stream<List<int>>? stream;
 
   /// index of this media
-  int index;
+  double? order;
 }

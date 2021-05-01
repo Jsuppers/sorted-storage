@@ -5,9 +5,7 @@ class FolderProperties {
     required this.title,
     this.order,
   }) {
-    if (this.order == null) {
-      this.order = DateTime.now().millisecondsSinceEpoch.toDouble();
-    }
+    order ??= DateTime.now().millisecondsSinceEpoch.toDouble();
   }
 
   static FolderProperties extractProperties(String folderName,

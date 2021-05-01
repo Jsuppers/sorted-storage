@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:googleapis/admob/v1.dart';
 import 'package:mime/mime.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -46,10 +45,11 @@ class ImageUploadDialog extends StatelessWidget {
       final String mime = lookupMimeType(element.name!) ?? '';
 
       final StoryMedia media = StoryMedia(
-          fileID: '',
+          id: '',
           name: element.name!,
           stream: element.readStream,
           contentSize: element.size!,
+          order: (DateTime.now().millisecondsSinceEpoch + i).toDouble(),
           isVideo: mime.startsWith('video/'),
           isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
       images.putIfAbsent(element.name!, () => media);

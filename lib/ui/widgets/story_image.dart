@@ -25,7 +25,7 @@ class StoryImage extends StatefulWidget {
       required this.storyMedia,
       required this.imageKey,
       required this.storyFolderID,
-      required this.folderID})
+      required this.id})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -41,7 +41,7 @@ class StoryImage extends StatefulWidget {
   final String storyFolderID;
 
   // ignore: public_member_api_docs
-  final String folderID;
+  final String id;
 
   @override
   _StoryImageState createState() => _StoryImageState();
@@ -51,7 +51,7 @@ class _StoryImageState extends State<StoryImage> {
   @override
   Widget build(BuildContext context) {
     return RetryMediaWidget(
-      folderId: widget.folderID,
+      folderId: widget.id,
       locked: widget.locked,
       media: widget.storyMedia,
       storyFolderID: widget.storyFolderID,
@@ -80,7 +80,8 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
 
   Widget _backgroundImage(
-      String imageKey, StoryMedia media, ImageProvider? image) {
+      String imageKey, StoryMedia media, ImageProvider? image,
+      {bool error = false}) {
     return Container(
       height: 150.0,
       width: 150.0,
@@ -92,8 +93,8 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
       ),
       child: !widget.locked
           ? _createEditControls(
-              widget.media.fileID, widget.media.name, showPlaceholder)
-          : _createNonEditControls(widget.media.fileID, showPlaceholder, media),
+              widget.media.id, widget.media.name, showPlaceholder)
+          : _createNonEditControls(widget.media.id, showPlaceholder, media),
     );
   }
 
@@ -172,7 +173,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
           BlocProvider.of<CloudStoriesBloc>(context).storage,
           widget.media.thumbnailURL,
           widget.folderId,
-          widget.media.fileID,
+          widget.media.id,
           retrieveThumbnail: widget.media.retrieveThumbnail,
         ),
         builder: (BuildContext context, AsyncSnapshot<String?> thumbnailURL) {
@@ -180,11 +181,11 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
           return RawMaterialButton(
             onPressed: () {
               if (widget.locked) {
-                URLService.openDriveMedia(widget.media.fileID);
+                URLService.openDriveMedia(widget.media.id);
               }
             },
             child: showPlaceholder
-                ? _backgroundImage(widget.media.fileID, widget.media, null)
+                ? _backgroundImage(widget.media.id, widget.media, null)
                 : SizedBox(
                     height: widget.locked == false ? 80 : 150.0,
                     width: widget.locked == false ? 80 : 150.0,
@@ -196,15 +197,12 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                                 StaticLoadingLogo(),
                             errorWidget: (BuildContext context, String url,
                                     dynamic error) =>
-                                _backgroundImage(
-                                    widget.media.fileID,
-                                    widget.media,
-                                    const AssetImage(
-                                        'assets/images/error.png')),
+                                _backgroundImage(widget.media.id, widget.media,
+                                    const AssetImage('assets/images/error.png')),
                             imageBuilder: (BuildContext context,
                                     ImageProvider<Object> image) =>
                                 _backgroundImage(
-                                    widget.media.fileID, widget.media, image),
+                                    widget.media.id, widget.media, image),
                           ),
                   ),
           );

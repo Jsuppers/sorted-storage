@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 
 // Package imports:
 import 'package:intl/intl.dart';
-import 'package:reorderables/reorderables.dart';
 
 // Project imports:
 import 'package:web/app/models/story_content.dart';
@@ -98,13 +97,13 @@ class _TimelineEventCardState extends State<EventCard> {
           storyMedia: image.value,
           imageKey: image.key,
           storyFolderID: widget.storyFolderID,
-          folderID: widget.story.folderID,
+          id: widget.story.folderID,
         ));
       }
     }
 
     cards.sort((StoryImage a, StoryImage b) =>
-        a.storyMedia.index.compareTo(b.storyMedia.index));
+        a.storyMedia.order!.compareTo(b.storyMedia.order!));
 
     return Form(
       child: Padding(
@@ -154,19 +153,10 @@ class _TimelineEventCardState extends State<EventCard> {
               ),
               Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: ReorderableWrap(
+                  child: Wrap(
+                      key: Key(DateTime.now().toString()),
                       spacing: 8.0,
                       runSpacing: 4.0,
-                      padding: const EdgeInsets.all(8),
-                      onReorder: (int oldIndex, int newIndex) {
-                        setState(() {
-                          final StoryImage image = cards.removeAt(oldIndex);
-                          cards.insert(newIndex, image);
-                          for (int i = 0; i < cards.length; i++) {
-                            cards[i].storyMedia.index = i;
-                          }
-                        });
-                      },
                       children: cards)),
               Text(
                 Property.getValueOrDefault(

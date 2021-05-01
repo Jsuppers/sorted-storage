@@ -57,6 +57,7 @@ class DialogService {
   /// dialog to share a folder
   static void editDialog(BuildContext context,
       {String? folderID, String? parentID}) {
+    final CloudStoriesBloc cloudBloc = BlocProvider.of<CloudStoriesBloc>(context);
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -66,13 +67,14 @@ class DialogService {
       },
     ).then((_) =>
         // update the ui with any changes made in the edit dialog
-        BlocProvider.of<CloudStoriesBloc>(context)
-            .add(const CloudStoriesEvent(CloudStoriesType.refresh)));
+        cloudBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
+            folderID: folderID, parentID: parentID)));
   }
 
   /// dialog to share a folder
   static void editFolderDialog(BuildContext context,
       {FolderProperties? folder}) {
+    CloudStoriesBloc cloudBloc = BlocProvider.of<CloudStoriesBloc>(context);
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -82,7 +84,7 @@ class DialogService {
       },
     ).then((_) =>
         // update the ui with any changes made in the edit dialog
-        BlocProvider.of<CloudStoriesBloc>(context)
+        cloudBloc
             .add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders)));
   }
 

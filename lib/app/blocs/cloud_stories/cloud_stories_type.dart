@@ -15,7 +15,6 @@ enum CloudStoriesType {
   createFolder,
   deleteFolder,
   updateFolderPosition,
-  updateAllFolders,
 
   rootFolder,
 
