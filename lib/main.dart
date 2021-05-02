@@ -11,7 +11,6 @@ import 'package:googleapis/drive/v3.dart';
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
@@ -78,10 +77,6 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<CloudStoriesBloc>(
           create: (BuildContext context) => _cloudStoriesBloc,
-        ),
-        BlocProvider<CommentHandlerBloc>(
-          create: (BuildContext context) => CommentHandlerBloc(
-              cloudStories: _cloudStories, storage: _googleDrive),
         ),
         BlocProvider<EditorBloc>(
             create: (BuildContext context) => EditorBloc(

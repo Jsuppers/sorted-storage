@@ -8,17 +8,8 @@ class Constants {
   /// the root folder for sorted storage
   static const String rootFolder = 'sorted-storage';
 
-  /// root folder for media content
-  static const String mediaFolder = 'media';
-
-  /// root folder for documents
-  static const String documentFolder = 'documents';
-
   /// file name of settings file
   static const String settingsFile = 'settings.json';
-
-  /// file name of comments file
-  static const String commentsFile = 'comments.json';
 
   /// donate url
   static const String donateURL = 'https://www.buymeacoffee.com/joris';

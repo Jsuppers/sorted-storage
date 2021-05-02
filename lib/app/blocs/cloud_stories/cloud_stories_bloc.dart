@@ -13,7 +13,6 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_properties.dart';
-import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/story_settings.dart';
@@ -205,7 +204,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
 
     String? settingsID;
-    String? commentsID;
     final Map<String, StoryMedia> images = <String, StoryMedia>{};
     final List<SubEvent> subEvents = <SubEvent>[];
     for (final File file in filesInFolder.files!) {
@@ -230,8 +228,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         images.putIfAbsent(file.id!, () => media);
       } else if (file.name == Constants.settingsFile) {
         settingsID = file.id!;
-      } else if (file.name == Constants.commentsFile) {
-        commentsID = file.id!;
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final int? timestamp = int.tryParse(file.name!);
         if (timestamp != null) {
@@ -252,15 +248,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     final StoryMetadata metadata = StoryMetadata.fromJson(
         settingsID, await storage.getJsonFile(settingsID));
 
-    final StoryComments comments =
-        StoryComments.fromJson(await storage.getJsonFile(commentsID));
-
     return StoryContent(
         timestamp: timestamp,
         images: images,
         metadata: metadata,
-        comments: comments,
-        commentsID: commentsID,
         subEvents: subEvents,
         folderID: folderID);
   }

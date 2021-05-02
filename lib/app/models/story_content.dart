@@ -1,5 +1,4 @@
 // Project imports:
-import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/app/models/sub_event.dart';
@@ -12,12 +11,9 @@ class StoryContent {
       this.images,
       required this.folderID,
       this.metadata,
-      this.subEvents,
-      this.commentsID,
-      this.comments}) {
+      this.subEvents}) {
     images ??= <String, StoryMedia>{};
     subEvents ??= <SubEvent>[];
-    comments ??= StoryComments();
     metadata ??= StoryMetadata();
   }
 
@@ -29,10 +25,8 @@ class StoryContent {
             event.images!.map((String key, StoryMedia value) {
           return MapEntry<String, StoryMedia>(key, StoryMedia.clone(value));
         })),
-        commentsID = event.commentsID,
         folderID = event.folderID,
-        subEvents = List<SubEvent>.from(event.subEvents!),
-        comments = StoryComments.clone(event.comments!);
+        subEvents = List<SubEvent>.from(event.subEvents!);
 
   StoryMetadata? metadata;
 
@@ -45,14 +39,8 @@ class StoryContent {
   /// the folder ID of this story
   String folderID;
 
-  /// the file ID of the comments file
-  String? commentsID;
-
   /// the ID of the permission for this story
 //  String permissionID;
-
-  /// comments for this story
-  StoryComments? comments;
 
   /// a list of all the sub events for this story
   List<SubEvent>? subEvents;

@@ -6,12 +6,8 @@ import 'dart:convert';
 import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
-import 'package:web/app/models/comments_response.dart';
-import 'package:web/app/models/story_comment.dart';
-import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/update_position.dart';
-import 'package:web/constants.dart';
 
 /// service which communicates with google drive
 class GoogleDrive {
@@ -101,40 +97,6 @@ class GoogleDrive {
       event = jsonDecode(utf8.decode(dataStore)) as Map<String, dynamic>;
     }
     return event;
-  }
-
-  /// upload a comment to the comments file
-  Future<CommentsResponse> uploadCommentsFile(
-      {String? commentsID,
-      required String folderID,
-      StoryComment? comment}) async {
-    StoryComments? comments;
-    if (commentsID != null) {
-      comments = StoryComments.fromJson(await getJsonFile(commentsID));
-    }
-    comments ??= StoryComments();
-    comments.comments ??= <StoryComment>[];
-
-    if (comment != null) {
-      comments.comments!.add(comment);
-    }
-
-    final List<int> fileContent = utf8.encode(jsonEncode(comments));
-    final Stream<List<int>> mediaStream =
-        Future<List<int>>.value(fileContent).asStream().asBroadcastStream();
-
-    String? responseID;
-    if (commentsID == null) {
-      responseID = await uploadMedia(
-          folderID, Constants.commentsFile, fileContent.length, mediaStream,
-          mimeType: 'application/json');
-    } else {
-      final File folder =
-          await updateFile(commentsID, Media(mediaStream, fileContent.length));
-      responseID = folder.id;
-    }
-
-    return CommentsResponse(comments: comments, commentsID: responseID);
   }
 
   /// create a story (a folder with the timestamp as the name)

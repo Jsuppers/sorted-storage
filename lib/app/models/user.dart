@@ -10,7 +10,7 @@ class User {
   /// email address of this user
   final String email;
 
-  /// display name of this user, used when sending comments
+  /// display name of this user
   final String displayName;
 
   /// url of a photo for this user

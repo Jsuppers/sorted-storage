@@ -3,18 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-// Package imports:
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 // Project imports:
-import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_event.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_type.dart';
-import 'package:web/app/models/story_comment.dart';
 import 'package:web/app/models/timeline_data.dart';
-import 'package:web/app/models/user.dart' as usr;
-import 'package:web/ui/widgets/event_comments.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
@@ -87,31 +77,6 @@ class _TimelineCardState extends State<TimelineCard> {
                     story: widget.event.subEvents![index]),
               );
             }),
-            BlocBuilder<AuthenticationBloc, usr.User?>(
-                builder: (BuildContext context, usr.User? user) {
-              return CommentWidget(
-                folderID: widget.folderId,
-                user: user,
-                width: widget.width,
-                height: widget.height,
-                sendComment: (BuildContext context, usr.User? currentUser,
-                    String comment) async {
-                  String user = 'Anonymous';
-                  if (currentUser != null) {
-                    user = currentUser.displayName;
-                    if (user == null || user == '') {
-                      user = currentUser.email;
-                    }
-                  }
-
-                  BlocProvider.of<CommentHandlerBloc>(context).add(
-                      CommentHandlerEvent(
-                          CommentHandlerType.uploadingCommentsStart,
-                          folderID: widget.folderId,
-                          data: StoryComment(comment: comment, user: user)));
-                },
-              );
-            })
           ],
         ),
       ),

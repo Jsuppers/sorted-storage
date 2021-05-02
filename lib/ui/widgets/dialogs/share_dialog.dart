@@ -15,11 +15,8 @@ import 'package:web/ui/widgets/share_widget.dart';
 /// dialog to share or stop sharing a story
 class ShareDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ShareDialog({Key? key, this.commentsID, required this.folderID})
+  const ShareDialog({Key? key, required this.folderID})
       : super(key: key);
-
-  // ignore: public_member_api_docs
-  final String? commentsID;
 
   // ignore: public_member_api_docs
   final String folderID;
@@ -30,7 +27,7 @@ class ShareDialog extends StatelessWidget {
         GoogleDrive(driveApi: BlocProvider.of<DriveBloc>(context).state);
     return BlocProvider<SharingBloc>(
       create: (BuildContext context) =>
-          SharingBloc(folderID, commentsID, storage),
+          SharingBloc(folderID, storage),
       child: Dialog(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0))),

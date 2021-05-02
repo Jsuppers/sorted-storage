@@ -15,9 +15,7 @@ import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/comments_response.dart';
 import 'package:web/app/models/media_progress.dart';
-import 'package:web/app/models/story_comments.dart';
 import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/app/models/story_settings.dart';
@@ -242,18 +240,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       final String? folderID = await _storage.createStory(parentId, timestamp);
 
       final StoryContent event = StoryContent(
-          comments: StoryComments(),
           folderID: folderID!,
-          timestamp: timestamp,
-          commentsID: '');
+          timestamp: timestamp);
       await _uploadSettingsFile(folderID, parentId, event.metadata!);
 
       if (mainEvent) {
-        final CommentsResponse commentsResponse =
-            await _storage.uploadCommentsFile(folderID: event.folderID);
-        event.comments = commentsResponse.comments;
-        event.commentsID = commentsResponse.commentsID!;
-
         final StoryTimelineData timelineEvent =
             StoryTimelineData(mainStory: event);
         _cloudStories.putIfAbsent(folderID, () => timelineEvent);
@@ -261,9 +252,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         final StoryTimelineData story = _cloudStories[parentId]!;
         story.subEvents!.add(StoryContent(
             folderID: event.folderID,
-            timestamp: story.mainStory.timestamp,
-            comments: StoryComments(),
-            commentsID: ''));
+            timestamp: story.mainStory.timestamp));
       }
       _cloudStoriesBloc
           .add(CloudStoriesEvent(CloudStoriesType.refresh, folderID: folderID));
