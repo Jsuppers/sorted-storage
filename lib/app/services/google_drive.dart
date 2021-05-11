@@ -3,7 +3,9 @@ import 'dart:async';
 import 'dart:convert';
 
 // Package imports:
+import 'package:emojis/emojis.dart';
 import 'package:googleapis/drive/v3.dart';
+import 'package:web/app/models/story_content.dart';
 
 // Project imports:
 import 'package:web/app/models/story_media.dart';
@@ -99,16 +101,35 @@ class GoogleDrive {
     return event;
   }
 
-  /// create a story (a folder with the timestamp as the name)
-  Future<String?> createStory(String parentID, int timestamp) async {
-    final File story = File();
-    story.parents = <String>[parentID];
-    story.mimeType = 'application/vnd.google-apps.folder';
-    story.name = timestamp.toString();
 
-    final File folder = await driveApi!.files.create(story);
-    return folder.id;
+  Future<FolderContent?> createStory(String? parentID) async {
+    if (parentID == null) {
+      return null;
+    }
+    final File fileMetadata = File();
+    final FolderContent fileProperties = FolderContent(
+        title: 'New Folder',
+        emoji: Emojis.smilingFace);
+    fileMetadata.name = '${Emojis.smilingFace} New Folder';
+    fileMetadata.parents = <String>[parentID];
+    fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+    fileMetadata.description = fileProperties.order.toString();
+    final File rt = await createFile(fileMetadata);
+    fileProperties.id = rt.id;
+
+    return fileProperties;
   }
+//
+//  /// create a story (a folder with the timestamp as the name)
+//  Future<String?> createStory(String parentID) async {
+//    final File story = File();
+//    story.parents = <String>[parentID];
+//    story.mimeType = 'application/vnd.google-apps.folder';
+//    story.name = timestamp.toString();
+//
+//    final File folder = await driveApi!.files.create(story);
+//    return folder.id;
+//  }
 
   Future<String?> uploadMedia(String parentID, String name, int contentLength,
       Stream<List<int>> mediaStream,

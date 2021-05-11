@@ -16,6 +16,7 @@ import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/media_progress.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_media.dart';
 import 'package:web/ui/helpers/text_display.dart';
 
@@ -24,16 +25,12 @@ class ImageUploadDialog extends StatelessWidget {
   // ignore: public_member_api_docs
   const ImageUploadDialog(
       {Key? key,
-      required this.folderID,
-      required this.parentID,
+      required this.folder,
       required this.file})
       : super(key: key);
 
   // ignore: public_member_api_docs
-  final String folderID;
-
-  // ignore: public_member_api_docs
-  final String parentID;
+  final FolderContent folder;
 
   final FilePickerResult file;
 
@@ -48,17 +45,16 @@ class ImageUploadDialog extends StatelessWidget {
           id: '',
           name: element.name!,
           stream: element.readStream,
-          contentSize: element.size!,
+          contentSize: element.size,
           order: (DateTime.now().millisecondsSinceEpoch + i).toDouble(),
           isVideo: mime.startsWith('video/'),
           isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
       images.putIfAbsent(element.name!, () => media);
     }
+
     BlocProvider.of<EditorBloc>(context).add(EditorEvent(
         EditorType.uploadImages,
-        parentID: parentID,
-        folderID: folderID,
-        data: images));
+        data: UpdateImagesEvent(images: images, folderContent: folder)));
 
     return Dialog(
       shape: const RoundedRectangleBorder(

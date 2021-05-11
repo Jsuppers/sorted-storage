@@ -39,17 +39,14 @@ class _MyAppState extends State<MyApp> {
   late DriveBloc _driveBloc;
   late NavigationBloc _navigationBloc;
   late CloudStoriesBloc _cloudStoriesBloc;
-  late Map<String, StoryTimelineData> _cloudStories;
 
   @override
   void initState() {
     super.initState();
-    _cloudStories = <String, StoryTimelineData>{};
     _googleDrive = GoogleDrive();
     _driveBloc = DriveBloc();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
     _cloudStoriesBloc = CloudStoriesBloc(
-        cloudStories: _cloudStories,
         storage: _googleDrive,
         navigationBloc: _navigationBloc);
   }
@@ -80,7 +77,6 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<EditorBloc>(
             create: (BuildContext context) => EditorBloc(
-                cloudStories: _cloudStories,
                 storage: _googleDrive,
                 navigationBloc: _navigationBloc,
                 cloudStoriesBloc: _cloudStoriesBloc)),

@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,9 +22,8 @@ class EventCard extends StatefulWidget {
   const EventCard(
       {Key? key,
       required this.width,
-      required this.story,
+      required this.folder,
       required this.controls,
-      required this.storyFolderID,
       required this.locked,
       this.height = double.infinity})
       : super(key: key);
@@ -37,13 +38,10 @@ class EventCard extends StatefulWidget {
   final double height;
 
   /// the story this card is related to
-  final StoryContent story;
+  final FolderContent folder;
 
   /// whether the card is locked
   final bool locked;
-
-  /// the folder ID of this story
-  final String storyFolderID;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -53,7 +51,7 @@ class _TimelineEventCardState extends State<EventCard> {
   final DateFormat formatter = DateFormat('dd MMMM, yyyy');
 
   Widget emoji() {
-    return widget.story.metadata!.emoji.isEmpty
+    return widget.folder.metadata!.emoji.isEmpty
         ? const Text(
             '📅',
             style: TextStyle(
@@ -61,7 +59,7 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
           )
         : Text(
-            widget.story.metadata!.emoji,
+            widget.folder.metadata!.emoji,
             style: const TextStyle(
               height: 1.2,
             ),
@@ -70,7 +68,7 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget timeStamp() {
     final DateTime selectedDate =
-        DateTime.fromMillisecondsSinceEpoch(widget.story.timestamp);
+        DateTime.fromMillisecondsSinceEpoch(widget.folder.order!.toInt());
     final String formattedDate = formatter.format(selectedDate);
     return Container(
       padding: EdgeInsets.zero,
@@ -89,15 +87,16 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   Widget build(BuildContext context) {
     final List<StoryImage> cards = <StoryImage>[];
-    if (widget.story.images != null) {
+    debugger();
+    if (widget.folder.images != null) {
       for (final MapEntry<String, StoryMedia> image
-          in widget.story.images!.entries) {
+          in widget.folder.images!.entries) {
+        debugger();
         cards.add(StoryImage(
           locked: widget.locked,
           storyMedia: image.value,
           imageKey: image.key,
-          storyFolderID: widget.storyFolderID,
-          id: widget.story.folderID,
+          id: widget.folder.id!,
         ));
       }
     }
@@ -142,7 +141,7 @@ class _TimelineEventCardState extends State<EventCard> {
             children: <Widget>[
               Text(
                 Property.getValueOrDefault(
-                  widget.story.metadata!.title,
+                  widget.folder.metadata!.title,
                   'No title given',
                 ),
                 style: TextStyle(
@@ -160,7 +159,7 @@ class _TimelineEventCardState extends State<EventCard> {
                       children: cards)),
               Text(
                 Property.getValueOrDefault(
-                  widget.story.metadata!.description,
+                  widget.folder.metadata!.description,
                   'No description given',
                 ),
                 textAlign: TextAlign.center,

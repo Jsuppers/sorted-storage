@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -27,14 +29,14 @@ class ViewPage extends StatefulWidget {
 }
 
 class _ViewPageState extends State<ViewPage> {
-  StoryTimelineData? timelineData;
+  FolderContent? folder;
   bool error = false;
 
   @override
   void initState() {
     super.initState();
     BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-        CloudStoriesType.retrieveStory,
+        CloudStoriesType.retrieveFolder,
         folderID: widget._destination));
   }
 
@@ -45,11 +47,11 @@ class _ViewPageState extends State<ViewPage> {
         if (state.type == CloudStoriesType.refresh) {
           if (state.error != null) {
             setState(() => error = true);
-          } else if (state.storyTimelineData != null) {
+          } else if (state.data != null) {
             setState(() {
-              timelineData = state.storyTimelineData;
-              timelineData!.subEvents!.sort((StoryContent a, StoryContent b) =>
-                  b.timestamp.compareTo(a.timestamp));
+              folder = state.data as FolderContent;
+              folder!.subFolders!.sort((FolderContent a, FolderContent b) =>
+                  b.order!.compareTo(a.order!));
             });
           }
         }
@@ -75,11 +77,12 @@ class _ViewPageState extends State<ViewPage> {
               : Padding(
                   padding: const EdgeInsets.all(20.0),
                   child: TimelineCard(
-                      key: Key(timelineData.toString()),
+                      key: Key(folder.toString()),
                       viewMode: true,
                       width: info.screenSize.width,
                       height: info.screenSize.height,
-                      event: timelineData!,
+                      folder: folder!,
+                      parent: folder!,
                       folderId: widget._destination),
                 );
         },

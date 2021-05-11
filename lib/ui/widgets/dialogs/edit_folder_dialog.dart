@@ -6,6 +6,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/ui/widgets/edit/edit_folder.dart';
 
 class EditFolderDialog extends StatelessWidget {
@@ -13,7 +14,7 @@ class EditFolderDialog extends StatelessWidget {
   const EditFolderDialog({Key? key, this.folder}) : super(key: key);
 
   // ignore: public_member_api_docs
-  final FolderProperties? folder;
+  final FolderContent? folder;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class EditFolderDialog extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ResponsiveBuilder(
           builder: (BuildContext context, SizingInformation constraints) {
-            return EditFolder(folder);
+            return EditFolder(folder: folder);
           },
         ),
       ),

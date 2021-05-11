@@ -29,6 +29,7 @@ import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
+import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/edit/edit_header.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -38,18 +39,17 @@ import 'package:web/ui/widgets/story_image.dart';
 /// page which shows a single story
 class EditStory extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditStory(this._destination, {Key? key, this.parentID})
-      : super(key: key);
+  const EditStory(this._destination, {Key? key, this.parent}) : super(key: key);
 
   final String? _destination;
-  final String? parentID;
+  final FolderContent? parent;
 
   @override
   _EditStoryState createState() => _EditStoryState();
 }
 
 class _EditStoryState extends State<EditStory> {
-  StoryTimelineData? timelineData;
+  FolderContent? timelineData;
   bool error = false;
   late String? folderID;
 
@@ -59,13 +59,11 @@ class _EditStoryState extends State<EditStory> {
     folderID = widget._destination;
     if (folderID != null) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveStory,
+          CloudStoriesType.retrieveFolder,
           folderID: folderID));
     } else {
-      BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-          EditorType.createStory,
-          parentID: widget.parentID,
-          mainEvent: true));
+      BlocProvider.of<EditorBloc>(context)
+          .add(EditorEvent(EditorType.createStory, data: widget.parent));
     }
   }
 
@@ -73,6 +71,17 @@ class _EditStoryState extends State<EditStory> {
   Widget build(BuildContext context) {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
       listener: (BuildContext context, CloudStoriesState state) {
+    if (state.type == CloudStoriesType.retrieveFolder
+    && state.folderID == widget._destination) {
+      if (state.data != null) {
+        setState(() {
+          timelineData = FolderContent.clone(state.data as FolderContent);
+          timelineData!.subFolders!.sort(
+                  (FolderContent a, FolderContent b) =>
+                  b.order!.compareTo(a.order!));
+        });
+      }
+    }
         if (state.type == CloudStoriesType.refresh) {
           if (state.error != null) {
             setState(() => error = true);
@@ -80,16 +89,15 @@ class _EditStoryState extends State<EditStory> {
             if (state.folderID != null) {
               folderID = state.folderID;
             }
-            StoryTimelineData? data = BlocProvider.of<CloudStoriesBloc>(context)
-                .state
-                .cloudStories[folderID];
+            FolderContent? data = TimelineService.getFolderWithID(folderID!,
+                BlocProvider.of<CloudStoriesBloc>(context).rootFolder);
 
             if (data != null) {
               setState(() {
-                timelineData = StoryTimelineData.clone(data);
-                timelineData!.subEvents!.sort(
-                    (StoryContent a, StoryContent b) =>
-                        b.timestamp.compareTo(a.timestamp));
+                timelineData = FolderContent.clone(data);
+                timelineData!.subFolders!.sort(
+                    (FolderContent a, FolderContent b) =>
+                        b.order!.compareTo(a.order!));
               });
             }
           }
@@ -121,8 +129,8 @@ class _EditStoryState extends State<EditStory> {
             padding: const EdgeInsets.all(20.0),
             child: EditStoryContent(
               width: info.screenSize.width,
-              event: timelineData!,
               height: info.screenSize.height,
+              folder: timelineData,
             ));
       }),
     );
@@ -136,7 +144,7 @@ class EditStoryContent extends StatefulWidget {
       {Key? key,
       required this.width,
       required this.height,
-      required this.event})
+      required this.folder})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -146,7 +154,7 @@ class EditStoryContent extends StatefulWidget {
   final double height;
 
   // ignore: public_member_api_docs
-  final StoryTimelineData event;
+  final FolderContent? folder;
 
   @override
   _EditStoryContentState createState() => _EditStoryContentState();
@@ -157,7 +165,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.event == null) {
+    if (widget.folder == null) {
       return const FullPageLoadingLogo(backgroundColor: Colors.white);
     }
 
@@ -171,7 +179,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
         title: EditHeader(
             savingState: savingState,
             width: widget.width,
-            folderID: widget.event.mainStory.folderID),
+            folder: widget.folder),
       ),
       SliverToBoxAdapter(
         child: MultiBlocListener(
@@ -190,7 +198,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                 if (state.type == EditorType.deleteImage) {
                   setState(() {
                     TimelineService.removeImage(
-                        state.data as String, widget.event);
+                        state.data as String, widget.folder);
                   });
                 }
               },
@@ -201,13 +209,13 @@ class _EditStoryContentState extends State<EditStoryContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                FolderPage(widget.folder!.id!),
                 EventCard(
                   savingState: savingState,
-                  storyFolderID: widget.event.mainStory.folderID,
                   width: widget.width,
                   controls: Container(),
                   height: widget.height,
-                  story: widget.event.mainStory,
+                  folder: widget.folder!,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -224,7 +232,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                           }
                           BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                               EditorType.createStory,
-                              parentID: widget.event.mainStory.folderID));
+                              data: widget.folder));
                         },
                         width: Constants.minScreenWidth,
                         backgroundColor: Colors.white,
@@ -232,52 +240,6 @@ class _EditStoryContentState extends State<EditStoryContent> {
                         iconColor: Colors.black),
                   ),
                 ),
-                ...List<Widget>.generate(widget.event.subEvents!.length,
-                    (int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: EventCard(
-                        savingState: savingState,
-                        storyFolderID: widget.event.mainStory.folderID,
-                        controls: Align(
-                          alignment: Alignment.topRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 3, top: 3),
-                            child: Container(
-                              height: 34,
-                              width: 34,
-                              decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(40))),
-                              child: IconButton(
-                                iconSize: 18,
-                                splashRadius: 18,
-                                icon: const Icon(
-                                  Icons.clear,
-                                  color: Colors.redAccent,
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  if (savingState == SavingState.saving) {
-                                    return;
-                                  }
-                                  BlocProvider.of<EditorBloc>(context).add(
-                                      EditorEvent(EditorType.deleteStory,
-                                          parentID:
-                                              widget.event.mainStory.folderID,
-                                          folderID: widget.event
-                                              .subEvents![index].folderID));
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        width: widget.width,
-                        height: widget.height,
-                        story: widget.event.subEvents![index]),
-                  );
-                }),
               ],
             ),
           ),
@@ -293,9 +255,8 @@ class EventCard extends StatefulWidget {
   const EventCard(
       {Key? key,
       required this.width,
-      required this.story,
+      required this.folder,
       required this.controls,
-      required this.storyFolderID,
       this.height = double.infinity,
       this.savingState})
       : super(key: key);
@@ -312,10 +273,7 @@ class EventCard extends StatefulWidget {
   final double height;
 
   /// the story this card is related to
-  final StoryContent story;
-
-  /// the folder ID of this story
-  final String storyFolderID;
+  final FolderContent folder;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -337,8 +295,10 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   void initState() {
     super.initState();
-    selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.story.timestamp);
-    formattedDate = DateFormat('dd MMMM, yyyy').format(selectedDate);
+    if (widget.folder.order != null) {
+      selectedDate = DateTime.fromMillisecondsSinceEpoch(widget.folder.order!.toInt());
+      formattedDate = DateFormat('dd MMMM, yyyy').format(selectedDate);
+    }
   }
 
   Widget title(String text) {
@@ -354,10 +314,10 @@ class _TimelineEventCardState extends State<EventCard> {
           minWidth: 40,
           height: 40,
           onPressed: () => DialogService.emojiDialog(context,
-              parentID: widget.storyFolderID,
-              folderID: widget.story.folderID,
-              metadata: widget.story.metadata!),
-          child: widget.story.metadata!.emoji.isEmpty
+              folderID: widget.folder.id!,
+              folder: widget.folder,
+              metadata: widget.folder.metadata!),
+          child: widget.folder.metadata!.emoji.isEmpty
               ? const Text(
                   '📅',
                   style: TextStyle(
@@ -365,7 +325,7 @@ class _TimelineEventCardState extends State<EventCard> {
                   ),
                 )
               : Text(
-                  widget.story.metadata!.emoji,
+                  widget.folder.metadata!.emoji,
                   style: const TextStyle(
                     height: 1.2,
                   ),
@@ -400,12 +360,11 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
-              BlocProvider.of<EditorBloc>(context).add(
-                EditorEvent(EditorType.updateTimestamp,
-                    parentID: widget.storyFolderID,
-                    folderID: widget.story.folderID,
-                    data: date.millisecondsSinceEpoch),
-              );
+              BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                  EditorType.updateTimestamp,
+                  data: UpdateOrderEvent(
+                      order: date.millisecondsSinceEpoch.toDouble(),
+                      folderContent: widget.folder)));
             },
           ),
         ),
@@ -415,25 +374,24 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    titleController.text = widget.story.metadata!.title;
+    titleController.text = widget.folder.metadata!.title;
     // TODO save position
     titleController.selection =
         TextSelection.collapsed(offset: titleController.text.length);
-    descriptionController.text = widget.story.metadata!.description;
+    descriptionController.text = widget.folder.metadata!.description;
     // TODO save position
     descriptionController.selection =
         TextSelection.collapsed(offset: descriptionController.text.length);
 
     final List<StoryImage> cards = <StoryImage>[];
-    if (widget.story.images != null) {
+    if (widget.folder.images != null) {
       for (final MapEntry<String, StoryMedia> image
-          in widget.story.images!.entries) {
+          in widget.folder.images!.entries) {
         cards.add(StoryImage(
           locked: false,
           storyMedia: image.value,
           imageKey: image.key,
-          storyFolderID: widget.storyFolderID,
-          id: widget.story.folderID,
+          id: widget.folder.id!,
         ));
       }
     }
@@ -476,12 +434,13 @@ class _TimelineEventCardState extends State<EventCard> {
                     onChanged: (String content) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
                       _debounce = Timer(const Duration(milliseconds: 500), () {
-                        widget.story.metadata!.title = content;
+                        widget.folder.metadata!.title = content;
+
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.updateMetadata,
-                            parentID: widget.storyFolderID,
-                            folderID: widget.story.folderID,
-                            data: widget.story.metadata));
+                            data: UpdateMetaDataEvent(
+                                metaData: widget.folder.metadata!,
+                                folderContent: widget.folder)));
                       });
                     }),
               ],
@@ -489,8 +448,7 @@ class _TimelineEventCardState extends State<EventCard> {
             const SizedBox(height: 10),
             ReordableImages(
                 cards: cards,
-                parentID: widget.storyFolderID,
-                folderID: widget.story.folderID),
+                folderID: widget.folder.id!),
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
@@ -508,8 +466,7 @@ class _TimelineEventCardState extends State<EventCard> {
                           }
                           DialogService.imageUploadDialog(
                             context,
-                            folderID: widget.story.folderID,
-                            parentID: widget.storyFolderID,
+                            folder: widget.folder,
                           );
                         },
                         width: Constants.minScreenWidth,
@@ -538,12 +495,12 @@ class _TimelineEventCardState extends State<EventCard> {
                     onChanged: (String content) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
                       _debounce = Timer(const Duration(milliseconds: 500), () {
-                        widget.story.metadata!.description = content;
+                        widget.folder.metadata!.description = content;
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.updateMetadata,
-                            parentID: widget.storyFolderID,
-                            folderID: widget.story.folderID,
-                            data: widget.story.metadata));
+                            data: UpdateMetaDataEvent(
+                                metaData: widget.folder.metadata!,
+                                folderContent: widget.folder)));
                       });
                     },
                     maxLines: null),
@@ -558,11 +515,9 @@ class _TimelineEventCardState extends State<EventCard> {
 }
 
 class ReordableImages extends StatefulWidget {
-  ReordableImages(
-      {required this.cards, required this.parentID, required this.folderID});
+  ReordableImages({required this.cards, required this.folderID});
 
   List<StoryImage> cards;
-  String parentID;
   String folderID;
 
   @override
@@ -583,12 +538,12 @@ class _ReordableImagesState extends State<ReordableImages> {
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateImagePosition,
                   folderID: widget.folderID,
-                  parentID: widget.parentID,
                   data: UpdatePosition(
                       media: true,
                       currentIndex: oldIndex,
                       targetIndex: newIndex,
-                      items: <StoryImage>[...widget.cards])));
+                      items: <StoryImage>[...widget.cards],
+                      folderID: widget.folderID)));
 
               setState(() {
                 final StoryImage image = widget.cards.removeAt(oldIndex);

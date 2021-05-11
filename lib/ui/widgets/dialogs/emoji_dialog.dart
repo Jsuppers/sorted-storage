@@ -6,6 +6,7 @@ import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/ui/widgets/edit/emoji_picker.dart';
 
@@ -26,9 +27,9 @@ class EmojiDialog extends StatelessWidget {
   // ignore: public_member_api_docs
   final String folderID;
 
-  final StoryMetadata? metadata;
+  final FolderMetadata? metadata;
 
-  final FolderProperties? folder;
+  final FolderContent? folder;
 
   @override
   Widget build(BuildContext context) {

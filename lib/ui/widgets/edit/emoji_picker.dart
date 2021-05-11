@@ -12,6 +12,7 @@ import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_settings.dart';
 
 /// widget which allows a user to pick a emoji
@@ -31,9 +32,9 @@ class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
   final String? parentID;
 
-  final StoryMetadata? metadata;
+  final FolderMetadata? metadata;
 
-  final FolderProperties? folder;
+  final FolderContent? folder;
 
   @override
   State createState() => EmojiPickerState();
@@ -132,10 +133,9 @@ class EmojiPickerState extends State<EmojiPicker> {
               widget.metadata!.emoji = element;
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateMetadata,
-                  parentID: widget.parentID,
-                  folderID: widget.folderID,
-                  refreshUI: true,
-                  data: widget.metadata));
+                  data: UpdateMetaDataEvent(metaData: widget.metadata!,
+                      folderContent: widget.folder!),
+                  refreshUI: true));
               BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
             }
             if (widget.folder != null) {

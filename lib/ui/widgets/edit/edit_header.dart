@@ -13,6 +13,7 @@ import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -23,13 +24,11 @@ class EditHeader extends StatefulWidget {
   EditHeader(
       {Key? key,
       this.savingState,
-      required this.folderID,
       required this.width,
       this.folder})
       : super(key: key);
 
-  final String folderID;
-  final FolderProperties? folder;
+  final FolderContent? folder;
   final double width;
   final SavingState? savingState;
 
@@ -57,7 +56,7 @@ class _EditHeaderState extends State<EditHeader> {
                       if (widget.savingState == SavingState.saving) {
                         return;
                       }
-                      DialogService.shareDialog(context, widget.folderID);
+                      DialogService.shareDialog(context, widget.folder!.id!);
                     },
                     width: widget.width,
                     backgroundColor: Colors.white,
@@ -80,7 +79,7 @@ class _EditHeaderState extends State<EditHeader> {
                           BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                               EditorType.deleteStory,
                               closeDialog: true,
-                              folderID: widget.folderID));
+                              data: widget.folder));
                         }
                       };
                       DialogService.showAlertDialog(context,

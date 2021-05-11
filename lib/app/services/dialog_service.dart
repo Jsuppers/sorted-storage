@@ -10,6 +10,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/story_settings.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/edit_folder_dialog.dart';
@@ -34,7 +35,7 @@ class DialogService {
   }
 
   static void imageUploadDialog(BuildContext context,
-      {required String folderID, required String parentID}) {
+      {required FolderContent folder}) {
     FilePicker.platform
         .pickFiles(
             type: FileType.media, allowMultiple: true, withReadStream: true)
@@ -47,7 +48,7 @@ class DialogService {
                     useRootNavigator: true,
                     builder: (BuildContext context) {
                       return ImageUploadDialog(
-                          file: file, folderID: folderID, parentID: parentID);
+                          file: file, folder: folder);
                     },
                   )
                 }
@@ -56,24 +57,24 @@ class DialogService {
 
   /// dialog to share a folder
   static void editDialog(BuildContext context,
-      {String? folderID, String? parentID}) {
+      {String? folderID, FolderContent? parent}) {
     final CloudStoriesBloc cloudBloc = BlocProvider.of<CloudStoriesBloc>(context);
     showDialog(
       context: context,
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext context) {
-        return EditStoryDialog(folderID: folderID, parentID: parentID);
+        return EditStoryDialog(folderID: folderID, parent: parent);
       },
     ).then((_) =>
         // update the ui with any changes made in the edit dialog
         cloudBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
-            folderID: folderID, parentID: parentID)));
+            folderID: folderID, parentID: parent!.id)));
   }
 
   /// dialog to share a folder
   static void editFolderDialog(BuildContext context,
-      {FolderProperties? folder}) {
+      {FolderContent? parent, FolderContent? folder}) {
     CloudStoriesBloc cloudBloc = BlocProvider.of<CloudStoriesBloc>(context);
     showDialog(
       context: context,
@@ -85,7 +86,8 @@ class DialogService {
     ).then((_) =>
         // update the ui with any changes made in the edit dialog
         cloudBloc
-            .add(const CloudStoriesEvent(CloudStoriesType.retrieveFolders)));
+            .add(CloudStoriesEvent(CloudStoriesType.retrieveFolder,
+            data: parent, folderID: parent!.id)));
   }
 
   /// dialog to share a folder
@@ -104,8 +106,8 @@ class DialogService {
   static void emojiDialog(BuildContext context,
       {required String folderID,
       String? parentID,
-      StoryMetadata? metadata,
-      FolderProperties? folder}) {
+      FolderMetadata? metadata,
+      FolderContent? folder}) {
     showDialog(
       context: context,
       barrierDismissible: true,

@@ -24,7 +24,6 @@ class StoryImage extends StatefulWidget {
       required this.locked,
       required this.storyMedia,
       required this.imageKey,
-      required this.storyFolderID,
       required this.id})
       : super(key: key);
 
@@ -38,7 +37,6 @@ class StoryImage extends StatefulWidget {
   final String imageKey;
 
   // ignore: public_member_api_docs
-  final String storyFolderID;
 
   // ignore: public_member_api_docs
   final String id;
@@ -54,7 +52,6 @@ class _StoryImageState extends State<StoryImage> {
       folderId: widget.id,
       locked: widget.locked,
       media: widget.storyMedia,
-      storyFolderID: widget.storyFolderID,
     );
   }
 }
@@ -63,8 +60,8 @@ class RetryMediaWidget extends StatefulWidget {
   RetryMediaWidget(
       {required this.folderId,
       required this.locked,
-      required this.media,
-      required this.storyFolderID})
+      required this.media
+      })
       : super();
 
   @override
@@ -73,7 +70,6 @@ class RetryMediaWidget extends StatefulWidget {
   String folderId;
   StoryMedia media;
   bool locked;
-  String storyFolderID;
 }
 
 class _RetryMediaWidgetState extends State<RetryMediaWidget> {
@@ -152,8 +148,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                       BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                           EditorType.deleteImage,
                           folderID: widget.folderId,
-                          data: imageKey,
-                          parentID: widget.storyFolderID));
+                          data: imageKey));
                     },
                   ),
                 ),

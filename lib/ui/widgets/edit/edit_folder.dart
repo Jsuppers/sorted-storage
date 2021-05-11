@@ -20,6 +20,7 @@ import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -29,9 +30,9 @@ import 'package:web/ui/widgets/loading.dart';
 /// page which shows a single story
 class EditFolder extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditFolder(this._folderProperties, {Key? key}) : super(key: key);
+  const EditFolder({Key? key, this.folder}) : super(key: key);
 
-  final FolderProperties? _folderProperties;
+  final FolderContent? folder;
 
   @override
   _EditFolderState createState() => _EditFolderState();
@@ -39,15 +40,16 @@ class EditFolder extends StatefulWidget {
 
 class _EditFolderState extends State<EditFolder> {
   bool error = false;
-  FolderProperties? folderProperties;
+  FolderContent? folderProperties;
 
   @override
   void initState() {
-    folderProperties = widget._folderProperties;
+    folderProperties = widget.folder;
     super.initState();
     if (folderProperties == null) {
-      BlocProvider.of<CloudStoriesBloc>(context)
-          .add(CloudStoriesEvent(CloudStoriesType.createFolder));
+      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+          CloudStoriesType.createFolder,
+          data: BlocProvider.of<CloudStoriesBloc>(context).rootFolder));
     }
   }
 
@@ -61,7 +63,7 @@ class _EditFolderState extends State<EditFolder> {
           } else {
             if (state.data != null) {
               setState(() {
-                folderProperties = state.data as FolderProperties;
+                folderProperties = state.data as FolderContent;
               });
             }
           }
@@ -118,7 +120,7 @@ class EditFolderContent extends StatefulWidget {
   final double height;
 
   // ignore: public_member_api_docs
-  final FolderProperties folder;
+  final FolderContent folder;
 
   @override
   _EditFolderContentState createState() => _EditFolderContentState();
@@ -139,8 +141,7 @@ class _EditFolderContentState extends State<EditFolderContent> {
         title: EditHeader(
             savingState: savingState,
             width: widget.width,
-            folder: widget.folder,
-            folderID: widget.folder.id!),
+            folder: widget.folder),
       ),
       SliverToBoxAdapter(
         child: MultiBlocListener(
@@ -204,7 +205,7 @@ class EventCard extends StatefulWidget {
   final double height;
 
   /// the story this card is related to
-  final FolderProperties folder;
+  final FolderContent folder;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();

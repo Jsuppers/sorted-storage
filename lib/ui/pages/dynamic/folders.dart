@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +17,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_properties.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
@@ -41,7 +44,7 @@ class _FolderPageState extends State<FolderPage> {
           .add(const CloudStoriesEvent(CloudStoriesType.rootFolder));
     } else {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveFolders,
+          CloudStoriesType.retrieveFolder,
           folderID: widget.rootID));
     }
   }
@@ -50,18 +53,29 @@ class _FolderPageState extends State<FolderPage> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(alignment: Alignment.topLeft, child: FolderView()),
+      child: Container(alignment: Alignment.topLeft, child: FolderView(folderID: widget.rootID)),
     );
   }
 }
 
 class FolderView extends StatefulWidget {
+  FolderView({required this.folderID});
+
+  String folderID;
   @override
   _FolderViewState createState() => _FolderViewState();
 }
 
 class _FolderViewState extends State<FolderView> {
-  List<FolderProperties>? folders;
+  FolderContent? folder;
+  String? folderID;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    folderID = widget.folderID;
+  }
 
   String _shortenText(String text) {
     if (text.length <= 20) {
@@ -73,8 +87,8 @@ class _FolderViewState extends State<FolderView> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    if (folders != null) {
-      for (FolderProperties folder in folders!) {
+    if (folder != null &&  folder!.subFolders != null) {
+      for (FolderContent subFolder in folder!.subFolders!) {
         children.add(Container(
           height: 40.0,
           width: 220.0,
@@ -88,7 +102,7 @@ class _FolderViewState extends State<FolderView> {
           child: GestureDetector(
             onTap: () => {
               BlocProvider.of<NavigationBloc>(context)
-                  .add(NavigateToMediaEvent(folderId: folder.id!))
+                  .add(NavigateToMediaEvent(folderId: subFolder.id!))
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -96,10 +110,10 @@ class _FolderViewState extends State<FolderView> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: SizedBox(
-                      width: 30, child: Center(child: Text(folder.emoji))),
+                      width: 30, child: Center(child: Text(subFolder.emoji))),
                 ),
-                Text(_shortenText(folder.title)),
-                PopUpOptions(folderID: folder.id!, folder: folder),
+                Text(_shortenText(subFolder.title)),
+                PopUpOptions(folderID: subFolder.id!, folder: subFolder, parent: folder),
               ],
             ),
           ),
@@ -110,18 +124,22 @@ class _FolderViewState extends State<FolderView> {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
         listener: (BuildContext context, CloudStoriesState state) {
       if (state.type == CloudStoriesType.rootFolder) {
+        final FolderContent folderContent = state.data as FolderContent;
+        folderID = folderContent.id;
         BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-            CloudStoriesType.retrieveFolders,
-            folderID: state.data as String));
+            CloudStoriesType.retrieveFolder,
+            folderID: folderContent.id));
       }
-      if (state.type == CloudStoriesType.retrieveFolders) {
+      if (state.type == CloudStoriesType.retrieveFolder
+          && state.folderID == folderID) {
         setState(() {
-          folders = state.data as List<FolderProperties>;
+          folder = state.data as FolderContent;
         });
       }
     }, child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
       return Column(
+        key: Key(DateTime.now().toString()),
         children: [
           ReorderableWrap(
               header: [
@@ -134,7 +152,7 @@ class _FolderViewState extends State<FolderView> {
                           text: 'New Folder',
                           icon: Icons.create_new_folder_outlined,
                           onPressed: () async {
-                            if (folders == null) {
+                            if (folder == null) {
                               return;
                             }
                             DialogService.editFolderDialog(context);
@@ -153,23 +171,24 @@ class _FolderViewState extends State<FolderView> {
               padding: const EdgeInsets.all(8),
               onReorder: (int oldIndex, int newIndex) {
                 UpdatePosition ui = UpdatePosition(
+                  folderID: folderID!,
                     currentIndex: oldIndex,
                     targetIndex: newIndex,
-                    items: <FolderProperties>[...folders!]);
+                    items: <FolderContent>[...folder!.subFolders!]);
 
                 BlocProvider.of<CloudStoriesBloc>(context).add(
                     CloudStoriesEvent(CloudStoriesType.updateFolderPosition,
                         data: ui));
 
                 setState(() {
-                  final FolderProperties image = folders!.removeAt(oldIndex);
-                  folders!.insert(newIndex, image);
+                  final FolderContent image = folder!.subFolders!.removeAt(oldIndex);
+                  folder!.subFolders!.insert(newIndex, image);
                 });
               },
               children: children),
-          if (folders == null)
+          if (folder == null)
             const FullPageLoadingLogo(backgroundColor: Colors.transparent),
-          if (folders != null && folders!.isEmpty)
+          if (folder != null && folder!.subFolders!.isEmpty)
             SizedBox(
               height: constraints.screenSize.height / 1.5,
               child: Center(

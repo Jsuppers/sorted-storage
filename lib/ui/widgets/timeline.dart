@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/models/story_content.dart';
@@ -15,18 +18,21 @@ import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class _TimeLineEventEntry {
-  final int timestamp;
+  final double? order;
   final Widget event;
 
   // ignore: sort_constructors_first
-  _TimeLineEventEntry(this.timestamp, this.event);
+  _TimeLineEventEntry(this.order, this.event);
 }
 
 // ignore: public_member_api_docs
 class TimelineLayout extends StatefulWidget {
   // ignore: public_member_api_docs
-  const TimelineLayout({Key? key, required this.width, required this.height})
-      : super(key: key);
+  const TimelineLayout({Key? key,
+    required this.width,
+    required this.height,
+    required this.folder,
+  }): super(key: key);
 
   // ignore: public_member_api_docs
   final double width;
@@ -34,44 +40,58 @@ class TimelineLayout extends StatefulWidget {
   // ignore: public_member_api_docs
   final double height;
 
+  final FolderContent folder;
+
   @override
   State<StatefulWidget> createState() => _TimelineLayoutState();
 }
 
 class _TimelineLayoutState extends State<TimelineLayout> {
-  late Map<String, StoryTimelineData> _timelineData;
-  bool loaded = false;
+  late FolderContent folder;
   bool addingStory = false;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    folder = widget.folder;
+//    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+//        CloudStoriesType.retrieveFolder,
+//        folderID: folder.id));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    _timelineData =
-        BlocProvider.of<CloudStoriesBloc>(context).state.cloudStories;
 
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
-    _timelineData.forEach((String folderId, StoryTimelineData event) {
+    folder.subFolders ??= [];
+    folder.subFolders!.sort((FolderContent a, FolderContent b) =>
+        b.order!.compareTo(a.order!));
+    folder.subFolders!.forEach((FolderContent subFolder) {
       final Widget display = TimelineCard(
           width: widget.width,
           height: widget.height,
-          event: event,
-          folderId: folderId);
+          folder: subFolder,
+          parent: folder,
+          folderId: subFolder.id!);
       final _TimeLineEventEntry _timeLineEventEntry =
-          _TimeLineEventEntry(event.mainStory.timestamp, display);
+      _TimeLineEventEntry(subFolder.order, display);
       timeLineEvents.add(_timeLineEventEntry);
     });
 
-    final StringBuffer widgetKey = StringBuffer();
-    widgetKey.write(_timelineData.length.toString());
-    timeLineEvents.sort((_TimeLineEventEntry a, _TimeLineEventEntry b) =>
-        b.timestamp.compareTo(a.timestamp));
     for (final _TimeLineEventEntry element in timeLineEvents) {
-      widgetKey.write(element.timestamp.toString());
       children.add(element.event);
     }
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
         listener: (BuildContext context, CloudStoriesState state) {
+//          if (state.type == CloudStoriesType.retrieveFolder
+//              && state.folderID == widget.folder.id) {
+//            setState(() {
+//              folder = state.data as FolderContent;
+//            });
+//          }
           if (state.type == CloudStoriesType.refresh) {
             if (state.error != null) {
               final SnackBar snackBar = SnackBar(
@@ -83,21 +103,16 @@ class _TimelineLayoutState extends State<TimelineLayout> {
 
             setState(() {
               addingStory = false;
-              _timelineData.forEach((String key, StoryTimelineData story) =>
-                  story.subEvents!.sort((StoryContent a, StoryContent b) =>
-                      b.timestamp.compareTo(a.timestamp)));
-
-              loaded = true;
             });
           }
         },
-        child: !loaded ? StaticLoadingLogo() : content(children, widgetKey));
+        child: content(children));
   }
 
-  Widget content(List<Widget> children, StringBuffer widgetKey) {
+  Widget content(List<Widget> children) {
     if (children.isNotEmpty) {
       return Column(
-        key: Key(widgetKey.toString()),
+        key: Key(DateTime.now().toString()),
         children: children,
       );
     }

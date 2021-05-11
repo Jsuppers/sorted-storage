@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -9,10 +11,13 @@ import 'package:responsive_builder/responsive_builder.dart';
 // Project imports:
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/models/story_content.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/widgets/icon_button.dart';
+import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline.dart';
 
 /// Page which contains all the stories
@@ -26,21 +31,34 @@ class MediaPage extends StatefulWidget {
 }
 
 class _MediaPageState extends State<MediaPage> {
+  FolderContent? folder;
+  bool error = false;
+
   @override
   void initState() {
     super.initState();
-    if (widget.folderID != null) {
+    if (widget.folderID != null && widget.folderID!.isNotEmpty) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveStories,
+          CloudStoriesType.retrieveFolder,
           folderID: widget.folderID));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBuilder(
+    return BlocListener<CloudStoriesBloc, CloudStoriesState>(
+    listener: (BuildContext context, CloudStoriesState state) {
+      if (state.type == CloudStoriesType.retrieveFolder
+          && state.folderID == widget.folderID) {
+        setState(() {
+          folder = state.data as FolderContent;
+        });
+      }
+
+    }, child: folder == null ? StaticLoadingLogo() : ResponsiveBuilder(
       builder: (BuildContext context, SizingInformation constraints) {
         return Column(
+          key: Key(DateTime.now().toString()),
           children: [
             Container(
               height: 50,
@@ -54,7 +72,8 @@ class _MediaPageState extends State<MediaPage> {
                         text: 'Add',
                         icon: Icons.create_new_folder_outlined,
                         onPressed: () => DialogService.editDialog(context,
-                            parentID: widget.folderID),
+                            folderID: widget.folderID,
+                            parent: BlocProvider.of<CloudStoriesBloc>(context).rootFolder),
                         width: constraints.screenSize.width,
                         backgroundColor: Colors.transparent,
                         textColor: Colors.black,
@@ -67,12 +86,13 @@ class _MediaPageState extends State<MediaPage> {
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: TimelineLayout(
+                  folder: folder!,
                   width: constraints.screenSize.width,
                   height: constraints.screenSize.height),
             ),
           ],
         );
       },
-    );
+    ));
   }
 }

@@ -6,20 +6,14 @@ enum CloudStoriesType {
   /// new user clears all information
   newUser,
 
-  /// retrieve all stories from storage
-  retrieveStories,
-
   /// retrieve a specific story from storage
-  retrieveFolders,
+  retrieveFolder,
 
   createFolder,
   deleteFolder,
   updateFolderPosition,
 
   rootFolder,
-
-  /// retrieve a specific story from storage
-  retrieveStory,
 
   editStory,
 
