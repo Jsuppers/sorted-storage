@@ -9,7 +9,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/folder_content.dart';
 
 // Project imports:
 import 'package:web/ui/widgets/pop_up_options.dart';
@@ -85,9 +85,9 @@ class _TimelineCardState extends State<TimelineCard> {
               controls: widget.viewMode
                   ? Container()
                   : PopUpOptions(
-                      folderID: widget.folderId,
+                      folder: widget.folder,
                       parent: widget.parent,
-                      subFolderID:  widget.folderId,),
+              ),
               width: widget.width,
               height: widget.height,
               folder: folder!,

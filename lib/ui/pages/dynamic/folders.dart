@@ -16,8 +16,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_properties.dart';
-import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
@@ -27,9 +26,10 @@ import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 
 class FolderPage extends StatefulWidget {
-  FolderPage(this.rootID);
+  FolderPage(this.rootID, {this.editing});
 
   String rootID;
+  bool? editing;
 
   @override
   _FolderPageState createState() => _FolderPageState();
@@ -113,7 +113,7 @@ class _FolderViewState extends State<FolderView> {
                       width: 30, child: Center(child: Text(subFolder.emoji))),
                 ),
                 Text(_shortenText(subFolder.title)),
-                PopUpOptions(folderID: subFolder.id!, folder: subFolder, parent: folder),
+                PopUpOptions(folder: subFolder, parent: folder),
               ],
             ),
           ),
@@ -136,6 +136,15 @@ class _FolderViewState extends State<FolderView> {
           folder = state.data as FolderContent;
         });
       }
+      if (state.type == CloudStoriesType.refresh &&
+          state.folderID == folderID) {
+        inspect(folder);
+        debugger();
+        setState(() {});
+//        BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+//            CloudStoriesType.retrieveFolder,
+//            folderID: folderID.id));
+      }
     }, child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
       return Column(
@@ -155,7 +164,9 @@ class _FolderViewState extends State<FolderView> {
                             if (folder == null) {
                               return;
                             }
-                            DialogService.editFolderDialog(context);
+                            DialogService.editDialog(context,
+                                parent: folder,
+                            );
                           },
                           width: constraints.screenSize.width,
                           backgroundColor: Colors.transparent,
@@ -174,6 +185,7 @@ class _FolderViewState extends State<FolderView> {
                   folderID: folderID!,
                     currentIndex: oldIndex,
                     targetIndex: newIndex,
+                    metadata: folder?.metadata ?? {},
                     items: <FolderContent>[...folder!.subFolders!]);
 
                 BlocProvider.of<CloudStoriesBloc>(context).add(

@@ -1,8 +1,8 @@
 // Project imports:
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/story_media.dart';
-import 'package:web/app/models/story_settings.dart';
+import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/folder_metadata.dart';
 
 /// Event for the CloudStoriesBloc
 class EditorEvent {
@@ -36,21 +36,9 @@ class EditorEvent {
   final String? error;
 }
 
-class UpdateOrderEvent {
-  UpdateOrderEvent({this.order, this.folderContent});
-  double? order;
-  FolderContent? folderContent;
-}
-
-class UpdateMetaDataEvent {
-  UpdateMetaDataEvent({required this.metaData, required this.folderContent});
-  FolderMetadata metaData;
-  FolderContent folderContent;
-}
-
 class UpdateImagesEvent {
   UpdateImagesEvent({required this.images, required this.folderContent});
-  Map<String, StoryMedia> images;
+  Map<String, FolderMedia> images;
   FolderContent folderContent;
 }
 

@@ -1,5 +1,3 @@
-import 'package:web/app/models/story_content.dart';
-
 class UpdatePosition {
   UpdatePosition(
       {
@@ -7,6 +5,7 @@ class UpdatePosition {
         required this.currentIndex,
       required this.targetIndex,
       required this.items,
+        required this.metadata,
       this.media});
 
   int currentIndex;
@@ -14,4 +13,5 @@ class UpdatePosition {
   bool? media;
   List<dynamic> items;
   String folderID;
+  Map<String, dynamic> metadata;
 }

@@ -11,28 +11,15 @@ import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_properties.dart';
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/story_settings.dart';
+import 'package:web/app/models/folder_content.dart';
 
 /// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
   const EmojiPicker(
       {Key? key,
-      required this.folderID,
-      this.parentID,
-      this.metadata,
       this.folder})
       : super(key: key);
-
-  // ignore: public_member_api_docs
-  final String folderID;
-
-  // ignore: public_member_api_docs
-  final String? parentID;
-
-  final FolderMetadata? metadata;
 
   final FolderContent? folder;
 
@@ -129,20 +116,11 @@ class EmojiPickerState extends State<EmojiPicker> {
         MaterialButton(
           height: 40,
           onPressed: () {
-            if (widget.metadata != null) {
-              widget.metadata!.emoji = element;
-              BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                  EditorType.updateMetadata,
-                  data: UpdateMetaDataEvent(metaData: widget.metadata!,
-                      folderContent: widget.folder!),
-                  refreshUI: true));
-              BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
-            }
             if (widget.folder != null) {
               widget.folder!.emoji = element;
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateName,
-                  folderID: widget.folderID,
+                  folderID: widget.folder!.id,
                   refreshUI: true,
                   data: '$element ${widget.folder!.title}'));
               BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());

@@ -1,7 +1,7 @@
 /// information for media content, this could be a image, video or a document
-class StoryMedia {
+class FolderMedia {
   // ignore: public_member_api_docs
-  StoryMedia({
+  FolderMedia({
     required this.id,
     this.thumbnailURL,
     this.stream,
@@ -16,7 +16,7 @@ class StoryMedia {
   }
 
   /// clone the media file
-  StoryMedia.clone(StoryMedia media)
+  FolderMedia.clone(FolderMedia media)
       : thumbnailURL = media.thumbnailURL,
         stream = media.stream,
         isVideo = media.isVideo,

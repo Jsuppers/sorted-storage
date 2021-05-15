@@ -1,6 +1,4 @@
 // Flutter imports:
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -13,7 +11,6 @@ import 'package:web/ui/pages/dynamic/documents.dart';
 import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/pages/dynamic/media.dart';
 import 'package:web/ui/pages/dynamic/profile.dart';
-import 'package:web/ui/pages/dynamic/view.dart';
 import 'package:web/ui/pages/static/error.dart';
 import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
@@ -36,7 +33,6 @@ class RouteConfiguration {
       settings: settings,
       child: LayoutWrapper(
           widget: _getPageContent(baseRoute, routingData.destination),
-          isViewMode: baseRoute == BaseRoute.view.toRouteString(),
           requiresAuthentication: _pageRequiresAuthentication(baseRoute),
           routingData: routingData),
     );
@@ -55,8 +51,6 @@ class RouteConfiguration {
         orElse: () => BaseRoute.home);
 
     switch (currentRoute) {
-      case BaseRoute.view:
-        return ViewPage(destination);
       case BaseRoute.documents:
         return DocumentsPage();
       case BaseRoute.media:

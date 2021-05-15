@@ -9,12 +9,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/timeline_data.dart';
-import 'package:web/ui/widgets/loading.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class _TimeLineEventEntry {
@@ -48,7 +45,7 @@ class TimelineLayout extends StatefulWidget {
 
 class _TimelineLayoutState extends State<TimelineLayout> {
   late FolderContent folder;
-  bool addingStory = false;
+  bool addingFolder = false;
 
   @override
   void initState() {
@@ -67,8 +64,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
     folder.subFolders ??= [];
-    folder.subFolders!.sort((FolderContent a, FolderContent b) =>
-        b.order!.compareTo(a.order!));
+    FolderContent.sortFolders(folder.subFolders);
     folder.subFolders!.forEach((FolderContent subFolder) {
       final Widget display = TimelineCard(
           width: widget.width,
@@ -77,7 +73,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           parent: folder,
           folderId: subFolder.id!);
       final _TimeLineEventEntry _timeLineEventEntry =
-      _TimeLineEventEntry(subFolder.order, display);
+      _TimeLineEventEntry(subFolder.getTimestamp(), display);
       timeLineEvents.add(_timeLineEventEntry);
     });
 
@@ -102,7 +98,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
             }
 
             setState(() {
-              addingStory = false;
+              addingFolder = false;
             });
           }
         },

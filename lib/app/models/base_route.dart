@@ -2,7 +2,6 @@
 enum BaseRoute {
   documents,
   media,
-  view,
   login,
   policy,
   terms,

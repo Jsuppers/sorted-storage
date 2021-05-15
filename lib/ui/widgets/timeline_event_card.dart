@@ -9,12 +9,13 @@ import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/story_media.dart';
+import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/helpers/property.dart';
 import 'package:web/ui/theme/theme.dart';
-import 'package:web/ui/widgets/story_image.dart';
+import 'package:web/ui/widgets/folder_image.dart';
 
 ///
 class EventCard extends StatefulWidget {
@@ -51,7 +52,7 @@ class _TimelineEventCardState extends State<EventCard> {
   final DateFormat formatter = DateFormat('dd MMMM, yyyy');
 
   Widget emoji() {
-    return widget.folder.metadata!.emoji.isEmpty
+    return widget.folder.emoji.isEmpty
         ? const Text(
             '📅',
             style: TextStyle(
@@ -59,7 +60,7 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
           )
         : Text(
-            widget.folder.metadata!.emoji,
+            widget.folder.emoji,
             style: const TextStyle(
               height: 1.2,
             ),
@@ -67,8 +68,9 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   Widget timeStamp() {
+    final double timestamp = widget.folder.getTimestamp() ?? DateTime.now().millisecondsSinceEpoch.toDouble();
     final DateTime selectedDate =
-        DateTime.fromMillisecondsSinceEpoch(widget.folder.order!.toInt());
+        DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
     final String formattedDate = formatter.format(selectedDate);
     return Container(
       padding: EdgeInsets.zero,
@@ -86,23 +88,23 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    final List<StoryImage> cards = <StoryImage>[];
+    final List<FolderImage> cards = <FolderImage>[];
     debugger();
     if (widget.folder.images != null) {
-      for (final MapEntry<String, StoryMedia> image
+      for (final MapEntry<String, FolderMedia> image
           in widget.folder.images!.entries) {
         debugger();
-        cards.add(StoryImage(
+        cards.add(FolderImage(
           locked: widget.locked,
-          storyMedia: image.value,
+          folderMedia: image.value,
           imageKey: image.key,
           id: widget.folder.id!,
         ));
       }
     }
 
-    cards.sort((StoryImage a, StoryImage b) =>
-        a.storyMedia.order!.compareTo(b.storyMedia.order!));
+    cards.sort((FolderImage a, FolderImage b) =>
+        a.folderMedia.order!.compareTo(b.folderMedia.order!));
 
     return Form(
       child: Padding(
@@ -141,7 +143,7 @@ class _TimelineEventCardState extends State<EventCard> {
             children: <Widget>[
               Text(
                 Property.getValueOrDefault(
-                  widget.folder.metadata!.title,
+                  widget.folder.title,
                   'No title given',
                 ),
                 style: TextStyle(
@@ -159,7 +161,7 @@ class _TimelineEventCardState extends State<EventCard> {
                       children: cards)),
               Text(
                 Property.getValueOrDefault(
-                  widget.folder.metadata!.description,
+                  widget.folder.metadata![describeEnum(MetadataKeys.description)] as String,
                   'No description given',
                 ),
                 textAlign: TextAlign.center,

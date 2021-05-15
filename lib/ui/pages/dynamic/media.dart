@@ -13,7 +13,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -72,8 +72,7 @@ class _MediaPageState extends State<MediaPage> {
                         text: 'Add',
                         icon: Icons.create_new_folder_outlined,
                         onPressed: () => DialogService.editDialog(context,
-                            folderID: widget.folderID,
-                            parent: BlocProvider.of<CloudStoriesBloc>(context).rootFolder),
+                            parent: folder),
                         width: constraints.screenSize.width,
                         backgroundColor: Colors.transparent,
                         textColor: Colors.black,

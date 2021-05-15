@@ -4,11 +4,13 @@ import 'dart:convert';
 
 // Package imports:
 import 'package:emojis/emojis.dart';
+import 'package:flutter/foundation.dart';
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/folder_content.dart';
 
 // Project imports:
-import 'package:web/app/models/story_media.dart';
+import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
 
 /// service which communicates with google drive
@@ -40,7 +42,8 @@ class GoogleDrive {
     }
     final String? id = _getId(updatePosition, updatePosition.currentIndex);
     if (id != null) {
-      await _updatePosition(id, order);
+      updatePosition.metadata[describeEnum(MetadataKeys.timestamp)] = order;
+      await updateDescription(id, updatePosition.metadata);
     } else {
       throw 'error';
     }
@@ -50,21 +53,21 @@ class GoogleDrive {
 
   double? _getOrder(UpdatePosition updatePosition, int index) {
     if (updatePosition.media != null) {
-      return updatePosition.items[index]?.storyMedia?.order as double?;
+      return updatePosition.items[index]?.folderMedia?.order as double?;
     }
     return updatePosition.items[index]?.order as double?;
   }
 
   String? _getId(UpdatePosition updatePosition, int index) {
     if (updatePosition.media != null) {
-      return updatePosition.items[index]?.storyMedia?.id as String?;
+      return updatePosition.items[index]?.folderMedia?.id as String?;
     }
     return updatePosition.items[index]?.id as String?;
   }
 
   /// upload a data stream to a file, and return the file's id
   Future<String?> uploadMediaToFolder(String folderID, String imageName,
-      StoryMedia storyMedia, Stream<List<int>> dataStream) async {
+      FolderMedia storyMedia, Stream<List<int>> dataStream) async {
     final File mediaFile = File();
     mediaFile.parents = <String>[folderID];
     mediaFile.name = imageName;
@@ -77,30 +80,21 @@ class GoogleDrive {
     return uploadMedia.id;
   }
 
+//  /// update a media file index
+//  Future<File> _updatePosition(String imageID, dynamic position) async {
+//    final File mediaFile = File();
+//    mediaFile.description = position.toString();
+//
+//    return driveApi!.files.update(mediaFile, imageID);
+//  }
+
   /// update a media file index
-  Future<File> _updatePosition(String imageID, dynamic position) async {
+  Future<File> updateDescription(String fileId, Map<String, dynamic> metadata) async {
     final File mediaFile = File();
-    mediaFile.description = position.toString();
+    mediaFile.description = jsonEncode(metadata);
 
-    return driveApi!.files.update(mediaFile, imageID);
+    return driveApi!.files.update(mediaFile, fileId);
   }
-
-  /// read and return the contents of a json file
-  Future<Map<String, dynamic>?> getJsonFile(String? fileId) async {
-    Map<String, dynamic>? event;
-    if (fileId != null) {
-      final Media mediaFile = await driveApi!.files
-          .get(fileId, downloadOptions: DownloadOptions.fullMedia) as Media;
-
-      final List<int> dataStore = <int>[];
-      await for (final List<int> data in mediaFile.stream) {
-        dataStore.insertAll(dataStore.length, data);
-      }
-      event = jsonDecode(utf8.decode(dataStore)) as Map<String, dynamic>;
-    }
-    return event;
-  }
-
 
   Future<FolderContent?> createStory(String? parentID) async {
     if (parentID == null) {
@@ -113,7 +107,7 @@ class GoogleDrive {
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
     fileMetadata.parents = <String>[parentID];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-    fileMetadata.description = fileProperties.order.toString();
+    fileMetadata.description = jsonEncode(fileProperties.metadata);
     final File rt = await createFile(fileMetadata);
     fileProperties.id = rt.id;
 

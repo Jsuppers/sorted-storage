@@ -1,6 +1,5 @@
 // Project imports:
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/timeline_data.dart';
+import 'package:web/app/models/folder_content.dart';
 
 /// service for various functions regarding the timeline
 class TimelineService {

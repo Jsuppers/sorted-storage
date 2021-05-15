@@ -1,9 +1,10 @@
 // Dart imports:
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 // Package imports:
-import 'package:emojis/emojis.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 
@@ -13,10 +14,9 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/story_media.dart';
-import 'package:web/app/models/story_settings.dart';
-import 'package:web/app/models/sub_event.dart';
+import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/app/services/timeline_service.dart';
@@ -50,21 +50,18 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
       case CloudStoriesType.deleteFolder:
         _deleteFolder(event.data as FolderContent);
         break;
-      case CloudStoriesType.createFolder:
-        final FolderContent parent = event.data as FolderContent;
-        final FolderContent? fp = await storage.createStory(parent.id);
-        yield CloudStoriesState(CloudStoriesType.createFolder, data: fp);
-        break;
+//      case CloudStoriesType.createFolder:
+//        final FolderContent parent = event.data as FolderContent;
+//        final FolderContent? fp = await storage.createStory(parent.id);
+//        yield CloudStoriesState(CloudStoriesType.createFolder, data: fp);
+//        break;
       case CloudStoriesType.retrieveFolder:
         if (event.data != null) {
           yield CloudStoriesState(CloudStoriesType.retrieveFolder, data: event.data, folderID: event.folderID);
           break;
         }
         if (rootFolder != null && event.folderID == rootFolder!.id) {
-          if (rootFolder!.subFolders != null) {
-            rootFolder!.subFolders!.sort((FolderContent a, FolderContent b) =>
-                a.order!.compareTo(b.order!));
-          }
+          FolderContent.sortFolders(rootFolder!.subFolders);
           yield CloudStoriesState(CloudStoriesType.retrieveFolder, data: rootFolder, folderID: event.folderID);
         } else if (rootFolder != null) {
           final FolderContent? folder = TimelineService.getFolderWithID(event.folderID!, rootFolder);
@@ -87,8 +84,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         yield const CloudStoriesState(CloudStoriesType.initialState);
         break;
       case CloudStoriesType.initialState:
-        break;
-      case CloudStoriesType.editStory:
         break;
     }
   }
@@ -161,7 +156,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 //  }
 
   Future<FolderContent> _createEventFromFolder(
-      String folderID, {String? folderName, double? order, FolderContent? folder}) async {
+      String folderID, {String? folderName, Map<String, dynamic>? metadata, FolderContent? folder}) async {
     if (folder != null && folder.loaded == true) {
       return folder;
     }
@@ -171,58 +166,53 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
 
     FolderContent? currentFolder = folder;
-    String? settingsID;
-    final Map<String, StoryMedia> images = <String, StoryMedia>{};
+    final Map<String, FolderMedia> images = <String, FolderMedia>{};
     final List<FolderContent> subFolders = <FolderContent>[];
     for (final File file in filesInFolder.files!) {
-      double? subFolderOrder;
+      Map<String, dynamic>? metadata;
       if (file.description != null) {
-        subFolderOrder = double.tryParse(file.description ?? '');
+        try {
+          metadata = jsonDecode(file.description ?? '') as Map<String, dynamic>? ?? {};
+        } catch (e) {
+          metadata = {};
+        }
       }
 
       if (file.mimeType!.startsWith('image/') ||
           file.mimeType!.startsWith('video/')) {
-        final StoryMedia media = StoryMedia(
+        final FolderMedia media = FolderMedia(
           id: file.id!,
           name: file.name!,
           isVideo: file.mimeType!.startsWith('video/'),
           retrieveThumbnail: true,
           thumbnailURL: file.thumbnailLink,
-          order: subFolderOrder
+          order: metadata?[describeEnum(MetadataKeys.timestamp)] as double?
         );
         images.putIfAbsent(file.id!, () => media);
-      } else if (file.name == Constants.settingsFile) {
-        settingsID = file.id!;
-      } else if (file.mimeType == 'application/vnd.google-apps.folder') {
-        final double? order = double.tryParse(file.description ?? '');
+      }  else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final FolderContent subFolder =
           FolderContent.createFromFolderName(
-              folderName: file.name!, id: file.id!, order: order);
+              folderName: file.name!, id: file.id!, metadata: metadata);
         subFolders.add(subFolder);
       } else {
-        final StoryMedia media = StoryMedia(
+        final FolderMedia media = FolderMedia(
             name: file.name!,
             id: file.id!,
             isDocument: true,
             thumbnailURL: file.thumbnailLink,
             retrieveThumbnail: true,
-            order: subFolderOrder);
+            order: metadata?[describeEnum(MetadataKeys.timestamp)] as double?);
         images.putIfAbsent(file.id!, () => media);
       }
     }
 
-    final FolderMetadata metadata = FolderMetadata.fromJson(
-        settingsID, await storage.getJsonFile(settingsID));
-
     currentFolder ??= FolderContent.createFromFolderName(
           folderName: folderName,
           id: folderID,
-          order: order);
-
+          metadata: metadata);
 
     // TODO images not showing when directly going to media
     currentFolder.images = images;
-    currentFolder.metadata = metadata;
     currentFolder.subFolders = subFolders;
     currentFolder.loaded = true;
 
@@ -239,20 +229,24 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
         filter:
         'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
     File rootFile;
-    double? order;
+    Map<String, dynamic> metadata = {};
     if (folderParent.files!.isEmpty) {
-      order = DateTime.now().millisecondsSinceEpoch.toDouble();
+      metadata[describeEnum(MetadataKeys.timestamp)] = DateTime.now().millisecondsSinceEpoch.toDouble();
       final File fileMetadata = File();
       fileMetadata.name = Constants.rootFolder;
       fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-      fileMetadata.description = order.toString();
+      fileMetadata.description = jsonEncode(metadata);
       rootFile = await storage.createFile(fileMetadata);
     } else {
       rootFile = folderParent.files!.first;
-      order = double.tryParse(rootFile.description ?? '');
+      try {
+        metadata = jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ?? {};
+      } catch (e) {
+        metadata = {};
+      }
     }
 
-    return _createEventFromFolder(rootFile.id!, folderName: rootFile.name!, order: order);
+    return _createEventFromFolder(rootFile.id!, folderName: rootFile.name!, metadata: metadata);
   }
 
 //  Future<List<FolderContent>> _getFolders(String? folderID) async {

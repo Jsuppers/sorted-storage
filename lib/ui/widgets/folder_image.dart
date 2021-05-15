@@ -10,19 +10,19 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/models/story_media.dart';
+import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/media_card.dart';
 
-/// image in the story
-class StoryImage extends StatefulWidget {
+/// image in the folder
+class FolderImage extends StatefulWidget {
   // ignore: public_member_api_docs
-  const StoryImage(
+  const FolderImage(
       {Key? key,
       required this.locked,
-      required this.storyMedia,
+      required this.folderMedia,
       required this.imageKey,
       required this.id})
       : super(key: key);
@@ -31,7 +31,7 @@ class StoryImage extends StatefulWidget {
   final bool locked;
 
   // ignore: public_member_api_docs
-  final StoryMedia storyMedia;
+  final FolderMedia folderMedia;
 
   // ignore: public_member_api_docs
   final String imageKey;
@@ -42,16 +42,16 @@ class StoryImage extends StatefulWidget {
   final String id;
 
   @override
-  _StoryImageState createState() => _StoryImageState();
+  _FolderImageState createState() => _FolderImageState();
 }
 
-class _StoryImageState extends State<StoryImage> {
+class _FolderImageState extends State<FolderImage> {
   @override
   Widget build(BuildContext context) {
     return RetryMediaWidget(
       folderId: widget.id,
       locked: widget.locked,
-      media: widget.storyMedia,
+      media: widget.folderMedia,
     );
   }
 }
@@ -68,7 +68,7 @@ class RetryMediaWidget extends StatefulWidget {
   _RetryMediaWidgetState createState() => _RetryMediaWidgetState();
 
   String folderId;
-  StoryMedia media;
+  FolderMedia media;
   bool locked;
 }
 
@@ -76,7 +76,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
 
   Widget _backgroundImage(
-      String imageKey, StoryMedia media, ImageProvider? image,
+      String imageKey, FolderMedia media, ImageProvider? image,
       {bool error = false}) {
     return Container(
       height: 150.0,
@@ -95,7 +95,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   }
 
   Widget _createNonEditControls(
-      String imageKey, bool showPlaceholder, StoryMedia media) {
+      String imageKey, bool showPlaceholder, FolderMedia media) {
     if (showPlaceholder) {
       return MediaCard(media);
     }

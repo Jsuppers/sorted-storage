@@ -1,0 +1,4 @@
+enum MetadataKeys {
+  timestamp,
+  description
+}

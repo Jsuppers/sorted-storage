@@ -1,18 +1,17 @@
 // Flutter imports:
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_properties.dart';
-import 'package:web/app/models/story_content.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/services/dialog_service.dart';
 
 class PopUpOptions extends StatelessWidget {
-  PopUpOptions({required this.folderID, this.subFolderID, this.folder, this.parent});
+  PopUpOptions({this.folder, this.parent});
 
-  String folderID;
   FolderContent? folder;
   FolderContent? parent;
-  String? subFolderID;
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +23,13 @@ class PopUpOptions extends StatelessWidget {
         onSelected: (String value) {
           switch (value) {
             case 'Edit':
-              if (folder != null) {
-                DialogService.editFolderDialog(context, folder: folder, parent: parent);
-              } else {
-                DialogService.editDialog(context, folderID: folderID, parent: parent);
-              }
+
+              inspect(folder);
+              debugger();
+              DialogService.editDialog(context, folder: folder, parent: parent);
               break;
             case 'Share':
-              DialogService.shareDialog(context, subFolderID ?? folderID);
+              DialogService.shareDialog(context, folder!.id!);
               break;
             default:
               break;

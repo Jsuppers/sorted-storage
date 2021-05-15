@@ -8,9 +8,6 @@ class Constants {
   /// the root folder for sorted storage
   static const String rootFolder = 'sorted-storage';
 
-  /// file name of settings file
-  static const String settingsFile = 'settings.json';
-
   /// donate url
   static const String donateURL = 'https://www.buymeacoffee.com/joris';
 

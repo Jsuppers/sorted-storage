@@ -9,13 +9,11 @@ enum CloudStoriesType {
   /// retrieve a specific story from storage
   retrieveFolder,
 
-  createFolder,
   deleteFolder,
   updateFolderPosition,
 
   rootFolder,
 
-  editStory,
 
   /// update ui of current state of the local copy
   refresh,

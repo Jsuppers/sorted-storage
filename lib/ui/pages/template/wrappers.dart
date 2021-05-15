@@ -27,8 +27,7 @@ class LayoutWrapper extends StatelessWidget {
       {Key? key,
       required this.widget,
       this.requiresAuthentication = false,
-      this.routingData,
-      this.isViewMode = false})
+      this.routingData})
       : super(key: key);
 
   /// main widget
@@ -36,9 +35,6 @@ class LayoutWrapper extends StatelessWidget {
 
   /// whether this widget requires a authenticated user
   final bool requiresAuthentication;
-
-  /// whether this widget is on the
-  final bool isViewMode;
 
   /// the targeted route
   final RoutingData? routingData;
@@ -62,7 +58,7 @@ class LayoutWrapper extends StatelessWidget {
       }
       return Content(
           widget: widget,
-          includeNavigation: !isViewMode,
+          includeNavigation: true,
           routingData: routingData);
     });
   }

@@ -5,30 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_properties.dart';
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/story_settings.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/widgets/edit/emoji_picker.dart';
 
 /// emoji dialog
 class EmojiDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EmojiDialog(
-      {Key? key,
-      this.parentID,
-      required this.folderID,
-      this.metadata,
-      this.folder})
-      : super(key: key);
+  const EmojiDialog({ Key? key, this.folder}) : super(key: key);
 
   // ignore: public_member_api_docs
-  final String? parentID;
-
-  // ignore: public_member_api_docs
-  final String folderID;
-
-  final FolderMetadata? metadata;
-
   final FolderContent? folder;
 
   @override
@@ -44,9 +29,6 @@ class EmojiDialog extends StatelessWidget {
           child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
               return EmojiPicker(
-                  folderID: folderID,
-                  parentID: parentID,
-                  metadata: metadata,
                   folder: folder);
             },
           ),

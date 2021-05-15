@@ -3,7 +3,7 @@ enum EditorType {
   updateMetadata,
   updateName,
   updateTimestamp,
-  createStory,
+  createFolder,
   deleteStory,
   syncingState,
 
