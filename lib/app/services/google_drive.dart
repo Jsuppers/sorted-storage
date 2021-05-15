@@ -53,9 +53,9 @@ class GoogleDrive {
 
   double? _getOrder(UpdatePosition updatePosition, int index) {
     if (updatePosition.media != null) {
-      return updatePosition.items[index]?.folderMedia?.order as double?;
+      return updatePosition.items[index]?.folderMedia?.getTimestamp() as double?;
     }
-    return updatePosition.items[index]?.order as double?;
+    return updatePosition.items[index]?.getTimestamp() as double?;
   }
 
   String? _getId(UpdatePosition updatePosition, int index) {
@@ -71,7 +71,7 @@ class GoogleDrive {
     final File mediaFile = File();
     mediaFile.parents = <String>[folderID];
     mediaFile.name = imageName;
-    mediaFile.description = storyMedia.order.toString();
+    mediaFile.description = jsonEncode(storyMedia.metadata);
 
     final Media image = Media(dataStream, storyMedia.contentSize);
     final File uploadMedia =

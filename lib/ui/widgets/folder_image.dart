@@ -10,6 +10,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/url_service.dart';
@@ -24,7 +25,8 @@ class FolderImage extends StatefulWidget {
       required this.locked,
       required this.folderMedia,
       required this.imageKey,
-      required this.id})
+      required this.folder,
+        required this.parent,})
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -37,9 +39,8 @@ class FolderImage extends StatefulWidget {
   final String imageKey;
 
   // ignore: public_member_api_docs
-
-  // ignore: public_member_api_docs
-  final String id;
+  final FolderContent folder;
+  final FolderContent parent;
 
   @override
   _FolderImageState createState() => _FolderImageState();
@@ -49,7 +50,8 @@ class _FolderImageState extends State<FolderImage> {
   @override
   Widget build(BuildContext context) {
     return RetryMediaWidget(
-      folderId: widget.id,
+      folder: widget.folder,
+      parent: widget.parent,
       locked: widget.locked,
       media: widget.folderMedia,
     );
@@ -58,7 +60,9 @@ class _FolderImageState extends State<FolderImage> {
 
 class RetryMediaWidget extends StatefulWidget {
   RetryMediaWidget(
-      {required this.folderId,
+      {
+        required this.folder,
+        required this.parent,
       required this.locked,
       required this.media
       })
@@ -67,7 +71,8 @@ class RetryMediaWidget extends StatefulWidget {
   @override
   _RetryMediaWidgetState createState() => _RetryMediaWidgetState();
 
-  String folderId;
+  FolderContent folder;
+  FolderContent parent;
   FolderMedia media;
   bool locked;
 }
@@ -145,10 +150,15 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                       size: 18,
                     ),
                     onPressed: () {
+                      UpdateDeleteImageEvent update = UpdateDeleteImageEvent(
+                          imageID: imageKey,
+                          folder: widget.folder,
+                          parent: widget.parent,
+                      );
                       BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                           EditorType.deleteImage,
-                          folderID: widget.folderId,
-                          data: imageKey));
+                          refreshUI: true,
+                          data: update));
                     },
                   ),
                 ),
@@ -167,7 +177,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
         future: RetryService.getThumbnail(
           BlocProvider.of<CloudStoriesBloc>(context).storage,
           widget.media.thumbnailURL,
-          widget.folderId,
+          widget.folder.id!,
           widget.media.id,
           retrieveThumbnail: widget.media.retrieveThumbnail,
         ),

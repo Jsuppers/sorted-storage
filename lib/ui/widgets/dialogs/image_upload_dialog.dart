@@ -26,11 +26,14 @@ class ImageUploadDialog extends StatelessWidget {
   const ImageUploadDialog(
       {Key? key,
       required this.folder,
+      required this.parent,
       required this.file})
       : super(key: key);
 
   // ignore: public_member_api_docs
   final FolderContent folder;
+  // ignore: public_member_api_docs
+  final FolderContent parent;
 
   final FilePickerResult file;
 
@@ -46,15 +49,15 @@ class ImageUploadDialog extends StatelessWidget {
           name: element.name!,
           stream: element.readStream,
           contentSize: element.size,
-          order: (DateTime.now().millisecondsSinceEpoch + i).toDouble(),
           isVideo: mime.startsWith('video/'),
           isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
+      media.setTimestamp((DateTime.now().millisecondsSinceEpoch + i).toDouble());
       images.putIfAbsent(element.name!, () => media);
     }
 
     BlocProvider.of<EditorBloc>(context).add(EditorEvent(
         EditorType.uploadImages,
-        data: UpdateImagesEvent(images: images, folderContent: folder)));
+        data: UpdateImagesEvent(images: images, folder: folder, parent: parent)));
 
     return Dialog(
       shape: const RoundedRectangleBorder(

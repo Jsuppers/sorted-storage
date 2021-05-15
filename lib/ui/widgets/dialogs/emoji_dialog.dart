@@ -11,10 +11,12 @@ import 'package:web/ui/widgets/edit/emoji_picker.dart';
 /// emoji dialog
 class EmojiDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EmojiDialog({ Key? key, this.folder}) : super(key: key);
+  const EmojiDialog({ Key? key, this.folder, this.parent}) : super(key: key);
 
   // ignore: public_member_api_docs
   final FolderContent? folder;
+  // ignore: public_member_api_docs
+  final FolderContent? parent;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class EmojiDialog extends StatelessWidget {
           child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
               return EmojiPicker(
+                parent: parent,
                   folder: folder);
             },
           ),

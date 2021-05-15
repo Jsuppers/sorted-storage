@@ -48,7 +48,7 @@ class _MediaPageState extends State<MediaPage> {
   Widget build(BuildContext context) {
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
     listener: (BuildContext context, CloudStoriesState state) {
-      if (state.type == CloudStoriesType.retrieveFolder
+       if (state.type == CloudStoriesType.retrieveFolder
           && state.folderID == widget.folderID) {
         setState(() {
           folder = state.data as FolderContent;

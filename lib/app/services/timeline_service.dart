@@ -23,25 +23,6 @@ class TimelineService {
     return null;
   }
 
-  /// Removes a image with the given key
-  static bool removeImage(String imageKey, FolderContent? folder) {
-    if (folder == null || folder.images == null) {
-      return false;
-    }
-    if (folder.images!.containsKey(imageKey)) {
-      folder.images!.removeWhere((String key, _) => key == imageKey);
-      return true;
-    } else {
-      for (int i = 0; i < folder.subFolders!.length; i++) {
-        final FolderContent element = folder.subFolders![i];
-        if (removeImage(imageKey, element)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   /// Retrieves a story with the given folder ID
   static String? getParentID(String folderID, FolderContent? folder, {String? parentID}) {
     if (parentID != null) {

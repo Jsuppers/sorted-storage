@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import 'package:web/app/models/folder_metadata.dart';
+
 /// information for media content, this could be a image, video or a document
 class FolderMedia {
   // ignore: public_member_api_docs
@@ -8,11 +11,11 @@ class FolderMedia {
     this.isVideo = false,
     this.isDocument = false,
     this.contentSize,
-    this.order,
+    this.metadata,
     required this.name,
     this.retrieveThumbnail = false,
   }) {
-    order ??= DateTime.now().millisecondsSinceEpoch.toDouble();
+    metadata ??= <String, dynamic>{};
   }
 
   /// clone the media file
@@ -25,7 +28,7 @@ class FolderMedia {
         retrieveThumbnail = media.retrieveThumbnail,
         id = media.id,
         name = media.name,
-        order = media.order;
+        metadata = media.metadata;
 
   /// and index which will ensure the media without an index will be at the end
   /// of the list hopefully no one uploads this much media in one story..
@@ -56,5 +59,24 @@ class FolderMedia {
   Stream<List<int>>? stream;
 
   /// index of this media
-  double? order;
+  Map<String, dynamic>? metadata;
+
+  double? getTimestamp() {
+    return metadata?[describeEnum(MetadataKeys.timestamp)] as double?;
+  }
+
+  void setTimestamp(double? timestamp) {
+    if (timestamp == null) {
+      return;
+    }
+    metadata?[describeEnum(MetadataKeys.timestamp)] = timestamp;
+  }
+
+  String? getDescription() {
+    return metadata?[describeEnum(MetadataKeys.description)] as String?;
+  }
+
+  void setDescription(String? description) {
+    metadata?[describeEnum(MetadataKeys.description)] = description;
+  }
 }

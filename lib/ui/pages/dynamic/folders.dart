@@ -138,12 +138,7 @@ class _FolderViewState extends State<FolderView> {
       }
       if (state.type == CloudStoriesType.refresh &&
           state.folderID == folderID) {
-        inspect(folder);
-        debugger();
         setState(() {});
-//        BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-//            CloudStoriesType.retrieveFolder,
-//            folderID: folderID.id));
       }
     }, child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {

@@ -86,6 +86,14 @@ class FolderContent {
     metadata?[describeEnum(MetadataKeys.timestamp)] = timestamp;
   }
 
+  String? getDescription() {
+    return metadata?[describeEnum(MetadataKeys.description)] as String?;
+  }
+
+  void setDescription(String? description) {
+    metadata?[describeEnum(MetadataKeys.description)] = description;
+  }
+
   /// the folder ID of this doler
   String? id;
 

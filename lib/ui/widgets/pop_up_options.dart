@@ -23,9 +23,6 @@ class PopUpOptions extends StatelessWidget {
         onSelected: (String value) {
           switch (value) {
             case 'Edit':
-
-              inspect(folder);
-              debugger();
               DialogService.editDialog(context, folder: folder, parent: parent);
               break;
             case 'Share':

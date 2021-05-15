@@ -21,11 +21,10 @@ class TimelineCard extends StatefulWidget {
   const TimelineCard(
       {Key? key,
       required this.width,
-      required this.folderId,
       required this.height,
       required this.folder,
-        required this.parent,
-      this.viewMode = false})
+      required this.parent,
+      })
       : super(key: key);
 
   // ignore: public_member_api_docs
@@ -39,12 +38,6 @@ class TimelineCard extends StatefulWidget {
   // ignore: public_member_api_docs
   final FolderContent parent;
 
-  // ignore: public_member_api_docs
-  final String folderId;
-
-  // ignore: public_member_api_docs
-  final bool viewMode;
-
   @override
   _TimelineCardState createState() => _TimelineCardState();
 }
@@ -56,24 +49,22 @@ class _TimelineCardState extends State<TimelineCard> {
   void initState() {
     super.initState();
     folder = widget.folder;
-    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-        CloudStoriesType.retrieveFolder,
-        folderID: widget.folderId));
+    if (folder?.loaded == null || folder!.loaded == false) {
+      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+          CloudStoriesType.retrieveFolder,
+          folderID: widget.folder.id));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    List<FolderContent> subFolders = folder?.subFolders ?? [];
-
+    final List<FolderContent> subFolders = folder?.subFolders ?? [];
     return BlocListener<CloudStoriesBloc, CloudStoriesState>(
         listener: (BuildContext context, CloudStoriesState state) {
-          if (state.type == CloudStoriesType.retrieveFolder
-              && state.folderID == widget.folderId) {
-            setState(() {
-              folder = state.data as FolderContent;
-            });
+          if (state.type == CloudStoriesType.refresh &&
+              state.folderID == widget.parent.id) {
+            setState(() {});
           }
-
         }, child: Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Card(
@@ -81,26 +72,24 @@ class _TimelineCardState extends State<TimelineCard> {
         child: Column(
           children: <Widget>[
             EventCard(
-              locked: true,
-              controls: widget.viewMode
-                  ? Container()
-                  : PopUpOptions(
+              controls: PopUpOptions(
                       folder: widget.folder,
                       parent: widget.parent,
               ),
               width: widget.width,
               height: widget.height,
               folder: folder!,
+              parent: widget.parent,
             ),
             ...List<Widget>.generate(subFolders.length,
                 (int index) {
               return Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: EventCard(
-                    locked: true,
                     controls: Container(),
                     width: widget.width,
                     height: widget.height,
+                    parent: folder!,
                     folder: subFolders[index]),
               );
             }),

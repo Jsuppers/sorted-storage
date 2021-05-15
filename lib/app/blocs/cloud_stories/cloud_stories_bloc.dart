@@ -91,7 +91,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 
   Future<void> _updatePosition(UpdatePosition updatePosition) async {
     final double? newOrder = await storage.updatePosition(updatePosition);
-    updatePosition.items[updatePosition.currentIndex].order = newOrder;
+    updatePosition.items[updatePosition.currentIndex].setTimestamp(newOrder);
   }
 
 
@@ -168,6 +168,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
     FolderContent? currentFolder = folder;
     final Map<String, FolderMedia> images = <String, FolderMedia>{};
     final List<FolderContent> subFolders = <FolderContent>[];
+    int index = 0;
     for (final File file in filesInFolder.files!) {
       Map<String, dynamic>? metadata;
       if (file.description != null) {
@@ -186,13 +187,19 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           isVideo: file.mimeType!.startsWith('video/'),
           retrieveThumbnail: true,
           thumbnailURL: file.thumbnailLink,
-          order: metadata?[describeEnum(MetadataKeys.timestamp)] as double?
+          metadata: metadata,
         );
+        if (media.getTimestamp() == null) {
+          media.setTimestamp((DateTime.now().millisecondsSinceEpoch + index).toDouble());
+        }
         images.putIfAbsent(file.id!, () => media);
       }  else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final FolderContent subFolder =
           FolderContent.createFromFolderName(
               folderName: file.name!, id: file.id!, metadata: metadata);
+        if (subFolder.getTimestamp() == null) {
+          subFolder.setTimestamp((DateTime.now().millisecondsSinceEpoch + index).toDouble());
+        }
         subFolders.add(subFolder);
       } else {
         final FolderMedia media = FolderMedia(
@@ -201,9 +208,13 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
             isDocument: true,
             thumbnailURL: file.thumbnailLink,
             retrieveThumbnail: true,
-            order: metadata?[describeEnum(MetadataKeys.timestamp)] as double?);
+            metadata: metadata);
+        if (media.getTimestamp() == null) {
+          media.setTimestamp((DateTime.now().millisecondsSinceEpoch + index).toDouble());
+        }
         images.putIfAbsent(file.id!, () => media);
       }
+      index++;
     }
 
     currentFolder ??= FolderContent.createFromFolderName(
@@ -211,6 +222,9 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
           id: folderID,
           metadata: metadata);
 
+    if (currentFolder.getTimestamp() == null) {
+      currentFolder.setTimestamp((DateTime.now().millisecondsSinceEpoch + index).toDouble());
+    }
     // TODO images not showing when directly going to media
     currentFolder.images = images;
     currentFolder.subFolders = subFolders;

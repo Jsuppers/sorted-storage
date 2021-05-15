@@ -18,10 +18,12 @@ class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
   const EmojiPicker(
       {Key? key,
-      this.folder})
+      required this.folder,
+      required this.parent})
       : super(key: key);
 
   final FolderContent? folder;
+  final FolderContent? parent;
 
   @override
   State createState() => EmojiPickerState();
@@ -118,11 +120,13 @@ class EmojiPickerState extends State<EmojiPicker> {
           onPressed: () {
             if (widget.folder != null) {
               widget.folder!.emoji = element;
+            UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
+                folder: widget.folder!,
+                parent: widget.parent!);
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateName,
-                  folderID: widget.folder!.id,
                   refreshUI: true,
-                  data: '$element ${widget.folder!.title}'));
+                  data: updateNameEvent));
               BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
             }
           },

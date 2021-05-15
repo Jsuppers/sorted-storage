@@ -24,8 +24,8 @@ class EventCard extends StatefulWidget {
       {Key? key,
       required this.width,
       required this.folder,
+        required this.parent,
       required this.controls,
-      required this.locked,
       this.height = double.infinity})
       : super(key: key);
 
@@ -40,9 +40,7 @@ class EventCard extends StatefulWidget {
 
   /// the story this card is related to
   final FolderContent folder;
-
-  /// whether the card is locked
-  final bool locked;
+  final FolderContent parent;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -69,8 +67,7 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget timeStamp() {
     final double timestamp = widget.folder.getTimestamp() ?? DateTime.now().millisecondsSinceEpoch.toDouble();
-    final DateTime selectedDate =
-        DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
+    final DateTime selectedDate = DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
     final String formattedDate = formatter.format(selectedDate);
     return Container(
       padding: EdgeInsets.zero,
@@ -89,22 +86,24 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   Widget build(BuildContext context) {
     final List<FolderImage> cards = <FolderImage>[];
-    debugger();
     if (widget.folder.images != null) {
       for (final MapEntry<String, FolderMedia> image
           in widget.folder.images!.entries) {
-        debugger();
         cards.add(FolderImage(
-          locked: widget.locked,
+          locked: true,
+          folder: widget.folder,
+          parent: widget.parent,
           folderMedia: image.value,
           imageKey: image.key,
-          id: widget.folder.id!,
         ));
       }
     }
 
-    cards.sort((FolderImage a, FolderImage b) =>
-        a.folderMedia.order!.compareTo(b.folderMedia.order!));
+    cards.sort((FolderImage a, FolderImage b) {
+      final double first = a.folderMedia.getTimestamp() ?? 0;
+      final double second = b.folderMedia.getTimestamp() ?? 0;
+      return first.compareTo(second);
+    });
 
     return Form(
       child: Padding(
@@ -161,7 +160,7 @@ class _TimelineEventCardState extends State<EventCard> {
                       children: cards)),
               Text(
                 Property.getValueOrDefault(
-                  widget.folder.metadata![describeEnum(MetadataKeys.description)] as String,
+                  widget.folder.metadata?[describeEnum(MetadataKeys.description)] as String?,
                   'No description given',
                 ),
                 textAlign: TextAlign.center,
