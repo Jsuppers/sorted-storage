@@ -211,27 +211,29 @@ class _EditStoryContentState extends State<EditStoryContent> {
       isRootFolder: widget.isRootFolder,
     ));
 
-    output.add(Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: SizedBox(
-        height: 40,
-        width: 140,
-        child: ButtonWithIcon(
-            text: 'add folder',
-            icon: Icons.add,
-            onPressed: () async {
-              if (savingState == SavingState.saving) {
-                return;
-              }
-              BlocProvider.of<EditorBloc>(context).add(
-                  EditorEvent(EditorType.createFolder, data: widget.folder));
-            },
-            width: Constants.minScreenWidth,
-            backgroundColor: Colors.white,
-            textColor: Colors.black,
-            iconColor: Colors.black),
-      ),
-    ));
+    if (!widget.isRootFolder) {
+      output.add(Padding(
+        padding: const EdgeInsets.only(bottom: 10),
+        child: SizedBox(
+          height: 40,
+          width: 140,
+          child: ButtonWithIcon(
+              text: 'add folder',
+              icon: Icons.add,
+              onPressed: () async {
+                if (savingState == SavingState.saving) {
+                  return;
+                }
+                BlocProvider.of<EditorBloc>(context).add(
+                    EditorEvent(EditorType.createFolder, data: widget.folder));
+              },
+              width: Constants.minScreenWidth,
+              backgroundColor: Colors.white,
+              textColor: Colors.black,
+              iconColor: Colors.black),
+        ),
+      ));
+    }
 
     if (widget.isRootFolder ||
         folder.subFolders == null ||
