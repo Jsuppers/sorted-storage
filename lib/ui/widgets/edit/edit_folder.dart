@@ -46,6 +46,7 @@ class EditFolder extends StatefulWidget {
 
 class _EditFolderState extends State<EditFolder> {
   FolderContent? folder;
+  FolderContent? cloudCopyFolder;
   String? folderID;
   bool isRootFolder = false;
   bool error = false;
@@ -59,6 +60,7 @@ class _EditFolderState extends State<EditFolder> {
       BlocProvider.of<EditorBloc>(context)
           .add(EditorEvent(EditorType.createFolder, data: widget.parent));
     } else {
+      cloudCopyFolder = widget.folder;
       folder = FolderContent.clone(widget.folder!);
       folderID = folder!.id;
     }
@@ -74,7 +76,12 @@ class _EditFolderState extends State<EditFolder> {
           } else if (state?.data != null) {
             FolderContent newFolder = state?.data as FolderContent;
             setState(() {
-              folder ??= FolderContent.clone(newFolder);
+              if (folder != null) {
+                folder!.subFolders!.add(FolderContent.clone(newFolder));
+              } else {
+                cloudCopyFolder = newFolder;
+                folder = FolderContent.clone(newFolder);
+              }
               FolderContent.sortFolders(folder?.subFolders);
               folderID = folder!.id;
             });
@@ -109,6 +116,7 @@ class _EditFolderState extends State<EditFolder> {
               width: info.screenSize.width,
               height: info.screenSize.height,
               folder: folder,
+              cloudCopy: cloudCopyFolder,
               parent: widget.parent,
               isRootFolder: isRootFolder,
             ));
@@ -125,6 +133,7 @@ class EditStoryContent extends StatefulWidget {
       required this.width,
       required this.height,
       required this.folder,
+        required this.cloudCopy,
       required this.parent,
       required this.isRootFolder})
       : super(key: key);
@@ -137,6 +146,8 @@ class EditStoryContent extends StatefulWidget {
 
   // ignore: public_member_api_docs
   final FolderContent? folder;
+  // ignore: public_member_api_docs
+  final FolderContent? cloudCopy;
   // ignore: public_member_api_docs
   final FolderContent? parent;
 
@@ -225,7 +236,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
                   return;
                 }
                 BlocProvider.of<EditorBloc>(context).add(
-                    EditorEvent(EditorType.createFolder, data: widget.folder));
+                    EditorEvent(EditorType.createFolder, data: widget.cloudCopy));
               },
               width: Constants.minScreenWidth,
               backgroundColor: Colors.white,
