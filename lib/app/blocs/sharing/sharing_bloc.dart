@@ -60,7 +60,7 @@ class SharingBloc extends Bloc<ShareEvent, SharingState?> {
   Future<SharingState> _shareFolder() async {
     try {
       _folderPermissionID =
-          await _shareFile(_folderPermissionID!, _folderID, 'anyone', 'reader');
+          await _shareFile(_folderPermissionID, _folderID, 'anyone', 'reader');
     } catch (e) {
       return SharingNotSharedState(
           errorMessage: 'error while sharing folder, please try again');
@@ -72,7 +72,7 @@ class SharingBloc extends Bloc<ShareEvent, SharingState?> {
   }
 
   Future<String> _shareFile(
-      String permissionID, String fileID, String type, String role) async {
+      String? permissionID, String fileID, String type, String role) async {
     if (permissionID == null) {
       String? perm = await _getPermissions(fileID, type, role);
       return perm ??= await _createPermission(fileID, type, role) ?? '';

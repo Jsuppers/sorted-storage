@@ -7,7 +7,6 @@ import 'package:page_transition/page_transition.dart';
 // Project imports:
 import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
-import 'package:web/ui/pages/dynamic/documents.dart';
 import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/pages/dynamic/media.dart';
 import 'package:web/ui/pages/dynamic/profile.dart';
@@ -18,6 +17,13 @@ import 'package:web/ui/pages/static/privacy_policy.dart';
 import 'package:web/ui/pages/static/terms_of_conditions.dart';
 import 'package:web/ui/pages/template/wrappers.dart';
 
+class PageContent {
+  PageContent({required this.page, this.requiresAuthentication = false});
+
+  Widget page;
+  bool requiresAuthentication;
+}
+
 /// class for various routing methods
 class RouteConfiguration {
   static const String _uriRegex = '(/.*?)(/.*)';
@@ -27,48 +33,45 @@ class RouteConfiguration {
     final RoutingData routingData =
         RouteConfiguration.getRoutingData(settings.name);
     final String baseRoute = routingData.baseRoute;
+    final PageContent pageContent = _getPageContent(baseRoute, routingData.destination);
 
     return PageTransition<dynamic>(
       type: PageTransitionType.fade,
       settings: settings,
       child: LayoutWrapper(
-          widget: _getPageContent(baseRoute, routingData.destination),
-          requiresAuthentication: _pageRequiresAuthentication(baseRoute),
+          widget: pageContent.page,
+          requiresAuthentication: pageContent.requiresAuthentication,
           routingData: routingData),
     );
   }
 
-  static bool _pageRequiresAuthentication(String baseRoute) {
-    return baseRoute == BaseRoute.media.toRouteString() ||
-        baseRoute == BaseRoute.documents.toRouteString() ||
-        baseRoute == BaseRoute.profile.toRouteString() ||
-        baseRoute == BaseRoute.folders.toRouteString();
-  }
-
-  static Widget _getPageContent(String baseRoute, String destination) {
+  static PageContent _getPageContent(String baseRoute, String destination) {
     final BaseRoute currentRoute = BaseRoute.values.firstWhere(
         (BaseRoute br) => br.toRouteString() == baseRoute,
-        orElse: () => BaseRoute.home);
+        orElse: () {
+          if (baseRoute.isEmpty || baseRoute.length == 1) {
+            return BaseRoute.home;
+          }
+          return BaseRoute.folder;
+        });
 
     switch (currentRoute) {
-      case BaseRoute.documents:
-        return DocumentsPage();
-      case BaseRoute.media:
-        return MediaPage(destination);
       case BaseRoute.login:
-        return LoginPage();
+        return PageContent(page: LoginPage());
       case BaseRoute.policy:
-        return PolicyPage();
+        return PageContent(page: PolicyPage());
       case BaseRoute.terms:
-        return TermsPage();
+        return PageContent(page: TermsPage());
       case BaseRoute.error:
-        return ErrorPage();
+        return PageContent(page: ErrorPage());
       case BaseRoute.home:
-        return HomePage();
+        return PageContent(page: HomePage());
       case BaseRoute.profile:
-        return ProfilePage();
+        return PageContent(page: ProfilePage(), requiresAuthentication: true);
       case BaseRoute.folders:
-        return FolderPage(destination);
+        return PageContent(page: FolderPage(destination), requiresAuthentication: true);
+      case BaseRoute.folder:
+        return PageContent(page: MediaPage(baseRoute.replaceFirst('/', '')), requiresAuthentication: true);
     }
   }
 

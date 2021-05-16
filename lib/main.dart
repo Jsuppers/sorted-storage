@@ -16,13 +16,14 @@ import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 Future<void> main() async {
+  setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }

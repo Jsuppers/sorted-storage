@@ -32,7 +32,7 @@ class _ShareWidgetState extends State<ShareWidget> {
     final TextEditingController controller = TextEditingController();
     final bool shared = widget.state is SharingSharedState;
     if (shared) {
-      controller.text = '${Constants.websiteURL}/view/${widget.folderID}';
+      controller.text = '${Constants.websiteURL}/${widget.folderID}';
     }
 
     return Padding(

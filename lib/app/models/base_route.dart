@@ -1,12 +1,11 @@
 /// route enums
 enum BaseRoute {
-  documents,
-  media,
   login,
   policy,
   terms,
   error,
   home,
+  folder,
   profile,
   folders
 }

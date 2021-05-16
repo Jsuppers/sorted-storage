@@ -45,7 +45,7 @@ class NavigateToMediaEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToMediaEvent({required String folderId})
       : super(
-            route: '${BaseRoute.media.toRouteString()}/$folderId',
+            route: '/$folderId',
             requiresAuthentication: true);
 }
 
@@ -64,15 +64,6 @@ class NavigateToProfileEvent extends NavigationEvent {
   NavigateToProfileEvent()
       : super(
             route: BaseRoute.profile.toRouteString(),
-            requiresAuthentication: true);
-}
-
-/// event to navigate to the documents page
-class NavigateToDocumentsEvent extends NavigationEvent {
-  /// constructor which sets route to the documents page
-  NavigateToDocumentsEvent()
-      : super(
-            route: BaseRoute.documents.toRouteString(),
             requiresAuthentication: true);
 }
 
