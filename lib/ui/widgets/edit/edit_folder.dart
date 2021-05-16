@@ -158,7 +158,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
 
     return CustomScrollView(slivers: [
       SliverAppBar(
-        // toolbarHeight: 50,
+        automaticallyImplyLeading: false,
         floating: true,
         backgroundColor: Colors.white,
         pinned: true,
