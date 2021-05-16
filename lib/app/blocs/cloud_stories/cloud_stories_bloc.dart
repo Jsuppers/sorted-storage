@@ -56,22 +56,16 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState> {
 //        yield CloudStoriesState(CloudStoriesType.createFolder, data: fp);
 //        break;
       case CloudStoriesType.retrieveFolder:
-        if (event.data != null) {
-          yield CloudStoriesState(CloudStoriesType.retrieveFolder, data: event.data, folderID: event.folderID);
-          break;
-        }
         if (rootFolder != null && event.folderID == rootFolder!.id) {
           FolderContent.sortFolders(rootFolder!.subFolders);
           yield CloudStoriesState(CloudStoriesType.retrieveFolder, data: rootFolder, folderID: event.folderID);
         } else if (rootFolder != null) {
           final FolderContent? folder = TimelineService.getFolderWithID(event.folderID!, rootFolder);
-          _createEventFromFolder(folder!.id!, folder: folder).then((value) => {
-            add(CloudStoriesEvent(CloudStoriesType.retrieveFolder, data: value, folderID: event.folderID))
-          });
+          FolderContent value = await _createEventFromFolder(folder!.id!, folder: folder);
+          yield CloudStoriesState(CloudStoriesType.retrieveFolder, data: value, folderID: event.folderID);
         } else {
-          _createEventFromFolder(event.folderID!).then((folder) {
-            add(CloudStoriesEvent(CloudStoriesType.retrieveFolder, data: folder, folderID: event.folderID));
-          });
+          FolderContent value = await _createEventFromFolder(event.folderID!, folder: event.data as FolderContent?);
+          yield CloudStoriesState(CloudStoriesType.retrieveFolder, data: value, folderID: event.folderID);
         }
         break;
       case CloudStoriesType.refresh:

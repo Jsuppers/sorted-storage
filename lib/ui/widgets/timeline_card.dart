@@ -81,18 +81,6 @@ class _TimelineCardState extends State<TimelineCard> {
               folder: folder!,
               parent: widget.parent,
             ),
-            ...List<Widget>.generate(subFolders.length,
-                (int index) {
-              return Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: EventCard(
-                    controls: Container(),
-                    width: widget.width,
-                    height: widget.height,
-                    parent: folder!,
-                    folder: subFolders[index]),
-              );
-            }),
           ],
         ),
       ),

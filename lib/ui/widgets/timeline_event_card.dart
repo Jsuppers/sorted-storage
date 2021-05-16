@@ -1,12 +1,17 @@
 // Flutter imports:
-import 'dart:developer';
+import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Package imports:
 import 'package:intl/intl.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 
 // Project imports:
 import 'package:web/app/models/folder_content.dart';
@@ -48,6 +53,19 @@ class EventCard extends StatefulWidget {
 
 class _TimelineEventCardState extends State<EventCard> {
   final DateFormat formatter = DateFormat('dd MMMM, yyyy');
+  FolderContent? folder;
+
+  @override
+  void initState() {
+    super.initState();
+    folder = widget.folder;
+    if (folder?.loaded == null || folder!.loaded == false) {
+      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+          CloudStoriesType.retrieveFolder,
+          folderID: widget.folder.id,
+          data: folder));
+    }
+  }
 
   Widget emoji() {
     return widget.folder.emoji.isEmpty
@@ -83,6 +101,25 @@ class _TimelineEventCardState extends State<EventCard> {
     );
   }
 
+  List<Widget> subFolders() {
+    List<Widget> output = [];
+
+      if (folder!.subFolders == null || folder!.subFolders!.isEmpty) {
+        return output;
+      }
+      for (int i = 0; folder!.subFolders != null && i < folder!.subFolders!.length; i++) {
+        output.add(
+          EventCard(
+              width: widget.width,
+              height: widget.height,
+              folder: folder!.subFolders![i],
+              parent: widget.folder,
+              controls: Container()));
+      }
+
+    return output;
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<FolderImage> cards = <FolderImage>[];
@@ -105,7 +142,13 @@ class _TimelineEventCardState extends State<EventCard> {
       return first.compareTo(second);
     });
 
-    return Form(
+    return BlocListener<CloudStoriesBloc, CloudStoriesState>(
+        listener: (BuildContext context, CloudStoriesState state) {
+          if (state.type == CloudStoriesType.retrieveFolder &&
+              state.folderID == folder!.id) {
+            setState(() {});
+          }
+        }, child: Form(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(children: <Widget>[
@@ -171,8 +214,9 @@ class _TimelineEventCardState extends State<EventCard> {
               ),
             ],
           ),
+          ...subFolders(),
         ]),
       ),
-    );
+    ));
   }
 }

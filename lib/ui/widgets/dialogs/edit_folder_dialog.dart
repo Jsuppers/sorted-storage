@@ -9,9 +9,9 @@ import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/widgets/edit/edit_folder.dart';
 
 /// emoji dialog
-class EditStoryDialog extends StatelessWidget {
+class EditFolderDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EditStoryDialog({Key? key, this.folder, this.parent})
+  const EditFolderDialog({Key? key, this.folder, this.parent})
       : super(key: key);
 
   // ignore: public_member_api_docs

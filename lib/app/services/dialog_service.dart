@@ -11,7 +11,7 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
-import 'package:web/ui/widgets/dialogs/edit_story_dialog.dart';
+import 'package:web/ui/widgets/dialogs/edit_folder_dialog.dart';
 import 'package:web/ui/widgets/dialogs/emoji_dialog.dart';
 import 'package:web/ui/widgets/dialogs/error_dialog.dart';
 import 'package:web/ui/widgets/dialogs/image_upload_dialog.dart';
@@ -64,7 +64,7 @@ class DialogService {
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext context) {
-        return EditStoryDialog(folder: folder, parent: parent);
+        return EditFolderDialog(folder: folder, parent: parent);
       },
     ).then((_) {
       // update the ui with any changes made in the edit dialog

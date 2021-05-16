@@ -25,9 +25,7 @@ import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
-import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
-import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/edit/edit_header.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -190,23 +188,34 @@ class _EditStoryContentState extends State<EditStoryContent> {
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                EventCard(
-                  savingState: savingState,
-                  width: widget.width,
-                  controls: Container(),
-                  height: widget.height,
-                  folder: widget.folder!,
-                  parent: widget.parent!,
-                  isRootFolder: widget.isRootFolder,
-                ),
-                if (!widget.isRootFolder) FolderPage(widget.folder!.id!),
-              ],
+              children: getCards(widget.folder!, widget.parent!, 0),
             ),
           ),
         ),
       ),
     ]);
+  }
+
+
+  List<Widget> getCards(FolderContent folder, FolderContent parent, int depth) {
+    List<Widget> output = [];
+    output.add(EventCard(
+      savingState: savingState,
+      controls: Container(),
+      width: widget.width,
+      height: widget.height,
+      folder: folder,
+      parent: parent,
+      isRootFolder: widget.isRootFolder,
+    ));
+
+    if (widget.isRootFolder || folder.subFolders == null || folder.subFolders!.isEmpty) {
+      return output;
+    }
+    for (int i = 0; folder.subFolders != null && i < folder.subFolders!.length; i++) {
+      output.addAll(getCards(folder.subFolders![i], folder, depth + 1));
+    }
+    return output;
   }
 }
 
