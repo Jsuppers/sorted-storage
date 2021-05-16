@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/blocs/navigation/navigation_bloc.dart';
+import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/dialog_service.dart';
+import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/sync_icon.dart';
 
@@ -90,7 +90,20 @@ class _EditHeaderState extends State<EditHeader> {
                 const SizedBox(width: 10),
               ],
             ),
-            const Align(alignment: Alignment.centerRight, child: SyncingIcon()),
+            Row(children: [
+              const Align(alignment: Alignment.centerRight, child: SyncingIcon()),
+              const SizedBox(width: 10),
+              MaterialButton(
+                  minWidth: 100,
+                  color: myThemeData.primaryColorDark,
+                  textColor: myThemeData.primaryColor,
+                  onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                      .add(NavigatorPopEvent()),
+                  child: Row(
+                    children: const <Widget>[
+                      Text('close'),
+                    ],
+                  )),],)
           ],
         ));
   }
