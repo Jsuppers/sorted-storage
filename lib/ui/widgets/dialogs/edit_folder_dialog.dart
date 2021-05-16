@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:web/app/models/folder_content.dart';
 
 // Project imports:
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/widgets/edit/edit_folder.dart';
 
 /// emoji dialog

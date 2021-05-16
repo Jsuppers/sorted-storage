@@ -24,10 +24,12 @@ class EditHeader extends StatefulWidget {
       {Key? key,
       this.savingState,
       required this.width,
-      this.folder})
+      required this.folder,
+      required this.parent})
       : super(key: key);
 
   final FolderContent? folder;
+  final FolderContent? parent;
   final double width;
   final SavingState? savingState;
 
@@ -69,21 +71,19 @@ class _EditHeaderState extends State<EditHeader> {
                       if (widget.savingState == SavingState.saving) {
                         return;
                       }
-                      Function callback = () {
-                        if (widget.folder != null) {
-                          BlocProvider.of<CloudStoriesBloc>(context).add(
-                              CloudStoriesEvent(CloudStoriesType.deleteFolder,
-                                  data: widget.folder));
-                        } else {
-                          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                              EditorType.deleteStory,
-                              closeDialog: true,
-                              data: widget.folder));
-                        }
-                      };
                       DialogService.showAlertDialog(context,
                           message: 'Are you sure you want to delete?',
-                          callback: callback);
+                          callback: () {
+                        UpdateFolderEvent updateEvent = UpdateFolderEvent(
+                          folder: widget.folder!,
+                          parent: widget.parent!,
+                        );
+
+                        BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                            EditorType.deleteFolder,
+                            closeDialog: true,
+                            data: updateEvent));
+                      });
                     },
                     width: widget.width,
                     backgroundColor: Colors.redAccent),

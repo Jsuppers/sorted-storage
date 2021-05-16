@@ -15,9 +15,9 @@ import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/media_progress.dart';
 import 'package:web/ui/helpers/text_display.dart';
 
 /// image upload dialog
@@ -51,13 +51,15 @@ class ImageUploadDialog extends StatelessWidget {
           contentSize: element.size,
           isVideo: mime.startsWith('video/'),
           isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
-      media.setTimestamp((DateTime.now().millisecondsSinceEpoch + i).toDouble());
+      media
+          .setTimestamp((DateTime.now().millisecondsSinceEpoch + i).toDouble());
       images.putIfAbsent(element.name!, () => media);
     }
 
     BlocProvider.of<EditorBloc>(context).add(EditorEvent(
         EditorType.uploadImages,
-        data: UpdateImagesEvent(images: images, folder: folder, parent: parent)));
+        data:
+            UpdateImagesEvent(images: images, folder: folder, parent: parent)));
 
     return Dialog(
       shape: const RoundedRectangleBorder(

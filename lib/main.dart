@@ -47,8 +47,7 @@ class _MyAppState extends State<MyApp> {
     _driveBloc = DriveBloc();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
     _cloudStoriesBloc = CloudStoriesBloc(
-        storage: _googleDrive,
-        navigationBloc: _navigationBloc);
+        storage: _googleDrive, navigationBloc: _navigationBloc);
   }
 
   @override

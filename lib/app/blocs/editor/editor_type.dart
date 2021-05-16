@@ -4,7 +4,7 @@ enum EditorType {
   updateName,
   updateTimestamp,
   createFolder,
-  deleteStory,
+  deleteFolder,
   syncingState,
 
   /// delete a image

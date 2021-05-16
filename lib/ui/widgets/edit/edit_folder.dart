@@ -28,9 +28,9 @@ import 'package:web/app/services/dialog_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/edit/edit_header.dart';
+import 'package:web/ui/widgets/folder_image.dart';
 import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
-import 'package:web/ui/widgets/folder_image.dart';
 
 /// page which shows a single folder
 class EditFolder extends StatefulWidget {
@@ -72,8 +72,9 @@ class _EditFolderState extends State<EditFolder> {
           if (state?.error != null) {
             setState(() => error = true);
           } else if (state?.data != null) {
+            FolderContent newFolder = state?.data as FolderContent;
             setState(() {
-              folder = FolderContent.clone(state?.data as FolderContent);
+              folder ??= FolderContent.clone(newFolder);
               FolderContent.sortFolders(folder?.subFolders);
               folderID = folder!.id;
             });
@@ -163,9 +164,11 @@ class _EditStoryContentState extends State<EditStoryContent> {
         pinned: true,
         elevation: 0.0,
         title: EditHeader(
-            savingState: savingState,
-            width: widget.width,
-            folder: widget.folder),
+          savingState: savingState,
+          width: widget.width,
+          folder: widget.folder,
+          parent: widget.parent,
+        ),
       ),
       SliverToBoxAdapter(
         child: MultiBlocListener(
@@ -196,7 +199,6 @@ class _EditStoryContentState extends State<EditStoryContent> {
     ]);
   }
 
-
   List<Widget> getCards(FolderContent folder, FolderContent parent, int depth) {
     List<Widget> output = [];
     output.add(EventCard(
@@ -209,10 +211,36 @@ class _EditStoryContentState extends State<EditStoryContent> {
       isRootFolder: widget.isRootFolder,
     ));
 
-    if (widget.isRootFolder || folder.subFolders == null || folder.subFolders!.isEmpty) {
+    output.add(Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SizedBox(
+        height: 40,
+        width: 140,
+        child: ButtonWithIcon(
+            text: 'add folder',
+            icon: Icons.add,
+            onPressed: () async {
+              if (savingState == SavingState.saving) {
+                return;
+              }
+              BlocProvider.of<EditorBloc>(context).add(
+                  EditorEvent(EditorType.createFolder, data: widget.folder));
+            },
+            width: Constants.minScreenWidth,
+            backgroundColor: Colors.white,
+            textColor: Colors.black,
+            iconColor: Colors.black),
+      ),
+    ));
+
+    if (widget.isRootFolder ||
+        folder.subFolders == null ||
+        folder.subFolders!.isEmpty) {
       return output;
     }
-    for (int i = 0; folder.subFolders != null && i < folder.subFolders!.length; i++) {
+    for (int i = 0;
+        folder.subFolders != null && i < folder.subFolders!.length;
+        i++) {
       output.addAll(getCards(folder.subFolders![i], folder, depth + 1));
     }
     return output;
@@ -226,7 +254,7 @@ class EventCard extends StatefulWidget {
       {Key? key,
       required this.width,
       required this.folder,
-        required this.parent,
+      required this.parent,
       required this.controls,
       required this.isRootFolder,
       this.height = double.infinity,
@@ -294,8 +322,8 @@ class _TimelineEventCardState extends State<EventCard> {
         MaterialButton(
           minWidth: 40,
           height: 40,
-          onPressed: () =>
-              DialogService.emojiDialog(context, folder: widget.folder, parent: widget.parent),
+          onPressed: () => DialogService.emojiDialog(context,
+              folder: widget.folder, parent: widget.parent),
           child: widget.folder.emoji.isEmpty
               ? const Text(
                   '📅',
@@ -343,10 +371,10 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
-              widget.folder.setTimestamp(date.millisecondsSinceEpoch.toDouble());
+              widget.folder
+                  .setTimestamp(date.millisecondsSinceEpoch.toDouble());
               UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                  folder: widget.folder,
-                  parent: widget.parent);
+                  folder: widget.folder, parent: widget.parent);
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateTimestamp,
                   data: updateNameEvent));
@@ -416,8 +444,7 @@ class _TimelineEventCardState extends State<EventCard> {
                 _debounce = Timer(const Duration(milliseconds: 500), () {
                   widget.folder.setDescription(content);
                   UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                      folder: widget.folder,
-                      parent: widget.parent);
+                      folder: widget.folder, parent: widget.parent);
                   BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                       EditorType.updateMetadata,
                       data: updateNameEvent));
@@ -502,8 +529,7 @@ class _TimelineEventCardState extends State<EventCard> {
                         widget.folder.title = content;
 
                         UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                            folder: widget.folder,
-                            parent: widget.parent);
+                            folder: widget.folder, parent: widget.parent);
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.updateName,
                             data: updateNameEvent));

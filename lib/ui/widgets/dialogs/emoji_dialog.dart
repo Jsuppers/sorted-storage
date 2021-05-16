@@ -11,7 +11,7 @@ import 'package:web/ui/widgets/edit/emoji_picker.dart';
 /// emoji dialog
 class EmojiDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const EmojiDialog({ Key? key, this.folder, this.parent}) : super(key: key);
+  const EmojiDialog({Key? key, this.folder, this.parent}) : super(key: key);
 
   // ignore: public_member_api_docs
   final FolderContent? folder;
@@ -30,9 +30,7 @@ class EmojiDialog extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
-              return EmojiPicker(
-                parent: parent,
-                  folder: folder);
+              return EmojiPicker(parent: parent, folder: folder);
             },
           ),
         ),

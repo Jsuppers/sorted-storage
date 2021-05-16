@@ -20,14 +20,14 @@ import 'package:web/ui/widgets/media_card.dart';
 /// image in the folder
 class FolderImage extends StatefulWidget {
   // ignore: public_member_api_docs
-  const FolderImage(
-      {Key? key,
-      required this.locked,
-      required this.folderMedia,
-      required this.imageKey,
-      required this.folder,
-        required this.parent,})
-      : super(key: key);
+  const FolderImage({
+    Key? key,
+    required this.locked,
+    required this.folderMedia,
+    required this.imageKey,
+    required this.folder,
+    required this.parent,
+  }) : super(key: key);
 
   // ignore: public_member_api_docs
   final bool locked;
@@ -60,12 +60,10 @@ class _FolderImageState extends State<FolderImage> {
 
 class RetryMediaWidget extends StatefulWidget {
   RetryMediaWidget(
-      {
-        required this.folder,
-        required this.parent,
+      {required this.folder,
+      required this.parent,
       required this.locked,
-      required this.media
-      })
+      required this.media})
       : super();
 
   @override
@@ -151,9 +149,9 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                     ),
                     onPressed: () {
                       UpdateDeleteImageEvent update = UpdateDeleteImageEvent(
-                          imageID: imageKey,
-                          folder: widget.folder,
-                          parent: widget.parent,
+                        imageID: imageKey,
+                        folder: widget.folder,
+                        parent: widget.parent,
                       );
                       BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                           EditorType.deleteImage,
@@ -202,8 +200,11 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                                 StaticLoadingLogo(),
                             errorWidget: (BuildContext context, String url,
                                     dynamic error) =>
-                                _backgroundImage(widget.media.id, widget.media,
-                                    const AssetImage('assets/images/error.png')),
+                                _backgroundImage(
+                                    widget.media.id,
+                                    widget.media,
+                                    const AssetImage(
+                                        'assets/images/error.png')),
                             imageBuilder: (BuildContext context,
                                     ImageProvider<Object> image) =>
                                 _backgroundImage(

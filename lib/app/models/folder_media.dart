@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Project imports:
 import 'package:web/app/models/folder_metadata.dart';
 
 /// information for media content, this could be a image, video or a document

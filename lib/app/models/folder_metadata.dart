@@ -1,4 +1,1 @@
-enum MetadataKeys {
-  timestamp,
-  description
-}
+enum MetadataKeys { timestamp, description }

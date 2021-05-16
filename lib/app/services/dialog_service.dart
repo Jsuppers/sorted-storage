@@ -33,7 +33,8 @@ class DialogService {
 
   static void imageUploadDialog(BuildContext context,
       {required FolderContent folder, required FolderContent parent}) {
-    final CloudStoriesBloc cloudBloc = BlocProvider.of<CloudStoriesBloc>(context);
+    final CloudStoriesBloc cloudBloc =
+        BlocProvider.of<CloudStoriesBloc>(context);
     FilePicker.platform
         .pickFiles(
             type: FileType.media, allowMultiple: true, withReadStream: true)
@@ -48,8 +49,8 @@ class DialogService {
                       return ImageUploadDialog(
                           file: file, folder: folder, parent: parent);
                     },
-                  ).then((value) =>
-                  cloudBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
+                  ).then((value) => cloudBloc.add(CloudStoriesEvent(
+                      CloudStoriesType.refresh,
                       folderID: parent.id)))
                 }
             });
@@ -58,7 +59,8 @@ class DialogService {
   /// dialog to share a folder
   static void editDialog(BuildContext context,
       {FolderContent? folder, FolderContent? parent}) {
-    final CloudStoriesBloc cloudBloc = BlocProvider.of<CloudStoriesBloc>(context);
+    final CloudStoriesBloc cloudBloc =
+        BlocProvider.of<CloudStoriesBloc>(context);
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -68,10 +70,9 @@ class DialogService {
       },
     ).then((_) {
       // update the ui with any changes made in the edit dialog
-      cloudBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
-          folderID: parent!.id));
+      cloudBloc.add(
+          CloudStoriesEvent(CloudStoriesType.refresh, folderID: parent!.id));
     });
-
 
 //    // update the ui with any changes made in the edit dialog
 //    cloudBloc
@@ -92,7 +93,8 @@ class DialogService {
   }
 
   /// dialog to allow the user to select a emoji
-  static void emojiDialog(BuildContext context, { FolderContent? folder,  FolderContent? parent }) {
+  static void emojiDialog(BuildContext context,
+      {FolderContent? folder, FolderContent? parent}) {
     showDialog(
       context: context,
       barrierDismissible: true,

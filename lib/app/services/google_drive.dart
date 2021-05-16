@@ -2,13 +2,15 @@
 import 'dart:async';
 import 'dart:convert';
 
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:emojis/emojis.dart';
-import 'package:flutter/foundation.dart';
 import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/models/folder_content.dart';
 
 // Project imports:
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
@@ -53,7 +55,8 @@ class GoogleDrive {
 
   double? _getOrder(UpdatePosition updatePosition, int index) {
     if (updatePosition.media != null) {
-      return updatePosition.items[index]?.folderMedia?.getTimestamp() as double?;
+      return updatePosition.items[index]?.folderMedia?.getTimestamp()
+          as double?;
     }
     return updatePosition.items[index]?.getTimestamp() as double?;
   }
@@ -89,7 +92,8 @@ class GoogleDrive {
 //  }
 
   /// update a media file index
-  Future<File> updateDescription(String fileId, Map<String, dynamic> metadata) async {
+  Future<File> updateDescription(
+      String fileId, Map<String, dynamic> metadata) async {
     final File mediaFile = File();
     mediaFile.description = jsonEncode(metadata);
 
@@ -101,9 +105,8 @@ class GoogleDrive {
       return null;
     }
     final File fileMetadata = File();
-    final FolderContent fileProperties = FolderContent(
-        title: 'New Folder',
-        emoji: Emojis.smilingFace);
+    final FolderContent fileProperties =
+        FolderContent(title: 'New Folder', emoji: Emojis.smilingFace);
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
     fileMetadata.parents = <String>[parentID];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';

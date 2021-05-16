@@ -57,9 +57,7 @@ class LayoutWrapper extends StatelessWidget {
         return StaticLoadingLogo();
       }
       return Content(
-          widget: widget,
-          includeNavigation: true,
-          routingData: routingData);
+          widget: widget, includeNavigation: true, routingData: routingData);
     });
   }
 }
@@ -219,55 +217,3 @@ class _CustomActionButtonState extends State<CustomActionButton>
     );
   }
 }
-
-//
-//class ActionButton extends StatefulWidget {
-//  @override
-//  _ActionButtonState createState() => _ActionButtonState();
-//}
-//
-//class _ActionButtonState extends State<ActionButton> {
-//  bool saving = false;
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return BlocListener<EditorBloc, EditorState>(
-//      listener: (BuildContext context, EditorState state) {
-//        if (state.type == EditorType.syncingState) {
-//          setState(() {
-//            saving = state.data == SavingState.saving;
-//          });
-//        }
-//      },
-//      child: FloatingActionButton(
-//        onPressed: () {
-//          if (saving == true) {
-//            return;
-//          }
-//          setState(() {
-//            saving = true;
-//          });
-//          final String mediaFile =
-//              BlocProvider
-//                  .of<CloudStoriesBloc>(context)
-//                  .currentMediaFileId;
-//          BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-//              EditorType.createStory,
-//              parentID: mediaFile,
-//              mainEvent: true));
-//        },
-//        backgroundColor: myThemeData.primaryColorDark,
-//        child: saving
-//            ? const IconSpinner(
-//          icon: Icons.sync,
-//          color: Colors.white,
-//          isSpinning: true, // change it to true or false
-//        )
-//            : const Icon(
-//          Icons.add,
-//          color: Colors.white,
-//        ),
-//      ),
-//    );
-//  }
-//}

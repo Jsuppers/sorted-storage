@@ -11,8 +11,7 @@ import 'package:web/app/services/google_drive.dart';
 /// This folder to be shared or un-shared
 class SharingBloc extends Bloc<ShareEvent, SharingState?> {
   /// constructor
-  SharingBloc(String folderID, GoogleDrive storage)
-      : super(null) {
+  SharingBloc(String folderID, GoogleDrive storage) : super(null) {
     _folderID = folderID;
     _storage = storage;
     add(InitialEvent());

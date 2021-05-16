@@ -1,6 +1,5 @@
 // Project imports:
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/models/timeline_data.dart';
 
 /// State returned
 class CloudStoriesState {
@@ -11,12 +10,6 @@ class CloudStoriesState {
   final CloudStoriesType type;
 
   final dynamic data;
-
-//  /// cloud copy of the timeline
-//  final Map<String, StoryTimelineData> cloudStories;
-//
-//  /// data returned from the state
-//  final StoryTimelineData? storyTimelineData;
 
   /// the folder ID for the related story
   final String? folderID;

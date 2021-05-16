@@ -1,11 +1,8 @@
 // Dart imports:
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
 
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
@@ -16,9 +13,9 @@ import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/google_drive.dart';
@@ -51,9 +48,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       case EditorType.createFolder:
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        final FolderContent? folder =
-            await _createEventFolder(parent: event.data as FolderContent);
+        FolderContent parent = event.data as FolderContent;
+        final FolderContent? folder = await _createEventFolder(parent: parent);
         if (folder != null) {
+          parent.subFolders!.add(folder);
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
           yield EditorState(EditorType.createFolder, data: folder);
@@ -66,9 +64,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         final UpdateImagesEvent imagesEvent = event.data as UpdateImagesEvent;
         imageIndexesToIgnore = <int>[];
         _uploadImages(
-            imagesEvent.images, imagesEvent.folder, imagesEvent.parent).then((value) => {
-        add(EditorEvent(EditorType.syncingState, data: SavingState.success, refreshUI: true))
-        });
+                imagesEvent.images, imagesEvent.folder, imagesEvent.parent)
+            .then((value) => {
+                  add(EditorEvent(EditorType.syncingState,
+                      data: SavingState.success, refreshUI: true))
+                });
         break;
       case EditorType.ignoreImage:
         imageIndexesToIgnore = <int>[];
@@ -81,20 +81,21 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             data: event.data,
             error: event.error);
         break;
-      case EditorType.deleteStory:
-        final String? error = await _deleteEvent(event.data as FolderContent);
+      case EditorType.deleteFolder:
+        final String? error =
+            await _deleteEvent(event.data as UpdateFolderEvent);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopDialogEvent());
         } else {
-          yield EditorState(EditorType.deleteStory, error: error);
+          yield EditorState(EditorType.deleteFolder, error: error);
         }
         break;
       case EditorType.deleteImage:
         UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        final FolderContent eventData = TimelineService.getFolderWithID(
-            update.folder.id!, update.parent)!;
+        final FolderContent eventData =
+            TimelineService.getFolderWithID(update.folder.id!, update.parent)!;
         final String? error = await _deleteFile(update.imageID);
         if (error == null) {
           eventData.images!.remove(update.imageID);
@@ -135,7 +136,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         try {
           await _storage.updateDescription(folderID, data.folder.metadata!);
           final FolderContent? eventData =
-          TimelineService.getFolderWithID(folderID, data.parent);
+              TimelineService.getFolderWithID(folderID, data.parent);
           if (eventData != null) {
             eventData.setTimestamp(data.folder.getTimestamp());
           }
@@ -151,11 +152,14 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             data: SavingState.saving, refreshUI: event.refreshUI));
         final UpdateFolderEvent data = event.data as UpdateFolderEvent;
 
-        _storage.updateDescription(data.folder.id!, data.folder.metadata!).then((value) {
-        TimelineService.getFolderWithID(data.folder.id!, data.parent)!.metadata = data.folder.metadata!;
-              add(EditorEvent(EditorType.syncingState,
-                  data: SavingState.success, refreshUI: event.refreshUI));
-            });
+        _storage
+            .updateDescription(data.folder.id!, data.folder.metadata!)
+            .then((value) {
+          TimelineService.getFolderWithID(data.folder.id!, data.parent)!
+              .metadata = data.folder.metadata!;
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.success, refreshUI: event.refreshUI));
+        });
         break;
       case EditorType.updateImagePosition:
         UpdatePosition uip = event.data as UpdatePosition;
@@ -187,17 +191,12 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     }
   }
 
-  Future<String?> _deleteEvent(FolderContent folderContent) async {
-    _storage.delete(folderContent.id!).then((dynamic value) {
-      final String? parentID =
-          TimelineService.getParentID(folderContent.id!, folderContent);
-
-      if (parentID != null) {
-        final FolderContent? parentFolders =
-            TimelineService.getFolderWithID(parentID, folderContent);
-        parentFolders!.subFolders!.remove(folderContent);
-      }
-      _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.refresh));
+  Future<String?> _deleteEvent(UpdateFolderEvent update) async {
+    _storage.delete(update.folder.id!).then((dynamic value) {
+      update.parent.subFolders!
+          .removeWhere((folder) => folder.id == update.folder.id);
+      _cloudStoriesBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
+          folderID: update.parent.id));
       return null;
     }, onError: (_) {
       return 'Error when deleting story';
@@ -213,12 +212,13 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     }
   }
 
-  Future<FolderContent?> _createEventFolder({required FolderContent parent}) async {
+  Future<FolderContent?> _createEventFolder(
+      {required FolderContent parent}) async {
     return _storage.createStory(parent.id);
   }
 
-  Future<void> _uploadImages(Map<String, FolderMedia> images, FolderContent folder,
-      FolderContent parent) async {
+  Future<void> _uploadImages(Map<String, FolderMedia> images,
+      FolderContent folder, FolderContent parent) async {
     final List<MapEntry<String, FolderMedia>> entries = images.entries.toList();
     final int length = entries.length;
     bool errors = false;
@@ -246,7 +246,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     int index,
     String name,
     FolderMedia storyMedia,
-      FolderContent folder,
+    FolderContent folder,
     FolderContent parent,
   ) async {
     final StreamController<List<int>> streamController =

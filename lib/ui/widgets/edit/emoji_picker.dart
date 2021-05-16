@@ -16,10 +16,7 @@ import 'package:web/app/models/folder_content.dart';
 /// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EmojiPicker(
-      {Key? key,
-      required this.folder,
-      required this.parent})
+  const EmojiPicker({Key? key, required this.folder, required this.parent})
       : super(key: key);
 
   final FolderContent? folder;
@@ -120,9 +117,8 @@ class EmojiPickerState extends State<EmojiPicker> {
           onPressed: () {
             if (widget.folder != null) {
               widget.folder!.emoji = element;
-            UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                folder: widget.folder!,
-                parent: widget.parent!);
+              UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
+                  folder: widget.folder!, parent: widget.parent!);
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateName,
                   refreshUI: true,

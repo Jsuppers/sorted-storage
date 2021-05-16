@@ -1,11 +1,10 @@
 class UpdatePosition {
   UpdatePosition(
-      {
-        required this.folderID,
-        required this.currentIndex,
+      {required this.folderID,
+      required this.currentIndex,
       required this.targetIndex,
       required this.items,
-        required this.metadata,
+      required this.metadata,
       this.media});
 
   int currentIndex;

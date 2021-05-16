@@ -1,5 +1,7 @@
-// Project imports:
+// Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Project imports:
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 

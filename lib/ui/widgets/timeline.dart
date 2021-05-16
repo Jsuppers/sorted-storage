@@ -17,11 +17,12 @@ class _TimeLineEventEntry {
 // ignore: public_member_api_docs
 class TimelineLayout extends StatefulWidget {
   // ignore: public_member_api_docs
-  const TimelineLayout({Key? key,
+  const TimelineLayout({
+    Key? key,
     required this.width,
     required this.height,
     required this.folder,
-  }): super(key: key);
+  }) : super(key: key);
 
   // ignore: public_member_api_docs
   final double width;
@@ -36,23 +37,22 @@ class TimelineLayout extends StatefulWidget {
 }
 
 class _TimelineLayoutState extends State<TimelineLayout> {
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
-    if(widget.folder.subFolders != null) {
+    if (widget.folder.subFolders != null) {
       FolderContent.sortFolders(widget.folder.subFolders);
       widget.folder.subFolders!.forEach((FolderContent subFolder) {
         final Widget display = TimelineCard(
-            width: widget.width,
-            height: widget.height,
-            folder: subFolder,
-            parent: widget.folder,
+          width: widget.width,
+          height: widget.height,
+          folder: subFolder,
+          parent: widget.folder,
         );
         final _TimeLineEventEntry _timeLineEventEntry =
-        _TimeLineEventEntry(subFolder.getTimestamp(), display);
+            _TimeLineEventEntry(subFolder.getTimestamp(), display);
         timeLineEvents.add(_timeLineEventEntry);
       });
     }

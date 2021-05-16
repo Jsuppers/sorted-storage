@@ -36,31 +36,26 @@ class EditorEvent {
   final String? error;
 }
 
-
 class UpdateFolderEvent {
   UpdateFolderEvent({required this.folder, required this.parent});
   FolderContent folder;
   FolderContent parent;
 }
 
-class UpdateImagesEvent extends UpdateFolderEvent{
-  UpdateImagesEvent({
-    required this.images,
-    required FolderContent folder,
-    required FolderContent parent}):
-        super(folder: folder, parent: parent);
+class UpdateImagesEvent extends UpdateFolderEvent {
+  UpdateImagesEvent(
+      {required this.images,
+      required FolderContent folder,
+      required FolderContent parent})
+      : super(folder: folder, parent: parent);
   Map<String, FolderMedia> images;
 }
 
-class UpdateDeleteImageEvent extends UpdateFolderEvent{
-  UpdateDeleteImageEvent({
-    required this.imageID,
-    required FolderContent folder,
-    required FolderContent parent}):
-        super(folder: folder, parent: parent);
+class UpdateDeleteImageEvent extends UpdateFolderEvent {
+  UpdateDeleteImageEvent(
+      {required this.imageID,
+      required FolderContent folder,
+      required FolderContent parent})
+      : super(folder: folder, parent: parent);
   String imageID;
 }
-
-
-
-
