@@ -174,12 +174,12 @@ class _EditStoryContentState extends State<EditStoryContent> {
         backgroundColor: Colors.white,
         pinned: true,
         elevation: 0.0,
-        title: widget.folder?.owner != null && widget.folder!.owner == true ? EditHeader(
+        title: EditHeader(
           savingState: savingState,
           width: widget.width,
           folder: widget.folder,
           parent: widget.parent,
-        ) : Container(),
+        ),
       ),
       SliverToBoxAdapter(
         child: MultiBlocListener(
