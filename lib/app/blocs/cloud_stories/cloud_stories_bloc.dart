@@ -53,7 +53,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
           folder = cache[event.folderID];
         }
         FolderContent value = await _createEventFromFolder(event.folderID!,
-            folder: folder);
+            folder: folder, owner: folder?.owner != null && folder!.owner == true);
         cache.putIfAbsent(value.id!, () => value);
         yield CloudStoriesState(CloudStoriesType.retrieveFolder,
             data: value, folderID: event.folderID);
@@ -77,6 +77,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
 
   Future<FolderContent> _createEventFromFolder(String folderID,
       {String? folderName,
+       required bool owner,
       Map<String, dynamic>? metadata,
       FolderContent? folder}) async {
     if (folder != null && folder.loaded == true) {
@@ -101,11 +102,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
           metadata = {};
         }
       }
-      bool owner = false;
+      bool subFolderOwner = false;
       if (file.owners != null) {
         for (final User user in file.owners!) {
           if (user.me == true) {
-            owner = true;
+            subFolderOwner = true;
             break;
           }
         }
@@ -128,7 +129,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         images.putIfAbsent(file.id!, () => media);
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final FolderContent subFolder = FolderContent.createFromFolderName(
-            folderName: file.name!, owner: owner, id: file.id!, metadata: metadata);
+            folderName: file.name!, owner: subFolderOwner, id: file.id!, metadata: metadata);
         if (subFolder.getTimestamp() == null) {
           subFolder.setTimestamp(
               (DateTime.now().millisecondsSinceEpoch + index).toDouble());
@@ -152,7 +153,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     }
 
     currentFolder ??= FolderContent.createFromFolderName(
-      owner: true,
+      owner: owner,
         folderName: folderName, id: folderID, metadata: metadata);
 
     if (currentFolder.getTimestamp() == null) {
@@ -196,7 +197,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         metadata = {};
       }
     }
-    return _createEventFromFolder(rootFile.id!,
+    return _createEventFromFolder(rootFile.id!, owner: true,
         folderName: rootFile.name!, metadata: metadata);
   }
 }

@@ -19,16 +19,16 @@ import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline.dart';
 
 /// Page which contains all the stories
-class MediaPage extends StatefulWidget {
-  MediaPage(this.folderID);
+class FolderPage extends StatefulWidget {
+  FolderPage(this.folderID);
 
   String? folderID;
 
   @override
-  _MediaPageState createState() => _MediaPageState();
+  _FolderPageState createState() => _FolderPageState();
 }
 
-class _MediaPageState extends State<MediaPage> {
+class _FolderPageState extends State<FolderPage> {
   FolderContent? folder;
   bool error = false;
 

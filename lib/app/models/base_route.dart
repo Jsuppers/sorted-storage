@@ -7,7 +7,8 @@ enum BaseRoute {
   home,
   folder,
   profile,
-  folders
+  folders,
+  show
 }
 
 extension ParseToString on BaseRoute {

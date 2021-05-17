@@ -8,7 +8,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/ui/pages/dynamic/folders.dart';
-import 'package:web/ui/pages/dynamic/media.dart';
+import 'package:web/ui/pages/dynamic/folder.dart';
 import 'package:web/ui/pages/dynamic/profile.dart';
 import 'package:web/ui/pages/static/error.dart';
 import 'package:web/ui/pages/static/home.dart';
@@ -52,7 +52,7 @@ class RouteConfiguration {
           if (baseRoute.isEmpty || baseRoute.length == 1) {
             return BaseRoute.home;
           }
-          return BaseRoute.folder;
+          return BaseRoute.show;
         });
 
     switch (currentRoute) {
@@ -69,9 +69,11 @@ class RouteConfiguration {
       case BaseRoute.profile:
         return PageContent(page: ProfilePage(), requiresAuthentication: true);
       case BaseRoute.folders:
-        return PageContent(page: FolderPage(destination), requiresAuthentication: true);
+        return PageContent(page: FoldersPage(destination), requiresAuthentication: true);
       case BaseRoute.folder:
-        return PageContent(page: MediaPage(baseRoute.replaceFirst('/', '')), requiresAuthentication: true);
+        return PageContent(page: FolderPage(destination), requiresAuthentication: true);
+      case BaseRoute.show:
+        return PageContent(page: FolderPage(baseRoute.replaceFirst('/', '')));
     }
   }
 

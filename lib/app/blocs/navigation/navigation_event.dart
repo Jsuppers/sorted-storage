@@ -45,7 +45,7 @@ class NavigateToMediaEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToMediaEvent({required String folderId})
       : super(
-            route: '/$folderId',
+            route: '${BaseRoute.folder.toRouteString()}/$folderId',
             requiresAuthentication: true);
 }
 

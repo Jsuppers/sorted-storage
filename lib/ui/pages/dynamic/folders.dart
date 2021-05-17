@@ -23,17 +23,17 @@ import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 
-class FolderPage extends StatefulWidget {
-  FolderPage(this.rootID, {this.editing});
+class FoldersPage extends StatefulWidget {
+  FoldersPage(this.rootID, {this.editing});
 
   String rootID;
   bool? editing;
 
   @override
-  _FolderPageState createState() => _FolderPageState();
+  _FoldersPageState createState() => _FoldersPageState();
 }
 
-class _FolderPageState extends State<FolderPage> {
+class _FoldersPageState extends State<FoldersPage> {
   @override
   void initState() {
     super.initState();
