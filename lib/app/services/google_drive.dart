@@ -100,13 +100,13 @@ class GoogleDrive {
     return driveApi!.files.update(mediaFile, fileId);
   }
 
-  Future<FolderContent?> createStory(String? parentID) async {
+  Future<FolderContent?> createFolder(String? parentID) async {
     if (parentID == null) {
       return null;
     }
     final File fileMetadata = File();
     final FolderContent fileProperties =
-        FolderContent(title: 'New Folder', emoji: Emojis.smilingFace);
+        FolderContent(title: 'New Folder', emoji: Emojis.smilingFace, owner: true);
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
     fileMetadata.parents = <String>[parentID];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';

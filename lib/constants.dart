@@ -3,7 +3,7 @@ class Constants {
   static const String originalValueKey = 'originalRoute';
 
   /// url of sorted storage website
-  static const String websiteURL = 'https://sortedstorage.com/#';
+  static const String websiteURL = 'https://sortedstorage.com';
 
   /// the root folder for sorted storage
   static const String rootFolder = 'sorted-storage';

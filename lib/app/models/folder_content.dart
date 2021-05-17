@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/foundation.dart';
+import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
 import 'package:web/app/models/folder_media.dart';
@@ -36,6 +37,7 @@ class FolderContent {
       this.images,
       this.permissionID,
       this.metadata,
+      required this.owner,
       this.subFolders}) {
     subFolders ??= [];
     images ??= <String, FolderMedia>{};
@@ -45,6 +47,7 @@ class FolderContent {
   static FolderContent createFromFolderName(
       {required String? folderName,
       required Map<String, dynamic>? metadata,
+        required bool owner,
       required String id}) {
     folderName ??= '';
     final FolderNameData fileName = FolderNameData.fromFileName(folderName);
@@ -53,6 +56,7 @@ class FolderContent {
       title: fileName.title,
       id: id,
       metadata: metadata,
+      owner: owner,
     );
   }
 
@@ -78,6 +82,7 @@ class FolderContent {
           return MapEntry<String, FolderMedia>(key, FolderMedia.clone(value));
         })),
         id = event.id,
+        owner = event.owner,
         subFolders = List<FolderContent>.from(event.subFolders!);
 
   double? getTimestamp() {
@@ -109,6 +114,8 @@ class FolderContent {
 
   /// the ID of the permission for this folder
   String? permissionID;
+
+  bool owner;
 
   Map<String, dynamic>? metadata;
 

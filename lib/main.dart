@@ -11,6 +11,8 @@ import 'package:googleapis/drive/v3.dart';
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
+import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
@@ -88,6 +90,7 @@ class _MyAppState extends State<MyApp> {
         listeners: <BlocListener<dynamic, dynamic>>[
           BlocListener<AuthenticationBloc, usr.User?>(
             listener: (BuildContext context, usr.User? user) {
+              _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.newUser));
               _driveBloc.add(InitialDriveEvent(user: user));
             },
           ),

@@ -19,7 +19,6 @@ import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/google_drive.dart';
-import 'package:web/app/services/timeline_service.dart';
 import 'package:web/constants.dart';
 
 /// CloudStoriesBloc handles all the cloud changes of the timeline.
@@ -31,6 +30,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
 
   late NavigationBloc navigationBloc;
   FolderContent? rootFolder;
+  Map<String, FolderContent?> cache = {};
   GoogleDrive storage;
 
   @override
@@ -48,23 +48,15 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         yield CloudStoriesState(CloudStoriesType.rootFolder, data: rootFolder);
         break;
       case CloudStoriesType.retrieveFolder:
-        if (rootFolder != null && event.folderID == rootFolder!.id) {
-          FolderContent.sortFolders(rootFolder!.subFolders);
-          yield CloudStoriesState(CloudStoriesType.retrieveFolder,
-              data: rootFolder, folderID: event.folderID);
-        } else if (rootFolder != null) {
-          final FolderContent? folder =
-              TimelineService.getFolderWithID(event.folderID!, rootFolder);
-          FolderContent value =
-              await _createEventFromFolder(folder!.id!, folder: folder);
-          yield CloudStoriesState(CloudStoriesType.retrieveFolder,
-              data: value, folderID: event.folderID);
-        } else {
-          FolderContent value = await _createEventFromFolder(event.folderID!,
-              folder: event.data as FolderContent?);
-          yield CloudStoriesState(CloudStoriesType.retrieveFolder,
-              data: value, folderID: event.folderID);
+        FolderContent? folder = event.data as FolderContent?;
+        if (folder == null && cache.containsKey(event.folderID)) {
+          folder = cache[event.folderID];
         }
+        FolderContent value = await _createEventFromFolder(event.folderID!,
+            folder: folder);
+        cache.putIfAbsent(value.id!, () => value);
+        yield CloudStoriesState(CloudStoriesType.retrieveFolder,
+            data: value, folderID: event.folderID);
         break;
       case CloudStoriesType.refresh:
         yield CloudStoriesState(CloudStoriesType.refresh,
@@ -72,6 +64,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         break;
       case CloudStoriesType.newUser:
         rootFolder = null;
+        cache.clear();
         // TODO logout
         break;
     }
@@ -92,7 +85,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     final FileList filesInFolder = await storage.listFiles(
         "'$folderID' in parents and trashed=false",
         filter:
-            'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
+            'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description, owners)');
 
     FolderContent? currentFolder = folder;
     final Map<String, FolderMedia> images = <String, FolderMedia>{};
@@ -106,6 +99,15 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
               jsonDecode(file.description ?? '') as Map<String, dynamic>? ?? {};
         } catch (e) {
           metadata = {};
+        }
+      }
+      bool owner = false;
+      if (file.owners != null) {
+        for (final User user in file.owners!) {
+          if (user.me == true) {
+            owner = true;
+            break;
+          }
         }
       }
 
@@ -126,7 +128,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         images.putIfAbsent(file.id!, () => media);
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final FolderContent subFolder = FolderContent.createFromFolderName(
-            folderName: file.name!, id: file.id!, metadata: metadata);
+            folderName: file.name!, owner: owner, id: file.id!, metadata: metadata);
         if (subFolder.getTimestamp() == null) {
           subFolder.setTimestamp(
               (DateTime.now().millisecondsSinceEpoch + index).toDouble());
@@ -150,6 +152,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     }
 
     currentFolder ??= FolderContent.createFromFolderName(
+      owner: true,
         folderName: folderName, id: folderID, metadata: metadata);
 
     if (currentFolder.getTimestamp() == null) {

@@ -214,7 +214,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   Future<FolderContent?> _createEventFolder(
       {required FolderContent parent}) async {
-    return _storage.createStory(parent.id);
+    return _storage.createFolder(parent.id);
   }
 
   Future<void> _uploadImages(Map<String, FolderMedia> images,
