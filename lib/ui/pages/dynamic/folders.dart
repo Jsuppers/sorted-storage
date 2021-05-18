@@ -39,7 +39,7 @@ class _FoldersPageState extends State<FoldersPage> {
     super.initState();
     if (widget.rootID.isEmpty) {
       BlocProvider.of<CloudStoriesBloc>(context)
-          .add(const CloudStoriesEvent(CloudStoriesType.rootFolder));
+          .add(const CloudStoriesEvent(CloudStoriesType.getRootFolder));
     } else {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
           CloudStoriesType.retrieveFolder,
@@ -129,7 +129,7 @@ class _FolderViewState extends State<FolderView> {
       if (state == null) {
         return;
       }
-      if (state.type == CloudStoriesType.rootFolder) {
+      if (state.type == CloudStoriesType.getRootFolder) {
         final FolderContent folderContent = state.data as FolderContent;
         folderID = folderContent.id;
         BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(

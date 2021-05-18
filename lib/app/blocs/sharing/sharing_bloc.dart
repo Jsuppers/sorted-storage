@@ -23,12 +23,16 @@ class SharingBloc extends Bloc<ShareEvent, SharingState?> {
 
   @override
   Stream<SharingState> mapEventToState(ShareEvent event) async* {
-    if (event is InitialEvent) {
-      yield await _getPermissionsAll();
-    } else if (event is StartSharingEvent) {
-      yield await _shareFolder();
-    } else if (event is StopSharingEvent) {
-      yield await _stopSharingFolder();
+    switch (event.runtimeType) {
+      case InitialEvent:
+        yield await _getPermissionsAll();
+        break;
+      case StartSharingEvent:
+        yield await _shareFolder();
+        break;
+      case StopSharingEvent:
+        yield await _stopSharingFolder();
+        break;
     }
   }
 

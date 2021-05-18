@@ -23,6 +23,9 @@ class GoogleDrive {
   /// drive api
   DriveApi? driveApi;
 
+  static String folderFilter =
+      'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)';
+
   Future<double?> updatePosition(UpdatePosition updatePosition) async {
     double? order = _getOrder(updatePosition, updatePosition.currentIndex);
 
@@ -83,14 +86,6 @@ class GoogleDrive {
     return uploadMedia.id;
   }
 
-//  /// update a media file index
-//  Future<File> _updatePosition(String imageID, dynamic position) async {
-//    final File mediaFile = File();
-//    mediaFile.description = position.toString();
-//
-//    return driveApi!.files.update(mediaFile, imageID);
-//  }
-
   /// update a media file index
   Future<File> updateDescription(
       String fileId, Map<String, dynamic> metadata) async {
@@ -105,8 +100,8 @@ class GoogleDrive {
       return null;
     }
     final File fileMetadata = File();
-    final FolderContent fileProperties =
-        FolderContent(title: 'New Folder', emoji: Emojis.smilingFace, owner: true);
+    final FolderContent fileProperties = FolderContent(
+        title: 'New Folder', emoji: Emojis.smilingFace, owner: true);
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
     fileMetadata.parents = <String>[parentID];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';

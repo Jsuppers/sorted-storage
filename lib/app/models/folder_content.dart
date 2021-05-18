@@ -1,6 +1,5 @@
 // Flutter imports:
 import 'package:flutter/foundation.dart';
-import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
 import 'package:web/app/models/folder_media.dart';
@@ -30,15 +29,16 @@ class FolderNameData {
 /// content for a story
 class FolderContent {
   // ignore: public_member_api_docs
-  FolderContent(
-      {this.id,
-      required this.title,
-      required this.emoji,
-      this.images,
-      this.permissionID,
-      this.metadata,
-      required this.owner,
-      this.subFolders}) {
+  FolderContent({
+    this.id,
+    required this.owner,
+    required this.title,
+    required this.emoji,
+    this.images,
+    this.permissionID,
+    this.metadata,
+    this.subFolders,
+  }) {
     subFolders ??= [];
     images ??= <String, FolderMedia>{};
     metadata ??= {};
@@ -47,7 +47,7 @@ class FolderContent {
   static FolderContent createFromFolderName(
       {required String? folderName,
       required Map<String, dynamic>? metadata,
-        required bool owner,
+      required bool owner,
       required String id}) {
     folderName ??= '';
     final FolderNameData fileName = FolderNameData.fromFileName(folderName);
@@ -83,6 +83,7 @@ class FolderContent {
         })),
         id = event.id,
         owner = event.owner,
+        isRootFolder = event.isRootFolder,
         subFolders = List<FolderContent>.from(event.subFolders!);
 
   double? getTimestamp() {
@@ -111,6 +112,8 @@ class FolderContent {
   String title;
 
   bool loaded = false;
+
+  bool isRootFolder = false;
 
   /// the ID of the permission for this folder
   String? permissionID;

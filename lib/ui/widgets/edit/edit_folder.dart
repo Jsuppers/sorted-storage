@@ -48,14 +48,11 @@ class _EditFolderState extends State<EditFolder> {
   FolderContent? folder;
   FolderContent? cloudCopyFolder;
   String? folderID;
-  bool isRootFolder = false;
   bool error = false;
 
   @override
   void initState() {
     super.initState();
-    isRootFolder =
-        widget.parent == BlocProvider.of<CloudStoriesBloc>(context).rootFolder;
     if (widget.folder == null) {
       BlocProvider.of<EditorBloc>(context)
           .add(EditorEvent(EditorType.createFolder, data: widget.parent));
@@ -118,7 +115,6 @@ class _EditFolderState extends State<EditFolder> {
               folder: folder,
               cloudCopy: cloudCopyFolder,
               parent: widget.parent,
-              isRootFolder: isRootFolder,
             ));
       }),
     );
@@ -128,15 +124,14 @@ class _EditFolderState extends State<EditFolder> {
 // ignore: public_member_api_docs
 class EditStoryContent extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditStoryContent(
-      {Key? key,
-      required this.width,
-      required this.height,
-      required this.folder,
-        required this.cloudCopy,
-      required this.parent,
-      required this.isRootFolder})
-      : super(key: key);
+  const EditStoryContent({
+    Key? key,
+    required this.width,
+    required this.height,
+    required this.folder,
+    required this.cloudCopy,
+    required this.parent,
+  }) : super(key: key);
 
   // ignore: public_member_api_docs
   final double width;
@@ -150,9 +145,6 @@ class EditStoryContent extends StatefulWidget {
   final FolderContent? cloudCopy;
   // ignore: public_member_api_docs
   final FolderContent? parent;
-
-  // ignore: public_member_api_docs
-  final bool isRootFolder;
 
   @override
   _EditStoryContentState createState() => _EditStoryContentState();
@@ -219,10 +211,9 @@ class _EditStoryContentState extends State<EditStoryContent> {
       height: widget.height,
       folder: folder,
       parent: parent,
-      isRootFolder: widget.isRootFolder,
     ));
 
-    if (!widget.isRootFolder) {
+    if (!widget.parent!.isRootFolder) {
       output.add(Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: SizedBox(
@@ -235,8 +226,9 @@ class _EditStoryContentState extends State<EditStoryContent> {
                 if (savingState == SavingState.saving) {
                   return;
                 }
-                BlocProvider.of<EditorBloc>(context).add(
-                    EditorEvent(EditorType.createFolder, data: widget.cloudCopy));
+                BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                    EditorType.createFolder,
+                    data: widget.cloudCopy));
               },
               width: Constants.minScreenWidth,
               backgroundColor: Colors.white,
@@ -246,7 +238,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
       ));
     }
 
-    if (widget.isRootFolder ||
+    if (widget.parent!.isRootFolder ||
         folder.subFolders == null ||
         folder.subFolders!.isEmpty) {
       return output;
@@ -269,7 +261,6 @@ class EventCard extends StatefulWidget {
       required this.folder,
       required this.parent,
       required this.controls,
-      required this.isRootFolder,
       this.height = double.infinity,
       this.savingState})
       : super(key: key);
@@ -290,9 +281,6 @@ class EventCard extends StatefulWidget {
 
   /// the story this card is related to
   final FolderContent parent;
-
-  /// the story this card is related to
-  final bool isRootFolder;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -357,7 +345,7 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget timeStamp() {
     // root folder uses the timestamp to order it's content
-    if (widget.isRootFolder) {
+    if (widget.parent.isRootFolder) {
       return Container();
     }
     return Column(
@@ -399,7 +387,7 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   List<Widget> innerContent(List<FolderImage> cards) {
-    if (widget.isRootFolder) {
+    if (widget.parent.isRootFolder) {
       return <Widget>[];
     }
     return [

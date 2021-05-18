@@ -5,8 +5,12 @@ enum CloudStoriesType {
 
   /// retrieve a specific story from storage
   retrieveFolder,
+
+  /// update the folder's position
   updateFolderPosition,
-  rootFolder,
+
+  /// get the root folder for the user
+  getRootFolder,
 
   /// update ui of current state of the local copy
   refresh,

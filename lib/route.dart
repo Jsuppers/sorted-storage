@@ -7,8 +7,8 @@ import 'package:page_transition/page_transition.dart';
 // Project imports:
 import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
-import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/pages/dynamic/folder.dart';
+import 'package:web/ui/pages/dynamic/folders.dart';
 import 'package:web/ui/pages/dynamic/profile.dart';
 import 'package:web/ui/pages/static/error.dart';
 import 'package:web/ui/pages/static/home.dart';
@@ -26,14 +26,13 @@ class PageContent {
 
 /// class for various routing methods
 class RouteConfiguration {
-  static const String _uriRegex = '(/.*?)(/.*)';
-
   /// create a page depending on route
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final RoutingData routingData =
         RouteConfiguration.getRoutingData(settings.name);
     final String baseRoute = routingData.baseRoute;
-    final PageContent pageContent = _getPageContent(baseRoute, routingData.destination);
+    final PageContent pageContent =
+        _getPageContent(baseRoute, routingData.destination);
 
     return PageTransition<dynamic>(
       type: PageTransitionType.fade,
@@ -47,13 +46,12 @@ class RouteConfiguration {
 
   static PageContent _getPageContent(String baseRoute, String destination) {
     final BaseRoute currentRoute = BaseRoute.values.firstWhere(
-        (BaseRoute br) => br.toRouteString() == baseRoute,
-        orElse: () {
-          if (baseRoute.isEmpty || baseRoute.length == 1) {
-            return BaseRoute.home;
-          }
-          return BaseRoute.show;
-        });
+        (BaseRoute br) => br.toRouteString() == baseRoute, orElse: () {
+      if (baseRoute.isEmpty || baseRoute.length == 1) {
+        return BaseRoute.home;
+      }
+      return BaseRoute.show;
+    });
 
     switch (currentRoute) {
       case BaseRoute.login:
@@ -69,9 +67,11 @@ class RouteConfiguration {
       case BaseRoute.profile:
         return PageContent(page: ProfilePage(), requiresAuthentication: true);
       case BaseRoute.folders:
-        return PageContent(page: FoldersPage(destination), requiresAuthentication: true);
+        return PageContent(
+            page: FoldersPage(destination), requiresAuthentication: true);
       case BaseRoute.folder:
-        return PageContent(page: FolderPage(destination), requiresAuthentication: true);
+        return PageContent(
+            page: FolderPage(destination), requiresAuthentication: true);
       case BaseRoute.show:
         return PageContent(page: FolderPage(baseRoute.replaceFirst('/', '')));
     }
@@ -79,7 +79,7 @@ class RouteConfiguration {
 
   static RoutingData getRoutingData(String? path) {
     final Uri uriData = Uri.parse(path ?? '');
-    final RegExp regExp = RegExp(_uriRegex);
+    final RegExp regExp = RegExp('(/.*?)(/.*)');
     final Iterable<RegExpMatch> matches = regExp.allMatches(uriData.path);
     String baseRoute = uriData.path;
     String destination = '';

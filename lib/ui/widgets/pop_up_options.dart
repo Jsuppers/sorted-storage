@@ -1,6 +1,3 @@
-// Dart imports:
-import 'dart:developer';
-
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -26,15 +23,10 @@ class PopUpOptions extends StatelessWidget {
             case 'Edit':
               DialogService.editDialog(context, folder: folder, parent: parent);
               break;
-            case 'Share':
-              DialogService.shareDialog(context, folder!.id!);
-              break;
-            default:
-              break;
           }
         },
         itemBuilder: (BuildContext context) {
-          return {'Edit', 'Share', 'Cancel'}.map((String choice) {
+          return {'Edit', 'Cancel'}.map((String choice) {
             return PopupMenuItem<String>(
               value: choice,
               child: Text(choice),

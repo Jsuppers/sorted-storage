@@ -30,7 +30,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
 
   late NavigationBloc navigationBloc;
   FolderContent? rootFolder;
-  Map<String, FolderContent?> cache = {};
+  Map<String, FolderContent?> cache = <String, FolderContent?>{};
   GoogleDrive storage;
 
   @override
@@ -38,46 +38,78 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     if (event == null) {
       return;
     }
-    // ignore: missing_enum_constant_in_switch
     switch (event.type) {
       case CloudStoriesType.updateFolderPosition:
-        _updatePosition(event.data as UpdatePosition);
+        _updateFolderPosition(event.data as UpdatePosition);
         break;
-      case CloudStoriesType.rootFolder:
-        rootFolder = await _getCurrentUserRootFolder();
-        yield CloudStoriesState(CloudStoriesType.rootFolder, data: rootFolder);
+      case CloudStoriesType.getRootFolder:
+        yield await _getRootFolder();
         break;
       case CloudStoriesType.retrieveFolder:
-        FolderContent? folder = event.data as FolderContent?;
-        if (folder == null && cache.containsKey(event.folderID)) {
-          folder = cache[event.folderID];
-        }
-        FolderContent value = await _createEventFromFolder(event.folderID!,
-            folder: folder, owner: folder?.owner != null && folder!.owner == true);
-        cache.putIfAbsent(value.id!, () => value);
-        yield CloudStoriesState(CloudStoriesType.retrieveFolder,
-            data: value, folderID: event.folderID);
+        yield await _retrieveFolder(event);
         break;
       case CloudStoriesType.refresh:
-        yield CloudStoriesState(CloudStoriesType.refresh,
-            error: event.error, folderID: event.folderID);
+        yield _refresh(event);
         break;
       case CloudStoriesType.newUser:
-        rootFolder = null;
-        cache.clear();
-        // TODO logout
+        _newUser();
         break;
     }
   }
 
-  Future<void> _updatePosition(UpdatePosition updatePosition) async {
+  Future<void> _updateFolderPosition(UpdatePosition updatePosition) async {
     final double? newOrder = await storage.updatePosition(updatePosition);
     updatePosition.items[updatePosition.currentIndex].setTimestamp(newOrder);
   }
 
-  Future<FolderContent> _createEventFromFolder(String folderID,
+  Future<CloudStoriesState> _getRootFolder() async {
+    if (rootFolder == null) {
+      final String query =
+          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+      final FileList folderParent =
+          await storage.listFiles(query, filter: GoogleDrive.folderFilter);
+      File rootFile;
+      Map<String, dynamic> metadata = {};
+      if (folderParent.files!.isEmpty) {
+        metadata[describeEnum(MetadataKeys.timestamp)] =
+            DateTime.now().millisecondsSinceEpoch.toDouble();
+        final File fileMetadata = File();
+        fileMetadata.name = Constants.rootFolder;
+        fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+        fileMetadata.description = jsonEncode(metadata);
+        rootFile = await storage.createFile(fileMetadata);
+      } else {
+        rootFile = folderParent.files!.first;
+        try {
+          metadata =
+              jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ??
+                  {};
+        } catch (e) {
+          metadata = {};
+        }
+      }
+      rootFolder = await _updateFolderData(rootFile.id!,
+          owner: true, folderName: rootFile.name!, metadata: metadata);
+      rootFolder!.isRootFolder = true;
+    }
+    return CloudStoriesState(CloudStoriesType.getRootFolder, data: rootFolder);
+  }
+
+  Future<CloudStoriesState> _retrieveFolder(CloudStoriesEvent event) async {
+    FolderContent? folder = event.data as FolderContent?;
+    if (folder == null && cache.containsKey(event.folderID)) {
+      folder = cache[event.folderID];
+    }
+    folder = await _updateFolderData(event.folderID!,
+        folder: folder, owner: folder?.owner != null && folder!.owner == true);
+    cache.putIfAbsent(folder.id!, () => folder);
+    return CloudStoriesState(CloudStoriesType.retrieveFolder,
+        data: folder, folderID: event.folderID);
+  }
+
+  Future<FolderContent> _updateFolderData(String folderID,
       {String? folderName,
-       required bool owner,
+      required bool owner,
       Map<String, dynamic>? metadata,
       FolderContent? folder}) async {
     if (folder != null && folder.loaded == true) {
@@ -129,7 +161,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         images.putIfAbsent(file.id!, () => media);
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final FolderContent subFolder = FolderContent.createFromFolderName(
-            folderName: file.name!, owner: subFolderOwner, id: file.id!, metadata: metadata);
+            folderName: file.name!,
+            owner: subFolderOwner,
+            id: file.id!,
+            metadata: metadata);
         if (subFolder.getTimestamp() == null) {
           subFolder.setTimestamp(
               (DateTime.now().millisecondsSinceEpoch + index).toDouble());
@@ -153,8 +188,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     }
 
     currentFolder ??= FolderContent.createFromFolderName(
-      owner: owner,
-        folderName: folderName, id: folderID, metadata: metadata);
+        owner: owner, folderName: folderName, id: folderID, metadata: metadata);
 
     if (currentFolder.getTimestamp() == null) {
       currentFolder.setTimestamp(
@@ -168,36 +202,13 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     return currentFolder;
   }
 
-  Future<FolderContent> _getCurrentUserRootFolder() async {
-    if (rootFolder != null) {
-      return rootFolder!;
-    }
-    final String query =
-        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
-    final FileList folderParent = await storage.listFiles(query,
-        filter:
-            'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)');
-    File rootFile;
-    Map<String, dynamic> metadata = {};
-    if (folderParent.files!.isEmpty) {
-      metadata[describeEnum(MetadataKeys.timestamp)] =
-          DateTime.now().millisecondsSinceEpoch.toDouble();
-      final File fileMetadata = File();
-      fileMetadata.name = Constants.rootFolder;
-      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-      fileMetadata.description = jsonEncode(metadata);
-      rootFile = await storage.createFile(fileMetadata);
-    } else {
-      rootFile = folderParent.files!.first;
-      try {
-        metadata =
-            jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ??
-                {};
-      } catch (e) {
-        metadata = {};
-      }
-    }
-    return _createEventFromFolder(rootFile.id!, owner: true,
-        folderName: rootFile.name!, metadata: metadata);
+  CloudStoriesState _refresh(CloudStoriesEvent event) {
+    return CloudStoriesState(CloudStoriesType.refresh,
+        error: event.error, folderID: event.folderID);
+  }
+
+  void _newUser() {
+    rootFolder = null;
+    cache.clear();
   }
 }

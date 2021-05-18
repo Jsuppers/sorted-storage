@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
@@ -22,7 +23,6 @@ import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
-import 'package:url_strategy/url_strategy.dart';
 
 Future<void> main() async {
   setPathUrlStrategy();
@@ -90,7 +90,8 @@ class _MyAppState extends State<MyApp> {
         listeners: <BlocListener<dynamic, dynamic>>[
           BlocListener<AuthenticationBloc, usr.User?>(
             listener: (BuildContext context, usr.User? user) {
-              _cloudStoriesBloc.add(const CloudStoriesEvent(CloudStoriesType.newUser));
+              _cloudStoriesBloc
+                  .add(const CloudStoriesEvent(CloudStoriesType.newUser));
               _driveBloc.add(InitialDriveEvent(user: user));
             },
           ),

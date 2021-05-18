@@ -9,6 +9,7 @@ class CloudStoriesState {
   /// type of state
   final CloudStoriesType type;
 
+  /// generic data passed in the state
   final dynamic data;
 
   /// the folder ID for the related story

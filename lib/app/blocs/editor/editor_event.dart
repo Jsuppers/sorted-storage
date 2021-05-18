@@ -2,7 +2,6 @@
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
-import 'package:web/app/models/folder_metadata.dart';
 
 /// Event for the CloudStoriesBloc
 class EditorEvent {

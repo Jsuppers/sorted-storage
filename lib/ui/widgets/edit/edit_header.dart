@@ -1,3 +1,6 @@
+// Dart imports:
+import 'dart:developer';
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -5,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
+import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
@@ -50,20 +54,26 @@ class _EditHeaderState extends State<EditHeader> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                ButtonWithIcon(
-                    text: 'share',
-                    icon: Icons.share,
-                    onPressed: () {
-                      if (widget.savingState == SavingState.saving) {
-                        return;
-                      }
-                      DialogService.shareDialog(context, widget.folder!.id!);
-                    },
-                    width: widget.width,
-                    backgroundColor: Colors.white,
-                    textColor: Colors.black,
-                    iconColor: Colors.black),
-                const SizedBox(width: 10),
+                Visibility(
+                  visible: widget.parent!.isRootFolder,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: ButtonWithIcon(
+                        text: 'share',
+                        icon: Icons.share,
+                        onPressed: () {
+                          if (widget.savingState == SavingState.saving) {
+                            return;
+                          }
+                          DialogService.shareDialog(
+                              context, widget.folder!.id!);
+                        },
+                        width: widget.width,
+                        backgroundColor: Colors.white,
+                        textColor: Colors.black,
+                        iconColor: Colors.black),
+                  ),
+                ),
                 ButtonWithIcon(
                     text: 'delete',
                     icon: Icons.delete,
@@ -90,20 +100,24 @@ class _EditHeaderState extends State<EditHeader> {
                 const SizedBox(width: 10),
               ],
             ),
-            Row(children: [
-              const Align(alignment: Alignment.centerRight, child: SyncingIcon()),
-              const SizedBox(width: 10),
-              MaterialButton(
-                  minWidth: 100,
-                  color: myThemeData.primaryColorDark,
-                  textColor: myThemeData.primaryColor,
-                  onPressed: () => BlocProvider.of<NavigationBloc>(context)
-                      .add(NavigatorPopEvent()),
-                  child: Row(
-                    children: const <Widget>[
-                      Text('close'),
-                    ],
-                  )),],)
+            Row(
+              children: [
+                const Align(
+                    alignment: Alignment.centerRight, child: SyncingIcon()),
+                const SizedBox(width: 10),
+                MaterialButton(
+                    minWidth: 100,
+                    color: myThemeData.primaryColorDark,
+                    textColor: myThemeData.primaryColor,
+                    onPressed: () => BlocProvider.of<NavigationBloc>(context)
+                        .add(NavigatorPopEvent()),
+                    child: Row(
+                      children: const <Widget>[
+                        Text('close'),
+                      ],
+                    )),
+              ],
+            )
           ],
         ));
   }
