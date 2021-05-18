@@ -68,7 +68,7 @@ class RouteConfiguration {
         return PageContent(page: ProfilePage(), requiresAuthentication: true);
       case BaseRoute.folders:
         return PageContent(
-            page: FoldersPage(destination), requiresAuthentication: true);
+            page: FoldersPage(), requiresAuthentication: true);
       case BaseRoute.folder:
         return PageContent(
             page: FolderPage(destination), requiresAuthentication: true);

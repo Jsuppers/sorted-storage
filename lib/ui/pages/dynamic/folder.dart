@@ -70,7 +70,7 @@ class _FolderPageState extends State<FolderPage> {
                   return Column(
                     key: Key(DateTime.now().toString()),
                     children: [
-                      Container(
+                      SizedBox(
                         height: 50,
                         width: constraints.screenSize.width,
                         child: Padding(
@@ -78,6 +78,7 @@ class _FolderPageState extends State<FolderPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              if(folder?.owner == true)
                               ButtonWithIcon(
                                   text: 'Add',
                                   icon: Icons.create_new_folder_outlined,

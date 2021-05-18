@@ -90,7 +90,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
       }
       rootFolder = await _updateFolderData(rootFile.id!,
           owner: true, folderName: rootFile.name!, metadata: metadata);
-      rootFolder!.isRootFolder = true;
+      rootFolder?.isRootFolder = true;
     }
     return CloudStoriesState(CloudStoriesType.getRootFolder, data: rootFolder);
   }

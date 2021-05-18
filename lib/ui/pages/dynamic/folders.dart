@@ -24,10 +24,6 @@ import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 
 class FoldersPage extends StatefulWidget {
-  FoldersPage(this.rootID, {this.editing});
-
-  String rootID;
-  bool? editing;
 
   @override
   _FoldersPageState createState() => _FoldersPageState();
@@ -37,14 +33,9 @@ class _FoldersPageState extends State<FoldersPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.rootID.isEmpty) {
       BlocProvider.of<CloudStoriesBloc>(context)
           .add(const CloudStoriesEvent(CloudStoriesType.getRootFolder));
-    } else {
-      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveFolder,
-          folderID: widget.rootID));
-    }
+
   }
 
   @override
@@ -53,29 +44,19 @@ class _FoldersPageState extends State<FoldersPage> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
           alignment: Alignment.topLeft,
-          child: FolderView(folderID: widget.rootID)),
+          child: FolderView()),
     );
   }
 }
 
 class FolderView extends StatefulWidget {
-  FolderView({required this.folderID});
 
-  String folderID;
   @override
   _FolderViewState createState() => _FolderViewState();
 }
 
 class _FolderViewState extends State<FolderView> {
   FolderContent? folder;
-  String? folderID;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    folderID = widget.folderID;
-  }
 
   String _shortenText(String text) {
     if (text.length <= 20) {
@@ -130,20 +111,12 @@ class _FolderViewState extends State<FolderView> {
         return;
       }
       if (state.type == CloudStoriesType.getRootFolder) {
-        final FolderContent folderContent = state.data as FolderContent;
-        folderID = folderContent.id;
-        BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-            CloudStoriesType.retrieveFolder,
-            folderID: folderContent.id));
-      }
-      if (state.type == CloudStoriesType.retrieveFolder &&
-          state.folderID == folderID) {
         setState(() {
           folder = state.data as FolderContent;
         });
       }
       if (state.type == CloudStoriesType.refresh &&
-          state.folderID == folderID) {
+          state.folderID == folder?.id) {
         setState(() {});
       }
     }, child: ResponsiveBuilder(
@@ -184,7 +157,7 @@ class _FolderViewState extends State<FolderView> {
               padding: const EdgeInsets.all(8),
               onReorder: (int oldIndex, int newIndex) {
                 UpdatePosition ui = UpdatePosition(
-                    folderID: folderID!,
+                    folderID: folder!.id!,
                     currentIndex: oldIndex,
                     targetIndex: newIndex,
                     metadata: folder?.metadata ?? {},
