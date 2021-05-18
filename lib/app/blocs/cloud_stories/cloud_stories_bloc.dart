@@ -89,8 +89,9 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         }
       }
       rootFolder = await _updateFolderData(rootFile.id!,
-          owner: true, folderName: rootFile.name!, metadata: metadata);
+          folderName: rootFile.name!, metadata: metadata);
       rootFolder?.isRootFolder = true;
+      rootFolder?.amOwner = true;
     }
     return CloudStoriesState(CloudStoriesType.getRootFolder, data: rootFolder);
   }
@@ -101,7 +102,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
       folder = cache[event.folderID];
     }
     folder = await _updateFolderData(event.folderID!,
-        folder: folder, owner: folder?.owner != null && folder!.owner == true);
+        folder: folder);
+    folder.amOwner ??= await storage.amOwner(event.folderID!);
     cache.putIfAbsent(folder.id!, () => folder);
     return CloudStoriesState(CloudStoriesType.retrieveFolder,
         data: folder, folderID: event.folderID);
@@ -109,7 +111,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
 
   Future<FolderContent> _updateFolderData(String folderID,
       {String? folderName,
-      required bool owner,
       Map<String, dynamic>? metadata,
       FolderContent? folder}) async {
     if (folder != null && folder.loaded == true) {
@@ -117,8 +118,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     }
     final FileList filesInFolder = await storage.listFiles(
         "'$folderID' in parents and trashed=false",
-        filter:
-            'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description, owners)');
+        filter: GoogleDrive.folderFilter);
 
     FolderContent? currentFolder = folder;
     final Map<String, FolderMedia> images = <String, FolderMedia>{};
@@ -188,7 +188,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     }
 
     currentFolder ??= FolderContent.createFromFolderName(
-        owner: owner, folderName: folderName, id: folderID, metadata: metadata);
+        folderName: folderName, id: folderID, metadata: metadata);
 
     if (currentFolder.getTimestamp() == null) {
       currentFolder.setTimestamp(

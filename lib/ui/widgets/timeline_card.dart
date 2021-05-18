@@ -75,7 +75,7 @@ class _TimelineCardState extends State<TimelineCard> {
           child: Column(
             children: <Widget>[
               EventCard(
-                controls: folder?.owner != null && folder!.owner == true
+                controls: folder?.amOwner != null && folder!.amOwner == true
                     ? PopUpOptions(
                         folder: widget.folder,
                         parent: widget.parent,

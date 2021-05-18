@@ -24,7 +24,7 @@ class GoogleDrive {
   DriveApi? driveApi;
 
   static String folderFilter =
-      'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description)';
+      'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description,owners)';
 
   Future<double?> updatePosition(UpdatePosition updatePosition) async {
     double? order = _getOrder(updatePosition, updatePosition.currentIndex);
@@ -101,7 +101,7 @@ class GoogleDrive {
     }
     final File fileMetadata = File();
     final FolderContent fileProperties = FolderContent(
-        title: 'New Folder', emoji: Emojis.smilingFace, owner: true);
+        title: 'New Folder', emoji: Emojis.smilingFace, amOwner: true);
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
     fileMetadata.parents = <String>[parentID];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';
@@ -159,6 +159,18 @@ class GoogleDrive {
 
   Future<dynamic> getFile(String fileID, {String? filter}) async {
     return driveApi!.files.get(fileID, $fields: filter);
+  }
+
+  Future<bool> amOwner(String fileID) async {
+    final File file = await getFile(fileID , filter: 'owners') as File;
+    if (file.owners != null) {
+      for (final User user in file.owners!) {
+        if (user.me == true) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   Future<FileList> listFiles(String query, {String? filter}) async {

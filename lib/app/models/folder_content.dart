@@ -31,7 +31,7 @@ class FolderContent {
   // ignore: public_member_api_docs
   FolderContent({
     this.id,
-    required this.owner,
+    this.amOwner,
     required this.title,
     required this.emoji,
     this.images,
@@ -47,8 +47,8 @@ class FolderContent {
   static FolderContent createFromFolderName(
       {required String? folderName,
       required Map<String, dynamic>? metadata,
-      required bool owner,
-      required String id}) {
+      required String id,
+      bool? owner}) {
     folderName ??= '';
     final FolderNameData fileName = FolderNameData.fromFileName(folderName);
     return FolderContent(
@@ -56,7 +56,7 @@ class FolderContent {
       title: fileName.title,
       id: id,
       metadata: metadata,
-      owner: owner,
+      amOwner: owner,
     );
   }
 
@@ -82,7 +82,7 @@ class FolderContent {
           return MapEntry<String, FolderMedia>(key, FolderMedia.clone(value));
         })),
         id = event.id,
-        owner = event.owner,
+        amOwner = event.amOwner,
         isRootFolder = event.isRootFolder,
         subFolders = List<FolderContent>.from(event.subFolders!);
 
@@ -118,7 +118,8 @@ class FolderContent {
   /// the ID of the permission for this folder
   String? permissionID;
 
-  bool owner;
+  /// if the current user is the owner of the folder
+  bool? amOwner;
 
   Map<String, dynamic>? metadata;
 

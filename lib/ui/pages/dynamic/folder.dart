@@ -20,9 +20,9 @@ import 'package:web/ui/widgets/timeline.dart';
 
 /// Page which contains all the stories
 class FolderPage extends StatefulWidget {
-  FolderPage(this.folderID);
+  const FolderPage(this.folderID);
 
-  String? folderID;
+  final String? folderID;
 
   @override
   _FolderPageState createState() => _FolderPageState();
@@ -78,17 +78,19 @@ class _FolderPageState extends State<FolderPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if(folder?.owner == true)
-                              ButtonWithIcon(
-                                  text: 'Add',
-                                  icon: Icons.create_new_folder_outlined,
-                                  onPressed: () => DialogService.editDialog(
-                                      context,
-                                      parent: folder),
-                                  width: constraints.screenSize.width,
-                                  backgroundColor: Colors.transparent,
-                                  textColor: Colors.black,
-                                  iconColor: Colors.black),
+                              Visibility(
+                                visible: folder!.amOwner == true,
+                                child: ButtonWithIcon(
+                                    text: 'Add',
+                                    icon: Icons.create_new_folder_outlined,
+                                    onPressed: () => DialogService.editDialog(
+                                        context,
+                                        parent: folder),
+                                    width: constraints.screenSize.width,
+                                    backgroundColor: Colors.transparent,
+                                    textColor: Colors.black,
+                                    iconColor: Colors.black),
+                              ),
                               const NavBarLogo(height: 30),
                             ],
                           ),
