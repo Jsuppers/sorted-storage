@@ -24,16 +24,14 @@ import 'package:web/ui/widgets/sync_icon.dart';
 
 class EditHeader extends StatefulWidget {
   // ignore: public_member_api_docs, lines_longer_than_80_chars
-  EditHeader(
-      {Key? key,
-      this.savingState,
-      required this.width,
-      required this.folder,
-      required this.parent})
-      : super(key: key);
+  EditHeader({
+    Key? key,
+    this.savingState,
+    required this.width,
+    required this.folder,
+  }) : super(key: key);
 
   final FolderContent? folder;
-  final FolderContent? parent;
   final double width;
   final SavingState? savingState;
 
@@ -55,7 +53,7 @@ class _EditHeaderState extends State<EditHeader> {
             Row(
               children: <Widget>[
                 Visibility(
-                  visible: widget.parent!.isRootFolder,
+                  visible: widget.folder!.parent!.isRootFolder,
                   child: Padding(
                     padding: const EdgeInsets.only(right: 10.0),
                     child: ButtonWithIcon(
@@ -84,15 +82,10 @@ class _EditHeaderState extends State<EditHeader> {
                       DialogService.showAlertDialog(context,
                           message: 'Are you sure you want to delete?',
                           callback: () {
-                        UpdateFolderEvent updateEvent = UpdateFolderEvent(
-                          folder: widget.folder!,
-                          parent: widget.parent!,
-                        );
-
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.deleteFolder,
                             closeDialog: true,
-                            data: updateEvent));
+                            data: widget.folder));
                       });
                     },
                     width: widget.width,

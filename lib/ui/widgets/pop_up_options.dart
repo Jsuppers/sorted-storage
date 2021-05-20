@@ -6,10 +6,9 @@ import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/services/dialog_service.dart';
 
 class PopUpOptions extends StatelessWidget {
-  PopUpOptions({this.folder, this.parent});
+  PopUpOptions({this.folder});
 
   FolderContent? folder;
-  FolderContent? parent;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,8 @@ class PopUpOptions extends StatelessWidget {
         onSelected: (String value) {
           switch (value) {
             case 'Edit':
-              DialogService.editDialog(context, folder: folder, parent: parent);
+              DialogService.editDialog(context,
+                  folder: folder, parent: folder?.parent);
               break;
           }
         },

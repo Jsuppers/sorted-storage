@@ -101,8 +101,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     if (folder == null && cache.containsKey(event.folderID)) {
       folder = cache[event.folderID];
     }
-    folder = await _updateFolderData(event.folderID!,
-        folder: folder);
+    folder = await _updateFolderData(event.folderID!, folder: folder);
     folder.amOwner ??= await storage.amOwner(event.folderID!);
     cache.putIfAbsent(folder.id!, () => folder);
     return CloudStoriesState(CloudStoriesType.retrieveFolder,
@@ -120,7 +119,10 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         "'$folderID' in parents and trashed=false",
         filter: GoogleDrive.folderFilter);
 
-    FolderContent? currentFolder = folder;
+    FolderContent? currentFolder = folder ??
+        FolderContent.createFromFolderName(
+            folderName: folderName, id: folderID, metadata: metadata);
+
     final Map<String, FolderMedia> images = <String, FolderMedia>{};
     final List<FolderContent> subFolders = <FolderContent>[];
     int index = 0;
@@ -163,6 +165,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
         final FolderContent subFolder = FolderContent.createFromFolderName(
             folderName: file.name!,
             owner: subFolderOwner,
+            parent: currentFolder,
             id: file.id!,
             metadata: metadata);
         if (subFolder.getTimestamp() == null) {
@@ -186,9 +189,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
       }
       index++;
     }
-
-    currentFolder ??= FolderContent.createFromFolderName(
-        folderName: folderName, id: folderID, metadata: metadata);
 
     if (currentFolder.getTimestamp() == null) {
       currentFolder.setTimestamp(

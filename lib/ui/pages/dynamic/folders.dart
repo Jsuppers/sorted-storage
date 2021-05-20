@@ -24,7 +24,6 @@ import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 
 class FoldersPage extends StatefulWidget {
-
   @override
   _FoldersPageState createState() => _FoldersPageState();
 }
@@ -33,24 +32,20 @@ class _FoldersPageState extends State<FoldersPage> {
   @override
   void initState() {
     super.initState();
-      BlocProvider.of<CloudStoriesBloc>(context)
-          .add(const CloudStoriesEvent(CloudStoriesType.getRootFolder));
-
+    BlocProvider.of<CloudStoriesBloc>(context)
+        .add(const CloudStoriesEvent(CloudStoriesType.getRootFolder));
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-          alignment: Alignment.topLeft,
-          child: FolderView()),
+      child: Container(alignment: Alignment.topLeft, child: FolderView()),
     );
   }
 }
 
 class FolderView extends StatefulWidget {
-
   @override
   _FolderViewState createState() => _FolderViewState();
 }
@@ -96,7 +91,7 @@ class _FolderViewState extends State<FolderView> {
                         width: 30, child: Center(child: Text(subFolder.emoji))),
                   ),
                   Text(_shortenText(subFolder.title)),
-                  PopUpOptions(folder: subFolder, parent: folder),
+                  PopUpOptions(folder: subFolder),
                 ],
               ),
             ),

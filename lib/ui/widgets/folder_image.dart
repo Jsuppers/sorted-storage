@@ -26,7 +26,6 @@ class FolderImage extends StatefulWidget {
     required this.folderMedia,
     required this.imageKey,
     required this.folder,
-    required this.parent,
   }) : super(key: key);
 
   // ignore: public_member_api_docs
@@ -40,7 +39,6 @@ class FolderImage extends StatefulWidget {
 
   // ignore: public_member_api_docs
   final FolderContent folder;
-  final FolderContent parent;
 
   @override
   _FolderImageState createState() => _FolderImageState();
@@ -51,7 +49,6 @@ class _FolderImageState extends State<FolderImage> {
   Widget build(BuildContext context) {
     return RetryMediaWidget(
       folder: widget.folder,
-      parent: widget.parent,
       locked: widget.locked,
       media: widget.folderMedia,
     );
@@ -60,17 +57,13 @@ class _FolderImageState extends State<FolderImage> {
 
 class RetryMediaWidget extends StatefulWidget {
   RetryMediaWidget(
-      {required this.folder,
-      required this.parent,
-      required this.locked,
-      required this.media})
+      {required this.folder, required this.locked, required this.media})
       : super();
 
   @override
   _RetryMediaWidgetState createState() => _RetryMediaWidgetState();
 
   FolderContent folder;
-  FolderContent parent;
   FolderMedia media;
   bool locked;
 }
@@ -151,7 +144,6 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                       UpdateDeleteImageEvent update = UpdateDeleteImageEvent(
                         imageID: imageKey,
                         folder: widget.folder,
-                        parent: widget.parent,
                       );
                       BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                           EditorType.deleteImage,

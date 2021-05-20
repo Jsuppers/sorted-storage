@@ -32,7 +32,7 @@ class DialogService {
   }
 
   static void imageUploadDialog(BuildContext context,
-      {required FolderContent folder, required FolderContent parent}) {
+      {required FolderContent folder}) {
     final CloudStoriesBloc cloudBloc =
         BlocProvider.of<CloudStoriesBloc>(context);
     FilePicker.platform
@@ -46,12 +46,11 @@ class DialogService {
                     barrierDismissible: false,
                     useRootNavigator: true,
                     builder: (BuildContext context) {
-                      return ImageUploadDialog(
-                          file: file, folder: folder, parent: parent);
+                      return ImageUploadDialog(file: file, folder: folder);
                     },
                   ).then((value) => cloudBloc.add(CloudStoriesEvent(
                       CloudStoriesType.refresh,
-                      folderID: parent.id)))
+                      folderID: folder.parent!.id)))
                 }
             });
   }
@@ -71,13 +70,8 @@ class DialogService {
     ).then((_) {
       // update the ui with any changes made in the edit dialog
       cloudBloc.add(
-          CloudStoriesEvent(CloudStoriesType.refresh, folderID: parent!.id));
+          CloudStoriesEvent(CloudStoriesType.refresh, folderID: parent?.id));
     });
-
-//    // update the ui with any changes made in the edit dialog
-//    cloudBloc
-//        .add(CloudStoriesEvent(CloudStoriesType.retrieveFolder,
-//        data: parent, folderID: parent!.id)));
   }
 
   /// dialog to share a folder
@@ -93,14 +87,13 @@ class DialogService {
   }
 
   /// dialog to allow the user to select a emoji
-  static void emojiDialog(BuildContext context,
-      {FolderContent? folder, FolderContent? parent}) {
+  static void emojiDialog(BuildContext context, {FolderContent? folder}) {
     showDialog(
       context: context,
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext context) {
-        return EmojiDialog(folder: folder, parent: parent);
+        return EmojiDialog(folder: folder);
       },
     );
   }

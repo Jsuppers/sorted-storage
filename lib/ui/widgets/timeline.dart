@@ -49,7 +49,6 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           width: widget.width,
           height: widget.height,
           folder: subFolder,
-          parent: widget.folder,
         );
         final _TimeLineEventEntry _timeLineEventEntry =
             _TimeLineEventEntry(subFolder.getTimestamp(), display);

@@ -38,6 +38,7 @@ class FolderContent {
     this.permissionID,
     this.metadata,
     this.subFolders,
+    this.parent,
   }) {
     subFolders ??= [];
     images ??= <String, FolderMedia>{};
@@ -48,6 +49,7 @@ class FolderContent {
       {required String? folderName,
       required Map<String, dynamic>? metadata,
       required String id,
+      FolderContent? parent,
       bool? owner}) {
     folderName ??= '';
     final FolderNameData fileName = FolderNameData.fromFileName(folderName);
@@ -57,6 +59,7 @@ class FolderContent {
       id: id,
       metadata: metadata,
       amOwner: owner,
+      parent: parent,
     );
   }
 
@@ -84,6 +87,7 @@ class FolderContent {
         id = event.id,
         amOwner = event.amOwner,
         isRootFolder = event.isRootFolder,
+        parent = event.parent,
         subFolders = List<FolderContent>.from(event.subFolders!);
 
   double? getTimestamp() {
@@ -114,6 +118,8 @@ class FolderContent {
   bool loaded = false;
 
   bool isRootFolder = false;
+
+  FolderContent? parent;
 
   /// the ID of the permission for this folder
   String? permissionID;

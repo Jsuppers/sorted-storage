@@ -30,7 +30,6 @@ class EventCard extends StatefulWidget {
       {Key? key,
       required this.width,
       required this.folder,
-      required this.parent,
       required this.controls,
       this.height = double.infinity})
       : super(key: key);
@@ -46,7 +45,6 @@ class EventCard extends StatefulWidget {
 
   /// the story this card is related to
   final FolderContent folder;
-  final FolderContent parent;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -117,7 +115,6 @@ class _TimelineEventCardState extends State<EventCard> {
           width: widget.width,
           height: widget.height,
           folder: folder!.subFolders![i],
-          parent: widget.folder,
           controls: Container()));
     }
 
@@ -133,7 +130,6 @@ class _TimelineEventCardState extends State<EventCard> {
         cards.add(FolderImage(
           locked: true,
           folder: widget.folder,
-          parent: widget.parent,
           folderMedia: image.value,
           imageKey: image.key,
         ));

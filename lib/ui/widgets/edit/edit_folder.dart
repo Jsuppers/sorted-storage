@@ -14,7 +14,6 @@ import 'package:reorderables/reorderables.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
@@ -114,7 +113,6 @@ class _EditFolderState extends State<EditFolder> {
               height: info.screenSize.height,
               folder: folder,
               cloudCopy: cloudCopyFolder,
-              parent: widget.parent,
             ));
       }),
     );
@@ -130,7 +128,6 @@ class EditStoryContent extends StatefulWidget {
     required this.height,
     required this.folder,
     required this.cloudCopy,
-    required this.parent,
   }) : super(key: key);
 
   // ignore: public_member_api_docs
@@ -143,8 +140,6 @@ class EditStoryContent extends StatefulWidget {
   final FolderContent? folder;
   // ignore: public_member_api_docs
   final FolderContent? cloudCopy;
-  // ignore: public_member_api_docs
-  final FolderContent? parent;
 
   @override
   _EditStoryContentState createState() => _EditStoryContentState();
@@ -170,7 +165,6 @@ class _EditStoryContentState extends State<EditStoryContent> {
           savingState: savingState,
           width: widget.width,
           folder: widget.folder,
-          parent: widget.parent,
         ),
       ),
       SliverToBoxAdapter(
@@ -194,7 +188,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: getCards(widget.folder!, widget.parent!, 0),
+              children: getCards(widget.folder!, 0),
             ),
           ),
         ),
@@ -202,7 +196,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
     ]);
   }
 
-  List<Widget> getCards(FolderContent folder, FolderContent parent, int depth) {
+  List<Widget> getCards(FolderContent folder, int depth) {
     List<Widget> output = [];
     output.add(EventCard(
       savingState: savingState,
@@ -210,10 +204,9 @@ class _EditStoryContentState extends State<EditStoryContent> {
       width: widget.width,
       height: widget.height,
       folder: folder,
-      parent: parent,
     ));
 
-    if (!widget.parent!.isRootFolder) {
+    if (!widget.folder!.parent!.isRootFolder) {
       output.add(Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: SizedBox(
@@ -238,7 +231,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
       ));
     }
 
-    if (widget.parent!.isRootFolder ||
+    if (widget.folder!.parent!.isRootFolder ||
         folder.subFolders == null ||
         folder.subFolders!.isEmpty) {
       return output;
@@ -246,7 +239,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
     for (int i = 0;
         folder.subFolders != null && i < folder.subFolders!.length;
         i++) {
-      output.addAll(getCards(folder.subFolders![i], folder, depth + 1));
+      output.addAll(getCards(folder.subFolders![i], depth + 1));
     }
     return output;
   }
@@ -259,7 +252,6 @@ class EventCard extends StatefulWidget {
       {Key? key,
       required this.width,
       required this.folder,
-      required this.parent,
       required this.controls,
       this.height = double.infinity,
       this.savingState})
@@ -278,9 +270,6 @@ class EventCard extends StatefulWidget {
 
   /// the story this card is related to
   final FolderContent folder;
-
-  /// the story this card is related to
-  final FolderContent parent;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -323,8 +312,8 @@ class _TimelineEventCardState extends State<EventCard> {
         MaterialButton(
           minWidth: 40,
           height: 40,
-          onPressed: () => DialogService.emojiDialog(context,
-              folder: widget.folder, parent: widget.parent),
+          onPressed: () =>
+              DialogService.emojiDialog(context, folder: widget.folder),
           child: widget.folder.emoji.isEmpty
               ? const Text(
                   '📅',
@@ -345,7 +334,7 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget timeStamp() {
     // root folder uses the timestamp to order it's content
-    if (widget.parent.isRootFolder) {
+    if (widget.folder.parent!.isRootFolder) {
       return Container();
     }
     return Column(
@@ -374,11 +363,8 @@ class _TimelineEventCardState extends State<EventCard> {
             onDateSelected: (DateTime date) {
               widget.folder
                   .setTimestamp(date.millisecondsSinceEpoch.toDouble());
-              UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                  folder: widget.folder, parent: widget.parent);
-              BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                  EditorType.updateTimestamp,
-                  data: updateNameEvent));
+              BlocProvider.of<EditorBloc>(context).add(
+                  EditorEvent(EditorType.updateTimestamp, data: widget.folder));
             },
           ),
         ),
@@ -387,7 +373,7 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   List<Widget> innerContent(List<FolderImage> cards) {
-    if (widget.parent.isRootFolder) {
+    if (widget.folder.parent!.isRootFolder) {
       return <Widget>[];
     }
     return [
@@ -414,7 +400,6 @@ class _TimelineEventCardState extends State<EventCard> {
                     DialogService.imageUploadDialog(
                       context,
                       folder: widget.folder,
-                      parent: widget.parent,
                     );
                   },
                   width: Constants.minScreenWidth,
@@ -444,11 +429,9 @@ class _TimelineEventCardState extends State<EventCard> {
                 if (_debounce?.isActive ?? false) _debounce?.cancel();
                 _debounce = Timer(const Duration(milliseconds: 500), () {
                   widget.folder.setDescription(content);
-                  UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                      folder: widget.folder, parent: widget.parent);
                   BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                       EditorType.updateMetadata,
-                      data: updateNameEvent));
+                      data: widget.folder));
                 });
               },
               maxLines: null),
@@ -482,7 +465,6 @@ class _TimelineEventCardState extends State<EventCard> {
           folderMedia: image.value,
           imageKey: image.key,
           folder: widget.folder,
-          parent: widget.parent,
         ));
       }
     }
@@ -528,12 +510,9 @@ class _TimelineEventCardState extends State<EventCard> {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
                       _debounce = Timer(const Duration(milliseconds: 500), () {
                         widget.folder.title = content;
-
-                        UpdateFolderEvent updateNameEvent = UpdateFolderEvent(
-                            folder: widget.folder, parent: widget.parent);
                         BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                             EditorType.updateName,
-                            data: updateNameEvent));
+                            data: widget.folder));
                       });
                     }),
               ],

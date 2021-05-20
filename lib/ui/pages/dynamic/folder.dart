@@ -87,8 +87,10 @@ class _FolderPageState extends State<FolderPage> {
                                     ButtonWithIcon(
                                         text: 'Home',
                                         icon: Icons.home_outlined,
-                                        onPressed: () => BlocProvider.of<NavigationBloc>(context)
-                                            .add(NavigateToFolderEvent()),
+                                        onPressed: () =>
+                                            BlocProvider.of<NavigationBloc>(
+                                                    context)
+                                                .add(NavigateToFolderEvent()),
                                         width: constraints.screenSize.width,
                                         backgroundColor: Colors.transparent,
                                         textColor: Colors.black,
@@ -96,9 +98,9 @@ class _FolderPageState extends State<FolderPage> {
                                     ButtonWithIcon(
                                         text: 'Add',
                                         icon: Icons.create_new_folder_outlined,
-                                        onPressed: () => DialogService.editDialog(
-                                            context,
-                                            parent: folder),
+                                        onPressed: () =>
+                                            DialogService.editDialog(context,
+                                                folder: folder),
                                         width: constraints.screenSize.width,
                                         backgroundColor: Colors.transparent,
                                         textColor: Colors.black,

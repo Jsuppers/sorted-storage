@@ -95,15 +95,18 @@ class GoogleDrive {
     return driveApi!.files.update(mediaFile, fileId);
   }
 
-  Future<FolderContent?> createFolder(String? parentID) async {
-    if (parentID == null) {
+  Future<FolderContent?> createFolder(FolderContent? parent) async {
+    if (parent == null || parent.id == null) {
       return null;
     }
     final File fileMetadata = File();
     final FolderContent fileProperties = FolderContent(
-        title: 'New Folder', emoji: Emojis.smilingFace, amOwner: true);
+        title: 'New Folder',
+        emoji: Emojis.smilingFace,
+        parent: parent,
+        amOwner: true);
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
-    fileMetadata.parents = <String>[parentID];
+    fileMetadata.parents = <String>[parent.id!];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';
     fileMetadata.description = jsonEncode(fileProperties.metadata);
     final File rt = await createFile(fileMetadata);
@@ -111,17 +114,6 @@ class GoogleDrive {
 
     return fileProperties;
   }
-//
-//  /// create a story (a folder with the timestamp as the name)
-//  Future<String?> createStory(String parentID) async {
-//    final File story = File();
-//    story.parents = <String>[parentID];
-//    story.mimeType = 'application/vnd.google-apps.folder';
-//    story.name = timestamp.toString();
-//
-//    final File folder = await driveApi!.files.create(story);
-//    return folder.id;
-//  }
 
   Future<String?> uploadMedia(String parentID, String name, int contentLength,
       Stream<List<int>> mediaStream,
@@ -162,7 +154,7 @@ class GoogleDrive {
   }
 
   Future<bool> amOwner(String fileID) async {
-    final File file = await getFile(fileID , filter: 'owners') as File;
+    final File file = await getFile(fileID, filter: 'owners') as File;
     if (file.owners != null) {
       for (final User user in file.owners!) {
         if (user.me == true) {

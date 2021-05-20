@@ -23,7 +23,6 @@ class TimelineCard extends StatefulWidget {
     required this.width,
     required this.height,
     required this.folder,
-    required this.parent,
   }) : super(key: key);
 
   // ignore: public_member_api_docs
@@ -34,8 +33,6 @@ class TimelineCard extends StatefulWidget {
 
   // ignore: public_member_api_docs
   final FolderContent folder;
-  // ignore: public_member_api_docs
-  final FolderContent parent;
 
   @override
   _TimelineCardState createState() => _TimelineCardState();
@@ -57,14 +54,13 @@ class _TimelineCardState extends State<TimelineCard> {
 
   @override
   Widget build(BuildContext context) {
-    final List<FolderContent> subFolders = folder?.subFolders ?? [];
     return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
       listener: (BuildContext context, CloudStoriesState? state) {
         if (state == null) {
           return;
         }
         if (state.type == CloudStoriesType.refresh &&
-            state.folderID == widget.parent.id) {
+            state.folderID == folder?.parent?.id) {
           setState(() {});
         }
       },
@@ -78,13 +74,11 @@ class _TimelineCardState extends State<TimelineCard> {
                 controls: folder?.amOwner != null && folder!.amOwner == true
                     ? PopUpOptions(
                         folder: widget.folder,
-                        parent: widget.parent,
                       )
                     : Container(),
                 width: widget.width,
                 height: widget.height,
                 folder: folder!,
-                parent: widget.parent,
               ),
             ],
           ),

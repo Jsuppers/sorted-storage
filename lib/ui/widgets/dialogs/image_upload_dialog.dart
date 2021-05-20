@@ -23,17 +23,11 @@ import 'package:web/ui/helpers/text_display.dart';
 /// image upload dialog
 class ImageUploadDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ImageUploadDialog(
-      {Key? key,
-      required this.folder,
-      required this.parent,
-      required this.file})
+  const ImageUploadDialog({Key? key, required this.folder, required this.file})
       : super(key: key);
 
   // ignore: public_member_api_docs
   final FolderContent folder;
-  // ignore: public_member_api_docs
-  final FolderContent parent;
 
   final FilePickerResult file;
 
@@ -58,8 +52,7 @@ class ImageUploadDialog extends StatelessWidget {
 
     BlocProvider.of<EditorBloc>(context).add(EditorEvent(
         EditorType.uploadImages,
-        data:
-            UpdateImagesEvent(images: images, folder: folder, parent: parent)));
+        data: UpdateImagesEvent(images: images, folder: folder)));
 
     return Dialog(
       shape: const RoundedRectangleBorder(

@@ -63,8 +63,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       case EditorType.uploadImages:
         final UpdateImagesEvent imagesEvent = event.data as UpdateImagesEvent;
         imageIndexesToIgnore = <int>[];
-        _uploadImages(
-                imagesEvent.images, imagesEvent.folder, imagesEvent.parent)
+        _uploadImages(imagesEvent.images, imagesEvent.folder,
+                imagesEvent.folder.parent!)
             .then((value) => {
                   add(EditorEvent(EditorType.syncingState,
                       data: SavingState.success, refreshUI: true))
@@ -82,8 +82,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             error: event.error);
         break;
       case EditorType.deleteFolder:
-        final String? error =
-            await _deleteEvent(event.data as UpdateFolderEvent);
+        final String? error = await _deleteEvent(event.data as FolderContent);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopDialogEvent());
         } else {
@@ -94,8 +93,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        final FolderContent eventData =
-            TimelineService.getFolderWithID(update.folder.id!, update.parent)!;
+        final FolderContent eventData = TimelineService.getFolderWithID(
+            update.folder.id!, update.folder.parent)!;
         final String? error = await _deleteFile(update.imageID);
         if (error == null) {
           eventData.images!.remove(update.imageID);
@@ -109,17 +108,15 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         break;
 
       case EditorType.updateName:
-        UpdateFolderEvent updateNameEvent = event.data as UpdateFolderEvent;
+        final FolderContent folder = event.data as FolderContent;
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        String fileName = FolderNameData.toFileName(updateNameEvent.folder);
-        _storage
-            .updateFileName(updateNameEvent.folder.id!, fileName)
-            .then((value) {
-          FolderContent eventData = TimelineService.getFolderWithID(
-              updateNameEvent.folder.id!, updateNameEvent.parent)!;
-          eventData.emoji = updateNameEvent.folder.emoji;
-          eventData.title = updateNameEvent.folder.title;
+        String fileName = FolderNameData.toFileName(folder);
+        _storage.updateFileName(folder.id!, fileName).then((value) {
+          FolderContent eventData =
+              TimelineService.getFolderWithID(folder.id!, folder.parent)!;
+          eventData.emoji = folder.emoji;
+          eventData.title = folder.title;
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
         });
@@ -129,16 +126,16 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             data: event.data, refreshUI: event.refreshUI);
         break;
       case EditorType.updateTimestamp:
-        final UpdateFolderEvent data = event.data as UpdateFolderEvent;
-        final String folderID = data.folder.id!;
+        final FolderContent folder = event.data as FolderContent;
+        final String folderID = folder.id!;
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
         try {
-          await _storage.updateDescription(folderID, data.folder.metadata!);
+          await _storage.updateDescription(folderID, folder.metadata!);
           final FolderContent? eventData =
-              TimelineService.getFolderWithID(folderID, data.parent);
+              TimelineService.getFolderWithID(folderID, folder.parent);
           if (eventData != null) {
-            eventData.setTimestamp(data.folder.getTimestamp());
+            eventData.setTimestamp(folder.getTimestamp());
           }
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
@@ -150,13 +147,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       case EditorType.updateMetadata:
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
-        final UpdateFolderEvent data = event.data as UpdateFolderEvent;
+        final FolderContent folder = event.data as FolderContent;
 
-        _storage
-            .updateDescription(data.folder.id!, data.folder.metadata!)
-            .then((value) {
-          TimelineService.getFolderWithID(data.folder.id!, data.parent)!
-              .metadata = data.folder.metadata!;
+        _storage.updateDescription(folder.id!, folder.metadata!).then((value) {
+          TimelineService.getFolderWithID(folder.id!, folder.parent)!.metadata =
+              folder.metadata!;
           add(EditorEvent(EditorType.syncingState,
               data: SavingState.success, refreshUI: event.refreshUI));
         });
@@ -191,12 +186,12 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     }
   }
 
-  Future<String?> _deleteEvent(UpdateFolderEvent update) async {
-    _storage.delete(update.folder.id!).then((dynamic value) {
-      update.parent.subFolders!
-          .removeWhere((folder) => folder.id == update.folder.id);
+  Future<String?> _deleteEvent(FolderContent folder) async {
+    _storage.delete(folder.id!).then((dynamic value) {
+      folder.parent!.subFolders!
+          .removeWhere((folder) => folder.id == folder.id);
       _cloudStoriesBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
-          folderID: update.parent.id));
+          folderID: folder.parent!.id));
       return null;
     }, onError: (_) {
       return 'Error when deleting story';
@@ -214,7 +209,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   Future<FolderContent?> _createEventFolder(
       {required FolderContent parent}) async {
-    return _storage.createFolder(parent.id);
+    return _storage.createFolder(parent);
   }
 
   Future<void> _uploadImages(Map<String, FolderMedia> images,
