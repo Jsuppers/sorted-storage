@@ -144,6 +144,18 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
               data: SavingState.error, refreshUI: event.refreshUI));
         }
         break;
+      case EditorType.updateImageMetadata:
+        add(EditorEvent(EditorType.syncingState,
+            data: SavingState.saving, refreshUI: event.refreshUI));
+        final UpdateImageMetaDataEvent update = event.data as UpdateImageMetaDataEvent;
+
+        _storage.updateDescription(update.media.id, update.media.metadata!).then((value) {
+          TimelineService.getFolderWithID(update.folder.id!, update.folder.parent)!
+              .images!.update(update.media.id, (_) => update.media);
+          add(EditorEvent(EditorType.syncingState,
+              data: SavingState.success, refreshUI: event.refreshUI));
+        });
+        break;
       case EditorType.updateMetadata:
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));

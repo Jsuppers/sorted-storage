@@ -41,6 +41,12 @@ class UpdateImagesEvent {
   FolderContent folder;
 }
 
+class UpdateImageMetaDataEvent {
+  UpdateImageMetaDataEvent({required this.media, required this.folder});
+  FolderMedia media;
+  FolderContent folder;
+}
+
 class UpdateDeleteImageEvent {
   UpdateDeleteImageEvent({
     required this.imageID,

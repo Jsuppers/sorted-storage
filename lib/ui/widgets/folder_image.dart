@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -14,6 +16,7 @@ import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/url_service.dart';
+import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/media_card.dart';
 
@@ -182,28 +185,89 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
             child: showPlaceholder
                 ? _backgroundImage(widget.media.id, widget.media, null)
                 : SizedBox(
-                    height: widget.locked == false ? 80 : 150.0,
+                    height: widget.locked == false ? 180 : 250.0,
                     width: widget.locked == false ? 80 : 150.0,
                     child: thumbnailURL.data == null
                         ? StaticLoadingLogo()
-                        : CachedNetworkImage(
-                            imageUrl: thumbnailURL.data!,
-                            placeholder: (BuildContext context, String url) =>
-                                StaticLoadingLogo(),
-                            errorWidget: (BuildContext context, String url,
-                                    dynamic error) =>
-                                _backgroundImage(
-                                    widget.media.id,
-                                    widget.media,
-                                    const AssetImage(
-                                        'assets/images/error.png')),
-                            imageBuilder: (BuildContext context,
-                                    ImageProvider<Object> image) =>
-                                _backgroundImage(
-                                    widget.media.id, widget.media, image),
-                          ),
+                        : Column(
+                          children: [
+                            SizedBox(
+                              height: widget.locked == false ? 80 : 150.0,
+                              width: widget.locked == false ? 80 : 150.0,
+                              child: CachedNetworkImage(
+                                  imageUrl: thumbnailURL.data!,
+                                  placeholder: (BuildContext context, String url) =>
+                                      StaticLoadingLogo(),
+                                  errorWidget: (BuildContext context, String url,
+                                          dynamic error) =>
+                                      _backgroundImage(
+                                          widget.media.id,
+                                          widget.media,
+                                          const AssetImage(
+                                              'assets/images/error.png')),
+                                  imageBuilder: (BuildContext context,
+                                          ImageProvider<Object> image) =>
+                                      _backgroundImage(
+                                          widget.media.id, widget.media, image),
+                                ),
+                            ),
+                            ImageDescription(media: widget.media, folder: widget.folder,)
+                          ],
+                        ),
                   ),
           );
         });
   }
 }
+
+class ImageDescription extends StatefulWidget {
+  ImageDescription({required this.media, required this.folder});
+  FolderMedia media;
+  FolderContent folder;
+
+  @override
+  _ImageDescriptionState createState() => _ImageDescriptionState();
+}
+
+class _ImageDescriptionState extends State<ImageDescription> {
+  TextEditingController descriptionController = TextEditingController();
+  Timer? _debounce;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    descriptionController.text = widget.media.getDescription() ?? '';
+    descriptionController.selection =
+        TextSelection.collapsed(offset: descriptionController.text.length);
+
+    return TextFormField(
+        controller: descriptionController,
+        style: TextStyle(
+            fontSize: 14.0,
+            fontFamily: 'OpenSans',
+            color: myThemeData.primaryColorDark),
+        decoration: const InputDecoration(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
+            hintText: 'Enter a description'),
+        onChanged: (String content) {
+          if (_debounce?.isActive ?? false) _debounce?.cancel();
+          _debounce = Timer(const Duration(milliseconds: 500), () {
+            widget.media.setDescription(content);
+            UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(folder: widget.folder, media: widget.media);
+            BlocProvider.of<EditorBloc>(context).add(EditorEvent(
+                EditorType.updateImageMetadata,
+                data: update));
+          });
+        },
+        maxLines: null);
+  }
+}
+
+

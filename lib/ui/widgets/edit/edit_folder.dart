@@ -430,7 +430,7 @@ class _TimelineEventCardState extends State<EventCard> {
                 _debounce = Timer(const Duration(milliseconds: 500), () {
                   widget.folder.setDescription(content);
                   BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                      EditorType.updateMetadata,
+                      EditorType.updateImageMetadata,
                       data: widget.folder));
                 });
               },
@@ -447,12 +447,9 @@ class _TimelineEventCardState extends State<EventCard> {
             .metadata?[describeEnum(MetadataKeys.description)] as String? ??
         '';
     titleController.text = widget.folder.title;
-    // TODO save position
     titleController.selection =
         TextSelection.collapsed(offset: titleController.text.length);
     descriptionController.text = description;
-
-    // TODO save position
     descriptionController.selection =
         TextSelection.collapsed(offset: descriptionController.text.length);
 
