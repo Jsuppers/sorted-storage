@@ -430,7 +430,7 @@ class _TimelineEventCardState extends State<EventCard> {
                 _debounce = Timer(const Duration(milliseconds: 500), () {
                   widget.folder.setDescription(content);
                   BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                      EditorType.updateImageMetadata,
+                      EditorType.updateMetadata,
                       data: widget.folder));
                 });
               },
