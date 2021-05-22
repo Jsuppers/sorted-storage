@@ -100,7 +100,7 @@ class _FolderPageState extends State<FolderPage> {
                                         icon: Icons.create_new_folder_outlined,
                                         onPressed: () =>
                                             DialogService.editDialog(context,
-                                                folder: folder),
+                                                parent: folder),
                                         width: constraints.screenSize.width,
                                         backgroundColor: Colors.transparent,
                                         textColor: Colors.black,

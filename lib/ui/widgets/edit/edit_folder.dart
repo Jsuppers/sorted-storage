@@ -57,8 +57,8 @@ class _EditFolderState extends State<EditFolder> {
           .add(EditorEvent(EditorType.createFolder, data: widget.parent));
     } else {
       cloudCopyFolder = widget.folder;
-      folder = FolderContent.clone(widget.folder!);
-      folderID = folder!.id;
+      folder = FolderContent.clone(cloudCopyFolder!);
+      folderID = cloudCopyFolder!.id;
     }
   }
 
