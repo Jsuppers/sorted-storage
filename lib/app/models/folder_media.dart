@@ -31,7 +31,7 @@ class FolderMedia {
         retrieveThumbnail = media.retrieveThumbnail,
         id = media.id,
         name = media.name,
-        metadata = media.metadata;
+        metadata = Map.from(media.metadata ?? {});
 
   /// and index which will ensure the media without an index will be at the end
   /// of the list hopefully no one uploads this much media in one story..

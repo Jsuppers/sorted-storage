@@ -381,7 +381,7 @@ class _TimelineEventCardState extends State<EventCard> {
       ReordableImages(
           cards: cards,
           folderID: widget.folder.id!,
-          metadata: widget.folder.metadata!),
+          metadata: widget.folder.metadata ?? {}),
       const SizedBox(height: 10),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -528,7 +528,7 @@ class ReordableImages extends StatefulWidget {
 
   List<FolderImage> cards;
   String folderID;
-  Map<String, dynamic> metadata;
+  Map<String, dynamic>? metadata;
 
   @override
   _ReordableImagesState createState() => _ReordableImagesState();
@@ -553,7 +553,7 @@ class _ReordableImagesState extends State<ReordableImages> {
                       currentIndex: oldIndex,
                       targetIndex: newIndex,
                       items: <FolderImage>[...widget.cards],
-                      metadata: widget.metadata,
+                      metadata: widget.metadata ?? {},
                       folderID: widget.folderID)));
 
               setState(() {

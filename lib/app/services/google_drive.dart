@@ -77,7 +77,7 @@ class GoogleDrive {
     final File mediaFile = File();
     mediaFile.parents = <String>[folderID];
     mediaFile.name = imageName;
-    mediaFile.description = jsonEncode(storyMedia.metadata);
+    mediaFile.description = jsonEncode(storyMedia.metadata ?? {});
 
     final Media image = Media(dataStream, storyMedia.contentSize);
     final File uploadMedia =
@@ -108,7 +108,7 @@ class GoogleDrive {
     fileMetadata.name = '${Emojis.smilingFace} New Folder';
     fileMetadata.parents = <String>[parent.id!];
     fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-    fileMetadata.description = jsonEncode(fileProperties.metadata);
+    fileMetadata.description = jsonEncode(fileProperties.metadata ?? {});
     final File rt = await createFile(fileMetadata);
     fileProperties.id = rt.id;
 

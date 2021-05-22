@@ -127,7 +127,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     final List<FolderContent> subFolders = <FolderContent>[];
     int index = 0;
     for (final File file in filesInFolder.files!) {
-      Map<String, dynamic>? metadata;
+      Map<String, dynamic>? metadata = {};
       if (file.description != null) {
         try {
           metadata =

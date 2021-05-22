@@ -85,8 +85,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         final String? error = await _deleteEvent(event.data as FolderContent);
         if (error == null && event.closeDialog) {
           _navigationBloc.add(NavigatorPopDialogEvent());
-        } else {
-          yield EditorState(EditorType.deleteFolder, error: error);
         }
         break;
       case EditorType.deleteImage:
@@ -131,7 +129,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         add(EditorEvent(EditorType.syncingState,
             data: SavingState.saving, refreshUI: event.refreshUI));
         try {
-          await _storage.updateDescription(folderID, folder.metadata!);
+          await _storage.updateDescription(folderID, folder.metadata ?? {});
           final FolderContent? eventData =
               TimelineService.getFolderWithID(folderID, folder.parent);
           if (eventData != null) {
@@ -149,7 +147,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             data: SavingState.saving, refreshUI: event.refreshUI));
         final UpdateImageMetaDataEvent update = event.data as UpdateImageMetaDataEvent;
 
-        _storage.updateDescription(update.media.id, update.media.metadata!).then((value) {
+        _storage.updateDescription(update.media.id, update.media.metadata ?? {}).then((value) {
           TimelineService.getFolderWithID(update.folder.id!, update.folder.parent)!
               .images!.update(update.media.id, (_) => update.media);
           add(EditorEvent(EditorType.syncingState,
@@ -161,7 +159,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             data: SavingState.saving, refreshUI: event.refreshUI));
         final FolderContent folder = event.data as FolderContent;
 
-        _storage.updateDescription(folder.id!, folder.metadata!).then((value) {
+        _storage.updateDescription(folder.id!, folder.metadata ?? {}).then((value) {
           TimelineService.getFolderWithID(folder.id!, folder.parent)!.metadata =
               folder.metadata!;
           add(EditorEvent(EditorType.syncingState,
@@ -201,7 +199,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<String?> _deleteEvent(FolderContent folder) async {
     _storage.delete(folder.id!).then((dynamic value) {
       folder.parent!.subFolders!
-          .removeWhere((folder) => folder.id == folder.id);
+          .removeWhere((subfolder) => subfolder.id == folder.id);
       _cloudStoriesBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
           folderID: folder.parent!.id));
       return null;

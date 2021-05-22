@@ -134,30 +134,3 @@ class FolderContent {
 
   List<FolderContent>? subFolders;
 }
-
-class InitialData {
-  InitialData({required this.emoji, required this.title});
-
-  /// a emoji for this folder
-  String emoji;
-
-  /// the title for this folder
-  String title;
-}
-
-class LoadedData {
-  LoadedData(
-      {required this.permissionID,
-      required this.metadata,
-      required this.images});
-
-  /// the ID of the permission for this folder
-  String permissionID;
-
-  Map<String, dynamic> metadata;
-
-  /// images on the main story
-  Map<String, FolderMedia> images;
-
-  List<FolderContent>? subFolders;
-}
