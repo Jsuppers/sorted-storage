@@ -36,10 +36,7 @@ class ShareDialog extends StatelessWidget {
             if (state == null) {
               return const FullPageLoadingLogo(backgroundColor: Colors.white);
             }
-            return ShareWidget(
-                key: Key(DateTime.now().toString()),
-                folder: folder,
-                state: state);
+            return ShareWidget(folder: folder, state: state);
           },
         ),
       ),

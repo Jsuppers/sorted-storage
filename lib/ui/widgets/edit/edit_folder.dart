@@ -538,7 +538,6 @@ class _ReordableImagesState extends State<ReordableImages> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        key: Key(DateTime.now().toString()),
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: ReorderableWrap(
             spacing: 8.0,

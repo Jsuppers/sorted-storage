@@ -22,6 +22,7 @@ import 'package:web/constants.dart';
 import 'package:web/ui/helpers/property.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/folder_image.dart';
+import 'package:web/ui/widgets/pop_up_options.dart';
 
 ///
 class EventCard extends StatefulWidget {
@@ -112,10 +113,15 @@ class _TimelineEventCardState extends State<EventCard> {
         folder!.subFolders != null && i < folder!.subFolders!.length;
         i++) {
       output.add(EventCard(
-          width: widget.width,
-          height: widget.height,
-          folder: folder!.subFolders![i],
-          controls: Container()));
+        width: widget.width,
+        height: widget.height,
+        folder: folder!.subFolders![i],
+        controls: folder?.amOwner != null && folder!.amOwner == true
+            ? PopUpOptions(
+                folder: widget.folder,
+              )
+            : Container(),
+      ));
     }
 
     return output;
@@ -200,11 +206,8 @@ class _TimelineEventCardState extends State<EventCard> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Wrap(
-                          key: Key(DateTime.now().toString()),
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children: cards)),
+                      child:
+                          Wrap(spacing: 8.0, runSpacing: 4.0, children: cards)),
                   Text(
                     Property.getValueOrDefault(
                       widget.folder

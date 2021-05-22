@@ -61,7 +61,6 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     }
     if (children.isNotEmpty) {
       return Column(
-        key: Key(DateTime.now().toString()),
         children: children,
       );
     }

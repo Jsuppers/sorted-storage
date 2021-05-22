@@ -33,10 +33,12 @@ class FoldersPage extends StatefulWidget {
 class _FoldersPageState extends State<FoldersPage> {
   FolderContent? folder;
   bool error = false;
+  late String key;
 
   @override
   void initState() {
     super.initState();
+    key = DateTime.now().toString();
     if (widget.folderID != null && widget.folderID!.isNotEmpty) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
           CloudStoriesType.retrieveFolder,
@@ -46,31 +48,30 @@ class _FoldersPageState extends State<FoldersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-        listeners: <BlocListener<dynamic, dynamic>>[
-          BlocListener<CloudStoriesBloc, CloudStoriesState?>(
-              listener: (BuildContext context, CloudStoriesState? state) {
-            if (state == null) {
-              return;
-            }
-            if (state.type == CloudStoriesType.refresh &&
-                state.folderID == widget.folderID) {
-              setState(() {});
-            }
-            if (state.type == CloudStoriesType.retrieveFolder &&
-                state.folderID == widget.folderID) {
-              setState(() {
-                folder = state.data as FolderContent;
-              });
-            }
-          }),
-        ],
+    return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
+        listener: (BuildContext context, CloudStoriesState? state) {
+          if (state == null) {
+            return;
+          }
+          if (state.type == CloudStoriesType.refresh &&
+              state.folderID == widget.folderID &&
+              state.data == null) {
+            setState(() {
+              key = DateTime.now().toString();
+            });
+          }
+          if (state.type == CloudStoriesType.retrieveFolder &&
+              state.folderID == widget.folderID) {
+            setState(() {
+              folder = state.data as FolderContent;
+            });
+          }
+        },
         child: folder == null
             ? StaticLoadingLogo()
             : ResponsiveBuilder(
                 builder: (BuildContext context, SizingInformation constraints) {
                   return Column(
-                    key: Key(DateTime.now().toString()),
                     children: [
                       SizedBox(
                         height: 50,
@@ -116,6 +117,7 @@ class _FoldersPageState extends State<FoldersPage> {
                       Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: TimelineLayout(
+                            key: Key(key),
                             folder: folder!,
                             width: constraints.screenSize.width,
                             height: constraints.screenSize.height),

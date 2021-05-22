@@ -117,7 +117,6 @@ class _FolderViewState extends State<FolderView> {
     }, child: ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
       return Column(
-        key: Key(DateTime.now().toString()),
         children: [
           ReorderableWrap(
               header: [

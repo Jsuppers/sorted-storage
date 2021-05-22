@@ -1,3 +1,6 @@
+// Dart imports:
+import 'dart:developer';
+
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -40,10 +43,12 @@ class TimelineCard extends StatefulWidget {
 
 class _TimelineCardState extends State<TimelineCard> {
   FolderContent? folder;
+  late String key;
 
   @override
   void initState() {
     super.initState();
+    key = DateTime.now().toString();
     folder = widget.folder;
     if (folder?.loaded == null || folder!.loaded == false) {
       BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
@@ -60,17 +65,24 @@ class _TimelineCardState extends State<TimelineCard> {
           return;
         }
         if (state.type == CloudStoriesType.refresh &&
-            state.folderID == folder?.parent?.id) {
-          setState(() {});
+            state.folderID == folder?.parent?.id &&
+            state.data != null) {
+          FolderContent? refreshFolder = state.data as FolderContent?;
+          debugger();
+          if (refreshFolder != null && refreshFolder.id == folder!.id) {
+            setState(() {
+              key = DateTime.now().toString();
+            });
+          }
         }
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 20.0),
         child: Card(
-          key: Key(DateTime.now().toString()),
           child: Column(
             children: <Widget>[
               EventCard(
+                key: Key(key),
                 controls: folder?.amOwner != null && folder!.amOwner == true
                     ? PopUpOptions(
                         folder: widget.folder,

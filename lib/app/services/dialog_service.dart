@@ -69,8 +69,8 @@ class DialogService {
       },
     ).then((_) {
       // update the ui with any changes made in the edit dialog
-      cloudBloc.add(
-          CloudStoriesEvent(CloudStoriesType.refresh, folderID: parent?.id));
+      cloudBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
+          folderID: parent?.id, data: folder));
     });
   }
 

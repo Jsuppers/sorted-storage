@@ -99,9 +99,7 @@ class _ShareWidgetState extends State<ShareWidget> {
                   child: Text('To make this event publicly visible '
                       'click the share button.'),
                 ),
-              ShareButton(
-                  key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-                  shared: shared),
+              ShareButton(shared: shared),
               Container(
                 padding: const EdgeInsets.all(20),
                 child: shared

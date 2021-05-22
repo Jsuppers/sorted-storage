@@ -204,7 +204,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
 
   CloudStoriesState _refresh(CloudStoriesEvent event) {
     return CloudStoriesState(CloudStoriesType.refresh,
-        error: event.error, folderID: event.folderID);
+        error: event.error, folderID: event.folderID, data: event.data);
   }
 
   void _newUser() {
