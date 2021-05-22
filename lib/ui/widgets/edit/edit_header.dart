@@ -52,25 +52,21 @@ class _EditHeaderState extends State<EditHeader> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Visibility(
-                  visible: widget.folder!.parent!.isRootFolder,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: ButtonWithIcon(
-                        text: 'share',
-                        icon: Icons.share,
-                        onPressed: () {
-                          if (widget.savingState == SavingState.saving) {
-                            return;
-                          }
-                          DialogService.shareDialog(
-                              context, widget.folder!.id!);
-                        },
-                        width: widget.width,
-                        backgroundColor: Colors.white,
-                        textColor: Colors.black,
-                        iconColor: Colors.black),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: ButtonWithIcon(
+                      text: 'share',
+                      icon: Icons.share,
+                      onPressed: () {
+                        if (widget.savingState == SavingState.saving) {
+                          return;
+                        }
+                        DialogService.shareDialog(context, widget.folder!);
+                      },
+                      width: widget.width,
+                      backgroundColor: Colors.white,
+                      textColor: Colors.black,
+                      iconColor: Colors.black),
                 ),
                 ButtonWithIcon(
                     text: 'delete',

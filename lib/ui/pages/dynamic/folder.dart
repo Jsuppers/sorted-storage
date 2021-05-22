@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -11,118 +10,77 @@ import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
 import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
-import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_content.dart';
-import 'package:web/app/services/dialog_service.dart';
-import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
-import 'package:web/ui/widgets/icon_button.dart';
+import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
-import 'package:web/ui/widgets/timeline.dart';
+import 'package:web/ui/widgets/timeline_card.dart';
 
-/// Page which contains all the stories
+/// page which shows a single story
 class FolderPage extends StatefulWidget {
-  const FolderPage(this.folderID);
+  // ignore: public_member_api_docs
+  const FolderPage(this._destination);
 
-  final String? folderID;
+  final String _destination;
 
   @override
-  _FolderPageState createState() => _FolderPageState();
+  _ViewPageState createState() => _ViewPageState();
 }
 
-class _FolderPageState extends State<FolderPage> {
+class _ViewPageState extends State<FolderPage> {
   FolderContent? folder;
   bool error = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.folderID != null && widget.folderID!.isNotEmpty) {
-      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveFolder,
-          folderID: widget.folderID));
-    }
+    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
+        CloudStoriesType.retrieveFolder,
+        folderID: widget._destination));
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-        listeners: <BlocListener<dynamic, dynamic>>[
-          BlocListener<CloudStoriesBloc, CloudStoriesState?>(
-              listener: (BuildContext context, CloudStoriesState? state) {
-            if (state == null) {
-              return;
-            }
-            if (state.type == CloudStoriesType.refresh &&
-                state.folderID == widget.folderID) {
-              setState(() {});
-            }
-            if (state.type == CloudStoriesType.retrieveFolder &&
-                state.folderID == widget.folderID) {
-              setState(() {
-                folder = state.data as FolderContent;
-              });
-            }
-          }),
-        ],
-        child: folder == null
-            ? StaticLoadingLogo()
-            : ResponsiveBuilder(
-                builder: (BuildContext context, SizingInformation constraints) {
-                  return Column(
-                    key: Key(DateTime.now().toString()),
-                    children: [
-                      SizedBox(
-                        height: 50,
-                        width: constraints.screenSize.width,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Visibility(
-                                visible: folder!.amOwner == true,
-                                child: Row(
-                                  children: [
-                                    ButtonWithIcon(
-                                        text: 'Home',
-                                        icon: Icons.home_outlined,
-                                        onPressed: () =>
-                                            BlocProvider.of<NavigationBloc>(
-                                                    context)
-                                                .add(NavigateToFolderEvent()),
-                                        width: constraints.screenSize.width,
-                                        backgroundColor: Colors.transparent,
-                                        textColor: Colors.black,
-                                        iconColor: Colors.black),
-                                    ButtonWithIcon(
-                                        text: 'Add',
-                                        icon: Icons.create_new_folder_outlined,
-                                        onPressed: () =>
-                                            DialogService.editDialog(context,
-                                                parent: folder),
-                                        width: constraints.screenSize.width,
-                                        backgroundColor: Colors.transparent,
-                                        textColor: Colors.black,
-                                        iconColor: Colors.black),
-                                  ],
-                                ),
-                              ),
-                              const NavBarLogo(height: 30),
-                            ],
+    return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
+      listener: (BuildContext context, CloudStoriesState? state) {
+        if (state == null) {
+          return;
+        }
+        if (state.type == CloudStoriesType.retrieveFolder &&
+            state.folderID == widget._destination) {
+          setState(() {
+            folder = state.data as FolderContent;
+          });
+        }
+      },
+      child: folder == null
+          ? const FullPageLoadingLogo(backgroundColor: Colors.transparent)
+          : ResponsiveBuilder(
+              builder: (BuildContext context, SizingInformation info) {
+                return error
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const SizedBox(height: 20),
+                          Text(
+                            'Error getting content',
+                            style: myThemeData.textTheme.headline3,
                           ),
-                        ),
-                      ),
-                      Padding(
+                          Text(
+                            'are you sure the link is correct?',
+                            style: myThemeData.textTheme.bodyText1,
+                          ),
+                          Image.asset('assets/images/error.png'),
+                        ],
+                      )
+                    : Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: TimelineLayout(
-                            folder: folder!,
-                            width: constraints.screenSize.width,
-                            height: constraints.screenSize.height),
-                      ),
-                    ],
-                  );
-                },
-              ));
+                        child: TimelineCard(
+                            width: info.screenSize.width,
+                            height: info.screenSize.height,
+                            folder: folder!),
+                      );
+              },
+            ),
+    );
   }
 }

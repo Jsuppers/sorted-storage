@@ -80,10 +80,10 @@ class LoginPage extends StatelessWidget {
     String? redirectRoute = arguments?[Constants.originalValueKey];
     if (redirectRoute == null ||
         redirectRoute == BaseRoute.login.toRouteString() ||
-        redirectRoute == BaseRoute.home.toRouteString() ||
+        redirectRoute == BaseRoute.about.toRouteString() ||
         redirectRoute == BaseRoute.profile.toRouteString() ||
         redirectRoute == '/') {
-      redirectRoute = BaseRoute.folders.toRouteString();
+      redirectRoute = BaseRoute.home.toRouteString();
     }
     BlocProvider.of<NavigationBloc>(context)
         .add(NavigateToRoute(redirectRoute));

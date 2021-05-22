@@ -1,6 +1,7 @@
-// Flutter imports:
+// Dart imports:
 import 'dart:async';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -190,16 +191,17 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                     child: thumbnailURL.data == null
                         ? StaticLoadingLogo()
                         : Column(
-                          children: [
-                            SizedBox(
-                              height: widget.locked == false ? 80 : 150.0,
-                              width: widget.locked == false ? 80 : 150.0,
-                              child: CachedNetworkImage(
+                            children: [
+                              SizedBox(
+                                height: widget.locked == false ? 80 : 150.0,
+                                width: widget.locked == false ? 80 : 150.0,
+                                child: CachedNetworkImage(
                                   imageUrl: thumbnailURL.data!,
-                                  placeholder: (BuildContext context, String url) =>
-                                      StaticLoadingLogo(),
-                                  errorWidget: (BuildContext context, String url,
-                                          dynamic error) =>
+                                  placeholder:
+                                      (BuildContext context, String url) =>
+                                          StaticLoadingLogo(),
+                                  errorWidget: (BuildContext context,
+                                          String url, dynamic error) =>
                                       _backgroundImage(
                                           widget.media.id,
                                           widget.media,
@@ -210,10 +212,13 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
                                       _backgroundImage(
                                           widget.media.id, widget.media, image),
                                 ),
-                            ),
-                            ImageDescription(media: widget.media, folder: widget.folder,)
-                          ],
-                        ),
+                              ),
+                              ImageDescription(
+                                media: widget.media,
+                                folder: widget.folder,
+                              )
+                            ],
+                          ),
                   ),
           );
         });
@@ -239,7 +244,6 @@ class _ImageDescriptionState extends State<ImageDescription> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     descriptionController.text = widget.media.getDescription() ?? '';
@@ -260,14 +264,12 @@ class _ImageDescriptionState extends State<ImageDescription> {
           if (_debounce?.isActive ?? false) _debounce?.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () {
             widget.media.setDescription(content);
-            UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(folder: widget.folder, media: widget.media);
-            BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                EditorType.updateImageMetadata,
-                data: update));
+            UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(
+                folder: widget.folder, media: widget.media);
+            BlocProvider.of<EditorBloc>(context)
+                .add(EditorEvent(EditorType.updateImageMetadata, data: update));
           });
         },
         maxLines: null);
   }
 }
-
-

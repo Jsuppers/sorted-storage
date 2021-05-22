@@ -4,10 +4,11 @@ enum BaseRoute {
   policy,
   terms,
   error,
-  home,
+  about,
+  folders,
   folder,
   profile,
-  folders,
+  home,
   show
 }
 

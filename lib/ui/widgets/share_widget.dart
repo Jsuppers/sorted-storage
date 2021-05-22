@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 // Project imports:
 import 'package:web/app/blocs/sharing/sharing_state.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/share_button.dart';
@@ -11,11 +12,11 @@ import 'package:web/ui/widgets/share_button.dart';
 // ignore: public_member_api_docs
 class ShareWidget extends StatefulWidget {
   // ignore: public_member_api_docs
-  const ShareWidget({Key? key, required this.folderID, required this.state})
+  const ShareWidget({Key? key, required this.folder, required this.state})
       : super(key: key);
 
   // ignore: public_member_api_docs
-  final String folderID;
+  final FolderContent folder;
 
   // ignore: public_member_api_docs
   final SharingState state;
@@ -32,7 +33,11 @@ class _ShareWidgetState extends State<ShareWidget> {
     final TextEditingController controller = TextEditingController();
     final bool shared = widget.state is SharingSharedState;
     if (shared) {
-      controller.text = '${Constants.websiteURL}/${widget.folderID}';
+      if (widget.folder.parent != null && widget.folder.parent!.isRootFolder) {
+        controller.text = '${Constants.websiteURL}/${widget.folder.id}';
+      } else {
+        controller.text = '${Constants.websiteURL}/folder/${widget.folder.id}';
+      }
     }
 
     return Padding(

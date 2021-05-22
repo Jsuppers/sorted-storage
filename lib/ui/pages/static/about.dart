@@ -8,7 +8,7 @@ import 'package:web/constants.dart';
 import 'package:web/ui/pages/template/page_template.dart';
 
 /// home page
-class HomePage extends StatelessWidget {
+class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<PageItemContent> content = <PageItemContent>[

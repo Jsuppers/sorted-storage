@@ -30,7 +30,7 @@ class NavigatorPopEvent extends NavigationEvent {}
 /// event to navigate to the home page
 class NavigateToHomeEvent extends NavigationEvent {
   /// constructor which sets route to the home page
-  NavigateToHomeEvent() : super(route: BaseRoute.home.toRouteString());
+  NavigateToHomeEvent() : super(route: BaseRoute.about.toRouteString());
 }
 
 /// event to navigate to the login page
@@ -45,7 +45,7 @@ class NavigateToMediaEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToMediaEvent({required String folderId})
       : super(
-            route: '${BaseRoute.folder.toRouteString()}/$folderId',
+            route: '${BaseRoute.folders.toRouteString()}/$folderId',
             requiresAuthentication: true);
 }
 
@@ -54,7 +54,7 @@ class NavigateToFolderEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToFolderEvent()
       : super(
-            route: BaseRoute.folders.toRouteString(),
+            route: BaseRoute.home.toRouteString(),
             requiresAuthentication: true);
 }
 

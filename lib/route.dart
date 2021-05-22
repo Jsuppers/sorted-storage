@@ -9,9 +9,10 @@ import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
 import 'package:web/ui/pages/dynamic/folder.dart';
 import 'package:web/ui/pages/dynamic/folders.dart';
+import 'package:web/ui/pages/dynamic/home.dart';
 import 'package:web/ui/pages/dynamic/profile.dart';
+import 'package:web/ui/pages/static/about.dart';
 import 'package:web/ui/pages/static/error.dart';
-import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/pages/static/privacy_policy.dart';
 import 'package:web/ui/pages/static/terms_of_conditions.dart';
@@ -48,7 +49,7 @@ class RouteConfiguration {
     final BaseRoute currentRoute = BaseRoute.values.firstWhere(
         (BaseRoute br) => br.toRouteString() == baseRoute, orElse: () {
       if (baseRoute.isEmpty || baseRoute.length == 1) {
-        return BaseRoute.home;
+        return BaseRoute.about;
       }
       return BaseRoute.show;
     });
@@ -62,17 +63,19 @@ class RouteConfiguration {
         return PageContent(page: TermsPage());
       case BaseRoute.error:
         return PageContent(page: ErrorPage());
-      case BaseRoute.home:
-        return PageContent(page: HomePage());
+      case BaseRoute.about:
+        return PageContent(page: AboutPage());
       case BaseRoute.profile:
         return PageContent(page: ProfilePage(), requiresAuthentication: true);
+      case BaseRoute.home:
+        return PageContent(page: HomePage(), requiresAuthentication: true);
       case BaseRoute.folders:
-        return PageContent(page: FoldersPage(), requiresAuthentication: true);
-      case BaseRoute.folder:
         return PageContent(
-            page: FolderPage(destination), requiresAuthentication: true);
+            page: FoldersPage(destination), requiresAuthentication: true);
+      case BaseRoute.folder:
+        return PageContent(page: FolderPage(destination));
       case BaseRoute.show:
-        return PageContent(page: FolderPage(baseRoute.replaceFirst('/', '')));
+        return PageContent(page: FoldersPage(baseRoute.replaceFirst('/', '')));
     }
   }
 

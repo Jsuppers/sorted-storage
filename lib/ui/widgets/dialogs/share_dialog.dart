@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/sharing/sharing_bloc.dart';
 import 'package:web/app/blocs/sharing/sharing_state.dart';
+import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/share_widget.dart';
@@ -15,17 +16,17 @@ import 'package:web/ui/widgets/share_widget.dart';
 /// dialog to share or stop sharing a story
 class ShareDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ShareDialog({Key? key, required this.folderID}) : super(key: key);
+  const ShareDialog({Key? key, required this.folder}) : super(key: key);
 
   // ignore: public_member_api_docs
-  final String folderID;
+  final FolderContent folder;
 
   @override
   Widget build(BuildContext context) {
     final GoogleDrive storage =
         GoogleDrive(driveApi: BlocProvider.of<DriveBloc>(context).state);
     return BlocProvider<SharingBloc>(
-      create: (BuildContext context) => SharingBloc(folderID, storage),
+      create: (BuildContext context) => SharingBloc(folder.id!, storage),
       child: Dialog(
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(4.0))),
@@ -37,7 +38,7 @@ class ShareDialog extends StatelessWidget {
             }
             return ShareWidget(
                 key: Key(DateTime.now().toString()),
-                folderID: folderID,
+                folder: folder,
                 state: state);
           },
         ),

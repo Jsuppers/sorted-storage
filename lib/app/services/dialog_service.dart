@@ -75,13 +75,13 @@ class DialogService {
   }
 
   /// dialog to share a folder
-  static void shareDialog(BuildContext context, String folderID) {
+  static void shareDialog(BuildContext context, FolderContent folder) {
     showDialog(
       context: context,
       barrierDismissible: true,
       useRootNavigator: true,
       builder: (BuildContext context) {
-        return ShareDialog(folderID: folderID);
+        return ShareDialog(folder: folder);
       },
     );
   }
