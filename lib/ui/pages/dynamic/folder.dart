@@ -6,10 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
@@ -33,19 +33,19 @@ class _ViewPageState extends State<FolderPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-        CloudStoriesType.retrieveFolder,
+    BlocProvider.of<FolderStorageBloc>(context).add(FolderStorageEvent(
+        FolderStorageType.getFolder,
         folderID: widget._destination));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
-      listener: (BuildContext context, CloudStoriesState? state) {
+    return BlocListener<FolderStorageBloc, FolderStorageState?>(
+      listener: (BuildContext context, FolderStorageState? state) {
         if (state == null) {
           return;
         }
-        if (state.type == CloudStoriesType.retrieveFolder &&
+        if (state.type == FolderStorageType.getFolder &&
             state.folderID == widget._destination) {
           setState(() {
             folder = state.data as FolderContent;

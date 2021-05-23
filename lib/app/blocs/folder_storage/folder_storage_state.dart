@@ -1,13 +1,13 @@
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 
 /// State returned
-class CloudStoriesState {
+class FolderStorageState {
   /// The state contains the type of state and a copy of the cloud timeline
-  const CloudStoriesState(this.type, {this.folderID, this.error, this.data});
+  const FolderStorageState(this.type, {this.folderID, this.error, this.data});
 
   /// type of state
-  final CloudStoriesType type;
+  final FolderStorageType type;
 
   /// generic data passed in the state
   final dynamic data;

@@ -1,14 +1,14 @@
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 
 /// Event for the CloudStoriesBloc
-class CloudStoriesEvent {
+class FolderStorageEvent {
   /// The constructor requires a CloudStories type
-  const CloudStoriesEvent(this.type,
+  const FolderStorageEvent(this.type,
       {this.parentID, this.folderID, this.error, this.data});
 
   /// used to tell the bloc which type of event this is
-  final CloudStoriesType type;
+  final FolderStorageType type;
 
   /// generic data passed in the event
   final dynamic data;

@@ -7,9 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
@@ -22,8 +22,8 @@ class NavigationLogin extends StatelessWidget {
     return MaterialButton(
       onPressed: () {
         if (loggedIn) {
-          BlocProvider.of<CloudStoriesBloc>(context)
-              .add(const CloudStoriesEvent(CloudStoriesType.newUser));
+          BlocProvider.of<FolderStorageBloc>(context)
+              .add(const FolderStorageEvent(FolderStorageType.newUser));
           BlocProvider.of<AuthenticationBloc>(context)
               .add(AuthenticationSignOutEvent());
         } else {

@@ -1,13 +1,10 @@
 /// possible types used for states and events
-enum CloudStoriesType {
+enum FolderStorageType {
   /// new user clears all information
   newUser,
 
   /// retrieve a specific story from storage
-  retrieveFolder,
-
-  /// update the folder's position
-  updateFolderPosition,
+  getFolder,
 
   /// get the root folder for the user
   getRootFolder,

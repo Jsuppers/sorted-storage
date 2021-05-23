@@ -7,10 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_content.dart';
@@ -40,27 +40,27 @@ class _FoldersPageState extends State<FoldersPage> {
     super.initState();
     key = DateTime.now().toString();
     if (widget.folderID != null && widget.folderID!.isNotEmpty) {
-      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveFolder,
+      BlocProvider.of<FolderStorageBloc>(context).add(FolderStorageEvent(
+          FolderStorageType.getFolder,
           folderID: widget.folderID));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
-        listener: (BuildContext context, CloudStoriesState? state) {
+    return BlocListener<FolderStorageBloc, FolderStorageState?>(
+        listener: (BuildContext context, FolderStorageState? state) {
           if (state == null) {
             return;
           }
-          if (state.type == CloudStoriesType.refresh &&
+          if (state.type == FolderStorageType.refresh &&
               state.folderID == widget.folderID &&
               state.data == null) {
             setState(() {
               key = DateTime.now().toString();
             });
           }
-          if (state.type == CloudStoriesType.retrieveFolder &&
+          if (state.type == FolderStorageType.getFolder &&
               state.folderID == widget.folderID) {
             setState(() {
               folder = state.data as FolderContent;

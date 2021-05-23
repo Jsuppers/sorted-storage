@@ -545,7 +545,7 @@ class _ReordableImagesState extends State<ReordableImages> {
             padding: const EdgeInsets.all(8),
             onReorder: (int oldIndex, int newIndex) {
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                  EditorType.updateImagePosition,
+                  EditorType.updatePosition,
                   folderID: widget.folderID,
                   data: UpdatePosition(
                       media: true,

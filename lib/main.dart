@@ -11,13 +11,13 @@ import 'package:url_strategy/url_strategy.dart';
 
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/google_drive.dart';
@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
   late GoogleDrive _googleDrive;
   late DriveBloc _driveBloc;
   late NavigationBloc _navigationBloc;
-  late CloudStoriesBloc _cloudStoriesBloc;
+  late FolderStorageBloc _folderStorageBloc;
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _MyAppState extends State<MyApp> {
     _googleDrive = GoogleDrive();
     _driveBloc = DriveBloc();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
-    _cloudStoriesBloc = CloudStoriesBloc(
+    _folderStorageBloc = FolderStorageBloc(
         storage: _googleDrive, navigationBloc: _navigationBloc);
   }
 
@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
     _driveBloc.close();
     _navigationBloc.close();
-    _cloudStoriesBloc.close();
+    _folderStorageBloc.close();
   }
 
   @override
@@ -74,14 +74,14 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AuthenticationBloc>(
           create: (BuildContext context) => AuthenticationBloc(),
         ),
-        BlocProvider<CloudStoriesBloc>(
-          create: (BuildContext context) => _cloudStoriesBloc,
+        BlocProvider<FolderStorageBloc>(
+          create: (BuildContext context) => _folderStorageBloc,
         ),
         BlocProvider<EditorBloc>(
             create: (BuildContext context) => EditorBloc(
                 storage: _googleDrive,
                 navigationBloc: _navigationBloc,
-                cloudStoriesBloc: _cloudStoriesBloc)),
+                folderStorageBloc: _folderStorageBloc)),
         BlocProvider<CookieNoticeBloc>(
           create: (BuildContext context) => CookieNoticeBloc(),
         ),
@@ -90,8 +90,8 @@ class _MyAppState extends State<MyApp> {
         listeners: <BlocListener<dynamic, dynamic>>[
           BlocListener<AuthenticationBloc, usr.User?>(
             listener: (BuildContext context, usr.User? user) {
-              _cloudStoriesBloc
-                  .add(const CloudStoriesEvent(CloudStoriesType.newUser));
+              _folderStorageBloc
+                  .add(const FolderStorageEvent(FolderStorageType.newUser));
               _driveBloc.add(InitialDriveEvent(user: user));
             },
           ),

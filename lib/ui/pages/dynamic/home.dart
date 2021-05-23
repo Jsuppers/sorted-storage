@@ -8,10 +8,13 @@ import 'package:reorderables/reorderables.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/editor/editor_bloc.dart';
+import 'package:web/app/blocs/editor/editor_event.dart';
+import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/folder_content.dart';
@@ -32,8 +35,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<CloudStoriesBloc>(context)
-        .add(const CloudStoriesEvent(CloudStoriesType.getRootFolder));
+    BlocProvider.of<FolderStorageBloc>(context)
+        .add(const FolderStorageEvent(FolderStorageType.getRootFolder));
   }
 
   @override
@@ -100,17 +103,17 @@ class _FolderViewState extends State<FolderView> {
       }
     }
 
-    return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
-        listener: (BuildContext context, CloudStoriesState? state) {
+    return BlocListener<FolderStorageBloc, FolderStorageState?>(
+        listener: (BuildContext context, FolderStorageState? state) {
       if (state == null) {
         return;
       }
-      if (state.type == CloudStoriesType.getRootFolder) {
+      if (state.type == FolderStorageType.getRootFolder) {
         setState(() {
           folder = state.data as FolderContent;
         });
       }
-      if (state.type == CloudStoriesType.refresh &&
+      if (state.type == FolderStorageType.refresh &&
           state.folderID == folder?.id) {
         setState(() {});
       }
@@ -157,9 +160,8 @@ class _FolderViewState extends State<FolderView> {
                     metadata: folder?.metadata ?? {},
                     items: <FolderContent>[...folder!.subFolders!]);
 
-                BlocProvider.of<CloudStoriesBloc>(context).add(
-                    CloudStoriesEvent(CloudStoriesType.updateFolderPosition,
-                        data: ui));
+                BlocProvider.of<EditorBloc>(context)
+                    .add(EditorEvent(EditorType.updatePosition, data: ui));
 
                 setState(() {
                   final FolderContent image =

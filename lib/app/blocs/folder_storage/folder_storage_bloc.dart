@@ -10,22 +10,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
-import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/constants.dart';
 
 /// CloudStoriesBloc handles all the cloud changes of the timeline.
-class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
+class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
   /// The constructor sets the private timeline data and sets the state to
   /// initial_state
-  CloudStoriesBloc({required this.storage, required this.navigationBloc})
+  FolderStorageBloc({required this.storage, required this.navigationBloc})
       : super(null);
 
   late NavigationBloc navigationBloc;
@@ -34,35 +33,27 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
   GoogleDrive storage;
 
   @override
-  Stream<CloudStoriesState> mapEventToState(CloudStoriesEvent? event) async* {
+  Stream<FolderStorageState> mapEventToState(FolderStorageEvent? event) async* {
     if (event == null) {
       return;
     }
     switch (event.type) {
-      case CloudStoriesType.updateFolderPosition:
-        _updateFolderPosition(event.data as UpdatePosition);
-        break;
-      case CloudStoriesType.getRootFolder:
+      case FolderStorageType.getRootFolder:
         yield await _getRootFolder();
         break;
-      case CloudStoriesType.retrieveFolder:
+      case FolderStorageType.getFolder:
         yield await _retrieveFolder(event);
         break;
-      case CloudStoriesType.refresh:
+      case FolderStorageType.refresh:
         yield _refresh(event);
         break;
-      case CloudStoriesType.newUser:
+      case FolderStorageType.newUser:
         _newUser();
         break;
     }
   }
 
-  Future<void> _updateFolderPosition(UpdatePosition updatePosition) async {
-    final double? newOrder = await storage.updatePosition(updatePosition);
-    updatePosition.items[updatePosition.currentIndex].setTimestamp(newOrder);
-  }
-
-  Future<CloudStoriesState> _getRootFolder() async {
+  Future<FolderStorageState> _getRootFolder() async {
     if (rootFolder == null) {
       final String query =
           "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
@@ -93,10 +84,11 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
       rootFolder?.isRootFolder = true;
       rootFolder?.amOwner = true;
     }
-    return CloudStoriesState(CloudStoriesType.getRootFolder, data: rootFolder);
+    return FolderStorageState(FolderStorageType.getRootFolder,
+        data: rootFolder);
   }
 
-  Future<CloudStoriesState> _retrieveFolder(CloudStoriesEvent event) async {
+  Future<FolderStorageState> _retrieveFolder(FolderStorageEvent event) async {
     FolderContent? folder = event.data as FolderContent?;
     if (folder == null && cache.containsKey(event.folderID)) {
       folder = cache[event.folderID];
@@ -104,7 +96,7 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     folder = await _updateFolderData(event.folderID!, folder: folder);
     folder.amOwner ??= await storage.amOwner(event.folderID!);
     cache.putIfAbsent(folder.id!, () => folder);
-    return CloudStoriesState(CloudStoriesType.retrieveFolder,
+    return FolderStorageState(FolderStorageType.getFolder,
         data: folder, folderID: event.folderID);
   }
 
@@ -194,7 +186,6 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
       currentFolder.setTimestamp(
           (DateTime.now().millisecondsSinceEpoch + index).toDouble());
     }
-    // TODO images not showing when directly going to media
     currentFolder.images = images;
     currentFolder.subFolders = subFolders;
     currentFolder.loaded = true;
@@ -202,8 +193,8 @@ class CloudStoriesBloc extends Bloc<CloudStoriesEvent, CloudStoriesState?> {
     return currentFolder;
   }
 
-  CloudStoriesState _refresh(CloudStoriesEvent event) {
-    return CloudStoriesState(CloudStoriesType.refresh,
+  FolderStorageState _refresh(FolderStorageEvent event) {
+    return FolderStorageState(FolderStorageType.refresh,
         error: event.error, folderID: event.folderID, data: event.data);
   }
 

@@ -11,10 +11,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_state.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
@@ -60,8 +60,8 @@ class _TimelineEventCardState extends State<EventCard> {
     super.initState();
     folder = widget.folder;
     if (folder?.loaded == null || folder!.loaded == false) {
-      BlocProvider.of<CloudStoriesBloc>(context).add(CloudStoriesEvent(
-          CloudStoriesType.retrieveFolder,
+      BlocProvider.of<FolderStorageBloc>(context).add(FolderStorageEvent(
+          FolderStorageType.getFolder,
           folderID: widget.folder.id,
           data: folder));
     }
@@ -148,12 +148,12 @@ class _TimelineEventCardState extends State<EventCard> {
       return first.compareTo(second);
     });
 
-    return BlocListener<CloudStoriesBloc, CloudStoriesState?>(
-        listener: (BuildContext context, CloudStoriesState? state) {
+    return BlocListener<FolderStorageBloc, FolderStorageState?>(
+        listener: (BuildContext context, FolderStorageState? state) {
           if (state == null) {
             return;
           }
-          if (state.type == CloudStoriesType.retrieveFolder &&
+          if (state.type == FolderStorageType.getFolder &&
               state.folderID == folder!.id) {
             setState(() {});
           }

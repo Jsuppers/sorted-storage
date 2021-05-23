@@ -6,9 +6,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_type.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/models/folder_content.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/edit_folder_dialog.dart';
@@ -33,8 +33,8 @@ class DialogService {
 
   static void imageUploadDialog(BuildContext context,
       {required FolderContent folder}) {
-    final CloudStoriesBloc cloudBloc =
-        BlocProvider.of<CloudStoriesBloc>(context);
+    final FolderStorageBloc cloudBloc =
+        BlocProvider.of<FolderStorageBloc>(context);
     FilePicker.platform
         .pickFiles(
             type: FileType.media, allowMultiple: true, withReadStream: true)
@@ -48,8 +48,8 @@ class DialogService {
                     builder: (BuildContext context) {
                       return ImageUploadDialog(file: file, folder: folder);
                     },
-                  ).then((value) => cloudBloc.add(CloudStoriesEvent(
-                      CloudStoriesType.refresh,
+                  ).then((value) => cloudBloc.add(FolderStorageEvent(
+                      FolderStorageType.refresh,
                       folderID: folder.parent!.id)))
                 }
             });
@@ -58,8 +58,8 @@ class DialogService {
   /// dialog to share a folder
   static void editDialog(BuildContext context,
       {FolderContent? folder, FolderContent? parent}) {
-    final CloudStoriesBloc cloudBloc =
-        BlocProvider.of<CloudStoriesBloc>(context);
+    final FolderStorageBloc cloudBloc =
+        BlocProvider.of<FolderStorageBloc>(context);
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -69,7 +69,7 @@ class DialogService {
       },
     ).then((_) {
       // update the ui with any changes made in the edit dialog
-      cloudBloc.add(CloudStoriesEvent(CloudStoriesType.refresh,
+      cloudBloc.add(FolderStorageEvent(FolderStorageType.refresh,
           folderID: parent?.id, data: folder));
     });
   }
