@@ -10,7 +10,7 @@ import 'package:emojis/emojis.dart';
 import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
@@ -48,7 +48,7 @@ class GoogleDrive {
     final String? id = _getId(updatePosition, updatePosition.currentIndex);
     if (id != null) {
       updatePosition.metadata[describeEnum(MetadataKeys.timestamp)] = order;
-      await updateDescription(id, updatePosition.metadata);
+      await updateMetadata(id, updatePosition.metadata);
     } else {
       throw 'error';
     }
@@ -86,8 +86,7 @@ class GoogleDrive {
     return uploadMedia.id;
   }
 
-  /// update a media file index
-  Future<File> updateDescription(
+  Future<File> updateMetadata(
       String fileId, Map<String, dynamic> metadata) async {
     final File mediaFile = File();
     mediaFile.description = jsonEncode(metadata);
@@ -95,12 +94,12 @@ class GoogleDrive {
     return driveApi!.files.update(mediaFile, fileId);
   }
 
-  Future<FolderContent?> createFolder(FolderContent? parent) async {
+  Future<Folder?> createFolder(Folder? parent) async {
     if (parent == null || parent.id == null) {
       return null;
     }
     final File fileMetadata = File();
-    final FolderContent fileProperties = FolderContent(
+    final Folder fileProperties = Folder(
         title: 'New Folder',
         emoji: Emojis.smilingFace,
         parent: parent,
@@ -111,21 +110,9 @@ class GoogleDrive {
     fileMetadata.description = jsonEncode(fileProperties.metadata ?? {});
     final File rt = await createFile(fileMetadata);
     fileProperties.id = rt.id;
+    parent.subFolders!.add(fileProperties);
 
     return fileProperties;
-  }
-
-  Future<String?> uploadMedia(String parentID, String name, int contentLength,
-      Stream<List<int>> mediaStream,
-      {required String mimeType}) async {
-    final File mediaFile = File();
-    mediaFile.parents = <String>[parentID];
-    mediaFile.mimeType = mimeType;
-    mediaFile.name = name;
-    final File folder = await driveApi!.files
-        .create(mediaFile, uploadMedia: Media(mediaStream, contentLength));
-
-    return folder.id;
   }
 
   Future<String?> updateFileName(String fileID, String name) async {
@@ -167,10 +154,6 @@ class GoogleDrive {
 
   Future<FileList> listFiles(String query, {String? filter}) async {
     return driveApi!.files.list(q: query, $fields: filter);
-  }
-
-  Future<File> updateFile(String fileID, Media media) {
-    return driveApi!.files.update(File(), fileID, uploadMedia: media);
   }
 
   Future<Permission> createPermission(String fileID, Permission perm) async {

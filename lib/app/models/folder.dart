@@ -21,21 +21,20 @@ class FolderNameData {
     return FolderNameData(emoji: emoji, title: title);
   }
 
-  static String toFileName(FolderContent folder) {
+  static String toFileName(Folder folder) {
     return '${folder.emoji} ${folder.title}';
   }
 }
 
 /// content for a story
-class FolderContent {
+class Folder {
   // ignore: public_member_api_docs
-  FolderContent({
+  Folder({
     this.id,
     this.amOwner,
     required this.title,
     required this.emoji,
     this.images,
-    this.permissionID,
     this.metadata,
     this.subFolders,
     this.parent,
@@ -45,15 +44,15 @@ class FolderContent {
     metadata ??= {};
   }
 
-  static FolderContent createFromFolderName(
+  static Folder createFromFolderName(
       {required String? folderName,
       required Map<String, dynamic>? metadata,
       required String id,
-      FolderContent? parent,
+      Folder? parent,
       bool? owner}) {
     folderName ??= '';
     final FolderNameData fileName = FolderNameData.fromFileName(folderName);
-    return FolderContent(
+    return Folder(
       emoji: fileName.emoji,
       title: fileName.title,
       id: id,
@@ -63,11 +62,11 @@ class FolderContent {
     );
   }
 
-  static void sortFolders(List<FolderContent>? folders) {
+  static void sortFolders(List<Folder>? folders) {
     if (folders == null) {
       return;
     }
-    folders.sort((FolderContent a, FolderContent b) {
+    folders.sort((Folder a, Folder b) {
       final double first = a.getTimestamp() ?? 0;
       final double second = b.getTimestamp() ?? 0;
       return first.compareTo(second);
@@ -75,10 +74,9 @@ class FolderContent {
   }
 
   /// clones a story content
-  FolderContent.clone(FolderContent event)
+  Folder.clone(Folder event)
       : title = event.title,
         emoji = event.emoji,
-        permissionID = event.permissionID,
         metadata = Map.from(event.metadata ?? {}),
         images = Map<String, FolderMedia>.from(
             event.images!.map((String key, FolderMedia value) {
@@ -88,7 +86,7 @@ class FolderContent {
         amOwner = event.amOwner,
         isRootFolder = event.isRootFolder,
         parent = event.parent,
-        subFolders = List<FolderContent>.from(event.subFolders!);
+        subFolders = List<Folder>.from(event.subFolders!);
 
   double? getTimestamp() {
     return metadata?[describeEnum(MetadataKeys.timestamp)] as double?;
@@ -119,10 +117,7 @@ class FolderContent {
 
   bool isRootFolder = false;
 
-  FolderContent? parent;
-
-  /// the ID of the permission for this folder
-  String? permissionID;
+  Folder? parent;
 
   /// if the current user is the owner of the folder
   bool? amOwner;
@@ -132,5 +127,5 @@ class FolderContent {
   /// images on the main story
   Map<String, FolderMedia>? images;
 
-  List<FolderContent>? subFolders;
+  List<Folder>? subFolders;
 }

@@ -17,7 +17,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
@@ -54,7 +54,7 @@ class FolderView extends StatefulWidget {
 }
 
 class _FolderViewState extends State<FolderView> {
-  FolderContent? folder;
+  Folder? folder;
 
   String _shortenText(String text) {
     if (text.length <= 20) {
@@ -67,7 +67,7 @@ class _FolderViewState extends State<FolderView> {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
     if (folder != null && folder!.subFolders != null) {
-      for (FolderContent subFolder in folder!.subFolders!) {
+      for (Folder subFolder in folder!.subFolders!) {
         children.add(
           GestureDetector(
             onTap: () => {
@@ -110,7 +110,7 @@ class _FolderViewState extends State<FolderView> {
       }
       if (state.type == FolderStorageType.getRootFolder) {
         setState(() {
-          folder = state.data as FolderContent;
+          folder = state.data as Folder;
         });
       }
       if (state.type == FolderStorageType.refresh &&
@@ -158,13 +158,13 @@ class _FolderViewState extends State<FolderView> {
                     currentIndex: oldIndex,
                     targetIndex: newIndex,
                     metadata: folder?.metadata ?? {},
-                    items: <FolderContent>[...folder!.subFolders!]);
+                    items: <Folder>[...folder!.subFolders!]);
 
                 BlocProvider.of<EditorBloc>(context)
                     .add(EditorEvent(EditorType.updatePosition, data: ui));
 
                 setState(() {
-                  final FolderContent image =
+                  final Folder image =
                       folder!.subFolders!.removeAt(oldIndex);
                   folder!.subFolders!.insert(newIndex, image);
                 });

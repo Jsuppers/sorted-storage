@@ -13,7 +13,7 @@ import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/url_service.dart';
@@ -42,7 +42,7 @@ class FolderImage extends StatefulWidget {
   final String imageKey;
 
   // ignore: public_member_api_docs
-  final FolderContent folder;
+  final Folder folder;
 
   @override
   _FolderImageState createState() => _FolderImageState();
@@ -67,7 +67,7 @@ class RetryMediaWidget extends StatefulWidget {
   @override
   _RetryMediaWidgetState createState() => _RetryMediaWidgetState();
 
-  FolderContent folder;
+  Folder folder;
   FolderMedia media;
   bool locked;
 }
@@ -228,7 +228,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
 class ImageDescription extends StatefulWidget {
   ImageDescription({required this.media, required this.folder});
   FolderMedia media;
-  FolderContent folder;
+  Folder folder;
 
   @override
   _ImageDescriptionState createState() => _ImageDescriptionState();

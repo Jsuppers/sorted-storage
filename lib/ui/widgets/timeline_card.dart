@@ -14,7 +14,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/pop_up_options.dart';
 import 'package:web/ui/widgets/timeline_event_card.dart';
 
@@ -35,14 +35,14 @@ class TimelineCard extends StatefulWidget {
   final double height;
 
   // ignore: public_member_api_docs
-  final FolderContent folder;
+  final Folder folder;
 
   @override
   _TimelineCardState createState() => _TimelineCardState();
 }
 
 class _TimelineCardState extends State<TimelineCard> {
-  FolderContent? folder;
+  Folder? folder;
   late String key;
 
   @override
@@ -67,7 +67,7 @@ class _TimelineCardState extends State<TimelineCard> {
         if (state.type == FolderStorageType.refresh &&
             state.folderID == folder?.parent?.id &&
             state.data != null) {
-          FolderContent? refreshFolder = state.data as FolderContent?;
+          Folder? refreshFolder = state.data as Folder?;
           debugger();
           if (refreshFolder != null && refreshFolder.id == folder!.id) {
             setState(() {

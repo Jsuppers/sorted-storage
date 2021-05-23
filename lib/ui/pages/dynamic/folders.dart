@@ -13,7 +13,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -31,7 +31,7 @@ class FoldersPage extends StatefulWidget {
 }
 
 class _FoldersPageState extends State<FoldersPage> {
-  FolderContent? folder;
+  Folder? folder;
   bool error = false;
   late String key;
 
@@ -63,7 +63,7 @@ class _FoldersPageState extends State<FoldersPage> {
           if (state.type == FolderStorageType.getFolder &&
               state.folderID == widget.folderID) {
             setState(() {
-              folder = state.data as FolderContent;
+              folder = state.data as Folder;
             });
           }
         },

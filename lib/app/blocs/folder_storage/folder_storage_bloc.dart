@@ -14,7 +14,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/services/google_drive.dart';
@@ -28,8 +28,8 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
       : super(null);
 
   late NavigationBloc navigationBloc;
-  FolderContent? rootFolder;
-  Map<String, FolderContent?> cache = <String, FolderContent?>{};
+  Folder? rootFolder;
+  Map<String, Folder?> cache = <String, Folder?>{};
   GoogleDrive storage;
 
   @override
@@ -42,7 +42,7 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
         yield await _getRootFolder();
         break;
       case FolderStorageType.getFolder:
-        yield await _retrieveFolder(event);
+        yield await _getFolder(event);
         break;
       case FolderStorageType.refresh:
         yield _refresh(event);
@@ -82,28 +82,26 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
       rootFolder = await _updateFolderData(rootFile.id!,
           folderName: rootFile.name!, metadata: metadata);
       rootFolder?.isRootFolder = true;
-      rootFolder?.amOwner = true;
     }
     return FolderStorageState(FolderStorageType.getRootFolder,
         data: rootFolder);
   }
 
-  Future<FolderStorageState> _retrieveFolder(FolderStorageEvent event) async {
-    FolderContent? folder = event.data as FolderContent?;
+  Future<FolderStorageState> _getFolder(FolderStorageEvent event) async {
+    Folder? folder = event.data as Folder?;
     if (folder == null && cache.containsKey(event.folderID)) {
       folder = cache[event.folderID];
     }
     folder = await _updateFolderData(event.folderID!, folder: folder);
-    folder.amOwner ??= await storage.amOwner(event.folderID!);
     cache.putIfAbsent(folder.id!, () => folder);
     return FolderStorageState(FolderStorageType.getFolder,
         data: folder, folderID: event.folderID);
   }
 
-  Future<FolderContent> _updateFolderData(String folderID,
+  Future<Folder> _updateFolderData(String folderID,
       {String? folderName,
       Map<String, dynamic>? metadata,
-      FolderContent? folder}) async {
+      Folder? folder}) async {
     if (folder != null && folder.loaded == true) {
       return folder;
     }
@@ -111,12 +109,12 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
         "'$folderID' in parents and trashed=false",
         filter: GoogleDrive.folderFilter);
 
-    FolderContent? currentFolder = folder ??
-        FolderContent.createFromFolderName(
+    Folder? currentFolder = folder ??
+        Folder.createFromFolderName(
             folderName: folderName, id: folderID, metadata: metadata);
 
     final Map<String, FolderMedia> images = <String, FolderMedia>{};
-    final List<FolderContent> subFolders = <FolderContent>[];
+    final List<Folder> subFolders = <Folder>[];
     int index = 0;
     for (final File file in filesInFolder.files!) {
       Map<String, dynamic>? metadata = {};
@@ -154,7 +152,7 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
         }
         images.putIfAbsent(file.id!, () => media);
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
-        final FolderContent subFolder = FolderContent.createFromFolderName(
+        final Folder subFolder = Folder.createFromFolderName(
             folderName: file.name!,
             owner: subFolderOwner,
             parent: currentFolder,
@@ -189,6 +187,7 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
     currentFolder.images = images;
     currentFolder.subFolders = subFolders;
     currentFolder.loaded = true;
+    currentFolder.amOwner ??= await storage.amOwner(folderID);
 
     return currentFolder;
   }

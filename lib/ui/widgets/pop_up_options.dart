@@ -2,13 +2,13 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/dialog_service.dart';
 
 class PopUpOptions extends StatelessWidget {
   PopUpOptions({this.folder});
 
-  FolderContent? folder;
+  Folder? folder;
 
   @override
   Widget build(BuildContext context) {

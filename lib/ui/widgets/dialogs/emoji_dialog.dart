@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/edit/emoji_picker.dart';
 
 /// emoji dialog
@@ -14,7 +14,7 @@ class EmojiDialog extends StatelessWidget {
   const EmojiDialog({Key? key, this.folder}) : super(key: key);
 
   // ignore: public_member_api_docs
-  final FolderContent? folder;
+  final Folder? folder;
 
   @override
   Widget build(BuildContext context) {

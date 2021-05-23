@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 // Project imports:
 import 'package:web/app/blocs/sharing/sharing_state.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/share_button.dart';
@@ -16,7 +16,7 @@ class ShareWidget extends StatefulWidget {
       : super(key: key);
 
   // ignore: public_member_api_docs
-  final FolderContent folder;
+  final Folder folder;
 
   // ignore: public_member_api_docs
   final SharingState state;

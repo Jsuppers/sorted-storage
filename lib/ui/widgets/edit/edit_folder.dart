@@ -18,7 +18,7 @@ import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/timeline_data.dart';
@@ -36,16 +36,16 @@ class EditFolder extends StatefulWidget {
   // ignore: public_member_api_docs
   const EditFolder({Key? key, this.folder, this.parent}) : super(key: key);
 
-  final FolderContent? folder;
-  final FolderContent? parent;
+  final Folder? folder;
+  final Folder? parent;
 
   @override
   _EditFolderState createState() => _EditFolderState();
 }
 
 class _EditFolderState extends State<EditFolder> {
-  FolderContent? folder;
-  FolderContent? cloudCopyFolder;
+  Folder? folder;
+  Folder? cloudCopyFolder;
   String? folderID;
   bool error = false;
 
@@ -57,7 +57,7 @@ class _EditFolderState extends State<EditFolder> {
           .add(EditorEvent(EditorType.createFolder, data: widget.parent));
     } else {
       cloudCopyFolder = widget.folder;
-      folder = FolderContent.clone(cloudCopyFolder!);
+      folder = Folder.clone(cloudCopyFolder!);
       folderID = cloudCopyFolder!.id;
     }
   }
@@ -70,15 +70,15 @@ class _EditFolderState extends State<EditFolder> {
           if (state?.error != null) {
             setState(() => error = true);
           } else if (state?.data != null) {
-            FolderContent newFolder = state?.data as FolderContent;
+            Folder newFolder = state?.data as Folder;
             setState(() {
               if (folder != null) {
-                folder!.subFolders!.add(FolderContent.clone(newFolder));
+                folder!.subFolders!.add(Folder.clone(newFolder));
               } else {
                 cloudCopyFolder = newFolder;
-                folder = FolderContent.clone(newFolder);
+                folder = Folder.clone(newFolder);
               }
-              FolderContent.sortFolders(folder?.subFolders);
+              Folder.sortFolders(folder?.subFolders);
               folderID = folder!.id;
             });
           }
@@ -137,9 +137,9 @@ class EditStoryContent extends StatefulWidget {
   final double height;
 
   // ignore: public_member_api_docs
-  final FolderContent? folder;
+  final Folder? folder;
   // ignore: public_member_api_docs
-  final FolderContent? cloudCopy;
+  final Folder? cloudCopy;
 
   @override
   _EditStoryContentState createState() => _EditStoryContentState();
@@ -196,7 +196,7 @@ class _EditStoryContentState extends State<EditStoryContent> {
     ]);
   }
 
-  List<Widget> getCards(FolderContent folder, int depth) {
+  List<Widget> getCards(Folder folder, int depth) {
     List<Widget> output = [];
     output.add(EventCard(
       savingState: savingState,
@@ -269,7 +269,7 @@ class EventCard extends StatefulWidget {
   final double height;
 
   /// the story this card is related to
-  final FolderContent folder;
+  final Folder folder;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();

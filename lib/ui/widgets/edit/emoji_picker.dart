@@ -11,14 +11,14 @@ import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 
 /// widget which allows a user to pick a emoji
 class EmojiPicker extends StatefulWidget {
   // ignore: public_member_api_docs
   const EmojiPicker({Key? key, required this.folder}) : super(key: key);
 
-  final FolderContent? folder;
+  final Folder? folder;
 
   @override
   State createState() => EmojiPickerState();

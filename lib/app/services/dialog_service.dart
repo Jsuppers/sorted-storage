@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/dialogs/cookie_dialog.dart';
 import 'package:web/ui/widgets/dialogs/edit_folder_dialog.dart';
 import 'package:web/ui/widgets/dialogs/emoji_dialog.dart';
@@ -32,7 +32,7 @@ class DialogService {
   }
 
   static void imageUploadDialog(BuildContext context,
-      {required FolderContent folder}) {
+      {required Folder folder}) {
     final FolderStorageBloc cloudBloc =
         BlocProvider.of<FolderStorageBloc>(context);
     FilePicker.platform
@@ -57,7 +57,7 @@ class DialogService {
 
   /// dialog to share a folder
   static void editDialog(BuildContext context,
-      {FolderContent? folder, FolderContent? parent}) {
+      {Folder? folder, Folder? parent}) {
     final FolderStorageBloc cloudBloc =
         BlocProvider.of<FolderStorageBloc>(context);
     showDialog(
@@ -75,7 +75,7 @@ class DialogService {
   }
 
   /// dialog to share a folder
-  static void shareDialog(BuildContext context, FolderContent folder) {
+  static void shareDialog(BuildContext context, Folder folder) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -87,7 +87,7 @@ class DialogService {
   }
 
   /// dialog to allow the user to select a emoji
-  static void emojiDialog(BuildContext context, {FolderContent? folder}) {
+  static void emojiDialog(BuildContext context, {Folder? folder}) {
     showDialog(
       context: context,
       barrierDismissible: true,

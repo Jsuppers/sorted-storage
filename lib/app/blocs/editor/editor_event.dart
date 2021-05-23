@@ -1,6 +1,6 @@
 // Project imports:
 import 'package:web/app/blocs/editor/editor_type.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 
 /// Event for the CloudStoriesBloc
@@ -38,13 +38,13 @@ class EditorEvent {
 class UpdateImagesEvent {
   UpdateImagesEvent({required this.images, required this.folder});
   Map<String, FolderMedia> images;
-  FolderContent folder;
+  Folder folder;
 }
 
 class UpdateImageMetaDataEvent {
   UpdateImageMetaDataEvent({required this.media, required this.folder});
   FolderMedia media;
-  FolderContent folder;
+  Folder folder;
 }
 
 class UpdateDeleteImageEvent {
@@ -53,5 +53,5 @@ class UpdateDeleteImageEvent {
     required this.folder,
   });
   String imageID;
-  FolderContent folder;
+  Folder folder;
 }

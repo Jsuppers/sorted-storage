@@ -15,7 +15,7 @@ import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/services/dialog_service.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -31,7 +31,7 @@ class EditHeader extends StatefulWidget {
     required this.folder,
   }) : super(key: key);
 
-  final FolderContent? folder;
+  final Folder? folder;
   final double width;
   final SavingState? savingState;
 

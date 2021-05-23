@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class _TimeLineEventEntry {
@@ -30,7 +30,7 @@ class TimelineLayout extends StatefulWidget {
   // ignore: public_member_api_docs
   final double height;
 
-  final FolderContent folder;
+  final Folder folder;
 
   @override
   State<StatefulWidget> createState() => _TimelineLayoutState();
@@ -43,8 +43,8 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
     if (widget.folder.subFolders != null) {
-      FolderContent.sortFolders(widget.folder.subFolders);
-      widget.folder.subFolders!.forEach((FolderContent subFolder) {
+      Folder.sortFolders(widget.folder.subFolders);
+      widget.folder.subFolders!.forEach((Folder subFolder) {
         final Widget display = TimelineCard(
           width: widget.width,
           height: widget.height,

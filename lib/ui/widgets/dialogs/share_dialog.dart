@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/sharing/sharing_bloc.dart';
 import 'package:web/app/blocs/sharing/sharing_state.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/google_drive.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/share_widget.dart';
@@ -19,7 +19,7 @@ class ShareDialog extends StatelessWidget {
   const ShareDialog({Key? key, required this.folder}) : super(key: key);
 
   // ignore: public_member_api_docs
-  final FolderContent folder;
+  final Folder folder;
 
   @override
   Widget build(BuildContext context) {

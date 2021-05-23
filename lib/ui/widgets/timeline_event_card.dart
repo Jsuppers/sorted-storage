@@ -15,7 +15,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/constants.dart';
@@ -45,7 +45,7 @@ class EventCard extends StatefulWidget {
   final double height;
 
   /// the story this card is related to
-  final FolderContent folder;
+  final Folder folder;
 
   @override
   _TimelineEventCardState createState() => _TimelineEventCardState();
@@ -53,7 +53,7 @@ class EventCard extends StatefulWidget {
 
 class _TimelineEventCardState extends State<EventCard> {
   final DateFormat formatter = DateFormat('dd MMMM, yyyy');
-  FolderContent? folder;
+  Folder? folder;
 
   @override
   void initState() {

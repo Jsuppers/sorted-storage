@@ -15,7 +15,7 @@ import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/ui/helpers/text_display.dart';
@@ -27,7 +27,7 @@ class ImageUploadDialog extends StatelessWidget {
       : super(key: key);
 
   // ignore: public_member_api_docs
-  final FolderContent folder;
+  final Folder folder;
 
   final FilePickerResult file;
 

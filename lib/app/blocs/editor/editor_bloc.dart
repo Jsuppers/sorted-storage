@@ -13,7 +13,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/timeline_data.dart';
@@ -86,10 +86,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<EditorState> _createFolder(EditorEvent event) async {
     add(EditorEvent(EditorType.syncingState,
         data: SavingState.saving, refreshUI: event.refreshUI));
-    FolderContent parent = event.data as FolderContent;
-    final FolderContent? folder = await _storage.createFolder(parent);
+    Folder parent = event.data as Folder;
+    final Folder? folder = await _storage.createFolder(parent);
     if (folder != null) {
-      parent.subFolders!.add(folder);
       add(EditorEvent(EditorType.syncingState,
           data: SavingState.success, refreshUI: event.refreshUI));
     } else {
@@ -100,7 +99,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   Future<void> _deleteFolder(EditorEvent event) async {
-    FolderContent folder = event.data as FolderContent;
+    Folder folder = event.data as Folder;
     String? error;
     await _storage.delete(folder.id!).then((dynamic value) {
       folder.parent!.subFolders!
@@ -150,7 +149,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     int index,
     String name,
     FolderMedia storyMedia,
-    FolderContent folder,
+    Folder folder,
   ) async {
     final StreamController<List<int>> streamController =
         StreamController<List<int>>();
@@ -178,7 +177,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         folder.id!, name, storyMedia, streamController.stream);
 
     if (imageID != null) {
-      final FolderContent? eventData =
+      final Folder? eventData =
           TimelineService.getFolderWithID(folder.id!, folder.parent);
       storyMedia.id = imageID;
       storyMedia.retrieveThumbnail = true;
@@ -203,7 +202,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
     add(EditorEvent(EditorType.syncingState,
         data: SavingState.saving, refreshUI: event.refreshUI));
-    final FolderContent eventData = TimelineService.getFolderWithID(
+    final Folder eventData = TimelineService.getFolderWithID(
         update.folder.id!, update.folder.parent)!;
     final String? error = await _deleteFile(update.imageID);
     if (error == null) {
@@ -227,12 +226,12 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   void _updateName(EditorEvent event) {
-    final FolderContent folder = event.data as FolderContent;
+    final Folder folder = event.data as Folder;
     add(EditorEvent(EditorType.syncingState,
         data: SavingState.saving, refreshUI: event.refreshUI));
     String fileName = FolderNameData.toFileName(folder);
     _storage.updateFileName(folder.id!, fileName).then((value) {
-      FolderContent eventData =
+      Folder eventData =
           TimelineService.getFolderWithID(folder.id!, folder.parent)!;
       eventData.emoji = folder.emoji;
       eventData.title = folder.title;
@@ -242,13 +241,13 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   Future<void> _updateTimestamp(EditorEvent event) async {
-    final FolderContent folder = event.data as FolderContent;
+    final Folder folder = event.data as Folder;
     final String folderID = folder.id!;
     add(EditorEvent(EditorType.syncingState,
         data: SavingState.saving, refreshUI: event.refreshUI));
     try {
-      await _storage.updateDescription(folderID, folder.metadata ?? {});
-      final FolderContent? eventData =
+      await _storage.updateMetadata(folderID, folder.metadata ?? {});
+      final Folder? eventData =
           TimelineService.getFolderWithID(folderID, folder.parent);
       if (eventData != null) {
         eventData.setTimestamp(folder.getTimestamp());
@@ -268,7 +267,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         event.data as UpdateImageMetaDataEvent;
 
     _storage
-        .updateDescription(update.media.id, update.media.metadata ?? {})
+        .updateMetadata(update.media.id, update.media.metadata ?? {})
         .then((value) {
       TimelineService.getFolderWithID(update.folder.id!, update.folder.parent)!
           .images!
@@ -281,9 +280,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateMetadata(EditorEvent event) {
     add(EditorEvent(EditorType.syncingState,
         data: SavingState.saving, refreshUI: event.refreshUI));
-    final FolderContent folder = event.data as FolderContent;
+    final Folder folder = event.data as Folder;
 
-    _storage.updateDescription(folder.id!, folder.metadata ?? {}).then((value) {
+    _storage.updateMetadata(folder.id!, folder.metadata ?? {}).then((value) {
       TimelineService.getFolderWithID(folder.id!, folder.parent)!.metadata =
           folder.metadata!;
       add(EditorEvent(EditorType.syncingState,
@@ -299,7 +298,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     add(const EditorEvent(EditorType.syncingState, data: SavingState.saving));
 
     _storage.updatePosition(uip).then((newOrder) {
-      final FolderContent? eventData = TimelineService.getFolderWithID(
+      final Folder? eventData = TimelineService.getFolderWithID(
           uip.folderID, _folderStorageBloc.rootFolder);
 
       if (eventData != null) {

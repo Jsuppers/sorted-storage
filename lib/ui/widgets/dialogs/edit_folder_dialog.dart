@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 // Project imports:
-import 'package:web/app/models/folder_content.dart';
+import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/edit/edit_folder.dart';
 
 /// emoji dialog
@@ -15,8 +15,8 @@ class EditFolderDialog extends StatelessWidget {
       : super(key: key);
 
   // ignore: public_member_api_docs
-  final FolderContent? folder;
-  final FolderContent? parent;
+  final Folder? folder;
+  final Folder? parent;
 
   @override
   Widget build(BuildContext context) {
