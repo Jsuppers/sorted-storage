@@ -14,6 +14,7 @@ import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
+import 'package:web/constants.dart';
 
 /// service which communicates with google drive
 class GoogleDrive {
@@ -166,5 +167,135 @@ class GoogleDrive {
 
   Future<dynamic> deletePermission(String fileID, String permissionID) async {
     return driveApi!.permissions.delete(fileID, permissionID);
+  }
+
+  Future<Folder> getRootFolder() async {
+      final String query =
+          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+      final FileList folderParent =
+          await listFiles(query, filter: GoogleDrive.folderFilter);
+      File rootFile;
+      Map<String, dynamic> metadata = {};
+      if (folderParent.files!.isEmpty) {
+        metadata[describeEnum(MetadataKeys.timestamp)] =
+            DateTime.now().millisecondsSinceEpoch.toDouble();
+        final File fileMetadata = File();
+        fileMetadata.name = Constants.rootFolder;
+        fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+        fileMetadata.description = jsonEncode(metadata);
+        rootFile = await createFile(fileMetadata);
+      } else {
+        rootFile = folderParent.files!.first;
+        try {
+          metadata =
+              jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ??
+                  {};
+        } catch (e) {
+          metadata = {};
+        }
+      }
+      Folder rootFolder = await getFolder(rootFile.id!,
+          folderName: rootFile.name!);
+      rootFolder.metadata = metadata;
+      rootFolder.isRootFolder = true;
+    return rootFolder;
+  }
+
+  Future<Folder> updateFolder(String folderID,
+    { String? folderName, required Folder folder }) async {
+    if (folder.loaded == true) {
+      return folder;
+    }
+    return _updateFolder(folder);
+    }
+
+  Future<Folder> getFolder(String folderID, {String? folderName}) async {
+    final Folder folder = Folder.createFromFolderName(
+            folderName: folderName, id: folderID);
+    return _updateFolder(folder);
+  }
+
+  Future<Folder> _updateFolder(Folder folder) async {
+    final FileList filesInFolder = await listFiles(
+        "'${folder.id}' in parents and trashed=false",
+        filter: GoogleDrive.folderFilter);
+
+    final Map<String, FolderMedia> images = <String, FolderMedia>{};
+    final List<Folder> subFolders = <Folder>[];
+    int index = 0;
+    for (final File file in filesInFolder.files!) {
+      Map<String, dynamic>? metadata = {};
+      if (file.description != null) {
+        try {
+          metadata =
+              jsonDecode(file.description ?? '') as Map<String, dynamic>? ?? {};
+        } catch (e) {
+          metadata = {};
+        }
+      }
+      bool subFolderOwner = false;
+      if (file.owners != null) {
+        for (final User user in file.owners!) {
+          if (user.me == true) {
+            subFolderOwner = true;
+            break;
+          }
+        }
+      }
+
+      if (file.mimeType!.startsWith('image/') ||
+          file.mimeType!.startsWith('video/')) {
+        final FolderMedia media = FolderMedia(
+          id: file.id!,
+          name: file.name!,
+          isVideo: file.mimeType!.startsWith('video/'),
+          retrieveThumbnail: true,
+          thumbnailURL: file.thumbnailLink,
+          metadata: metadata,
+        );
+        if (media.getTimestamp() == null) {
+          media.setTimestamp(
+              (DateTime.now().millisecondsSinceEpoch + index).toDouble());
+        }
+        images.putIfAbsent(file.id!, () => media);
+      } else if (file.mimeType == 'application/vnd.google-apps.folder') {
+        final Folder subFolder = Folder.createFromFolderName(
+            folderName: file.name!,
+            owner: subFolderOwner,
+            parent: folder,
+            id: file.id!,
+            metadata: metadata);
+        if (subFolder.getTimestamp() == null) {
+          subFolder.setTimestamp(
+              (DateTime.now().millisecondsSinceEpoch + index).toDouble());
+        }
+        subFolders.add(subFolder);
+      } else {
+        final FolderMedia media = FolderMedia(
+            name: file.name!,
+            id: file.id!,
+            isDocument: true,
+            thumbnailURL: file.thumbnailLink,
+            retrieveThumbnail: true,
+            metadata: metadata);
+        if (media.getTimestamp() == null) {
+          media.setTimestamp(
+              (DateTime.now().millisecondsSinceEpoch + index).toDouble());
+        }
+        images.putIfAbsent(file.id!, () => media);
+      }
+      index++;
+    }
+
+    if (folder.getTimestamp() == null) {
+      folder.setTimestamp(
+          (DateTime.now().millisecondsSinceEpoch + index).toDouble());
+    }
+    folder.images = images;
+    folder.subFolders = subFolders;
+    folder.loaded = true;
+    folder.amOwner ??= await amOwner(folder.id!);
+
+    return folder;
   }
 }
