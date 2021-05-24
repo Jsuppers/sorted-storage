@@ -86,28 +86,21 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<EditorState> _createFolder(EditorEvent event) async {
     final Folder parent = event.data as Folder;
     Folder? folder;
-    await syncData(() async {
+    await _syncData(() async {
       return _storage.createFolder(parent);
     }, (Folder? newFolder) => folder = newFolder);
     return EditorState(EditorType.createFolder, data: folder);
   }
 
   Future<void> _deleteFolder(EditorEvent event) async {
-    Folder folder = event.data as Folder;
-    String? error;
+    final Folder folder = event.data as Folder;
     await _storage.delete(folder.id!).then((dynamic value) {
-      folder.parent!.subFolders!
-          .removeWhere((subfolder) => subfolder.id == folder.id);
+      folder.parent!.subFolders!.removeWhere(
+              (Folder subfolder) => subfolder.id == folder.id);
       _folderStorageBloc.add(FolderStorageEvent(FolderStorageType.refresh,
           folderID: folder.parent!.id));
-      return null;
-    }, onError: (_) {
-      error = 'Error when deleting story';
-    });
-
-    if (error == null && event.closeDialog) {
       _navigationBloc.add(NavigatorPopDialogEvent());
-    }
+    });
   }
 
   Future<void> _uploadImages(EditorEvent event) async {
@@ -194,7 +187,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   Future<void> _deleteImage(EditorEvent event) async {
     final UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
-    syncData(
+    _syncData(
       () async {
         return _storage.delete(update.imageID);
       },
@@ -210,7 +203,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateName(EditorEvent event) {
     final Folder folder = event.data as Folder;
     final String fileName = FolderNameData.toFileName(folder);
-    syncData(
+    _syncData(
       () async {
         return _storage.updateFileName(folder.id!, fileName);
       },
@@ -226,7 +219,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<void> _updateTimestamp(EditorEvent event) async {
     final Folder folder = event.data as Folder;
     final String folderID = folder.id!;
-    syncData(
+    _syncData(
       () async {
         return _storage.updateMetadata(folderID, folder.metadata!);
       },
@@ -243,7 +236,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateImageMetadata(EditorEvent event) {
     final UpdateImageMetaDataEvent update =
         event.data as UpdateImageMetaDataEvent;
-    syncData(
+    _syncData(
       () async {
         return _storage.updateMetadata(update.media.id, update.media.metadata!);
       },
@@ -257,7 +250,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   void _updateMetadata(EditorEvent event) {
     final Folder folder = event.data as Folder;
-    syncData(
+    _syncData(
       () async {
         return _storage.updateMetadata(folder.id!, folder.metadata!);
       },
@@ -271,7 +264,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   void _updatePosition(EditorEvent event) {
     final UpdatePosition update = event.data as UpdatePosition;
-    syncData(
+    _syncData(
       () async {
         return _storage.updatePosition(update);
       },
@@ -288,7 +281,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     );
   }
 
-  Future<void> syncData(Function updateMethod, Function successMethod) async {
+  /// helper method to set the syncing state while calling a method
+  Future<void> _syncData(Function updateMethod, Function successMethod) async {
     add(const EditorEvent(EditorType.syncingState, data: SavingState.saving));
     try {
       final dynamic response = await updateMethod();
