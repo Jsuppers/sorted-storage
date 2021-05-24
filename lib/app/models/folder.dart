@@ -47,7 +47,7 @@ class Folder {
   static Folder createFromFolderName(
       {required String? folderName,
       required String id,
-        Map<String, dynamic>? metadata,
+      Map<String, dynamic>? metadata,
       Folder? parent,
       bool? owner}) {
     folderName ??= '';

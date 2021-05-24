@@ -170,48 +170,48 @@ class GoogleDrive {
   }
 
   Future<Folder> getRootFolder() async {
-      final String query =
-          "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
-      final FileList folderParent =
-          await listFiles(query, filter: GoogleDrive.folderFilter);
-      File rootFile;
-      Map<String, dynamic> metadata = {};
-      if (folderParent.files!.isEmpty) {
-        metadata[describeEnum(MetadataKeys.timestamp)] =
-            DateTime.now().millisecondsSinceEpoch.toDouble();
-        final File fileMetadata = File();
-        fileMetadata.name = Constants.rootFolder;
-        fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-        fileMetadata.description = jsonEncode(metadata);
-        rootFile = await createFile(fileMetadata);
-      } else {
-        rootFile = folderParent.files!.first;
-        try {
-          metadata =
-              jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ??
-                  {};
-        } catch (e) {
-          metadata = {};
-        }
+    final String query =
+        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
+    final FileList folderParent =
+        await listFiles(query, filter: GoogleDrive.folderFilter);
+    File rootFile;
+    Map<String, dynamic> metadata = {};
+    if (folderParent.files!.isEmpty) {
+      metadata[describeEnum(MetadataKeys.timestamp)] =
+          DateTime.now().millisecondsSinceEpoch.toDouble();
+      final File fileMetadata = File();
+      fileMetadata.name = Constants.rootFolder;
+      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
+      fileMetadata.description = jsonEncode(metadata);
+      rootFile = await createFile(fileMetadata);
+    } else {
+      rootFile = folderParent.files!.first;
+      try {
+        metadata =
+            jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ??
+                {};
+      } catch (e) {
+        metadata = {};
       }
-      Folder rootFolder = await getFolder(rootFile.id!,
-          folderName: rootFile.name!);
-      rootFolder.metadata = metadata;
-      rootFolder.isRootFolder = true;
+    }
+    Folder rootFolder =
+        await getFolder(rootFile.id!, folderName: rootFile.name!);
+    rootFolder.metadata = metadata;
+    rootFolder.isRootFolder = true;
     return rootFolder;
   }
 
   Future<Folder> updateFolder(String folderID,
-    { String? folderName, required Folder folder }) async {
+      {String? folderName, required Folder folder}) async {
     if (folder.loaded == true) {
       return folder;
     }
     return _updateFolder(folder);
-    }
+  }
 
   Future<Folder> getFolder(String folderID, {String? folderName}) async {
-    final Folder folder = Folder.createFromFolderName(
-            folderName: folderName, id: folderID);
+    final Folder folder =
+        Folder.createFromFolderName(folderName: folderName, id: folderID);
     return _updateFolder(folder);
   }
 

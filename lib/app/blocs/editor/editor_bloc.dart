@@ -84,17 +84,11 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   Future<EditorState> _createFolder(EditorEvent event) async {
-    add(EditorEvent(EditorType.syncingState,
-        data: SavingState.saving, refreshUI: event.refreshUI));
-    Folder parent = event.data as Folder;
-    final Folder? folder = await _storage.createFolder(parent);
-    if (folder != null) {
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success, refreshUI: event.refreshUI));
-    } else {
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.error, refreshUI: event.refreshUI));
-    }
+    final Folder parent = event.data as Folder;
+    Folder? folder;
+    await syncData(() async {
+      return _storage.createFolder(parent);
+    }, (Folder? newFolder) => folder = newFolder);
     return EditorState(EditorType.createFolder, data: folder);
   }
 
@@ -199,119 +193,111 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   Future<void> _deleteImage(EditorEvent event) async {
-    UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
-    add(EditorEvent(EditorType.syncingState,
-        data: SavingState.saving, refreshUI: event.refreshUI));
-    final Folder eventData = TimelineService.getFolderWithID(
-        update.folder.id!, update.folder.parent)!;
-    final String? error = await _deleteFile(update.imageID);
-    if (error == null) {
-      eventData.images!.remove(update.imageID);
-      update.folder.images!.remove(update.imageID);
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success, refreshUI: event.refreshUI));
-    } else {
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.error, refreshUI: event.refreshUI));
-    }
-  }
-
-  Future<String?> _deleteFile(String fileID) async {
-    try {
-      _storage.delete(fileID);
-      return null;
-    } catch (e) {
-      return 'could not delete $fileID';
-    }
+    final UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
+    syncData(
+      () async {
+        return _storage.delete(update.imageID);
+      },
+      (_) {
+        final Folder eventData = TimelineService.getFolderWithID(
+            update.folder.id!, update.folder.parent)!;
+        eventData.images!.remove(update.imageID);
+        update.folder.images!.remove(update.imageID);
+      },
+    );
   }
 
   void _updateName(EditorEvent event) {
     final Folder folder = event.data as Folder;
-    add(EditorEvent(EditorType.syncingState,
-        data: SavingState.saving, refreshUI: event.refreshUI));
-    String fileName = FolderNameData.toFileName(folder);
-    _storage.updateFileName(folder.id!, fileName).then((value) {
-      Folder eventData =
-          TimelineService.getFolderWithID(folder.id!, folder.parent)!;
-      eventData.emoji = folder.emoji;
-      eventData.title = folder.title;
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success, refreshUI: event.refreshUI));
-    });
+    final String fileName = FolderNameData.toFileName(folder);
+    syncData(
+      () async {
+        return _storage.updateFileName(folder.id!, fileName);
+      },
+      (_) {
+        final Folder eventData =
+            TimelineService.getFolderWithID(folder.id!, folder.parent)!;
+        eventData.emoji = folder.emoji;
+        eventData.title = folder.title;
+      },
+    );
   }
 
   Future<void> _updateTimestamp(EditorEvent event) async {
     final Folder folder = event.data as Folder;
     final String folderID = folder.id!;
-    add(EditorEvent(EditorType.syncingState,
-        data: SavingState.saving, refreshUI: event.refreshUI));
-    try {
-      await _storage.updateMetadata(folderID, folder.metadata ?? {});
-      final Folder? eventData =
-          TimelineService.getFolderWithID(folderID, folder.parent);
-      if (eventData != null) {
-        eventData.setTimestamp(folder.getTimestamp());
-      }
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success, refreshUI: event.refreshUI));
-    } catch (e) {
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.error, refreshUI: event.refreshUI));
-    }
+    syncData(
+      () async {
+        return _storage.updateMetadata(folderID, folder.metadata!);
+      },
+      (_) {
+        final Folder? eventData =
+            TimelineService.getFolderWithID(folderID, folder.parent);
+        if (eventData != null) {
+          eventData.setTimestamp(folder.getTimestamp());
+        }
+      },
+    );
   }
 
   void _updateImageMetadata(EditorEvent event) {
-    add(EditorEvent(EditorType.syncingState,
-        data: SavingState.saving, refreshUI: event.refreshUI));
     final UpdateImageMetaDataEvent update =
         event.data as UpdateImageMetaDataEvent;
-
-    _storage
-        .updateMetadata(update.media.id, update.media.metadata ?? {})
-        .then((value) {
-      TimelineService.getFolderWithID(update.folder.id!, update.folder.parent)!
-          .images!
-          .update(update.media.id, (_) => update.media);
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success, refreshUI: event.refreshUI));
-    });
+    syncData(
+      () async {
+        return _storage.updateMetadata(update.media.id, update.media.metadata!);
+      },
+      (_) {
+        final Folder? cloudCopy = TimelineService.getFolderWithID(
+            update.folder.id!, update.folder.parent);
+        cloudCopy?.images?.update(update.media.id, (_) => update.media);
+      },
+    );
   }
 
   void _updateMetadata(EditorEvent event) {
-    add(EditorEvent(EditorType.syncingState,
-        data: SavingState.saving, refreshUI: event.refreshUI));
     final Folder folder = event.data as Folder;
-
-    _storage.updateMetadata(folder.id!, folder.metadata ?? {}).then((value) {
-      TimelineService.getFolderWithID(folder.id!, folder.parent)!.metadata =
-          folder.metadata!;
-      add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success, refreshUI: event.refreshUI));
-    });
+    syncData(
+      () async {
+        return _storage.updateMetadata(folder.id!, folder.metadata!);
+      },
+      (_) {
+        final Folder? cloudCopy = TimelineService.getFolderWithID(
+            folder.id!, _folderStorageBloc.rootFolder);
+        cloudCopy?.metadata = folder.metadata;
+      },
+    );
   }
 
   void _updatePosition(EditorEvent event) {
-    UpdatePosition uip = event.data as UpdatePosition;
-    List<dynamic> images = uip.items;
-    int currentIndex = uip.currentIndex;
+    final UpdatePosition update = event.data as UpdatePosition;
+    syncData(
+      () async {
+        return _storage.updatePosition(update);
+      },
+      (double? newPosition) {
+        final Folder? cloudCopy = TimelineService.getFolderWithID(
+            update.folderID, _folderStorageBloc.rootFolder);
 
-    add(const EditorEvent(EditorType.syncingState, data: SavingState.saving));
-
-    _storage.updatePosition(uip).then((newOrder) {
-      final Folder? eventData = TimelineService.getFolderWithID(
-          uip.folderID, _folderStorageBloc.rootFolder);
-
-      if (eventData != null) {
-        final FolderMedia? oldItem =
-            eventData.images?[images[currentIndex].imageKey];
-        if (oldItem != null) {
-          oldItem.setTimestamp(newOrder);
+        if (cloudCopy != null) {
+          final FolderMedia? file =
+              cloudCopy.images?[update.items[update.currentIndex].imageKey];
+          file?.setTimestamp(newPosition);
         }
-      }
+      },
+    );
+  }
 
+  Future<void> syncData(Function updateMethod, Function successMethod) async {
+    add(const EditorEvent(EditorType.syncingState, data: SavingState.saving));
+    try {
+      final dynamic response = await updateMethod();
+      await successMethod(response);
       add(const EditorEvent(EditorType.syncingState,
           data: SavingState.success));
-    });
+    } catch (e) {
+      add(const EditorEvent(EditorType.syncingState, data: SavingState.error));
+    }
   }
 
   EditorState _relayState(EditorType type, EditorEvent event) {

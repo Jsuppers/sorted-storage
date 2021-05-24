@@ -164,8 +164,7 @@ class _FolderViewState extends State<FolderView> {
                     .add(EditorEvent(EditorType.updatePosition, data: ui));
 
                 setState(() {
-                  final Folder image =
-                      folder!.subFolders!.removeAt(oldIndex);
+                  final Folder image = folder!.subFolders!.removeAt(oldIndex);
                   folder!.subFolders!.insert(newIndex, image);
                 });
               },
