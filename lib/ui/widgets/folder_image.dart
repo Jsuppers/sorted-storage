@@ -76,8 +76,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
 
   Widget _backgroundImage(
-      String imageKey, FolderMedia media, ImageProvider? image,
-      {bool error = false}) {
+      String imageKey, FolderMedia media, ImageProvider? image) {
     return Container(
       height: 150.0,
       width: 150.0,
@@ -165,8 +164,59 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
     );
   }
 
+  Widget createImage() {
+    showPlaceholder = widget.media.thumbnailURL == null;
+    return RawMaterialButton(
+      onPressed: () {
+        if (widget.locked) {
+          URLService.openDriveMedia(widget.media.id);
+        }
+      },
+      child: showPlaceholder
+          ? _backgroundImage(widget.media.id, widget.media, null)
+          : SizedBox(
+        height: widget.locked == false ? 180 : 250.0,
+        width: widget.locked == false ? 80 : 150.0,
+        child: widget.media.thumbnailURL == null
+            ? StaticLoadingLogo()
+            : Column(
+          children: [
+            SizedBox(
+              height: widget.locked == false ? 80 : 150.0,
+              width: widget.locked == false ? 80 : 150.0,
+              child: CachedNetworkImage(
+                imageUrl: widget.media.thumbnailURL!,
+                placeholder:
+                    (BuildContext context, String url) =>
+                    StaticLoadingLogo(),
+                errorWidget: (BuildContext context,
+                    String url, dynamic error) =>
+                    _backgroundImage(
+                        widget.media.id,
+                        widget.media,
+                        const AssetImage(
+                            'assets/images/error.png')),
+                imageBuilder: (BuildContext context,
+                    ImageProvider<Object> image) =>
+                    _backgroundImage(
+                        widget.media.id, widget.media, image),
+              ),
+            ),
+            ImageDescription(
+              media: widget.media,
+              folder: widget.folder,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.media.thumbnailURL != null) {
+      return createImage();
+    }
     return FutureBuilder<String?>(
         future: RetryService.getThumbnail(
           BlocProvider.of<FolderStorageBloc>(context).storage,
@@ -179,51 +229,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
           if (thumbnailURL.data != null) {
             widget.media.thumbnailURL = thumbnailURL.data;
           }
-          showPlaceholder = thumbnailURL.data == null;
-          return RawMaterialButton(
-            onPressed: () {
-              if (widget.locked) {
-                URLService.openDriveMedia(widget.media.id);
-              }
-            },
-            child: showPlaceholder
-                ? _backgroundImage(widget.media.id, widget.media, null)
-                : SizedBox(
-                    height: widget.locked == false ? 180 : 250.0,
-                    width: widget.locked == false ? 80 : 150.0,
-                    child: thumbnailURL.data == null
-                        ? StaticLoadingLogo()
-                        : Column(
-                            children: [
-                              SizedBox(
-                                height: widget.locked == false ? 80 : 150.0,
-                                width: widget.locked == false ? 80 : 150.0,
-                                child: CachedNetworkImage(
-                                  imageUrl: thumbnailURL.data!,
-                                  placeholder:
-                                      (BuildContext context, String url) =>
-                                          StaticLoadingLogo(),
-                                  errorWidget: (BuildContext context,
-                                          String url, dynamic error) =>
-                                      _backgroundImage(
-                                          widget.media.id,
-                                          widget.media,
-                                          const AssetImage(
-                                              'assets/images/error.png')),
-                                  imageBuilder: (BuildContext context,
-                                          ImageProvider<Object> image) =>
-                                      _backgroundImage(
-                                          widget.media.id, widget.media, image),
-                                ),
-                              ),
-                              ImageDescription(
-                                media: widget.media,
-                                folder: widget.folder,
-                              )
-                            ],
-                          ),
-                  ),
-          );
+          return createImage();
         });
   }
 }
