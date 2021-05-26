@@ -391,8 +391,8 @@ class _TimelineEventCardState extends State<EventCard> {
               height: 40,
               width: 140,
               child: ButtonWithIcon(
-                  text: 'add media',
-                  icon: Icons.image,
+                  text: 'add file',
+                  icon: Icons.file_upload,
                   onPressed: () async {
                     if (widget.savingState == SavingState.saving) {
                       return;

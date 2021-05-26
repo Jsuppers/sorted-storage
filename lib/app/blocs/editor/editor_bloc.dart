@@ -48,16 +48,16 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         yield await _createFolder(event);
         break;
       case EditorType.deleteFolder:
-        await _deleteFolder(event);
+        _deleteFolder(event);
         break;
       case EditorType.uploadImages:
-        await _uploadImages(event);
+        _uploadImages(event);
         break;
       case EditorType.ignoreImage:
         _ignoreImage(event);
         break;
       case EditorType.deleteImage:
-        await _deleteImage(event);
+        _deleteImage(event);
         break;
       case EditorType.updateName:
         _updateName(event);
@@ -86,7 +86,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<EditorState> _createFolder(EditorEvent event) async {
     final Folder parent = event.data as Folder;
     Folder? folder;
-    await _syncData(() async {
+    await _syncData(event, () async {
       return _storage.createFolder(parent);
     }, (Folder? newFolder) => folder = newFolder);
     return EditorState(EditorType.createFolder, data: folder);
@@ -187,7 +187,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   Future<void> _deleteImage(EditorEvent event) async {
     final UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
-    _syncData(
+    _syncData(event,
       () async {
         return _storage.delete(update.imageID);
       },
@@ -203,7 +203,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateName(EditorEvent event) {
     final Folder folder = event.data as Folder;
     final String fileName = FolderNameData.toFileName(folder);
-    _syncData(
+    _syncData(event,
       () async {
         return _storage.updateFileName(folder.id!, fileName);
       },
@@ -219,7 +219,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<void> _updateTimestamp(EditorEvent event) async {
     final Folder folder = event.data as Folder;
     final String folderID = folder.id!;
-    _syncData(
+    _syncData(event,
       () async {
         return _storage.updateMetadata(folderID, folder.metadata!);
       },
@@ -236,7 +236,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateImageMetadata(EditorEvent event) {
     final UpdateImageMetaDataEvent update =
         event.data as UpdateImageMetaDataEvent;
-    _syncData(
+    _syncData(event,
       () async {
         return _storage.updateMetadata(update.media.id, update.media.metadata!);
       },
@@ -250,7 +250,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   void _updateMetadata(EditorEvent event) {
     final Folder folder = event.data as Folder;
-    _syncData(
+    _syncData(event,
       () async {
         return _storage.updateMetadata(folder.id!, folder.metadata!);
       },
@@ -264,7 +264,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   void _updatePosition(EditorEvent event) {
     final UpdatePosition update = event.data as UpdatePosition;
-    _syncData(
+    _syncData(event,
       () async {
         return _storage.updatePosition(update);
       },
@@ -282,15 +282,18 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   /// helper method to set the syncing state while calling a method
-  Future<void> _syncData(Function updateMethod, Function successMethod) async {
+  Future<void> _syncData(EditorEvent event, Function updateMethod, Function successMethod) async {
     add(const EditorEvent(EditorType.syncingState, data: SavingState.saving));
     try {
       final dynamic response = await updateMethod();
       await successMethod(response);
-      add(const EditorEvent(EditorType.syncingState,
-          data: SavingState.success));
+      add(EditorEvent(EditorType.syncingState,
+          data: SavingState.success,
+          refreshUI: event.refreshUI));
     } catch (e) {
-      add(const EditorEvent(EditorType.syncingState, data: SavingState.error));
+      add(EditorEvent(EditorType.syncingState,
+          data: SavingState.error,
+          refreshUI: event.refreshUI));
     }
   }
 
