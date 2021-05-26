@@ -176,6 +176,9 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
           retrieveThumbnail: widget.media.retrieveThumbnail,
         ),
         builder: (BuildContext context, AsyncSnapshot<String?> thumbnailURL) {
+          if (thumbnailURL.data != null) {
+            widget.media.thumbnailURL = thumbnailURL.data;
+          }
           showPlaceholder = thumbnailURL.data == null;
           return RawMaterialButton(
             onPressed: () {
