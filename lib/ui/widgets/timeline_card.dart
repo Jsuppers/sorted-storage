@@ -68,7 +68,6 @@ class _TimelineCardState extends State<TimelineCard> {
             state.folderID == folder?.parent?.id &&
             state.data != null) {
           Folder? refreshFolder = state.data as Folder?;
-          debugger();
           if (refreshFolder != null && refreshFolder.id == folder!.id) {
             setState(() {
               key = DateTime.now().toString();

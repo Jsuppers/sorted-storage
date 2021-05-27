@@ -41,15 +41,16 @@ class GoogleDrive {
       final double? orderAbove =
           _getOrder(updatePosition, updatePosition.targetIndex);
       final double? orderBelow =
-          _getOrder(updatePosition, updatePosition.targetIndex + 1);
+          _getOrder(updatePosition, updatePosition.targetIndex - 1);
       if (orderAbove != null && orderBelow != null) {
         order = (orderAbove + orderBelow) / 2;
       }
     }
     final String? id = _getId(updatePosition, updatePosition.currentIndex);
     if (id != null) {
-      updatePosition.metadata[describeEnum(MetadataKeys.timestamp)] = order;
-      await updateMetadata(id, updatePosition.metadata);
+      Map<String, dynamic> metaData = _getMetadata(updatePosition, updatePosition.currentIndex);
+      metaData[describeEnum(MetadataKeys.timestamp)] = order;
+      await updateMetadata(id, metaData);
     } else {
       throw 'error';
     }
@@ -70,6 +71,13 @@ class GoogleDrive {
       return updatePosition.items[index]?.folderMedia?.id as String?;
     }
     return updatePosition.items[index]?.id as String?;
+  }
+
+  Map<String, dynamic> _getMetadata(UpdatePosition updatePosition, int index) {
+    if (updatePosition.media != null) {
+      return updatePosition.items[index]?.folderMedia?.metadata as Map<String, dynamic>;
+    }
+    return updatePosition.items[index]?.metadata as Map<String, dynamic>;
   }
 
   /// upload a data stream to a file, and return the file's id

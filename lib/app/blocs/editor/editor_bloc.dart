@@ -269,13 +269,14 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         return _storage.updatePosition(update);
       },
       (double? newPosition) {
-        final Folder? cloudCopy = TimelineService.getFolderWithID(
-            update.folderID, _folderStorageBloc.rootFolder);
-
-        if (cloudCopy != null) {
-          final FolderMedia? file =
-              cloudCopy.images?[update.items[update.currentIndex].imageKey];
-          file?.setTimestamp(newPosition);
+        if (update.media == true) {
+          final Folder? cloudCopy = TimelineService.getFolderWithID(
+              update.folder!.id!, update.folder!.parent);
+          if (cloudCopy != null) {
+            final FolderMedia? file =
+            cloudCopy.images?[update.items[update.currentIndex].imageKey];
+            file?.setTimestamp(newPosition);
+          }
         }
       },
     );

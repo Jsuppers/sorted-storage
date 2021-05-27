@@ -380,8 +380,7 @@ class _TimelineEventCardState extends State<EventCard> {
       const SizedBox(height: 10),
       ReordableImages(
           cards: cards,
-          folderID: widget.folder.id!,
-          metadata: widget.folder.metadata ?? {}),
+          folder: widget.folder),
       const SizedBox(height: 10),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -524,11 +523,10 @@ class _TimelineEventCardState extends State<EventCard> {
 
 class ReordableImages extends StatefulWidget {
   ReordableImages(
-      {required this.cards, required this.folderID, required this.metadata});
+      {required this.cards, required this.folder});
 
   List<FolderImage> cards;
-  String folderID;
-  Map<String, dynamic>? metadata;
+  Folder folder;
 
   @override
   _ReordableImagesState createState() => _ReordableImagesState();
@@ -546,14 +544,13 @@ class _ReordableImagesState extends State<ReordableImages> {
             onReorder: (int oldIndex, int newIndex) {
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updatePosition,
-                  folderID: widget.folderID,
+                  folderID: widget.folder.id,
                   data: UpdatePosition(
                       media: true,
                       currentIndex: oldIndex,
                       targetIndex: newIndex,
                       items: <FolderImage>[...widget.cards],
-                      metadata: widget.metadata ?? {},
-                      folderID: widget.folderID)));
+                      folder: widget.folder)));
 
               setState(() {
                 final FolderImage image = widget.cards.removeAt(oldIndex);

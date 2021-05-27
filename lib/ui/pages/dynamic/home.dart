@@ -154,10 +154,9 @@ class _FolderViewState extends State<FolderView> {
               padding: const EdgeInsets.all(8),
               onReorder: (int oldIndex, int newIndex) {
                 UpdatePosition ui = UpdatePosition(
-                    folderID: folder!.id!,
+                    folder: folder,
                     currentIndex: oldIndex,
                     targetIndex: newIndex,
-                    metadata: folder?.metadata ?? {},
                     items: <Folder>[...folder!.subFolders!]);
 
                 BlocProvider.of<EditorBloc>(context)
