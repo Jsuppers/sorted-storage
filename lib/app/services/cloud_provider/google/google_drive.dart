@@ -2,6 +2,7 @@
 import 'dart:async';
 
 // Package imports:
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,23 +22,60 @@ class GoogleDrive {
   GoogleDrive();
 
   /// drive api
-  DriveApi? driveApi;
+  DriveApi? _driveApi;
 
   late FolderHelper _folderHelper;
   late SharingHelper _sharingHelper;
   late ProfileHelper _profileHelper;
 
-  void newUser({usr.User? user}) {
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      DriveApi.driveFileScope,
+    ],
+  );
+
+  Stream<usr.User?> userChange() {
+    return _googleSignIn.onCurrentUserChanged.map((GoogleSignInAccount? user) {
+      if (user == null) {
+        return null;
+      }
+      final usr.User newUser = usr.User(
+          displayName: user.displayName ?? '',
+          email: user.email,
+          photoUrl: user.photoUrl ?? '',
+          headers: user.authHeaders);
+      _newUser(user: newUser);
+      return newUser;
+    });
+  }
+
+  Future<void> _newUser({usr.User? user}) async {
     http.Client client;
     if (user != null) {
-      client = ClientWithAuthHeaders(user.headers);
+      client = ClientWithAuthHeaders(await user.headers);
     } else {
       client = ClientWithGoogleDriveKey();
     }
-    driveApi = DriveApi(client);
-    _folderHelper = FolderHelper(driveApi);
-    _sharingHelper = SharingHelper(driveApi);
-    _profileHelper = ProfileHelper(driveApi);
+    _driveApi = DriveApi(client);
+    _folderHelper = FolderHelper(_driveApi);
+    _sharingHelper = SharingHelper(_driveApi);
+    _profileHelper = ProfileHelper(_driveApi);
+  }
+
+  Future<bool> isSignedIn() {
+    return _googleSignIn.isSignedIn();
+  }
+
+  Future<void> signIn() {
+    return _googleSignIn.signIn();
+  }
+
+  Future<void> signInSilently(){
+    return _googleSignIn.signInSilently();
+  }
+
+  Future<void> signOut() {
+    return _googleSignIn.signOut();
   }
 
   Future<StorageInformation> getStorageInformation() async {

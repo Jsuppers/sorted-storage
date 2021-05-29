@@ -17,7 +17,7 @@ class User {
   final String photoUrl;
 
   /// auth headers for this user
-  final Map<String, String> headers;
+  final Future<Map<String, String>> headers;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{

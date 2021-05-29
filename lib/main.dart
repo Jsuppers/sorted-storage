@@ -63,7 +63,9 @@ class _MyAppState extends State<MyApp> {
           create: (BuildContext context) => _navigationBloc,
         ),
         BlocProvider<AuthenticationBloc>(
-          create: (BuildContext context) => AuthenticationBloc(),
+          create: (BuildContext context) => AuthenticationBloc(
+            storage: _googleDrive,
+          ),
         ),
         BlocProvider<FolderStorageBloc>(
           create: (BuildContext context) => _folderStorageBloc,
@@ -83,7 +85,6 @@ class _MyAppState extends State<MyApp> {
             listener: (BuildContext context, usr.User? user) {
               _folderStorageBloc
                   .add(const FolderStorageEvent(FolderStorageType.newUser));
-              _googleDrive.newUser(user: user);
             },
           ),
         ],

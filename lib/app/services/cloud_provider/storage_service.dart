@@ -3,10 +3,10 @@ import 'package:web/app/models/file.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/user.dart';
 
-abstract class CloudProvider {
-  CloudProvider();
+abstract class StorageService {
+  StorageService();
 
-  Stream<User?> get onCurrentUserChanged;
+  Stream<User?> userChange();
   Future<bool> isSignedIn();
   Future<User?> signIn();
   Future<User?> signInSilently();
