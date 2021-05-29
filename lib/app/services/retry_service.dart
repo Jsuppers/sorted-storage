@@ -1,16 +1,13 @@
-// Package imports:
-import 'package:googleapis/drive/v3.dart';
-
 // Project imports:
-import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 
 // Project imports:
 
 /// service for retrying
 class RetryService {
   /// get thumbnail image for a file
-  static Future<String?> getThumbnail(GoogleDrive storage, String? thumbnailURL,
-      String folderID, String imageKey,
+  static Future<String?> getThumbnail(StorageService storage,
+      String? thumbnailURL, String folderID, String imageKey,
       {int maxTries = 10, bool retrieveThumbnail = false}) async {
     if (thumbnailURL != null) {
       return thumbnailURL;
@@ -28,10 +25,8 @@ class RetryService {
     }
     return Future<String?>.delayed(Duration(seconds: (exp - currentTry) * 2),
         () async {
-      final File mediaFile =
-          await storage.getFile(imageKey, filter: 'thumbnailLink') as File;
-
-      return getThumbnail(storage, mediaFile.thumbnailLink, folderID, imageKey,
+      final String? thumbnailURL = await storage.getThumbnailURL(imageKey);
+      return getThumbnail(storage, thumbnailURL, folderID, imageKey,
           retrieveThumbnail: retrieveThumbnail, maxTries: currentTry - 1);
     });
   }

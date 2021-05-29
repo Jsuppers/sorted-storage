@@ -18,6 +18,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
 
@@ -35,17 +36,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
-  late GoogleDrive _googleDrive;
+  late StorageService _storage;
   late NavigationBloc _navigationBloc;
   late FolderStorageBloc _folderStorageBloc;
 
   @override
   void initState() {
     super.initState();
-    _googleDrive = GoogleDrive();
+    _storage = GoogleDrive();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
-    _folderStorageBloc = FolderStorageBloc(
-        storage: _googleDrive, navigationBloc: _navigationBloc);
+    _folderStorageBloc =
+        FolderStorageBloc(storage: _storage, navigationBloc: _navigationBloc);
   }
 
   @override
@@ -64,7 +65,7 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<AuthenticationBloc>(
           create: (BuildContext context) => AuthenticationBloc(
-            storage: _googleDrive,
+            storage: _storage,
           ),
         ),
         BlocProvider<FolderStorageBloc>(
@@ -72,7 +73,7 @@ class _MyAppState extends State<MyApp> {
         ),
         BlocProvider<EditorBloc>(
             create: (BuildContext context) => EditorBloc(
-                storage: _googleDrive,
+                storage: _storage,
                 navigationBloc: _navigationBloc,
                 folderStorageBloc: _folderStorageBloc)),
         BlocProvider<CookieNoticeBloc>(

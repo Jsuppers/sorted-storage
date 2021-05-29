@@ -16,11 +16,10 @@ import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/cloud_provider/google/helpers/folder_helper.dart';
 import 'package:web/app/services/cloud_provider/google/helpers/profile_helper.dart';
 import 'package:web/app/services/cloud_provider/google/helpers/sharing_helper.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 
 /// service which communicates with google drive
-class GoogleDrive {
-  GoogleDrive();
-
+class GoogleDrive implements StorageService {
   /// drive api
   DriveApi? _driveApi;
 
@@ -34,6 +33,7 @@ class GoogleDrive {
     ],
   );
 
+  @override
   Stream<usr.User?> userChange() {
     return _googleSignIn.onCurrentUserChanged.map((GoogleSignInAccount? user) {
       if (user == null) {
@@ -62,60 +62,39 @@ class GoogleDrive {
     _profileHelper = ProfileHelper(_driveApi);
   }
 
+  @override
   Future<bool> isSignedIn() {
     return _googleSignIn.isSignedIn();
   }
 
+  @override
   Future<void> signIn() {
     return _googleSignIn.signIn();
   }
 
-  Future<void> signInSilently(){
+  @override
+  Future<void> signInSilently() {
     return _googleSignIn.signInSilently();
   }
 
+  @override
   Future<void> signOut() {
     return _googleSignIn.signOut();
   }
 
+  @override
   Future<StorageInformation> getStorageInformation() async {
     return _profileHelper.getStorageInformation();
   }
 
-  Future<File> updateMetadata(
-      String fileId, Map<String, dynamic> metadata) async {
-    return _folderHelper.updateMetadata(fileId, metadata);
-  }
-
-  /// upload a data stream to a file, and return the file's id
-  Future<String?> uploadFileToFolder(String folderID, String imageName,
-      FileData fileData, Stream<List<int>> dataStream) async {
-    return _folderHelper.uploadFileToFolder(
-        folderID, imageName, fileData, dataStream);
-  }
-
-  Future<Folder?> createFolder(Folder? parent) async {
-    return _folderHelper.createFolder(parent);
-  }
-
-  Future<String?> updateFileName(String fileID, String name) async {
-    return _folderHelper.updateFileName(fileID, name);
-  }
-
-  Future<dynamic> delete(String fileID) async {
-    return _folderHelper.delete(fileID);
-  }
-
-  Future<dynamic> getFile(String fileID, {String? filter}) async {
-    return _folderHelper.getFile(fileID, filter: filter);
-  }
-
-  Future<FileList> listFiles(String query, {String? filter}) async {
-    return _folderHelper.listFiles(query, filter: filter);
-  }
-
+  @override
   Future<Folder> getRootFolder() async {
     return _folderHelper.getRootFolder();
+  }
+
+  @override
+  Future<Folder?> getFolder(String folderID, {String? folderName}) async {
+    return _folderHelper.getFolder(folderID, folderName: folderName);
   }
 
   Future<Folder> updateFolder(String folderID,
@@ -124,18 +103,51 @@ class GoogleDrive {
         folder: folder, folderName: folderName);
   }
 
-  Future<Folder> getFolder(String folderID, {String? folderName}) async {
-    return _folderHelper.getFolder(folderID, folderName: folderName);
+  @override
+  Future<Folder?> createFolder({Folder? parent}) async {
+    return _folderHelper.createFolder(parent);
   }
 
+  @override
+  Future<void> updateMetadata(
+      {required String fileId, required Map<String, dynamic> metadata}) async {
+    await _folderHelper.updateMetadata(fileId, metadata);
+  }
+
+  @override
+  Future<String?> updateFileName(String fileID, String name) async {
+    return _folderHelper.updateFileName(fileID, name);
+  }
+
+  @override
+  Future<String?> uploadFile(
+      String folderID, FileData file, Stream<List<int>> data) async {
+    return _folderHelper.uploadFileToFolder(folderID, file, data);
+  }
+
+  @override
+  Future<dynamic> deleteResource(String fileID) async {
+    return _folderHelper.delete(fileID);
+  }
+
+  @override
+  Future<String?> getThumbnailURL(String fileID) async {
+    final File file =
+        await _folderHelper.getFile(fileID, filter: 'thumbnailLink') as File;
+    return file.thumbnailLink;
+  }
+
+  @override
   Future<SharingInformation> isShared(String folderID) {
     return _sharingHelper.isShared(folderID);
   }
 
+  @override
   Future<SharingInformation> shareFolder(String folderID) {
     return _sharingHelper.shareFolder(folderID);
   }
 
+  @override
   Future<SharingInformation> stopSharingFolder(String folderID) {
     return _sharingHelper.stopSharingFolder(folderID);
   }

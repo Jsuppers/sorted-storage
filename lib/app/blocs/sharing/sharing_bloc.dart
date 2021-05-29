@@ -4,20 +4,20 @@ import 'package:bloc/bloc.dart';
 // Project imports:
 import 'package:web/app/blocs/sharing/sharing_event.dart';
 import 'package:web/app/models/sharing_information.dart';
-import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 
 /// SharingBloc handles creating and delete permissions for a folder to allow
 /// This folder to be shared or un-shared
 class SharingBloc extends Bloc<ShareEvent, SharingInformation?> {
   /// constructor
-  SharingBloc(String folderID, GoogleDrive storage) : super(null) {
+  SharingBloc(String folderID, StorageService storage) : super(null) {
     _folderID = folderID;
     _storage = storage;
     add(InitialEvent());
   }
 
   late String _folderID;
-  late GoogleDrive _storage;
+  late StorageService _storage;
 
   @override
   Stream<SharingInformation> mapEventToState(ShareEvent event) async* {

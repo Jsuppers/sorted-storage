@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_event.dart';
 import 'package:web/app/models/user.dart';
-import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 
 /// This bloc handles the signing in and out of users
 class AuthenticationBloc extends Bloc<AuthenticationEvent, User?> {
@@ -18,7 +18,7 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, User?> {
     });
   }
 
-  GoogleDrive storage;
+  StorageService storage;
 
   @override
   Stream<User?> mapEventToState(AuthenticationEvent event) async* {

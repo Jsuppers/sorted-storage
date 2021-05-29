@@ -2,6 +2,7 @@
 import 'dart:async';
 
 // Package imports:
+import 'package:emojis/emojis.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
@@ -10,7 +11,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 
 /// CloudStoriesBloc handles all the cloud changes of the timeline.
 class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
@@ -22,7 +23,7 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
   late NavigationBloc navigationBloc;
   Folder? rootFolder;
   Map<String, Folder?> cache = <String, Folder?>{};
-  GoogleDrive storage;
+  StorageService storage;
 
   @override
   Stream<FolderStorageState> mapEventToState(FolderStorageEvent? event) async* {
@@ -59,9 +60,10 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
     if (folder != null) {
       await storage.updateFolder(event.folderID!, folder: folder);
     } else {
-      folder = await storage.getFolder(event.folderID!);
+      folder = await storage.getFolder(event.folderID!,
+          folderName: '${Emojis.smilingFace} New Folder');
     }
-    cache.putIfAbsent(folder.id!, () => folder);
+    cache.putIfAbsent(folder!.id!, () => folder);
     return FolderStorageState(FolderStorageType.getFolder,
         data: folder, folderID: event.folderID);
   }

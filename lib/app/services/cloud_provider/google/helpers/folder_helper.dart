@@ -33,10 +33,10 @@ class FolderHelper {
   }
 
   /// upload a data stream to a file, and return the file's id
-  Future<String?> uploadFileToFolder(String folderID, String imageName,
-      FileData fileData, Stream<List<int>> dataStream) async {
+  Future<String?> uploadFileToFolder(
+      String folderID, FileData fileData, Stream<List<int>> dataStream) async {
     final File file = _createDriveFile(folderID,
-        name: imageName, metadata: fileData.metadata);
+        name: fileData.name, metadata: fileData.metadata);
     final Media image = Media(dataStream, fileData.contentSize);
     final File uploadedFile =
         await driveApi!.files.create(file, uploadMedia: image);
@@ -115,7 +115,7 @@ class FolderHelper {
 
   Future<Folder> getFolder(String folderID, {String? folderName}) async {
     final Folder folder =
-        Folder.createFromFolderName(folderName: folderName, id: folderID);
+        Folder.createFromFolderName(id: folderID, folderName: folderName);
     return _updateFolder(folder);
   }
 

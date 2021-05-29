@@ -19,7 +19,7 @@ import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
-import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 import 'package:web/app/services/timeline_service.dart';
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
@@ -28,7 +28,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   /// The constructor sets the private timeline data and sets the state to
   /// initial_state
   EditorBloc(
-      {required GoogleDrive storage,
+      {required StorageService storage,
       required NavigationBloc navigationBloc,
       required FolderStorageBloc folderStorageBloc})
       : super(null) {
@@ -37,7 +37,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _navigationBloc = navigationBloc;
   }
 
-  late GoogleDrive _storage;
+  late StorageService _storage;
   late NavigationBloc _navigationBloc;
   late FolderStorageBloc _folderStorageBloc;
   late List<int> imageIndexesToIgnore;
@@ -88,14 +88,14 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     final Folder parent = event.data as Folder;
     Folder? folder;
     await _syncData(event, () async {
-      return _storage.createFolder(parent);
+      return _storage.createFolder(parent: parent);
     }, (Folder? newFolder) => folder = newFolder);
     return EditorState(EditorType.createFolder, data: folder);
   }
 
   Future<void> _deleteFolder(EditorEvent event) async {
     final Folder folder = event.data as Folder;
-    await _storage.delete(folder.id!).then((dynamic value) {
+    await _storage.deleteResource(folder.id!).then((dynamic value) {
       folder.parent!.subFolders
           .removeWhere((Folder subfolder) => subfolder.id == folder.id);
       _folderStorageBloc.add(FolderStorageEvent(FolderStorageType.refresh,
@@ -114,7 +114,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     for (int i = 0; i < length; i++) {
       final MapEntry<String, FileData> entry = entries[i];
       try {
-        await _uploadImage(i, entry.key, entry.value, update.folder);
+        await _uploadImage(i, entry.value, update.folder);
       } catch (e) {
         errors = true;
         add(EditorEvent(EditorType.uploadStatus,
@@ -135,7 +135,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   Future<void> _uploadImage(
     int index,
-    String name,
     FileData fileData,
     Folder folder,
   ) async {
@@ -161,8 +160,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       streamController.close();
     });
 
-    final String? imageID = await _storage.uploadFileToFolder(
-        folder.id!, name, fileData, streamController.stream);
+    final String? imageID = await _storage.uploadFile(
+        folder.id!, fileData, streamController.stream);
 
     if (imageID != null) {
       final Folder? eventData =
@@ -191,7 +190,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _syncData(
       event,
       () async {
-        return _storage.delete(update.imageID);
+        return _storage.deleteResource(update.imageID);
       },
       (_) {
         final Folder eventData = TimelineService.getFolderWithID(
@@ -225,7 +224,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _syncData(
       event,
       () async {
-        return _storage.updateMetadata(folderID, folder.metadata);
+        return _storage.updateMetadata(
+            fileId: folderID, metadata: folder.metadata);
       },
       (_) {
         final Folder? eventData =
@@ -243,7 +243,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _syncData(
       event,
       () async {
-        return _storage.updateMetadata(update.media.id, update.media.metadata);
+        return _storage.updateMetadata(
+            fileId: update.media.id, metadata: update.media.metadata);
       },
       (_) {
         final Folder? cloudCopy = TimelineService.getFolderWithID(
@@ -258,7 +259,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _syncData(
       event,
       () async {
-        return _storage.updateMetadata(folder.id!, folder.metadata);
+        return _storage.updateMetadata(
+            fileId: folder.id!, metadata: folder.metadata);
       },
       (_) {
         final Folder? cloudCopy = TimelineService.getFolderWithID(
@@ -276,7 +278,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         final double? order = await update.getCurrentItemPosition();
         final Map<String, dynamic> metaData = update.getCurrentItemMetadata();
         metaData.setTimestamp(order);
-        await _storage.updateMetadata(update.getCurrentItemId(), metaData);
+        await _storage.updateMetadata(
+            fileId: update.getCurrentItemId(), metadata: metaData);
+        return order;
       },
       (double? newPosition) {
         if (update.media == true) {

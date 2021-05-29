@@ -9,7 +9,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/sharing/sharing_bloc.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/sharing_information.dart';
-import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/share_widget.dart';
 
@@ -23,7 +23,7 @@ class ShareDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GoogleDrive storage =
+    final StorageService storage =
         BlocProvider.of<FolderStorageBloc>(context).storage;
     return BlocProvider<SharingBloc>(
       create: (BuildContext context) => SharingBloc(folder.id!, storage),

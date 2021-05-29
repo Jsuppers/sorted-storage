@@ -1,25 +1,30 @@
 // Project imports:
-import 'package:web/app/models/file.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
+import 'package:web/app/models/sharing_information.dart';
+import 'package:web/app/models/storage_information.dart';
 import 'package:web/app/models/user.dart';
 
 abstract class StorageService {
-  StorageService();
-
   Stream<User?> userChange();
   Future<bool> isSignedIn();
-  Future<User?> signIn();
-  Future<User?> signInSilently();
+  Future<void> signIn();
+  Future<void> signInSilently();
   Future<void> signOut();
+  Future<StorageInformation> getStorageInformation();
   Future<Folder?> getRootFolder();
-  Future<Folder?> getFolder({String folderID});
+  Future<Folder?> getFolder(String folderID, {String? folderName});
+  Future<Folder> updateFolder(String folderID,
+      {String? folderName, required Folder folder});
   Future<Folder?> createFolder({Folder? parent});
-  Future<void> updateMetadata({String fileId, Map<String, dynamic> metadata});
+  Future<void> updateMetadata(
+      {required String fileId, required Map<String, dynamic> metadata});
   Future<void> updateFileName(String fileID, String name);
-  Future<void> uploadFile(Map<String, File> images, Folder folder);
-  Future<dynamic> getFile(String fileID, {String? filter});
-  Future<dynamic> deleteFile(String fileID);
-  Future<bool> isShared(String folderID);
-  Future<void> shareFolder(String folderID);
-  Future<void> stopSharingFolder(String folderID);
+  Future<String?> uploadFile(
+      String folderID, FileData file, Stream<List<int>> dataStream);
+  Future<dynamic> deleteResource(String resourceID);
+  Future<String?> getThumbnailURL(String fileID);
+  Future<SharingInformation> isShared(String folderID);
+  Future<SharingInformation> shareFolder(String folderID);
+  Future<SharingInformation> stopSharingFolder(String folderID);
 }

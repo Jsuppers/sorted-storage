@@ -1,4 +1,4 @@
-// Package imports:
+// Project imports:
 import 'package:web/app/models/user.dart';
 
 /// Abstract class for Authentication events
