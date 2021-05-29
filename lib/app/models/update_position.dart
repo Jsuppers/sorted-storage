@@ -45,14 +45,14 @@ class UpdatePosition {
     return currentItem.metadata.getTimestamp();
   }
 
-  String? getCurrentItemId() {
+  String getCurrentItemId() {
     if (media != null) {
       final FolderImage currentItem =
           (items as List<FolderImage>)[currentIndex];
       return currentItem.folderMedia.id;
     }
     final Folder currentItem = (items as List<Folder>)[currentIndex];
-    return currentItem.id;
+    return currentItem.id!;
   }
 
   Map<String, dynamic> getCurrentItemMetadata() {

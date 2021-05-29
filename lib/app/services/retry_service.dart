@@ -2,7 +2,9 @@
 import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
-import 'package:web/app/services/google_drive.dart';
+import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+
+// Project imports:
 
 /// service for retrying
 class RetryService {

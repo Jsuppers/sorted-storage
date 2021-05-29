@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/authentication/authentication_event.dart';
-import 'package:web/app/blocs/drive/drive_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
@@ -42,7 +41,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: <Widget>[
                     FutureBuilder<StorageInformation?>(
                       future: GoogleStorageService.getStorageInformation(
-                          BlocProvider.of<DriveBloc>(context).state),
+                          BlocProvider.of<FolderStorageBloc>(context)
+                              .storage
+                              .driveApi),
                       builder: (BuildContext context,
                           AsyncSnapshot<dynamic> snapshot) {
                         if (snapshot.hasError) {

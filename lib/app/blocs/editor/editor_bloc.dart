@@ -19,7 +19,7 @@ import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
-import 'package:web/app/services/google_drive.dart';
+import 'package:web/app/services/cloud_provider/google/google_drive.dart';
 import 'package:web/app/services/timeline_service.dart';
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
@@ -161,7 +161,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       streamController.close();
     });
 
-    final String? imageID = await _storage.uploadMediaToFolder(
+    final String? imageID = await _storage.uploadFileToFolder(
         folder.id!, name, fileData, streamController.stream);
 
     if (imageID != null) {
@@ -273,7 +273,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _syncData(
       event,
       () async {
-        return _storage.updatePosition(update);
+        final double? order = await update.getCurrentItemPosition();
+        final Map<String, dynamic> metaData = update.getCurrentItemMetadata();
+        metaData.setTimestamp(order);
+        await _storage.updateMetadata(update.getCurrentItemId(), metaData);
       },
       (double? newPosition) {
         if (update.media == true) {

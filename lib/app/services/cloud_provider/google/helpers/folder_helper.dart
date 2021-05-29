@@ -1,9 +1,5 @@
 // Dart imports:
-import 'dart:async';
 import 'dart:convert';
-
-// Flutter imports:
-import 'package:flutter/foundation.dart';
 
 // Package imports:
 import 'package:emojis/emojis.dart';
@@ -14,15 +10,12 @@ import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_metadata.dart';
-import 'package:web/app/models/update_position.dart';
 import 'package:web/constants.dart';
 
-/// service which communicates with google drive
-class GoogleDrive {
+class FolderHelper {
   // ignore: public_member_api_docs
-  GoogleDrive({this.driveApi});
+  FolderHelper(this.driveApi);
 
-  /// drive api
   DriveApi? driveApi;
 
   static const String _folderMimeType = 'application/vnd.google-apps.folder';
@@ -31,22 +24,16 @@ class GoogleDrive {
   static const String _rootFolderQuery =
       "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
 
-  Future<double?> updatePosition(UpdatePosition updatePosition) async {
-    final double? order = await updatePosition.getCurrentItemPosition();
-    final String? id = updatePosition.getCurrentItemId();
-    if (id != null) {
-      final Map<String, dynamic> metaData =
-          updatePosition.getCurrentItemMetadata();
-      metaData[describeEnum(MetadataKeys.timestamp)] = order;
-      await updateMetadata(id, metaData);
-    } else {
-      throw 'error';
-    }
-    return order;
+  Future<File> updateMetadata(
+      String fileId, Map<String, dynamic> metadata) async {
+    final File mediaFile = File();
+    mediaFile.description = jsonEncode(metadata);
+
+    return driveApi!.files.update(mediaFile, fileId);
   }
 
   /// upload a data stream to a file, and return the file's id
-  Future<String?> uploadMediaToFolder(String folderID, String imageName,
+  Future<String?> uploadFileToFolder(String folderID, String imageName,
       FileData fileData, Stream<List<int>> dataStream) async {
     final File file = _createDriveFile(folderID,
         name: imageName, metadata: fileData.metadata);
@@ -55,14 +42,6 @@ class GoogleDrive {
         await driveApi!.files.create(file, uploadMedia: image);
 
     return uploadedFile.id;
-  }
-
-  Future<File> updateMetadata(
-      String fileId, Map<String, dynamic> metadata) async {
-    final File mediaFile = File();
-    mediaFile.description = jsonEncode(metadata);
-
-    return driveApi!.files.update(mediaFile, fileId);
   }
 
   Future<Folder?> createFolder(Folder? parent) async {
@@ -98,37 +77,13 @@ class GoogleDrive {
     return driveApi!.files.get(fileID, $fields: filter);
   }
 
-  Future<bool> amOwner(String fileID) async {
-    final File file = await getFile(fileID, filter: 'owners') as File;
-    if (file.owners != null) {
-      for (final User user in file.owners!) {
-        if (user.me == true) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   Future<FileList> listFiles(String query, {String? filter}) async {
     return driveApi!.files.list(q: query, $fields: filter);
   }
 
-  Future<Permission> createPermission(String fileID, Permission perm) async {
-    return driveApi!.permissions.create(perm, fileID);
-  }
-
-  Future<PermissionList> listPermissions(String fileID) async {
-    return driveApi!.permissions.list(fileID);
-  }
-
-  Future<dynamic> deletePermission(String fileID, String permissionID) async {
-    return driveApi!.permissions.delete(fileID, permissionID);
-  }
-
   Future<Folder> getRootFolder() async {
     final FileList folderParent =
-        await listFiles(_rootFolderQuery, filter: GoogleDrive._folderFilter);
+        await listFiles(_rootFolderQuery, filter: _folderFilter);
     File rootFile;
     Map<String, dynamic> metadata = <String, dynamic>{};
     if (folderParent.files!.isEmpty) {
@@ -167,7 +122,7 @@ class GoogleDrive {
   Future<Folder> _updateFolder(Folder folder) async {
     final String folderQuery = "'${folder.id}' in parents and trashed=false";
     final FileList filesInFolder =
-        await listFiles(folderQuery, filter: GoogleDrive._folderFilter);
+        await listFiles(folderQuery, filter: _folderFilter);
     final Map<String, FileData> files = <String, FileData>{};
     final List<Folder> subFolders = <Folder>[];
     int index = 0;
@@ -191,7 +146,7 @@ class GoogleDrive {
         files.putIfAbsent(file.id!, () => media);
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final Folder subFolder = Folder.createFromFolderName(
-            folderName: file.name!,
+            folderName: file.name,
             owner: subFolderOwner,
             parent: folder,
             id: file.id!,
@@ -215,7 +170,10 @@ class GoogleDrive {
     folder.files = files;
     folder.subFolders = subFolders;
     folder.loaded = true;
-    folder.amOwner ??= await amOwner(folder.id!);
+    if (folder.amOwner == null) {
+      final File file = await getFile(folder.id!, filter: 'owners') as File;
+      folder.amOwner = _getAmOwner(file);
+    }
 
     return folder;
   }

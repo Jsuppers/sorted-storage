@@ -6,21 +6,18 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:googleapis/drive/v3.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 // Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
-import 'package:web/app/blocs/drive/drive_bloc.dart';
-import 'package:web/app/blocs/drive/drive_event.dart';
 import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/user.dart' as usr;
-import 'package:web/app/services/google_drive.dart';
+import 'package:web/app/services/cloud_provider/google/google_drive.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
 
@@ -39,7 +36,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
   late GoogleDrive _googleDrive;
-  late DriveBloc _driveBloc;
   late NavigationBloc _navigationBloc;
   late FolderStorageBloc _folderStorageBloc;
 
@@ -47,7 +43,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _googleDrive = GoogleDrive();
-    _driveBloc = DriveBloc();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
     _folderStorageBloc = FolderStorageBloc(
         storage: _googleDrive, navigationBloc: _navigationBloc);
@@ -56,7 +51,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     super.dispose();
-    _driveBloc.close();
     _navigationBloc.close();
     _folderStorageBloc.close();
   }
@@ -65,9 +59,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: <BlocProvider<dynamic>>[
-        BlocProvider<DriveBloc>(
-          create: (BuildContext context) => _driveBloc,
-        ),
         BlocProvider<NavigationBloc>(
           create: (BuildContext context) => _navigationBloc,
         ),
@@ -92,12 +83,7 @@ class _MyAppState extends State<MyApp> {
             listener: (BuildContext context, usr.User? user) {
               _folderStorageBloc
                   .add(const FolderStorageEvent(FolderStorageType.newUser));
-              _driveBloc.add(InitialDriveEvent(user: user));
-            },
-          ),
-          BlocListener<DriveBloc, DriveApi?>(
-            listener: (BuildContext context, DriveApi? driveApi) {
-              _googleDrive.driveApi = driveApi;
+              _googleDrive.newUser(user: user);
             },
           ),
         ],

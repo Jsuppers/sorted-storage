@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Project imports:
-import 'package:web/app/blocs/sharing/sharing_state.dart';
 import 'package:web/app/models/folder.dart';
+import 'package:web/app/models/sharing_information.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/share_button.dart';
@@ -19,20 +19,21 @@ class ShareWidget extends StatefulWidget {
   final Folder folder;
 
   // ignore: public_member_api_docs
-  final SharingState state;
+  final SharingInformation state;
 
   @override
   _ShareWidgetState createState() => _ShareWidgetState();
 }
 
 class _ShareWidgetState extends State<ShareWidget> {
-  bool loading = false;
-
   @override
   Widget build(BuildContext context) {
     final TextEditingController controller = TextEditingController();
-    final bool shared = widget.state is SharingSharedState;
-    if (shared) {
+    final bool shared = widget.state.shared == true;
+    if (widget.state.shared == null) {
+      widget.state.error ??= 'Something went wrong!';
+    }
+    if (shared == true) {
       if (widget.folder.parent != null && widget.folder.parent!.isRootFolder) {
         controller.text = '${Constants.websiteURL}/${widget.folder.id}';
       } else {
@@ -54,13 +55,13 @@ class _ShareWidgetState extends State<ShareWidget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              if (widget.state.errorMessage != null)
+              if (widget.state.error != null)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     const Icon(Icons.error),
                     const SizedBox(width: 5),
-                    Text(widget.state.errorMessage!),
+                    Text(widget.state.error!),
                   ],
                 )
               else
