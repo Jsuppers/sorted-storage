@@ -10,6 +10,7 @@ import 'package:emojis/emojis.dart';
 import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
@@ -24,75 +25,36 @@ class GoogleDrive {
   /// drive api
   DriveApi? driveApi;
 
-  static String folderFilter =
+  static const String _folderMimeType = 'application/vnd.google-apps.folder';
+  static const String _folderFilter =
       'files(id,name,parents,mimeType,hasThumbnail,thumbnailLink,description,owners)';
+  static const String _rootFolderQuery =
+      "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
 
   Future<double?> updatePosition(UpdatePosition updatePosition) async {
-    double? order = _getOrder(updatePosition, updatePosition.currentIndex);
-
-    if (updatePosition.targetIndex == updatePosition.items.length - 1) {
-      order = DateTime.now().millisecondsSinceEpoch.toDouble();
-    } else if (updatePosition.targetIndex == 0) {
-      order = _getOrder(updatePosition, 0);
-      if (order != null) {
-        order -= 1;
-      }
-    } else {
-      final double? orderAbove =
-          _getOrder(updatePosition, updatePosition.targetIndex);
-      final double? orderBelow =
-          _getOrder(updatePosition, updatePosition.targetIndex - 1);
-      if (orderAbove != null && orderBelow != null) {
-        order = (orderAbove + orderBelow) / 2;
-      }
-    }
-    final String? id = _getId(updatePosition, updatePosition.currentIndex);
+    final double? order = await updatePosition.getCurrentItemPosition();
+    final String? id = updatePosition.getCurrentItemId();
     if (id != null) {
-      Map<String, dynamic> metaData = _getMetadata(updatePosition, updatePosition.currentIndex);
+      final Map<String, dynamic> metaData =
+          updatePosition.getCurrentItemMetadata();
       metaData[describeEnum(MetadataKeys.timestamp)] = order;
       await updateMetadata(id, metaData);
     } else {
       throw 'error';
     }
-
     return order;
-  }
-
-  double? _getOrder(UpdatePosition updatePosition, int index) {
-    if (updatePosition.media != null) {
-      return updatePosition.items[index]?.folderMedia?.getTimestamp()
-          as double?;
-    }
-    return updatePosition.items[index]?.getTimestamp() as double?;
-  }
-
-  String? _getId(UpdatePosition updatePosition, int index) {
-    if (updatePosition.media != null) {
-      return updatePosition.items[index]?.folderMedia?.id as String?;
-    }
-    return updatePosition.items[index]?.id as String?;
-  }
-
-  Map<String, dynamic> _getMetadata(UpdatePosition updatePosition, int index) {
-    if (updatePosition.media != null) {
-      return updatePosition.items[index]?.folderMedia?.metadata as Map<String, dynamic>;
-    }
-    return updatePosition.items[index]?.metadata as Map<String, dynamic>;
   }
 
   /// upload a data stream to a file, and return the file's id
   Future<String?> uploadMediaToFolder(String folderID, String imageName,
       FolderMedia storyMedia, Stream<List<int>> dataStream) async {
-    final File mediaFile = File();
-    mediaFile.parents = <String>[folderID];
-    mediaFile.name = imageName;
-    mediaFile.description = jsonEncode(storyMedia.metadata ?? {});
-
+    final File file = _createDriveFile(folderID,
+        name: imageName, metadata: storyMedia.metadata);
     final Media image = Media(dataStream, storyMedia.contentSize);
-    final File uploadMedia =
-        await driveApi!.files.create(mediaFile, uploadMedia: image);
+    final File uploadedFile =
+        await driveApi!.files.create(file, uploadMedia: image);
 
-    return uploadMedia.id;
+    return uploadedFile.id;
   }
 
   Future<File> updateMetadata(
@@ -107,38 +69,25 @@ class GoogleDrive {
     if (parent == null || parent.id == null) {
       return null;
     }
-    final File fileMetadata = File();
-    final Folder fileProperties = Folder(
+    final Folder folder = Folder(
         title: 'New Folder',
         emoji: Emojis.smilingFace,
         parent: parent,
         amOwner: true);
-    fileMetadata.name = '${Emojis.smilingFace} New Folder';
-    fileMetadata.parents = <String>[parent.id!];
-    fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-    fileMetadata.description = jsonEncode(fileProperties.metadata ?? {});
-    final File rt = await createFile(fileMetadata);
-    fileProperties.id = rt.id;
-    parent.subFolders!.add(fileProperties);
+    final File file = _createDriveFile(parent.id!,
+        mimeType: _folderMimeType, metadata: folder.metadata);
+    final File rt = await driveApi!.files.create(file);
+    folder.id = rt.id;
+    parent.subFolders.add(folder);
 
-    return fileProperties;
+    return folder;
   }
 
   Future<String?> updateFileName(String fileID, String name) async {
-    try {
-      final File eventToUpload = File();
-      eventToUpload.name = name;
-
-      final File folder = await driveApi!.files.update(eventToUpload, fileID);
-
-      return folder.id;
-    } catch (e) {
-      return e.toString();
-    }
-  }
-
-  Future<File> createFile(File request, {Media? media}) async {
-    return driveApi!.files.create(request, uploadMedia: media);
+    final File file = File();
+    file.name = name;
+    final File folder = await driveApi!.files.update(file, fileID);
+    return folder.id;
   }
 
   Future<dynamic> delete(String fileID) async {
@@ -178,31 +127,23 @@ class GoogleDrive {
   }
 
   Future<Folder> getRootFolder() async {
-    final String query =
-        "mimeType='application/vnd.google-apps.folder' and trashed=false and name='${Constants.rootFolder}' and trashed=false";
     final FileList folderParent =
-        await listFiles(query, filter: GoogleDrive.folderFilter);
+        await listFiles(_rootFolderQuery, filter: GoogleDrive._folderFilter);
     File rootFile;
-    Map<String, dynamic> metadata = {};
+    Map<String, dynamic> metadata = <String, dynamic>{};
     if (folderParent.files!.isEmpty) {
-      metadata[describeEnum(MetadataKeys.timestamp)] =
-          DateTime.now().millisecondsSinceEpoch.toDouble();
-      final File fileMetadata = File();
-      fileMetadata.name = Constants.rootFolder;
-      fileMetadata.mimeType = 'application/vnd.google-apps.folder';
-      fileMetadata.description = jsonEncode(metadata);
-      rootFile = await createFile(fileMetadata);
+      metadata.setTimestamp(DateTime.now().millisecondsSinceEpoch.toDouble());
+      final File file = _createDriveFile(
+        Constants.rootFolder,
+        mimeType: _folderMimeType,
+        metadata: metadata,
+      );
+      rootFile = await driveApi!.files.create(file);
     } else {
       rootFile = folderParent.files!.first;
-      try {
-        metadata =
-            jsonDecode(rootFile.description ?? '') as Map<String, dynamic>? ??
-                {};
-      } catch (e) {
-        metadata = {};
-      }
+      metadata = MetaData.fromString(rootFile.description);
     }
-    Folder rootFolder =
+    final Folder rootFolder =
         await getFolder(rootFile.id!, folderName: rootFile.name!);
     rootFolder.metadata = metadata;
     rootFolder.isRootFolder = true;
@@ -224,32 +165,18 @@ class GoogleDrive {
   }
 
   Future<Folder> _updateFolder(Folder folder) async {
-    final FileList filesInFolder = await listFiles(
-        "'${folder.id}' in parents and trashed=false",
-        filter: GoogleDrive.folderFilter);
-
-    final Map<String, FolderMedia> images = <String, FolderMedia>{};
+    final String folderQuery = "'${folder.id}' in parents and trashed=false";
+    final FileList filesInFolder =
+        await listFiles(folderQuery, filter: GoogleDrive._folderFilter);
+    final Map<String, FolderMedia> files = <String, FolderMedia>{};
     final List<Folder> subFolders = <Folder>[];
     int index = 0;
     for (final File file in filesInFolder.files!) {
-      Map<String, dynamic>? metadata = {};
-      if (file.description != null) {
-        try {
-          metadata =
-              jsonDecode(file.description ?? '') as Map<String, dynamic>? ?? {};
-        } catch (e) {
-          metadata = {};
-        }
-      }
-      bool subFolderOwner = false;
-      if (file.owners != null) {
-        for (final User user in file.owners!) {
-          if (user.me == true) {
-            subFolderOwner = true;
-            break;
-          }
-        }
-      }
+      final Map<String, dynamic> metadata =
+          MetaData.fromString(file.description);
+      metadata.setTimestampIfEmpty(
+          (DateTime.now().millisecondsSinceEpoch + index).toDouble());
+      final bool subFolderOwner = _getAmOwner(file);
 
       if (file.mimeType!.startsWith('image/') ||
           file.mimeType!.startsWith('video/')) {
@@ -261,11 +188,7 @@ class GoogleDrive {
           thumbnailURL: file.thumbnailLink,
           metadata: metadata,
         );
-        if (media.getTimestamp() == null) {
-          media.setTimestamp(
-              (DateTime.now().millisecondsSinceEpoch + index).toDouble());
-        }
-        images.putIfAbsent(file.id!, () => media);
+        files.putIfAbsent(file.id!, () => media);
       } else if (file.mimeType == 'application/vnd.google-apps.folder') {
         final Folder subFolder = Folder.createFromFolderName(
             folderName: file.name!,
@@ -273,10 +196,6 @@ class GoogleDrive {
             parent: folder,
             id: file.id!,
             metadata: metadata);
-        if (subFolder.getTimestamp() == null) {
-          subFolder.setTimestamp(
-              (DateTime.now().millisecondsSinceEpoch + index).toDouble());
-        }
         subFolders.add(subFolder);
       } else {
         final FolderMedia media = FolderMedia(
@@ -286,24 +205,43 @@ class GoogleDrive {
             thumbnailURL: file.thumbnailLink,
             retrieveThumbnail: true,
             metadata: metadata);
-        if (media.getTimestamp() == null) {
-          media.setTimestamp(
-              (DateTime.now().millisecondsSinceEpoch + index).toDouble());
-        }
-        images.putIfAbsent(file.id!, () => media);
+        files.putIfAbsent(file.id!, () => media);
       }
       index++;
     }
 
-    if (folder.getTimestamp() == null) {
-      folder.setTimestamp(
-          (DateTime.now().millisecondsSinceEpoch + index).toDouble());
-    }
-    folder.images = images;
+    folder.metadata
+        .setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
+    folder.images = files;
     folder.subFolders = subFolders;
     folder.loaded = true;
     folder.amOwner ??= await amOwner(folder.id!);
 
     return folder;
+  }
+
+  bool _getAmOwner(File file) {
+    if (file.owners != null) {
+      for (final User user in file.owners!) {
+        if (user.me == true) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  File _createDriveFile(
+    String parentID, {
+    String? name,
+    String? mimeType,
+    Map<String, dynamic>? metadata,
+  }) {
+    final File file = File();
+    file.name = name ?? '${Emojis.smilingFace} New Folder';
+    file.parents = <String>[parentID];
+    file.mimeType = mimeType;
+    file.description = jsonEncode(metadata ?? <String, dynamic>{});
+    return file;
   }
 }

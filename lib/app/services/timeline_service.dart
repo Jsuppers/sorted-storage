@@ -11,10 +11,8 @@ class TimelineService {
     if (folder.id == folderID) {
       return folder;
     } else {
-      for (int i = 0;
-          folder.subFolders != null && i < folder.subFolders!.length;
-          i++) {
-        final Folder element = folder.subFolders![i];
+      for (int i = 0; i < folder.subFolders.length; i++) {
+        final Folder element = folder.subFolders[i];
         final Folder? subFolder = getFolderWithID(folderID, element);
         if (subFolder != null) {
           return subFolder;

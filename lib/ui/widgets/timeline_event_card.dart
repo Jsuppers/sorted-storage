@@ -15,6 +15,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
@@ -84,7 +85,7 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   Widget timeStamp() {
-    final double timestamp = widget.folder.getTimestamp() ??
+    final double timestamp = widget.folder.metadata.getTimestamp() ??
         DateTime.now().millisecondsSinceEpoch.toDouble();
     final DateTime selectedDate =
         DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
@@ -104,18 +105,16 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   List<Widget> subFolders() {
-    List<Widget> output = [];
+    final List<Widget> output = <Widget>[];
 
-    if (folder!.subFolders == null || folder!.subFolders!.isEmpty) {
+    if (folder!.subFolders.isEmpty) {
       return output;
     }
-    for (int i = 0;
-        folder!.subFolders != null && i < folder!.subFolders!.length;
-        i++) {
+    for (int i = 0; i < folder!.subFolders.length; i++) {
       output.add(EventCard(
         width: widget.width,
         height: widget.height,
-        folder: folder!.subFolders![i],
+        folder: folder!.subFolders[i],
         controls: folder?.amOwner != null && folder!.amOwner == true
             ? PopUpOptions(
                 folder: widget.folder,
@@ -130,21 +129,19 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   Widget build(BuildContext context) {
     final List<FolderImage> cards = <FolderImage>[];
-    if (widget.folder.images != null) {
-      for (final MapEntry<String, FolderMedia> image
-          in widget.folder.images!.entries) {
-        cards.add(FolderImage(
-          locked: true,
-          folder: widget.folder,
-          folderMedia: image.value,
-          imageKey: image.key,
-        ));
-      }
+    for (final MapEntry<String, FolderMedia> image
+        in widget.folder.images.entries) {
+      cards.add(FolderImage(
+        locked: true,
+        folder: widget.folder,
+        folderMedia: image.value,
+        imageKey: image.key,
+      ));
     }
 
     cards.sort((FolderImage a, FolderImage b) {
-      final double first = a.folderMedia.getTimestamp() ?? 0;
-      final double second = b.folderMedia.getTimestamp() ?? 0;
+      final double first = a.folderMedia.metadata?.getTimestamp() ?? 0;
+      final double second = b.folderMedia.metadata?.getTimestamp() ?? 0;
       return first.compareTo(second);
     });
 
@@ -211,7 +208,7 @@ class _TimelineEventCardState extends State<EventCard> {
                   Text(
                     Property.getValueOrDefault(
                       widget.folder
-                              .metadata?[describeEnum(MetadataKeys.description)]
+                              .metadata[describeEnum(MetadataKeys.description)]
                           as String?,
                       'No description given',
                     ),

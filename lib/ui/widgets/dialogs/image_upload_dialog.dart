@@ -15,6 +15,7 @@ import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/media_progress.dart';
@@ -45,7 +46,7 @@ class ImageUploadDialog extends StatelessWidget {
           contentSize: element.size,
           isVideo: mime.startsWith('video/'),
           isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
-      media
+      media.metadata!
           .setTimestamp((DateTime.now().millisecondsSinceEpoch + i).toDouble());
       images.putIfAbsent(element.name!, () => media);
     }

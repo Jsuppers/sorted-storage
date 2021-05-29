@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
@@ -42,18 +43,16 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
-    if (widget.folder.subFolders != null) {
-      Folder.sortFolders(widget.folder.subFolders);
-      widget.folder.subFolders!.forEach((Folder subFolder) {
-        final Widget display = TimelineCard(
-          width: widget.width,
-          height: widget.height,
-          folder: subFolder,
-        );
-        final _TimeLineEventEntry _timeLineEventEntry =
-            _TimeLineEventEntry(subFolder.getTimestamp(), display);
-        timeLineEvents.add(_timeLineEventEntry);
-      });
+    Folder.sortFolders(widget.folder.subFolders);
+    for (final Folder subFolder in widget.folder.subFolders) {
+      final Widget display = TimelineCard(
+        width: widget.width,
+        height: widget.height,
+        folder: subFolder,
+      );
+      final _TimeLineEventEntry _timeLineEventEntry =
+          _TimeLineEventEntry(subFolder.metadata.getTimestamp(), display);
+      timeLineEvents.add(_timeLineEventEntry);
     }
 
     for (final _TimeLineEventEntry element in timeLineEvents) {

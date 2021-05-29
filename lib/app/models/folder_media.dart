@@ -63,23 +63,4 @@ class FolderMedia {
 
   /// index of this media
   Map<String, dynamic>? metadata;
-
-  double? getTimestamp() {
-    return metadata?[describeEnum(MetadataKeys.timestamp)] as double?;
-  }
-
-  void setTimestamp(double? timestamp) {
-    if (timestamp == null) {
-      return;
-    }
-    metadata?[describeEnum(MetadataKeys.timestamp)] = timestamp;
-  }
-
-  String? getDescription() {
-    return metadata?[describeEnum(MetadataKeys.description)] as String?;
-  }
-
-  void setDescription(String? description) {
-    metadata?[describeEnum(MetadataKeys.description)] = description;
-  }
 }

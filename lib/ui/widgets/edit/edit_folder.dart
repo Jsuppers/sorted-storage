@@ -18,9 +18,9 @@ import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
-import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
@@ -70,10 +70,10 @@ class _EditFolderState extends State<EditFolder> {
           if (state?.error != null) {
             setState(() => error = true);
           } else if (state?.data != null) {
-            Folder newFolder = state?.data as Folder;
+            final Folder newFolder = state?.data as Folder;
             setState(() {
               if (folder != null) {
-                folder!.subFolders!.add(Folder.clone(newFolder));
+                folder!.subFolders.add(Folder.clone(newFolder));
               } else {
                 cloudCopyFolder = newFolder;
                 folder = Folder.clone(newFolder);
@@ -231,15 +231,11 @@ class _EditStoryContentState extends State<EditStoryContent> {
       ));
     }
 
-    if (widget.folder!.parent!.isRootFolder ||
-        folder.subFolders == null ||
-        folder.subFolders!.isEmpty) {
+    if (widget.folder!.parent!.isRootFolder || folder.subFolders.isEmpty) {
       return output;
     }
-    for (int i = 0;
-        folder.subFolders != null && i < folder.subFolders!.length;
-        i++) {
-      output.addAll(getCards(folder.subFolders![i], depth + 1));
+    for (int i = 0; i < folder.subFolders.length; i++) {
+      output.addAll(getCards(folder.subFolders[i], depth + 1));
     }
     return output;
   }
@@ -291,9 +287,9 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   void initState() {
     super.initState();
-    if (widget.folder.getTimestamp() != null) {
+    if (widget.folder.metadata.getTimestamp() != null) {
       selectedDate = DateTime.fromMillisecondsSinceEpoch(
-          widget.folder.getTimestamp()!.toInt());
+          widget.folder.metadata.getTimestamp()!.toInt());
       formattedDate = DateFormat('dd MMMM, yyyy').format(selectedDate);
     } else {
       selectedDate = DateTime.now();
@@ -361,7 +357,7 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
-              widget.folder
+              widget.folder.metadata
                   .setTimestamp(date.millisecondsSinceEpoch.toDouble());
               BlocProvider.of<EditorBloc>(context).add(
                   EditorEvent(EditorType.updateTimestamp, data: widget.folder));
@@ -378,9 +374,7 @@ class _TimelineEventCardState extends State<EventCard> {
     }
     return [
       const SizedBox(height: 10),
-      ReordableImages(
-          cards: cards,
-          folder: widget.folder),
+      ReordableImages(cards: cards, folder: widget.folder),
       const SizedBox(height: 10),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
@@ -427,7 +421,7 @@ class _TimelineEventCardState extends State<EventCard> {
               onChanged: (String content) {
                 if (_debounce?.isActive ?? false) _debounce?.cancel();
                 _debounce = Timer(const Duration(milliseconds: 500), () {
-                  widget.folder.setDescription(content);
+                  widget.folder.metadata.setDescription(content);
                   BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                       EditorType.updateMetadata,
                       data: widget.folder));
@@ -442,32 +436,27 @@ class _TimelineEventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    String description = widget.folder
-            .metadata?[describeEnum(MetadataKeys.description)] as String? ??
-        '';
     titleController.text = widget.folder.title;
     titleController.selection =
         TextSelection.collapsed(offset: titleController.text.length);
-    descriptionController.text = description;
+    descriptionController.text = widget.folder.metadata.getDescription();
     descriptionController.selection =
         TextSelection.collapsed(offset: descriptionController.text.length);
 
     final List<FolderImage> cards = <FolderImage>[];
-    if (widget.folder.images != null) {
-      for (final MapEntry<String, FolderMedia> image
-          in widget.folder.images!.entries) {
-        cards.add(FolderImage(
-          locked: false,
-          folderMedia: image.value,
-          imageKey: image.key,
-          folder: widget.folder,
-        ));
-      }
+    for (final MapEntry<String, FolderMedia> image
+        in widget.folder.images.entries) {
+      cards.add(FolderImage(
+        locked: false,
+        folderMedia: image.value,
+        imageKey: image.key,
+        folder: widget.folder,
+      ));
     }
 
     cards.sort((FolderImage a, FolderImage b) {
-      final double first = a.folderMedia.getTimestamp() ?? 0;
-      final double second = b.folderMedia.getTimestamp() ?? 0;
+      final double first = a.folderMedia.metadata?.getTimestamp() ?? 0;
+      final double second = b.folderMedia.metadata?.getTimestamp() ?? 0;
       return first.compareTo(second);
     });
 
@@ -522,8 +511,7 @@ class _TimelineEventCardState extends State<EventCard> {
 }
 
 class ReordableImages extends StatefulWidget {
-  ReordableImages(
-      {required this.cards, required this.folder});
+  ReordableImages({required this.cards, required this.folder});
 
   List<FolderImage> cards;
   Folder folder;

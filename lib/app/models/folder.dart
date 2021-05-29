@@ -1,9 +1,6 @@
-// Flutter imports:
-import 'package:flutter/foundation.dart';
-
 // Project imports:
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder_media.dart';
-import 'package:web/app/models/folder_metadata.dart';
 
 class FolderNameData {
   FolderNameData({required this.emoji, required this.title});
@@ -32,16 +29,22 @@ class Folder {
   Folder({
     this.id,
     this.amOwner,
+    this.parent,
     required this.title,
     required this.emoji,
-    this.images,
-    this.metadata,
-    this.subFolders,
-    this.parent,
+    Map<String, FolderMedia>? images,
+    Map<String, dynamic>? metadata,
+    List<Folder>? subFolders,
   }) {
-    subFolders ??= [];
-    images ??= <String, FolderMedia>{};
-    metadata ??= {};
+    if (subFolders != null) {
+      this.subFolders = subFolders;
+    }
+    if (metadata != null) {
+      this.metadata = metadata;
+    }
+    if (images != null) {
+      this.images = images;
+    }
   }
 
   static Folder createFromFolderName(
@@ -67,8 +70,8 @@ class Folder {
       return;
     }
     folders.sort((Folder a, Folder b) {
-      final double first = a.getTimestamp() ?? 0;
-      final double second = b.getTimestamp() ?? 0;
+      final double first = a.metadata.getTimestamp() ?? 0;
+      final double second = b.metadata.getTimestamp() ?? 0;
       return first.compareTo(second);
     });
   }
@@ -77,32 +80,16 @@ class Folder {
   Folder.clone(Folder event)
       : title = event.title,
         emoji = event.emoji,
-        metadata = Map.from(event.metadata ?? {}),
+        metadata = Map<String, dynamic>.from(event.metadata),
         images = Map<String, FolderMedia>.from(
-            event.images!.map((String key, FolderMedia value) {
+            event.images.map((String key, FolderMedia value) {
           return MapEntry<String, FolderMedia>(key, FolderMedia.clone(value));
         })),
         id = event.id,
         amOwner = event.amOwner,
         isRootFolder = event.isRootFolder,
         parent = event.parent,
-        subFolders = List<Folder>.from(event.subFolders!);
-
-  double? getTimestamp() {
-    return metadata?[describeEnum(MetadataKeys.timestamp)] as double?;
-  }
-
-  void setTimestamp(double? timestamp) {
-    metadata?[describeEnum(MetadataKeys.timestamp)] = timestamp;
-  }
-
-  String? getDescription() {
-    return metadata?[describeEnum(MetadataKeys.description)] as String?;
-  }
-
-  void setDescription(String? description) {
-    metadata?[describeEnum(MetadataKeys.description)] = description;
-  }
+        subFolders = List<Folder>.from(event.subFolders);
 
   /// the folder ID of this doler
   String? id;
@@ -122,10 +109,10 @@ class Folder {
   /// if the current user is the owner of the folder
   bool? amOwner;
 
-  Map<String, dynamic>? metadata;
+  Map<String, dynamic> metadata = <String, dynamic>{};
 
   /// images on the main story
-  Map<String, FolderMedia>? images;
+  Map<String, FolderMedia> images = <String, FolderMedia>{};
 
-  List<Folder>? subFolders;
+  List<Folder> subFolders = <Folder>[];
 }

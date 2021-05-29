@@ -13,6 +13,7 @@ import 'package:web/app/blocs/editor/editor_bloc.dart';
 import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/services/retry_service.dart';
@@ -175,40 +176,39 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
       child: showPlaceholder
           ? _backgroundImage(widget.media.id, widget.media, null)
           : SizedBox(
-        height: widget.locked == false ? 180 : 250.0,
-        width: widget.locked == false ? 80 : 150.0,
-        child: widget.media.thumbnailURL == null
-            ? StaticLoadingLogo()
-            : Column(
-          children: [
-            SizedBox(
-              height: widget.locked == false ? 80 : 150.0,
+              height: widget.locked == false ? 180 : 250.0,
               width: widget.locked == false ? 80 : 150.0,
-              child: CachedNetworkImage(
-                imageUrl: widget.media.thumbnailURL!,
-                placeholder:
-                    (BuildContext context, String url) =>
-                    StaticLoadingLogo(),
-                errorWidget: (BuildContext context,
-                    String url, dynamic error) =>
-                    _backgroundImage(
-                        widget.media.id,
-                        widget.media,
-                        const AssetImage(
-                            'assets/images/error.png')),
-                imageBuilder: (BuildContext context,
-                    ImageProvider<Object> image) =>
-                    _backgroundImage(
-                        widget.media.id, widget.media, image),
-              ),
+              child: widget.media.thumbnailURL == null
+                  ? StaticLoadingLogo()
+                  : Column(
+                      children: [
+                        SizedBox(
+                          height: widget.locked == false ? 80 : 150.0,
+                          width: widget.locked == false ? 80 : 150.0,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.media.thumbnailURL!,
+                            placeholder: (BuildContext context, String url) =>
+                                StaticLoadingLogo(),
+                            errorWidget: (BuildContext context, String url,
+                                    dynamic error) =>
+                                _backgroundImage(
+                                    widget.media.id,
+                                    widget.media,
+                                    const AssetImage(
+                                        'assets/images/error.png')),
+                            imageBuilder: (BuildContext context,
+                                    ImageProvider<Object> image) =>
+                                _backgroundImage(
+                                    widget.media.id, widget.media, image),
+                          ),
+                        ),
+                        ImageDescription(
+                          media: widget.media,
+                          folder: widget.folder,
+                        )
+                      ],
+                    ),
             ),
-            ImageDescription(
-              media: widget.media,
-              folder: widget.folder,
-            )
-          ],
-        ),
-      ),
     );
   }
 
@@ -255,7 +255,7 @@ class _ImageDescriptionState extends State<ImageDescription> {
 
   @override
   Widget build(BuildContext context) {
-    descriptionController.text = widget.media.getDescription() ?? '';
+    descriptionController.text = widget.media.metadata?.getDescription() ?? '';
     descriptionController.selection =
         TextSelection.collapsed(offset: descriptionController.text.length);
 
@@ -272,7 +272,7 @@ class _ImageDescriptionState extends State<ImageDescription> {
         onChanged: (String content) {
           if (_debounce?.isActive ?? false) _debounce?.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () {
-            widget.media.setDescription(content);
+            widget.media.metadata?.setDescription(content);
             UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(
                 folder: widget.folder, media: widget.media);
             BlocProvider.of<EditorBloc>(context)

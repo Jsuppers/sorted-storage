@@ -66,8 +66,8 @@ class _FolderViewState extends State<FolderView> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
-    if (folder != null && folder!.subFolders != null) {
-      for (Folder subFolder in folder!.subFolders!) {
+    if (folder != null) {
+      for (final Folder subFolder in folder!.subFolders) {
         children.add(
           GestureDetector(
             onTap: () => {
@@ -157,20 +157,20 @@ class _FolderViewState extends State<FolderView> {
                     folder: folder,
                     currentIndex: oldIndex,
                     targetIndex: newIndex,
-                    items: <Folder>[...folder!.subFolders!]);
+                    items: <Folder>[...folder!.subFolders]);
 
                 BlocProvider.of<EditorBloc>(context)
                     .add(EditorEvent(EditorType.updatePosition, data: ui));
 
                 setState(() {
-                  final Folder image = folder!.subFolders!.removeAt(oldIndex);
-                  folder!.subFolders!.insert(newIndex, image);
+                  final Folder image = folder!.subFolders.removeAt(oldIndex);
+                  folder!.subFolders.insert(newIndex, image);
                 });
               },
               children: children),
           if (folder == null)
             const FullPageLoadingLogo(backgroundColor: Colors.transparent),
-          if (folder != null && folder!.subFolders!.isEmpty)
+          if (folder != null && folder!.subFolders.isEmpty)
             SizedBox(
               height: constraints.screenSize.height / 1.5,
               child: Center(

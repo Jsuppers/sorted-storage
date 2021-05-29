@@ -13,6 +13,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/media_progress.dart';
@@ -95,8 +96,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<void> _deleteFolder(EditorEvent event) async {
     final Folder folder = event.data as Folder;
     await _storage.delete(folder.id!).then((dynamic value) {
-      folder.parent!.subFolders!.removeWhere(
-              (Folder subfolder) => subfolder.id == folder.id);
+      folder.parent!.subFolders
+          .removeWhere((Folder subfolder) => subfolder.id == folder.id);
       _folderStorageBloc.add(FolderStorageEvent(FolderStorageType.refresh,
           folderID: folder.parent!.id));
       _navigationBloc.add(NavigatorPopDialogEvent());
@@ -168,8 +169,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
           TimelineService.getFolderWithID(folder.id!, folder.parent);
       storyMedia.id = imageID;
       storyMedia.retrieveThumbnail = true;
-      eventData!.images!.putIfAbsent(imageID, () => storyMedia);
-      folder.images!.putIfAbsent(imageID, () => storyMedia);
+      eventData!.images.putIfAbsent(imageID, () => storyMedia);
+      folder.images.putIfAbsent(imageID, () => storyMedia);
 
       add(EditorEvent(EditorType.uploadStatus,
           folderID: folder.id,
@@ -187,15 +188,16 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   Future<void> _deleteImage(EditorEvent event) async {
     final UpdateDeleteImageEvent update = event.data as UpdateDeleteImageEvent;
-    _syncData(event,
+    _syncData(
+      event,
       () async {
         return _storage.delete(update.imageID);
       },
       (_) {
         final Folder eventData = TimelineService.getFolderWithID(
             update.folder.id!, update.folder.parent)!;
-        eventData.images!.remove(update.imageID);
-        update.folder.images!.remove(update.imageID);
+        eventData.images.remove(update.imageID);
+        update.folder.images.remove(update.imageID);
       },
     );
   }
@@ -203,7 +205,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateName(EditorEvent event) {
     final Folder folder = event.data as Folder;
     final String fileName = FolderNameData.toFileName(folder);
-    _syncData(event,
+    _syncData(
+      event,
       () async {
         return _storage.updateFileName(folder.id!, fileName);
       },
@@ -219,15 +222,16 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<void> _updateTimestamp(EditorEvent event) async {
     final Folder folder = event.data as Folder;
     final String folderID = folder.id!;
-    _syncData(event,
+    _syncData(
+      event,
       () async {
-        return _storage.updateMetadata(folderID, folder.metadata!);
+        return _storage.updateMetadata(folderID, folder.metadata);
       },
       (_) {
         final Folder? eventData =
             TimelineService.getFolderWithID(folderID, folder.parent);
         if (eventData != null) {
-          eventData.setTimestamp(folder.getTimestamp());
+          eventData.metadata.setTimestamp(folder.metadata.getTimestamp());
         }
       },
     );
@@ -236,23 +240,25 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   void _updateImageMetadata(EditorEvent event) {
     final UpdateImageMetaDataEvent update =
         event.data as UpdateImageMetaDataEvent;
-    _syncData(event,
+    _syncData(
+      event,
       () async {
         return _storage.updateMetadata(update.media.id, update.media.metadata!);
       },
       (_) {
         final Folder? cloudCopy = TimelineService.getFolderWithID(
             update.folder.id!, update.folder.parent);
-        cloudCopy?.images?.update(update.media.id, (_) => update.media);
+        cloudCopy?.images.update(update.media.id, (_) => update.media);
       },
     );
   }
 
   void _updateMetadata(EditorEvent event) {
     final Folder folder = event.data as Folder;
-    _syncData(event,
+    _syncData(
+      event,
       () async {
-        return _storage.updateMetadata(folder.id!, folder.metadata!);
+        return _storage.updateMetadata(folder.id!, folder.metadata);
       },
       (_) {
         final Folder? cloudCopy = TimelineService.getFolderWithID(
@@ -264,7 +270,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
 
   void _updatePosition(EditorEvent event) {
     final UpdatePosition update = event.data as UpdatePosition;
-    _syncData(event,
+    _syncData(
+      event,
       () async {
         return _storage.updatePosition(update);
       },
@@ -274,8 +281,10 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
               update.folder!.id!, update.folder!.parent);
           if (cloudCopy != null) {
             final FolderMedia? file =
-            cloudCopy.images?[update.items[update.currentIndex].imageKey];
-            file?.setTimestamp(newPosition);
+                cloudCopy.images[update.items[update.currentIndex].imageKey];
+            if (file != null) {
+              file.metadata?.setTimestamp(newPosition);
+            }
           }
         }
       },
@@ -283,18 +292,17 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   }
 
   /// helper method to set the syncing state while calling a method
-  Future<void> _syncData(EditorEvent event, Function updateMethod, Function successMethod) async {
+  Future<void> _syncData(
+      EditorEvent event, Function updateMethod, Function successMethod) async {
     add(const EditorEvent(EditorType.syncingState, data: SavingState.saving));
     try {
       final dynamic response = await updateMethod();
       await successMethod(response);
       add(EditorEvent(EditorType.syncingState,
-          data: SavingState.success,
-          refreshUI: event.refreshUI));
+          data: SavingState.success, refreshUI: event.refreshUI));
     } catch (e) {
       add(EditorEvent(EditorType.syncingState,
-          data: SavingState.error,
-          refreshUI: event.refreshUI));
+          data: SavingState.error, refreshUI: event.refreshUI));
     }
   }
 
