@@ -1,13 +1,7 @@
-// Flutter imports:
-import 'package:flutter/foundation.dart';
-
-// Project imports:
-import 'package:web/app/models/folder_metadata.dart';
-
 /// information for media content, this could be a image, video or a document
-class FolderMedia {
+class FileData {
   // ignore: public_member_api_docs
-  FolderMedia({
+  FileData({
     required this.id,
     this.thumbnailURL,
     this.stream,
@@ -22,7 +16,7 @@ class FolderMedia {
   }
 
   /// clone the media file
-  FolderMedia.clone(FolderMedia media)
+  FileData.clone(FileData media)
       : thumbnailURL = media.thumbnailURL,
         stream = media.stream,
         isVideo = media.isVideo,
@@ -34,7 +28,7 @@ class FolderMedia {
         metadata = Map.from(media.metadata ?? {});
 
   /// and index which will ensure the media without an index will be at the end
-  /// of the list hopefully no one uploads this much media in one story..
+  /// of the list hopefully no one uploads this much media in one folder..
   static const int highIntValue = 65536;
 
   /// name of the file

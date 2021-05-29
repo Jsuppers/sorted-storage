@@ -3,7 +3,7 @@ import 'package:web/app/models/folder.dart';
 
 /// service for various functions regarding the timeline
 class TimelineService {
-  /// Retrieves a story with the given folder ID
+  /// Retrieves a folder with the given folder ID
   static Folder? getFolderWithID(String folderID, Folder? folder) {
     if (folder == null) {
       return null;

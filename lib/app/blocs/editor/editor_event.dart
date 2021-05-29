@@ -1,7 +1,7 @@
 // Project imports:
 import 'package:web/app/blocs/editor/editor_type.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 
 /// Event for the CloudStoriesBloc
 class EditorEvent {
@@ -14,10 +14,10 @@ class EditorEvent {
       this.closeDialog = false,
       this.refreshUI = false});
 
-  /// represents which story this event is for, this can also be a sub event
+  /// represents which folder this event is for, this can also be a sub event
   final String? folderID;
 
-  /// usually set to the main story folderID, used to find a sub folder
+  /// usually set to the main folder folderID, used to find a sub folder
   final String? parentID;
 
   /// used to tell the bloc which type of event this is
@@ -37,13 +37,13 @@ class EditorEvent {
 
 class UpdateImagesEvent {
   UpdateImagesEvent({required this.images, required this.folder});
-  Map<String, FolderMedia> images;
+  Map<String, FileData> images;
   Folder folder;
 }
 
 class UpdateImageMetaDataEvent {
   UpdateImageMetaDataEvent({required this.media, required this.folder});
-  FolderMedia media;
+  FileData media;
   Folder folder;
 }
 

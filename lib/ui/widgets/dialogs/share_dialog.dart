@@ -13,7 +13,7 @@ import 'package:web/app/services/google_drive.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/share_widget.dart';
 
-/// dialog to share or stop sharing a story
+/// dialog to share or stop sharing a folder
 class ShareDialog extends StatelessWidget {
   // ignore: public_member_api_docs
   const ShareDialog({Key? key, required this.folder}) : super(key: key);

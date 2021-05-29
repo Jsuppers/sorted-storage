@@ -19,8 +19,8 @@ import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_state.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/extensions/metadata.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
@@ -108,7 +108,7 @@ class _EditFolderState extends State<EditFolder> {
 
         return Padding(
             padding: const EdgeInsets.all(20.0),
-            child: EditStoryContent(
+            child: EditFolderContent(
               width: info.screenSize.width,
               height: info.screenSize.height,
               folder: folder,
@@ -120,9 +120,9 @@ class _EditFolderState extends State<EditFolder> {
 }
 
 // ignore: public_member_api_docs
-class EditStoryContent extends StatefulWidget {
+class EditFolderContent extends StatefulWidget {
   // ignore: public_member_api_docs
-  const EditStoryContent({
+  const EditFolderContent({
     Key? key,
     required this.width,
     required this.height,
@@ -142,10 +142,10 @@ class EditStoryContent extends StatefulWidget {
   final Folder? cloudCopy;
 
   @override
-  _EditStoryContentState createState() => _EditStoryContentState();
+  _EditFolderContentState createState() => _EditFolderContentState();
 }
 
-class _EditStoryContentState extends State<EditStoryContent> {
+class _EditFolderContentState extends State<EditFolderContent> {
   SavingState? savingState;
 
   @override
@@ -264,7 +264,7 @@ class EventCard extends StatefulWidget {
   /// height of the card
   final double height;
 
-  /// the story this card is related to
+  /// the folder this card is related to
   final Folder folder;
 
   @override
@@ -444,8 +444,8 @@ class _TimelineEventCardState extends State<EventCard> {
         TextSelection.collapsed(offset: descriptionController.text.length);
 
     final List<FolderImage> cards = <FolderImage>[];
-    for (final MapEntry<String, FolderMedia> image
-        in widget.folder.images.entries) {
+    for (final MapEntry<String, FileData> image
+        in widget.folder.files.entries) {
       cards.add(FolderImage(
         locked: false,
         folderMedia: image.value,

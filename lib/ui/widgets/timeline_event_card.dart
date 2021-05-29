@@ -16,8 +16,8 @@ import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/extensions/metadata.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/helpers/property.dart';
@@ -45,7 +45,7 @@ class EventCard extends StatefulWidget {
   /// height of the card
   final double height;
 
-  /// the story this card is related to
+  /// the folder this card is related to
   final Folder folder;
 
   @override
@@ -129,8 +129,8 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   Widget build(BuildContext context) {
     final List<FolderImage> cards = <FolderImage>[];
-    for (final MapEntry<String, FolderMedia> image
-        in widget.folder.images.entries) {
+    for (final MapEntry<String, FileData> image
+        in widget.folder.files.entries) {
       cards.add(FolderImage(
         locked: true,
         folder: widget.folder,

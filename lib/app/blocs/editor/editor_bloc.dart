@@ -14,8 +14,8 @@ import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/extensions/metadata.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
@@ -107,12 +107,12 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<void> _uploadImages(EditorEvent event) async {
     final UpdateImagesEvent update = event.data as UpdateImagesEvent;
     imageIndexesToIgnore = <int>[];
-    final List<MapEntry<String, FolderMedia>> entries =
+    final List<MapEntry<String, FileData>> entries =
         update.images.entries.toList();
     final int length = entries.length;
     bool errors = false;
     for (int i = 0; i < length; i++) {
-      final MapEntry<String, FolderMedia> entry = entries[i];
+      final MapEntry<String, FileData> entry = entries[i];
       try {
         await _uploadImage(i, entry.key, entry.value, update.folder);
       } catch (e) {
@@ -136,15 +136,15 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
   Future<void> _uploadImage(
     int index,
     String name,
-    FolderMedia storyMedia,
+    FileData fileData,
     Folder folder,
   ) async {
     final StreamController<List<int>> streamController =
         StreamController<List<int>>();
-    final int totalSize = storyMedia.contentSize ?? 100;
+    final int totalSize = fileData.contentSize ?? 100;
     int sent = 0;
 
-    storyMedia.stream!.listen((List<int> event) {
+    fileData.stream!.listen((List<int> event) {
       if (imageIndexesToIgnore.contains(index)) {
         streamController.addError('canceled');
       } else {
@@ -162,15 +162,15 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     });
 
     final String? imageID = await _storage.uploadMediaToFolder(
-        folder.id!, name, storyMedia, streamController.stream);
+        folder.id!, name, fileData, streamController.stream);
 
     if (imageID != null) {
       final Folder? eventData =
           TimelineService.getFolderWithID(folder.id!, folder.parent);
-      storyMedia.id = imageID;
-      storyMedia.retrieveThumbnail = true;
-      eventData!.images.putIfAbsent(imageID, () => storyMedia);
-      folder.images.putIfAbsent(imageID, () => storyMedia);
+      fileData.id = imageID;
+      fileData.retrieveThumbnail = true;
+      eventData!.files.putIfAbsent(imageID, () => fileData);
+      folder.files.putIfAbsent(imageID, () => fileData);
 
       add(EditorEvent(EditorType.uploadStatus,
           folderID: folder.id,
@@ -196,8 +196,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       (_) {
         final Folder eventData = TimelineService.getFolderWithID(
             update.folder.id!, update.folder.parent)!;
-        eventData.images.remove(update.imageID);
-        update.folder.images.remove(update.imageID);
+        eventData.files.remove(update.imageID);
+        update.folder.files.remove(update.imageID);
       },
     );
   }
@@ -248,7 +248,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       (_) {
         final Folder? cloudCopy = TimelineService.getFolderWithID(
             update.folder.id!, update.folder.parent);
-        cloudCopy?.images.update(update.media.id, (_) => update.media);
+        cloudCopy?.files.update(update.media.id, (_) => update.media);
       },
     );
   }
@@ -280,8 +280,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
           final Folder? cloudCopy = TimelineService.getFolderWithID(
               update.folder!.id!, update.folder!.parent);
           if (cloudCopy != null) {
-            final FolderMedia? file =
-                cloudCopy.images[update.items[update.currentIndex].imageKey];
+            final FileData? file =
+                cloudCopy.files[update.items[update.currentIndex].imageKey];
             if (file != null) {
               file.metadata?.setTimestamp(newPosition);
             }

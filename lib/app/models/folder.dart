@@ -1,6 +1,6 @@
 // Project imports:
 import 'package:web/app/extensions/metadata.dart';
-import 'package:web/app/models/folder_media.dart';
+import 'package:web/app/models/file_data.dart';
 
 class FolderNameData {
   FolderNameData({required this.emoji, required this.title});
@@ -23,7 +23,7 @@ class FolderNameData {
   }
 }
 
-/// content for a story
+/// content for a folder
 class Folder {
   // ignore: public_member_api_docs
   Folder({
@@ -32,7 +32,7 @@ class Folder {
     this.parent,
     required this.title,
     required this.emoji,
-    Map<String, FolderMedia>? images,
+    Map<String, FileData>? files,
     Map<String, dynamic>? metadata,
     List<Folder>? subFolders,
   }) {
@@ -42,8 +42,8 @@ class Folder {
     if (metadata != null) {
       this.metadata = metadata;
     }
-    if (images != null) {
-      this.images = images;
+    if (files != null) {
+      this.files = files;
     }
   }
 
@@ -76,14 +76,14 @@ class Folder {
     });
   }
 
-  /// clones a story content
+  /// clones a folder's content
   Folder.clone(Folder event)
       : title = event.title,
         emoji = event.emoji,
         metadata = Map<String, dynamic>.from(event.metadata),
-        images = Map<String, FolderMedia>.from(
-            event.images.map((String key, FolderMedia value) {
-          return MapEntry<String, FolderMedia>(key, FolderMedia.clone(value));
+        files = Map<String, FileData>.from(
+            event.files.map((String key, FileData value) {
+          return MapEntry<String, FileData>(key, FileData.clone(value));
         })),
         id = event.id,
         amOwner = event.amOwner,
@@ -111,8 +111,7 @@ class Folder {
 
   Map<String, dynamic> metadata = <String, dynamic>{};
 
-  /// images on the main story
-  Map<String, FolderMedia> images = <String, FolderMedia>{};
+  Map<String, FileData> files = <String, FileData>{};
 
   List<Folder> subFolders = <Folder>[];
 }

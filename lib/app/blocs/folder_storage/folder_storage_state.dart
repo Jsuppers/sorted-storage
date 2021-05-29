@@ -12,7 +12,7 @@ class FolderStorageState {
   /// generic data passed in the state
   final dynamic data;
 
-  /// the folder ID for the related story
+  /// the folder ID for the related folder
   final String? folderID;
 
   /// error message

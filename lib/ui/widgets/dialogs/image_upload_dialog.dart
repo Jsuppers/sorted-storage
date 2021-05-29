@@ -16,8 +16,8 @@ import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/extensions/metadata.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/media_progress.dart';
 import 'package:web/ui/helpers/text_display.dart';
 
@@ -34,12 +34,12 @@ class ImageUploadDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, FolderMedia> images = <String, FolderMedia>{};
+    final Map<String, FileData> images = <String, FileData>{};
     for (int i = 0; i < file.files.length; i++) {
       final PlatformFile element = file.files[i];
       final String mime = lookupMimeType(element.name!) ?? '';
 
-      final FolderMedia media = FolderMedia(
+      final FileData media = FileData(
           id: '',
           name: element.name!,
           stream: element.readStream,

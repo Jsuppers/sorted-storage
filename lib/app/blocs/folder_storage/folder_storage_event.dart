@@ -13,10 +13,10 @@ class FolderStorageEvent {
   /// generic data passed in the event
   final dynamic data;
 
-  /// represents which story this event is for, this can also be a sub event
+  /// represents which folder this event is for, this can also be a sub event
   final String? folderID;
 
-  /// usually set to the main story folderID, used to find a sub folder
+  /// usually set to the main folder folderID, used to find a sub folder
   final String? parentID;
 
   /// error message to pass on to the front end

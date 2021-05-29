@@ -13,7 +13,7 @@ class RoutingData {
   /// first part of the route
   final String baseRoute;
 
-  /// destination of route i.e. a certain story
+  /// destination of route i.e. a certain folder
   final String destination;
 
   /// query parameters in the route

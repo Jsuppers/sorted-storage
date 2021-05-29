@@ -11,10 +11,10 @@ class EditorState {
       this.data,
       this.refreshUI = false});
 
-  /// represents which story this event is for, this can also be a sub event
+  /// represents which folder this event is for, this can also be a sub event
   final String? folderID;
 
-  /// usually set to the main story folderID, used to find a sub folder
+  /// usually set to the main folder folderID, used to find a sub folder
   final String? parentID;
 
   /// used to tell the bloc which type of event this is

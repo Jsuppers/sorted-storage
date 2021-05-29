@@ -7,13 +7,13 @@ abstract class SharingState {
   final String? errorMessage;
 }
 
-/// story is shared
+/// folder is shared
 class SharingSharedState extends SharingState {
   /// constructor which allows setting the error message
   SharingSharedState({String? errorMessage}) : super(errorMessage);
 }
 
-/// story is not shared
+/// folder is not shared
 class SharingNotSharedState extends SharingState {
   /// constructor which allows setting the error message
   SharingNotSharedState({String? errorMessage}) : super(errorMessage);

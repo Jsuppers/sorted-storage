@@ -4,8 +4,8 @@ abstract class ShareEvent {}
 /// initial event
 class InitialEvent extends ShareEvent {}
 
-/// story is setting it's permissions
+/// folder is setting it's permissions
 class StartSharingEvent extends ShareEvent {}
 
-/// story has set it's permissions
+/// folder has set it's permissions
 class StopSharingEvent extends ShareEvent {}

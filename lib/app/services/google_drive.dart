@@ -11,8 +11,8 @@ import 'package:googleapis/drive/v3.dart';
 
 // Project imports:
 import 'package:web/app/extensions/metadata.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/constants.dart';
@@ -47,10 +47,10 @@ class GoogleDrive {
 
   /// upload a data stream to a file, and return the file's id
   Future<String?> uploadMediaToFolder(String folderID, String imageName,
-      FolderMedia storyMedia, Stream<List<int>> dataStream) async {
+      FileData fileData, Stream<List<int>> dataStream) async {
     final File file = _createDriveFile(folderID,
-        name: imageName, metadata: storyMedia.metadata);
-    final Media image = Media(dataStream, storyMedia.contentSize);
+        name: imageName, metadata: fileData.metadata);
+    final Media image = Media(dataStream, fileData.contentSize);
     final File uploadedFile =
         await driveApi!.files.create(file, uploadMedia: image);
 
@@ -168,7 +168,7 @@ class GoogleDrive {
     final String folderQuery = "'${folder.id}' in parents and trashed=false";
     final FileList filesInFolder =
         await listFiles(folderQuery, filter: GoogleDrive._folderFilter);
-    final Map<String, FolderMedia> files = <String, FolderMedia>{};
+    final Map<String, FileData> files = <String, FileData>{};
     final List<Folder> subFolders = <Folder>[];
     int index = 0;
     for (final File file in filesInFolder.files!) {
@@ -180,7 +180,7 @@ class GoogleDrive {
 
       if (file.mimeType!.startsWith('image/') ||
           file.mimeType!.startsWith('video/')) {
-        final FolderMedia media = FolderMedia(
+        final FileData media = FileData(
           id: file.id!,
           name: file.name!,
           isVideo: file.mimeType!.startsWith('video/'),
@@ -198,7 +198,7 @@ class GoogleDrive {
             metadata: metadata);
         subFolders.add(subFolder);
       } else {
-        final FolderMedia media = FolderMedia(
+        final FileData media = FileData(
             name: file.name!,
             id: file.id!,
             isDocument: true,
@@ -212,7 +212,7 @@ class GoogleDrive {
 
     folder.metadata
         .setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
-    folder.images = files;
+    folder.files = files;
     folder.subFolders = subFolders;
     folder.loaded = true;
     folder.amOwner ??= await amOwner(folder.id!);

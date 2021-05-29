@@ -15,7 +15,7 @@ import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
-/// page which shows a single story
+/// page which shows a single folder
 class FolderPage extends StatefulWidget {
   // ignore: public_member_api_docs
   const FolderPage(this._destination);

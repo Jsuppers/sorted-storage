@@ -3,7 +3,7 @@ enum FolderStorageType {
   /// new user clears all information
   newUser,
 
-  /// retrieve a specific story from storage
+  /// retrieve a specific folder from storage
   getFolder,
 
   /// get the root folder for the user

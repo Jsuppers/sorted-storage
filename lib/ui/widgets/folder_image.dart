@@ -14,8 +14,8 @@ import 'package:web/app/blocs/editor/editor_event.dart';
 import 'package:web/app/blocs/editor/editor_type.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/extensions/metadata.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_media.dart';
 import 'package:web/app/services/retry_service.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -37,7 +37,7 @@ class FolderImage extends StatefulWidget {
   final bool locked;
 
   // ignore: public_member_api_docs
-  final FolderMedia folderMedia;
+  final FileData folderMedia;
 
   // ignore: public_member_api_docs
   final String imageKey;
@@ -69,7 +69,7 @@ class RetryMediaWidget extends StatefulWidget {
   _RetryMediaWidgetState createState() => _RetryMediaWidgetState();
 
   Folder folder;
-  FolderMedia media;
+  FileData media;
   bool locked;
 }
 
@@ -77,7 +77,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
 
   Widget _backgroundImage(
-      String imageKey, FolderMedia media, ImageProvider? image) {
+      String imageKey, FileData media, ImageProvider? image) {
     return Container(
       height: 150.0,
       width: 150.0,
@@ -95,7 +95,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   }
 
   Widget _createNonEditControls(
-      String imageKey, bool showPlaceholder, FolderMedia media) {
+      String imageKey, bool showPlaceholder, FileData media) {
     if (showPlaceholder) {
       return MediaCard(media);
     }
@@ -236,7 +236,7 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
 
 class ImageDescription extends StatefulWidget {
   ImageDescription({required this.media, required this.folder});
-  FolderMedia media;
+  FileData media;
   Folder folder;
 
   @override

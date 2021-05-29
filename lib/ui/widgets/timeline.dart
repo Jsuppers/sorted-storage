@@ -71,7 +71,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
           child: Column(
             children: [
               Image.asset(
-                'assets/images/no_story.png',
+                'assets/images/no_folder.png',
                 height: 150,
               ),
               const SizedBox(height: 10),
