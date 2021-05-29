@@ -243,7 +243,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
     _syncData(
       event,
       () async {
-        return _storage.updateMetadata(update.media.id, update.media.metadata!);
+        return _storage.updateMetadata(update.media.id, update.media.metadata);
       },
       (_) {
         final Folder? cloudCopy = TimelineService.getFolderWithID(
@@ -283,7 +283,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             final FileData? file =
                 cloudCopy.files[update.items[update.currentIndex].imageKey];
             if (file != null) {
-              file.metadata?.setTimestamp(newPosition);
+              file.metadata.setTimestamp(newPosition);
             }
           }
         }

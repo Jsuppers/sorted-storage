@@ -455,8 +455,8 @@ class _TimelineEventCardState extends State<EventCard> {
     }
 
     cards.sort((FolderImage a, FolderImage b) {
-      final double first = a.folderMedia.metadata?.getTimestamp() ?? 0;
-      final double second = b.folderMedia.metadata?.getTimestamp() ?? 0;
+      final double first = a.folderMedia.metadata.getTimestamp() ?? 0;
+      final double second = b.folderMedia.metadata.getTimestamp() ?? 0;
       return first.compareTo(second);
     });
 

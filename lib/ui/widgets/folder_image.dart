@@ -255,7 +255,7 @@ class _ImageDescriptionState extends State<ImageDescription> {
 
   @override
   Widget build(BuildContext context) {
-    descriptionController.text = widget.media.metadata?.getDescription() ?? '';
+    descriptionController.text = widget.media.metadata.getDescription();
     descriptionController.selection =
         TextSelection.collapsed(offset: descriptionController.text.length);
 
@@ -272,7 +272,7 @@ class _ImageDescriptionState extends State<ImageDescription> {
         onChanged: (String content) {
           if (_debounce?.isActive ?? false) _debounce?.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () {
-            widget.media.metadata?.setDescription(content);
+            widget.media.metadata.setDescription(content);
             UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(
                 folder: widget.folder, media: widget.media);
             BlocProvider.of<EditorBloc>(context)

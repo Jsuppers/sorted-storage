@@ -39,7 +39,7 @@ class UpdatePosition {
   double? getItemOrder(int index) {
     if (media != null) {
       final FolderImage currentItem = (items as List<FolderImage>)[index];
-      return currentItem.folderMedia.metadata!.getTimestamp()!;
+      return currentItem.folderMedia.metadata.getTimestamp()!;
     }
     final Folder currentItem = (items as List<Folder>)[index];
     return currentItem.metadata.getTimestamp();
@@ -59,7 +59,7 @@ class UpdatePosition {
     if (media != null) {
       final FolderImage currentItem =
           (items as List<FolderImage>)[currentIndex];
-      return currentItem.folderMedia.metadata!;
+      return currentItem.folderMedia.metadata;
     }
     final Folder currentItem = (items as List<Folder>)[currentIndex];
     return currentItem.metadata;

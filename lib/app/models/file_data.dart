@@ -8,11 +8,13 @@ class FileData {
     this.isVideo = false,
     this.isDocument = false,
     this.contentSize,
-    this.metadata,
+    Map<String, dynamic>? metadata,
     required this.name,
     this.retrieveThumbnail = false,
   }) {
-    metadata ??= <String, dynamic>{};
+    if (metadata != null) {
+      this.metadata = metadata;
+    }
   }
 
   /// clone the media file
@@ -25,11 +27,7 @@ class FileData {
         retrieveThumbnail = media.retrieveThumbnail,
         id = media.id,
         name = media.name,
-        metadata = Map.from(media.metadata ?? {});
-
-  /// and index which will ensure the media without an index will be at the end
-  /// of the list hopefully no one uploads this much media in one folder..
-  static const int highIntValue = 65536;
+        metadata = Map<String, dynamic>.from(media.metadata);
 
   /// name of the file
   String name;
@@ -56,5 +54,5 @@ class FileData {
   Stream<List<int>>? stream;
 
   /// index of this media
-  Map<String, dynamic>? metadata;
+  Map<String, dynamic> metadata = <String, dynamic>{};
 }
