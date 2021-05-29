@@ -10,8 +10,10 @@ import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/http_client.dart';
 import 'package:web/app/models/sharing_information.dart';
+import 'package:web/app/models/storage_information.dart';
 import 'package:web/app/models/user.dart' as usr;
 import 'package:web/app/services/cloud_provider/google/helpers/folder_helper.dart';
+import 'package:web/app/services/cloud_provider/google/helpers/profile_helper.dart';
 import 'package:web/app/services/cloud_provider/google/helpers/sharing_helper.dart';
 
 /// service which communicates with google drive
@@ -23,6 +25,7 @@ class GoogleDrive {
 
   late FolderHelper _folderHelper;
   late SharingHelper _sharingHelper;
+  late ProfileHelper _profileHelper;
 
   void newUser({usr.User? user}) {
     http.Client client;
@@ -34,6 +37,11 @@ class GoogleDrive {
     driveApi = DriveApi(client);
     _folderHelper = FolderHelper(driveApi);
     _sharingHelper = SharingHelper(driveApi);
+    _profileHelper = ProfileHelper(driveApi);
+  }
+
+  Future<StorageInformation> getStorageInformation() async {
+    return _profileHelper.getStorageInformation();
   }
 
   Future<File> updateMetadata(

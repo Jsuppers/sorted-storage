@@ -8,11 +8,14 @@ import 'package:googleapis/drive/v3.dart';
 // Project imports:
 import 'package:web/app/models/storage_information.dart';
 
-/// service which communicates with Google API
-class GoogleStorageService {
+class ProfileHelper {
+  ProfileHelper(this.driveApi);
+
+  DriveApi? driveApi;
+
   /// retrieve storage information
-  static Future<StorageInformation> getStorageInformation(DriveApi? api) async {
-    final About about = await api!.about.get($fields: 'storageQuota');
+  Future<StorageInformation> getStorageInformation() async {
+    final About? about = await driveApi?.about.get($fields: 'storageQuota');
     if (about == null) {
       return StorageInformation();
     }

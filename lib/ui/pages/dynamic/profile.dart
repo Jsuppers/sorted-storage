@@ -14,7 +14,7 @@ import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/models/storage_information.dart';
 import 'package:web/app/models/user.dart';
-import 'package:web/app/services/storage_service.dart';
+import 'package:web/app/services/cloud_provider/google/google_drive.dart';
 import 'package:web/app/services/url_service.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -30,6 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final User? user = BlocProvider.of<AuthenticationBloc>(context).state;
+    final GoogleDrive storage = BlocProvider.of<FolderStorageBloc>(context).storage;
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: Card(
@@ -40,10 +41,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Column(
                   children: <Widget>[
                     FutureBuilder<StorageInformation?>(
-                      future: GoogleStorageService.getStorageInformation(
-                          BlocProvider.of<FolderStorageBloc>(context)
-                              .storage
-                              .driveApi),
+                      future: storage.getStorageInformation(),
                       builder: (BuildContext context,
                           AsyncSnapshot<dynamic> snapshot) {
                         if (snapshot.hasError) {
