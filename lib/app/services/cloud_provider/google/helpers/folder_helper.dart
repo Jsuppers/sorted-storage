@@ -87,7 +87,7 @@ class FolderHelper {
     File rootFile;
     Map<String, dynamic> metadata = <String, dynamic>{};
     if (folderParent.files!.isEmpty) {
-      metadata.setTimestamp(DateTime.now().millisecondsSinceEpoch.toDouble());
+      metadata.setOrder(DateTime.now().millisecondsSinceEpoch.toDouble());
       final File file = _createDriveFile(
         Constants.rootFolder,
         mimeType: _folderMimeType,
@@ -130,7 +130,7 @@ class FolderHelper {
       final Map<String, dynamic> metadata =
           MetaData.fromString(file.description);
       metadata.setTimestampIfEmpty(
-          (DateTime.now().millisecondsSinceEpoch + index).toDouble());
+          DateTime.now().millisecondsSinceEpoch + index);
       final bool subFolderOwner = _getAmOwner(file);
 
       if (file.mimeType!.startsWith('image/') ||
@@ -166,7 +166,7 @@ class FolderHelper {
     }
 
     folder.metadata
-        .setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
+        .setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch);
     folder.files = files;
     folder.subFolders = subFolders;
     folder.loaded = true;

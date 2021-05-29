@@ -47,7 +47,7 @@ class ImageUploadDialog extends StatelessWidget {
           isVideo: mime.startsWith('video/'),
           isDocument: !mime.startsWith('video/') && !mime.startsWith('image/'));
       media.metadata
-          .setTimestamp((DateTime.now().millisecondsSinceEpoch + i).toDouble());
+          .setOrder((DateTime.now().millisecondsSinceEpoch + i).toDouble());
       images.putIfAbsent(element.name!, () => media);
     }
 

@@ -85,10 +85,9 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   Widget timeStamp() {
-    final double timestamp = widget.folder.metadata.getTimestamp() ??
-        DateTime.now().millisecondsSinceEpoch.toDouble();
-    final DateTime selectedDate =
-        DateTime.fromMillisecondsSinceEpoch(timestamp.toInt());
+    final int timestamp = widget.folder.metadata.getTimestamp() ??
+        DateTime.now().millisecondsSinceEpoch;
+    final DateTime selectedDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
     final String formattedDate = formatter.format(selectedDate);
     return Container(
       padding: EdgeInsets.zero,
@@ -140,8 +139,8 @@ class _TimelineEventCardState extends State<EventCard> {
     }
 
     cards.sort((FolderImage a, FolderImage b) {
-      final double first = a.folderMedia.metadata.getTimestamp() ?? 0;
-      final double second = b.folderMedia.metadata.getTimestamp() ?? 0;
+      final double first = a.folderMedia.metadata.getOrder() ?? 0;
+      final double second = b.folderMedia.metadata.getOrder() ?? 0;
       return first.compareTo(second);
     });
 

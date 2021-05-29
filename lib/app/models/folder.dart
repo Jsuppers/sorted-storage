@@ -42,6 +42,8 @@ class Folder {
     if (metadata != null) {
       this.metadata = metadata;
     }
+    this.metadata.setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch);
+    this.metadata.setOrderIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
     if (files != null) {
       this.files = files;
     }
@@ -70,8 +72,8 @@ class Folder {
       return;
     }
     folders.sort((Folder a, Folder b) {
-      final double first = a.metadata.getTimestamp() ?? 0;
-      final double second = b.metadata.getTimestamp() ?? 0;
+      final int first = a.metadata.getTimestamp() ?? 0;
+      final int second = b.metadata.getTimestamp() ?? 0;
       return first.compareTo(second);
     });
   }

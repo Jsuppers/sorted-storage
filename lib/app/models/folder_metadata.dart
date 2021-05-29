@@ -1,7 +1,7 @@
 // Dart imports:
 import 'dart:convert';
 
-enum MetadataKeys { timestamp, description }
+enum MetadataKeys { timestamp, description, order }
 
 class MetaData {
   static Map<String, dynamic> fromString(String? string) {

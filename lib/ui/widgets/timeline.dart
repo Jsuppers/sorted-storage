@@ -8,11 +8,11 @@ import 'package:web/app/models/folder.dart';
 import 'package:web/ui/widgets/timeline_card.dart';
 
 class _TimeLineEventEntry {
-  final double? order;
+  final int? timestamp;
   final Widget event;
 
   // ignore: sort_constructors_first
-  _TimeLineEventEntry(this.order, this.event);
+  _TimeLineEventEntry(this.timestamp, this.event);
 }
 
 // ignore: public_member_api_docs

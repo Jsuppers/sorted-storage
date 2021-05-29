@@ -358,7 +358,7 @@ class _TimelineEventCardState extends State<EventCard> {
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
               widget.folder.metadata
-                  .setTimestamp(date.millisecondsSinceEpoch.toDouble());
+                  .setTimestamp(date.millisecondsSinceEpoch);
               BlocProvider.of<EditorBloc>(context).add(
                   EditorEvent(EditorType.updateTimestamp, data: widget.folder));
             },
@@ -455,8 +455,8 @@ class _TimelineEventCardState extends State<EventCard> {
     }
 
     cards.sort((FolderImage a, FolderImage b) {
-      final double first = a.folderMedia.metadata.getTimestamp() ?? 0;
-      final double second = b.folderMedia.metadata.getTimestamp() ?? 0;
+      final double first = a.folderMedia.metadata.getOrder() ?? 0;
+      final double second = b.folderMedia.metadata.getOrder() ?? 0;
       return first.compareTo(second);
     });
 

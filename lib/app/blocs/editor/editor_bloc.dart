@@ -277,9 +277,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       () async {
         final double? order = await update.getCurrentItemPosition();
         final Map<String, dynamic> metaData = update.getCurrentItemMetadata();
-        metaData.setTimestamp(order);
-        await _storage.updateMetadata(
-            fileId: update.getCurrentItemId(), metadata: metaData);
+        metaData.setOrder(order);
+        await _storage.updateMetadata(fileId: update.getCurrentItemId(), metadata: metaData);
         return order;
       },
       (double? newPosition) {
@@ -290,7 +289,7 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
             final FileData? file =
                 cloudCopy.files[update.items[update.currentIndex].imageKey];
             if (file != null) {
-              file.metadata.setTimestamp(newPosition);
+              file.metadata.setOrder(newPosition);
             }
           }
         }

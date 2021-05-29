@@ -27,8 +27,15 @@ class UpdatePosition {
         order -= 1;
       }
     } else {
-      final double? orderAbove = getItemOrder(targetIndex);
-      final double? orderBelow = getItemOrder(targetIndex - 1);
+      double? orderAbove;
+      double? orderBelow;
+      if (targetIndex < currentIndex) {
+        orderAbove = getItemOrder(targetIndex);
+        orderBelow = getItemOrder(targetIndex - 1);
+      } else {
+        orderAbove = getItemOrder(targetIndex + 1);
+        orderBelow = getItemOrder(targetIndex);
+      }
       if (orderAbove != null && orderBelow != null) {
         order = (orderAbove + orderBelow) / 2;
       }
@@ -39,10 +46,10 @@ class UpdatePosition {
   double? getItemOrder(int index) {
     if (media != null) {
       final FolderImage currentItem = (items as List<FolderImage>)[index];
-      return currentItem.folderMedia.metadata.getTimestamp()!;
+      return currentItem.folderMedia.metadata.getOrder()!;
     }
     final Folder currentItem = (items as List<Folder>)[index];
-    return currentItem.metadata.getTimestamp();
+    return currentItem.metadata.getOrder();
   }
 
   String getCurrentItemId() {
