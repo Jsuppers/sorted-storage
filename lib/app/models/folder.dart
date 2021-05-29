@@ -2,6 +2,14 @@
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/file_data.dart';
 
+enum FolderTypes {
+  /// standard and default layout which shows the folders in a timeline layout
+  basic,
+
+  /// a custom layout
+  custom,
+}
+
 class FolderNameData {
   FolderNameData({required this.emoji, required this.title});
 
@@ -25,6 +33,7 @@ class FolderNameData {
 
 /// content for a folder
 class Folder {
+
   // ignore: public_member_api_docs
   Folder({
     this.id,

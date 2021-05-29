@@ -18,7 +18,6 @@ import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/app/models/folder_metadata.dart';
 import 'package:web/constants.dart';
 import 'package:web/ui/helpers/property.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -206,9 +205,7 @@ class _TimelineEventCardState extends State<EventCard> {
                           Wrap(spacing: 8.0, runSpacing: 4.0, children: cards)),
                   Text(
                     Property.getValueOrDefault(
-                      widget.folder
-                              .metadata[describeEnum(MetadataKeys.description)]
-                          as String?,
+                      widget.folder.metadata.getDescription(),
                       'No description given',
                     ),
                     textAlign: TextAlign.center,

@@ -1,12 +1,45 @@
 // Flutter imports:
 import 'package:flutter/foundation.dart';
+import 'package:web/app/models/folder.dart';
 
-// Project imports:
-import 'package:web/app/models/folder_metadata.dart';
+enum MetadataKeys {
+  /// timestamp allows the folder/file to have a certain date
+  timestamp,
+
+  /// description allows a small description of what the resource is about
+  description,
+
+  /// order is used to sort the resource e.g. folders in the home screen
+  /// can be moved around
+  order,
+
+  /// type is used to describe which layout to use
+  type,
+
+  /// if type is custom it will search for the value for this key and display
+  /// this in a web view
+  customURL
+}
 
 /// extension to easily get/set common values from a map
 /// to use don't forget to import 'package:web/app/extensions/metadata.dart';
 extension MetaDataExtension on Map<String, dynamic> {
+  FolderTypes? getType() {
+    return this[describeEnum(MetadataKeys.type)] as FolderTypes?;
+  }
+
+  void setType(FolderTypes? type) {
+    this[describeEnum(MetadataKeys.type)] = type;
+  }
+
+  String? getCustomURL() {
+    return this[describeEnum(MetadataKeys.customURL)] as String?;
+  }
+
+  void setCustomURL(String? customURL) {
+    this[describeEnum(MetadataKeys.customURL)] = customURL;
+  }
+
   int? getTimestamp() {
     return this[describeEnum(MetadataKeys.timestamp)] as int?;
   }
