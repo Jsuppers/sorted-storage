@@ -116,6 +116,21 @@ class _MyAppState extends State<MyApp> {
                         })
 
             ),
+        Story(
+          name: 'Time line ten',
+          builder: (_, k) =>
+              ResponsiveBuilder(
+                  builder: (BuildContext context, SizingInformation constraints) {
+                    return Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: TimelineLayout(
+                        folder: exampleFolderSingle(10),
+                        width: constraints.localWidgetSize.width,
+                        height: constraints.localWidgetSize.height,
+                      ),
+                    );
+                  })
+        ),
           ],
         ),
       ),

@@ -59,9 +59,14 @@ class _TimelineLayoutState extends State<TimelineLayout> {
       children.add(element.event);
     }
     if (children.isNotEmpty) {
-      return Column(
-        children: children,
-      );
+      return SizedBox(
+          height: widget.height,
+          child: ListView.builder(
+            itemCount: children.length,
+            itemBuilder: (BuildContext context, int index) {
+              return children[index];
+            },
+          ));
     }
     return SizedBox(
       height: widget.height / 1.5,
