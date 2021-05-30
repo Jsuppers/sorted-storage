@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:web/app/models/folder.dart';
+import 'package:web/app/models/theme_data.dart';
 
 enum MetadataKeys {
   /// timestamp allows the folder/file to have a certain date
@@ -20,12 +21,23 @@ enum MetadataKeys {
 
   /// if type is custom it will search for the value for this key and display
   /// this in a web view
-  customURL
+  customURL,
+
+  /// theme data allows the user to customize the color of the app
+  themeData,
 }
 
 /// extension to easily get/set common values from a map
 /// to use don't forget to import 'package:web/app/extensions/metadata.dart';
 extension MetaDataExtension on Map<String, dynamic> {
+  ThemeData? getThemeData() {
+    return this[describeEnum(MetadataKeys.themeData)] as ThemeData?;
+  }
+
+  void setThemeData(ThemeData? themeData) {
+    this[describeEnum(MetadataKeys.themeData)] = themeData;
+  }
+
   FolderLayout? getLayout() {
     return this[describeEnum(MetadataKeys.layout)] as FolderLayout?;
   }
