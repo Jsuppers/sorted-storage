@@ -3,11 +3,11 @@
 [![style: lint](https://img.shields.io/badge/style-lint-4BC0F5.svg)](https://pub.dev/packages/lint)
 
 
-![](assets/images/logo_tiny.png)
+![](assets/images/flow.png)
 
 
-This project provides users a sorted way to view their media and documents which are 
-saved in cloud storage. It is hosted on [sortedstorage.com](https://sortedstorage.com)
+The hope of this project is to provide users a way to view their files from storage providers in a more personalised and funner way. 
+It is hosted on [sortedstorage.com](https://sortedstorage.com)
  
 ### Getting Started
 
