@@ -32,3 +32,5 @@ Then you can open the file coverage/index.html
 2. dart format --fix .
 3. flutter pub run import_sorter:main
 
+### Storybook
+To quickly test you can run story book please read the storybook/README for more information

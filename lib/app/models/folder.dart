@@ -44,6 +44,7 @@ class Folder {
     Map<String, FileData>? files,
     Map<String, dynamic>? metadata,
     List<Folder>? subFolders,
+    bool? loaded,
   }) {
     if (subFolders != null) {
       this.subFolders = subFolders;
@@ -55,6 +56,9 @@ class Folder {
     this.metadata.setOrderIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
     if (files != null) {
       this.files = files;
+    }
+    if (loaded != null) {
+      this.loaded = loaded;
     }
   }
 

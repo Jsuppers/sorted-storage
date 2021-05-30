@@ -56,8 +56,7 @@ class LayoutWrapper extends StatelessWidget {
             .add(NavigateToLoginEvent(arguments: queryParameters));
         return StaticLoadingLogo();
       }
-      return Content(
-          widget: widget, includeNavigation: true, routingData: routingData);
+      return Content(widget: widget);
     });
   }
 }
@@ -68,7 +67,6 @@ class Content extends StatefulWidget {
   const Content(
       {Key? key,
       required this.widget,
-      this.routingData,
       this.includeNavigation = true})
       : super(key: key);
 
@@ -77,9 +75,6 @@ class Content extends StatefulWidget {
 
   /// should include the navigation bar
   final bool includeNavigation;
-
-  /// the targeted route
-  final RoutingData? routingData;
 
   @override
   _ContentState createState() => _ContentState();
@@ -95,6 +90,8 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final ScrollController _scrollController = ScrollController();
+
     return Scaffold(
       body: ResponsiveBuilder(
         builder: (BuildContext context, SizingInformation sizingInformation) =>
@@ -102,21 +99,24 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
           width: sizingInformation.screenSize.width,
           height: sizingInformation.screenSize.height,
           decoration: myBackgroundDecoration,
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: widget.widget,
-              ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0),
-                      child: Footer(sizingInformation.screenSize.width)),
+          child: Scrollbar(
+            controller: _scrollController,
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: widget.widget,
                 ),
-              )
-            ],
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20.0),
+                        child: Footer(sizingInformation.screenSize.width)),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
