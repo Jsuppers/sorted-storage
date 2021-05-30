@@ -13,12 +13,13 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/dialog_service.dart';
+import 'package:web/ui/layouts/timeline/timeline.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
-import 'package:web/ui/widgets/timeline.dart';
 
 /// Page which contains all the stories
 class FoldersPage extends StatefulWidget {
@@ -116,15 +117,27 @@ class _FoldersPageState extends State<FoldersPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: TimelineLayout(
-                            key: Key(key),
-                            folder: folder!,
-                            width: constraints.screenSize.width,
-                            height: constraints.screenSize.height),
+                        child: getLayout(
+                          constraints.screenSize.width,
+                          constraints.screenSize.height,
+                        ),
                       ),
                     ],
                   );
                 },
               ));
+  }
+
+  Widget getLayout(double width, double height) {
+    final FolderLayout? type = folder!.metadata.getLayout();
+    if (type == null || type == FolderLayout.basic) {
+      return TimelineLayout(
+        key: Key(key),
+        folder: folder!,
+        width: width,
+        height: height,
+      );
+    }
+    return Container();
   }
 }

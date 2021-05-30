@@ -13,8 +13,8 @@ import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/cloud_provider/google/google_drive.dart';
 import 'package:web/app/services/cloud_provider/storage_service.dart';
-import 'package:web/ui/widgets/timeline.dart';
 import 'package:web/app/models/user.dart' as usr;
+import 'package:web/ui/layouts/timeline/timeline.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,51 +86,43 @@ class _MyAppState extends State<MyApp> {
           children: [
             Story(
                 name: 'Time line empty',
-                builder: (_, k) =>
-                    ResponsiveBuilder(
-                        builder: (BuildContext context, SizingInformation constraints) {
-                          return Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: TimelineLayout(
-                              folder: exampleFolderSingle(0),
-                              width: constraints.localWidgetSize.width,
-                              height: constraints.localWidgetSize.height,
-                            ),
-                          );
-                        })
-
-            ),
+                builder: (_, k) => ResponsiveBuilder(builder:
+                        (BuildContext context, SizingInformation constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: TimelineLayout(
+                          folder: exampleFolderSingle(0),
+                          width: constraints.localWidgetSize.width,
+                          height: constraints.localWidgetSize.height,
+                        ),
+                      );
+                    })),
             Story(
                 name: 'Time line single',
-                builder: (_, k) =>
-                    ResponsiveBuilder(
-                        builder: (BuildContext context, SizingInformation constraints) {
-                          return Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: TimelineLayout(
-                              folder: exampleFolderSingle(1),
-                              width: constraints.localWidgetSize.width,
-                              height: constraints.localWidgetSize.height,
-                            ),
-                          );
-                        })
-
-            ),
-        Story(
-          name: 'Time line ten',
-          builder: (_, k) =>
-              ResponsiveBuilder(
-                  builder: (BuildContext context, SizingInformation constraints) {
-                    return Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: TimelineLayout(
-                        folder: exampleFolderSingle(10),
-                        width: constraints.localWidgetSize.width,
-                        height: constraints.localWidgetSize.height,
-                      ),
-                    );
-                  })
-        ),
+                builder: (_, k) => ResponsiveBuilder(builder:
+                        (BuildContext context, SizingInformation constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: TimelineLayout(
+                          folder: exampleFolderSingle(1),
+                          width: constraints.localWidgetSize.width,
+                          height: constraints.localWidgetSize.height,
+                        ),
+                      );
+                    })),
+            Story(
+                name: 'Time line ten',
+                builder: (_, k) => ResponsiveBuilder(builder:
+                        (BuildContext context, SizingInformation constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: TimelineLayout(
+                          folder: exampleFolderSingle(10),
+                          width: constraints.localWidgetSize.width,
+                          height: constraints.localWidgetSize.height,
+                        ),
+                      );
+                    })),
           ],
         ),
       ),
@@ -140,7 +132,7 @@ class _MyAppState extends State<MyApp> {
   Folder exampleFolderSingle(int children) {
     final List<Folder> subFolders = <Folder>[];
     for (int i = 0; i < children; i++) {
-      subFolders.add( Folder(
+      subFolders.add(Folder(
         title: 'Folder $i',
         emoji: Emojis.rocket,
         loaded: true,
@@ -153,5 +145,4 @@ class _MyAppState extends State<MyApp> {
       loaded: true,
     );
   }
-
 }

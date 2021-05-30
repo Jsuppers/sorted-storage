@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
+import 'package:web/ui/layouts/timeline/timeline_card.dart';
 
 class _TimeLineEventEntry {
   final int? timestamp;

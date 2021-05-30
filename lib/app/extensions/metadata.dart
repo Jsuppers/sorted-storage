@@ -1,5 +1,7 @@
 // Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Project imports:
 import 'package:web/app/models/folder.dart';
 
 enum MetadataKeys {
@@ -14,7 +16,7 @@ enum MetadataKeys {
   order,
 
   /// type is used to describe which layout to use
-  type,
+  layout,
 
   /// if type is custom it will search for the value for this key and display
   /// this in a web view
@@ -24,12 +26,12 @@ enum MetadataKeys {
 /// extension to easily get/set common values from a map
 /// to use don't forget to import 'package:web/app/extensions/metadata.dart';
 extension MetaDataExtension on Map<String, dynamic> {
-  FolderTypes? getType() {
-    return this[describeEnum(MetadataKeys.type)] as FolderTypes?;
+  FolderLayout? getLayout() {
+    return this[describeEnum(MetadataKeys.layout)] as FolderLayout?;
   }
 
-  void setType(FolderTypes? type) {
-    this[describeEnum(MetadataKeys.type)] = type;
+  void setLayout(FolderLayout? layout) {
+    this[describeEnum(MetadataKeys.layout)] = layout;
   }
 
   String? getCustomURL() {

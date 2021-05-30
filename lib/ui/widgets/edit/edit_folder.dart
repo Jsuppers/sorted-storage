@@ -357,8 +357,7 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
-              widget.folder.metadata
-                  .setTimestamp(date.millisecondsSinceEpoch);
+              widget.folder.metadata.setTimestamp(date.millisecondsSinceEpoch);
               BlocProvider.of<EditorBloc>(context).add(
                   EditorEvent(EditorType.updateTimestamp, data: widget.folder));
             },

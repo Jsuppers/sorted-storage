@@ -129,8 +129,8 @@ class FolderHelper {
     for (final File file in filesInFolder.files!) {
       final Map<String, dynamic> metadata =
           MetaData.fromString(file.description);
-      metadata.setTimestampIfEmpty(
-          DateTime.now().millisecondsSinceEpoch + index);
+      metadata
+          .setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch + index);
       final bool subFolderOwner = _getAmOwner(file);
 
       if (file.mimeType!.startsWith('image/') ||
@@ -165,8 +165,7 @@ class FolderHelper {
       index++;
     }
 
-    folder.metadata
-        .setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch);
+    folder.metadata.setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch);
     folder.files = files;
     folder.subFolders = subFolders;
     folder.loaded = true;

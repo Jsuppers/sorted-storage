@@ -86,7 +86,8 @@ class _TimelineEventCardState extends State<EventCard> {
   Widget timeStamp() {
     final int timestamp = widget.folder.metadata.getTimestamp() ??
         DateTime.now().millisecondsSinceEpoch;
-    final DateTime selectedDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final DateTime selectedDate =
+        DateTime.fromMillisecondsSinceEpoch(timestamp);
     final String formattedDate = formatter.format(selectedDate);
     return Container(
       padding: EdgeInsets.zero,

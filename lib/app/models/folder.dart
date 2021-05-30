@@ -2,7 +2,7 @@
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/file_data.dart';
 
-enum FolderTypes {
+enum FolderLayout {
   /// standard and default layout which shows the folders in a timeline layout
   basic,
 
@@ -33,7 +33,6 @@ class FolderNameData {
 
 /// content for a folder
 class Folder {
-
   // ignore: public_member_api_docs
   Folder({
     this.id,
@@ -53,7 +52,9 @@ class Folder {
       this.metadata = metadata;
     }
     this.metadata.setTimestampIfEmpty(DateTime.now().millisecondsSinceEpoch);
-    this.metadata.setOrderIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
+    this
+        .metadata
+        .setOrderIfEmpty(DateTime.now().millisecondsSinceEpoch.toDouble());
     if (files != null) {
       this.files = files;
     }

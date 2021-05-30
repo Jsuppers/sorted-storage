@@ -278,7 +278,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         final double? order = await update.getCurrentItemPosition();
         final Map<String, dynamic> metaData = update.getCurrentItemMetadata();
         metaData.setOrder(order);
-        await _storage.updateMetadata(fileId: update.getCurrentItemId(), metadata: metaData);
+        await _storage.updateMetadata(
+            fileId: update.getCurrentItemId(), metadata: metaData);
         return order;
       },
       (double? newPosition) {

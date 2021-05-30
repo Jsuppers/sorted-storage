@@ -64,10 +64,7 @@ class LayoutWrapper extends StatelessWidget {
 /// content styling
 class Content extends StatefulWidget {
   // ignore: public_member_api_docs
-  const Content(
-      {Key? key,
-      required this.widget,
-      this.includeNavigation = true})
+  const Content({Key? key, required this.widget, this.includeNavigation = true})
       : super(key: key);
 
   /// main widget

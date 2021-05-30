@@ -10,10 +10,11 @@ import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
+import 'package:web/ui/layouts/timeline/timeline_card.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
-import 'package:web/ui/widgets/timeline_card.dart';
 
 /// page which shows a single folder
 class FolderPage extends StatefulWidget {
@@ -74,13 +75,24 @@ class _ViewPageState extends State<FolderPage> {
                       )
                     : Padding(
                         padding: const EdgeInsets.all(20.0),
-                        child: TimelineCard(
-                            width: info.screenSize.width,
-                            height: info.screenSize.height,
-                            folder: folder!),
-                      );
+                        child: getLayout(
+                          info.screenSize.width,
+                          info.screenSize.height,
+                        ));
               },
             ),
     );
+  }
+
+  Widget getLayout(double width, double height) {
+    final FolderLayout? type = folder!.metadata.getLayout();
+    if (type == null || type == FolderLayout.basic) {
+      return TimelineCard(
+        folder: folder!,
+        width: width,
+        height: height,
+      );
+    }
+    return Container();
   }
 }
