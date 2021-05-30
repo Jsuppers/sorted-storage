@@ -24,6 +24,7 @@ enum MetadataKeys {
   customURL,
 
   /// theme data allows the user to customize the color of the app
+  /// this data should be saved in the root folder i.e. sorted-storage folder
   themeData,
 }
 
