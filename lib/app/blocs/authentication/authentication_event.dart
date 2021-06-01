@@ -1,4 +1,5 @@
-import 'package:google_sign_in/google_sign_in.dart';
+// Project imports:
+import 'package:web/app/models/user.dart';
 
 /// Abstract class for Authentication events
 abstract class AuthenticationEvent {}
@@ -18,5 +19,5 @@ class AuthenticationNewUserEvent extends AuthenticationEvent {
   AuthenticationNewUserEvent(this.user);
 
   /// user
-  GoogleSignInAccount user;
+  User? user;
 }

@@ -1,7 +1,11 @@
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:http/http.dart' as http;
 import 'package:http_retry/http_retry.dart';
+
+// Project imports:
 import 'package:web/env/env.dart';
 
 /// http client with headers
@@ -13,8 +17,8 @@ class ClientWithAuthHeaders extends http.BaseClient {
     _headers = headers;
   }
 
-  Map<String, String> _headers;
-  http.Client _client;
+  late Map<String, String> _headers;
+  late http.Client _client;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -34,7 +38,7 @@ class ClientWithGoogleDriveKey extends http.BaseClient {
         when: (http.BaseResponse r) => r.statusCode >= 400, retries: 5);
   }
 
-  http.Client _client;
+  late http.Client _client;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {

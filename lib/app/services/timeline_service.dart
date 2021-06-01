@@ -1,28 +1,24 @@
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/timeline_data.dart';
+// Project imports:
+import 'package:web/app/models/folder.dart';
 
 /// service for various functions regarding the timeline
 class TimelineService {
-  /// Retrieves a story with the given folder ID
-  static StoryContent getStoryWithFolderID(String parentID, String folderID,
-      Map<String, StoryTimelineData> timelineEvent) {
-    final StoryTimelineData event = timelineEvent[parentID];
-    if (event.mainStory.folderID == folderID) {
-      return event.mainStory;
+  /// Retrieves a folder with the given folder ID
+  static Folder? getFolderWithID(String folderID, Folder? folder) {
+    if (folder == null) {
+      return null;
+    }
+    if (folder.id == folderID) {
+      return folder;
     } else {
-      for (int i = 0; i < event.subEvents.length; i++) {
-        final StoryContent element = event.subEvents[i];
-        if (element.folderID == folderID) {
-          return element;
+      for (int i = 0; i < folder.subFolders.length; i++) {
+        final Folder element = folder.subFolders[i];
+        final Folder? subFolder = getFolderWithID(folderID, element);
+        if (subFolder != null) {
+          return subFolder;
         }
       }
     }
     return null;
-  }
-
-  /// Creates a unique temp name based on the parents ID and current time
-  static String createUniqueTempStoryName(String parentID) {
-    final int milliseconds = DateTime.now().millisecondsSinceEpoch;
-    return 'temp_${parentID}_${milliseconds.toString()}';
   }
 }

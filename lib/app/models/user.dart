@@ -2,22 +2,22 @@
 class User {
   // ignore: public_member_api_docs
   User(
-      {this.displayName,
-        this.headers,
-        this.photoUrl,
-        this.email});
+      {required this.displayName,
+      required this.headers,
+      required this.photoUrl,
+      required this.email});
 
   /// email address of this user
   final String email;
 
-  /// display name of this user, used when sending comments
+  /// display name of this user
   final String displayName;
 
   /// url of a photo for this user
   final String photoUrl;
 
   /// auth headers for this user
-  final Map<String, String> headers;
+  final Future<Map<String, String>> headers;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{

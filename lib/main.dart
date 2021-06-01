@@ -1,24 +1,29 @@
+// Dart imports:
 import 'dart:async';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:googleapis/drive/v3.dart';
+import 'package:url_strategy/url_strategy.dart';
+
+// Project imports:
 import 'package:web/app/blocs/authentication/authentication_bloc.dart';
-import 'package:web/app/blocs/authentication/authentication_event.dart';
-import 'package:web/app/blocs/cloud_stories/cloud_stories_bloc.dart';
-import 'package:web/app/blocs/comment_handler/comment_handler_bloc.dart';
 import 'package:web/app/blocs/cookie_notice/cookie_notice_bloc.dart';
-import 'package:web/app/blocs/drive/drive_bloc.dart';
-import 'package:web/app/blocs/drive/drive_event.dart';
-import 'package:web/app/blocs/local_stories/local_stories_bloc.dart';
+import 'package:web/app/blocs/editor/editor_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
+import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
-import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/user.dart' as usr;
-import 'package:web/app/services/google_drive.dart';
+import 'package:web/app/services/cloud_provider/google/google_drive.dart';
+import 'package:web/app/services/cloud_provider/storage_service.dart';
 import 'package:web/route.dart';
 import 'package:web/ui/theme/theme.dart';
 
 Future<void> main() async {
+  setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
@@ -31,81 +36,56 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
-  AuthenticationBloc _authenticationBloc;
-  NavigationBloc _navigationBloc;
-  GoogleDrive _googleDrive;
-  DriveBloc _driveBloc;
-  LocalStoriesBloc _localStoriesBloc;
-  CloudStoriesBloc _cloudStoriesBloc;
-  CommentHandlerBloc _commentHandler;
-  CookieNoticeBloc _cookieNoticeBloc;
-  final Map<String, StoryTimelineData> _localStories =
-      <String, StoryTimelineData>{};
+  late StorageService _storage;
+  late NavigationBloc _navigationBloc;
+  late FolderStorageBloc _folderStorageBloc;
 
   @override
   void initState() {
     super.initState();
-    _googleDrive = GoogleDrive();
-    _driveBloc = DriveBloc();
+    _storage = GoogleDrive();
     _navigationBloc = NavigationBloc(navigatorKey: _navigatorKey);
-    _authenticationBloc = AuthenticationBloc();
-    _authenticationBloc.add(AuthenticationSilentSignInEvent());
-    _localStoriesBloc = LocalStoriesBloc(localStories: _localStories);
-    _cloudStoriesBloc =
-        CloudStoriesBloc(localStories: _localStories, storage: _googleDrive);
-    _commentHandler =
-        CommentHandlerBloc(localStories: _localStories, storage: _googleDrive);
-    _cookieNoticeBloc = CookieNoticeBloc();
+    _folderStorageBloc =
+        FolderStorageBloc(storage: _storage, navigationBloc: _navigationBloc);
   }
 
   @override
   void dispose() {
     super.dispose();
     _navigationBloc.close();
-    _authenticationBloc.close();
-    _driveBloc.close();
-    _localStoriesBloc.close();
-    _cloudStoriesBloc.close();
-    _commentHandler.close();
-    _cookieNoticeBloc.close();
+    _folderStorageBloc.close();
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: <BlocProvider<dynamic>>[
-        BlocProvider<DriveBloc>(
-          create: (BuildContext context) => _driveBloc,
-        ),
         BlocProvider<NavigationBloc>(
           create: (BuildContext context) => _navigationBloc,
         ),
         BlocProvider<AuthenticationBloc>(
-          create: (BuildContext context) => _authenticationBloc,
+          create: (BuildContext context) => AuthenticationBloc(
+            storage: _storage,
+          ),
         ),
-        BlocProvider<CloudStoriesBloc>(
-          create: (BuildContext context) => _cloudStoriesBloc,
+        BlocProvider<FolderStorageBloc>(
+          create: (BuildContext context) => _folderStorageBloc,
         ),
-        BlocProvider<LocalStoriesBloc>(
-          create: (BuildContext context) => _localStoriesBloc,
-        ),
-        BlocProvider<CommentHandlerBloc>(
-          create: (BuildContext context) => _commentHandler,
-        ),
+        BlocProvider<EditorBloc>(
+            create: (BuildContext context) => EditorBloc(
+                storage: _storage,
+                navigationBloc: _navigationBloc,
+                folderStorageBloc: _folderStorageBloc)),
         BlocProvider<CookieNoticeBloc>(
-          create: (BuildContext context) => _cookieNoticeBloc,
+          create: (BuildContext context) => CookieNoticeBloc(),
         ),
       ],
       child: MultiBlocListener(
         listeners: <BlocListener<dynamic, dynamic>>[
-          BlocListener<AuthenticationBloc, usr.User>(
-            listener: (BuildContext context, usr.User user) {
-              _driveBloc.add(InitialDriveEvent(user: user));
-            },
-          ),
-          BlocListener<DriveBloc, DriveApi>(
-            listener: (BuildContext context, DriveApi driveApi) {
-              _googleDrive.driveApi = driveApi;
+          BlocListener<AuthenticationBloc, usr.User?>(
+            listener: (BuildContext context, usr.User? user) {
+              _folderStorageBloc
+                  .add(const FolderStorageEvent(FolderStorageType.newUser));
             },
           ),
         ],

@@ -1,19 +1,20 @@
-import 'package:googleapis/drive/v3.dart';
-import 'package:web/app/models/story_content.dart';
-import 'package:web/app/models/story_media.dart';
-import 'package:web/app/services/google_drive.dart';
+// Project imports:
+import 'package:web/app/services/cloud_provider/storage_service.dart';
+
+// Project imports:
 
 /// service for retrying
 class RetryService {
   /// get thumbnail image for a file
-  static Future<dynamic> getThumbnail(
-      GoogleDrive storage,
-      String folderID,
-      String imageKey,
-      Map<String, StoryMedia> images,
-      Map<String, List<String>> uploadingImages,
-      Function successCallback,
-      {int maxTries = 10}) async {
+  static Future<String?> getThumbnail(StorageService storage,
+      String? thumbnailURL, String folderID, String imageKey,
+      {int maxTries = 10, bool retrieveThumbnail = false}) async {
+    if (thumbnailURL != null) {
+      return thumbnailURL;
+    }
+    if (retrieveThumbnail != true) {
+      return null;
+    }
     const int exp = 10;
     int currentTry = maxTries;
     if (maxTries > exp) {
@@ -22,48 +23,11 @@ class RetryService {
     if (maxTries == 0) {
       return null;
     }
-    return Future<dynamic>.delayed(Duration(seconds: (exp - currentTry) * 2),
+    return Future<String?>.delayed(Duration(seconds: (exp - currentTry) * 2),
         () async {
-      if (images == null || !images.containsKey(imageKey)) {
-        return null;
-      }
-
-      final File mediaFile = await storage.getFile(imageKey,
-          filter: 'id,hasThumbnail,thumbnailLink') as File;
-
-      if (mediaFile.hasThumbnail) {
-        images[imageKey].thumbnailURL = mediaFile.thumbnailLink;
-        successCallback();
-        return null;
-      }
-
-      return getThumbnail(
-          storage, folderID, imageKey, images, uploadingImages, successCallback,
-          maxTries: currentTry - 1);
-    });
-  }
-
-  /// a recursive wait method to keep checking if a thumbnail URL is available
-  static Future<dynamic> checkNeedsRefreshing(
-      String folderID,
-      Map<String, List<String>> uploadingImages,
-      StoryContent localCopy,
-      Function successCallback,
-      {int maxTries = 60,
-      int seconds = 10}) async {
-    if (maxTries == 0) {
-      return null;
-    }
-    return Future<dynamic>.delayed(Duration(seconds: seconds), () async {
-      for (final MapEntry<String, StoryMedia> entry
-          in localCopy.images.entries) {
-        if (entry.value.thumbnailURL == null) {
-          return checkNeedsRefreshing(
-              folderID, uploadingImages, localCopy, successCallback,
-              maxTries: maxTries - 1, seconds: seconds);
-        }
-      }
-      successCallback();
+      final String? thumbnailURL = await storage.getThumbnailURL(imageKey);
+      return getThumbnail(storage, thumbnailURL, folderID, imageKey,
+          retrieveThumbnail: retrieveThumbnail, maxTries: currentTry - 1);
     });
   }
 }

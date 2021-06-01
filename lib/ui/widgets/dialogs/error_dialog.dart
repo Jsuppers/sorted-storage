@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+
+// Project imports:
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/ui/theme/theme.dart';
@@ -8,7 +13,7 @@ import 'package:web/ui/theme/theme.dart';
 /// dialog to show errors
 class ErrorDialog extends StatelessWidget {
   // ignore: public_member_api_docs
-  const ErrorDialog({Key key, this.errorMessages}) : super(key: key);
+  const ErrorDialog({Key? key, required this.errorMessages}) : super(key: key);
 
   // ignore: public_member_api_docs
   final List<String> errorMessages;

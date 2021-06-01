@@ -1,10 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// avatar of the user
 class Avatar extends StatefulWidget {
   // ignore: public_member_api_docs
-  const Avatar({this.url, this.size});
+  const Avatar({required this.url, required this.size});
 
   // ignore: public_member_api_docs
   final String url;
@@ -19,13 +22,8 @@ class Avatar extends StatefulWidget {
 class _AvatarState extends State<Avatar> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: widget.size,
-      height: widget.size,
-      decoration: const BoxDecoration(
-        color: Color(0xFFdedee0),
-        shape: BoxShape.circle,
-      ),
+    return CircleAvatar(
+      radius: widget.size,
       child: ClipOval(
           child: CachedNetworkImage(
         imageUrl: widget.url,

@@ -1,12 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Project imports:
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
 
 /// The footer which contains the privacy policy and terms of conditions
 class Footer extends StatelessWidget {
   /// constructor which sets the width
-  const Footer(this._width, {Key key}) : super(key: key);
+  const Footer(this._width, {Key? key}) : super(key: key);
 
   final double _width;
 
@@ -16,7 +21,8 @@ class Footer extends StatelessWidget {
       padding: const EdgeInsets.all(12.0),
       child: SizedBox(
         width: _width,
-        child: Center(
+        child: Align(
+          alignment: Alignment.bottomCenter,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[

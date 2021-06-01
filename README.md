@@ -3,11 +3,11 @@
 [![style: lint](https://img.shields.io/badge/style-lint-4BC0F5.svg)](https://pub.dev/packages/lint)
 
 
-![](assets/images/logo_tiny.png)
+![](assets/images/flow.png)
 
 
-This project provides users a sorted way to view their media and documents which are 
-saved in cloud storage. It is hosted on [sortedstorage.com](https://sortedstorage.com)
+The hope of this project is to provide users a way to view their files from storage providers in a more personalised and funner way. 
+It is hosted on [sortedstorage.com](https://sortedstorage.com)
  
 ### Getting Started
 
@@ -17,7 +17,8 @@ from [Google credentials](https://console.cloud.google.com/apis/credentials) (cr
 <br/> **recommended** restrict the api key
 2. Generate envify file: <br/> ```flutter pub run build_runner build```
 3. Google sign in only allows port 5000 from localhost so we need to run flutter web as follows: <br/>
-```flutter run -d chrome --web-hostname localhost --web-port 5000```
+```flutter run -d chrome --web-hostname localhost --web-port 5000 --no-sound-null-safety```
+4. we also need to add the --no-sound-null-safety flag until all libraries update to null safety
 
 ### Testing
 1. ```flutter test --coverage```
@@ -27,3 +28,10 @@ from [Google credentials](https://console.cloud.google.com/apis/credentials) (cr
 
 Then you can open the file coverage/index.html
 
+### Useful commands
+1. dart analyze
+2. dart format --fix .
+3. flutter pub run import_sorter:main
+
+### Storybook
+To quickly test you can run story book please read the storybook/README for more information

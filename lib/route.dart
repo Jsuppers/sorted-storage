@@ -1,81 +1,101 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:page_transition/page_transition.dart';
-import 'package:web/app/extensions/string_extensions.dart';
+
+// Project imports:
+import 'package:web/app/models/base_route.dart';
 import 'package:web/app/models/routing_data.dart';
-import 'package:web/ui/pages/dynamic/documents.dart';
-import 'package:web/ui/pages/dynamic/media.dart';
-import 'package:web/ui/pages/dynamic/view.dart';
+import 'package:web/ui/pages/dynamic/folder.dart';
+import 'package:web/ui/pages/dynamic/folders.dart';
+import 'package:web/ui/pages/dynamic/home.dart';
+import 'package:web/ui/pages/dynamic/profile.dart';
+import 'package:web/ui/pages/static/about.dart';
 import 'package:web/ui/pages/static/error.dart';
-import 'package:web/ui/pages/static/home.dart';
 import 'package:web/ui/pages/static/login.dart';
 import 'package:web/ui/pages/static/privacy_policy.dart';
 import 'package:web/ui/pages/static/terms_of_conditions.dart';
 import 'package:web/ui/pages/template/wrappers.dart';
 
-/// route enums
-enum route { documents, media, view, login, policy, terms, error, home }
+class PageContent {
+  PageContent({required this.page, this.requiresAuthentication = false});
 
-/// map of route paths
-const Map<route, String> routePaths = <route, String>{
-  route.documents: '/documents',
-  route.media: '/media',
-  route.view: '/view',
-  route.login: '/login',
-  route.policy: '/policy',
-  route.terms: '/terms',
-  route.error: '/error',
-  route.home: '/home',
-};
+  Widget page;
+  bool requiresAuthentication;
+}
 
 /// class for various routing methods
 class RouteConfiguration {
   /// create a page depending on route
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    final RoutingData routingData = settings.name.getRoutingData;
+    final RoutingData routingData =
+        RouteConfiguration.getRoutingData(settings.name);
     final String baseRoute = routingData.baseRoute;
+    final PageContent pageContent =
+        _getPageContent(baseRoute, routingData.destination);
 
     return PageTransition<dynamic>(
       type: PageTransitionType.fade,
       settings: settings,
       child: LayoutWrapper(
-          widget: _getPageContent(baseRoute, routingData.destination),
-          isViewMode: baseRoute == routePaths[route.view],
-          requiresAuthentication: _pageRequiresAuthentication(baseRoute),
-          targetRoute: routingData.route),
+          widget: pageContent.page,
+          requiresAuthentication: pageContent.requiresAuthentication,
+          routingData: routingData),
     );
   }
 
-  static bool _pageRequiresAuthentication(String baseRoute) {
-    return baseRoute == routePaths[route.media] ||
-        baseRoute == routePaths[route.documents] ||
-        baseRoute == '/';
+  static PageContent _getPageContent(String baseRoute, String destination) {
+    final BaseRoute currentRoute = BaseRoute.values.firstWhere(
+        (BaseRoute br) => br.toRouteString() == baseRoute, orElse: () {
+      if (baseRoute.isEmpty || baseRoute.length == 1) {
+        return BaseRoute.about;
+      }
+      return BaseRoute.show;
+    });
+
+    switch (currentRoute) {
+      case BaseRoute.login:
+        return PageContent(page: LoginPage());
+      case BaseRoute.policy:
+        return PageContent(page: PolicyPage());
+      case BaseRoute.terms:
+        return PageContent(page: TermsPage());
+      case BaseRoute.error:
+        return PageContent(page: ErrorPage());
+      case BaseRoute.about:
+        return PageContent(page: AboutPage());
+      case BaseRoute.profile:
+        return PageContent(page: ProfilePage(), requiresAuthentication: true);
+      case BaseRoute.home:
+        return PageContent(page: HomePage(), requiresAuthentication: true);
+      case BaseRoute.folders:
+        return PageContent(
+            page: FoldersPage(destination), requiresAuthentication: true);
+      case BaseRoute.folder:
+        return PageContent(page: FolderPage(destination));
+      case BaseRoute.show:
+        return PageContent(page: FoldersPage(baseRoute.replaceFirst('/', '')));
+    }
   }
 
-  static Widget _getPageContent(String baseRoute, String destination) {
-    if (baseRoute == routePaths[route.view]) {
-      return ViewPage(destination);
+  static RoutingData getRoutingData(String? path) {
+    final Uri uriData = Uri.parse(path ?? '');
+    final RegExp regExp = RegExp('(/.*?)(/.*)');
+    final Iterable<RegExpMatch> matches = regExp.allMatches(uriData.path);
+    String baseRoute = uriData.path;
+    String destination = '';
+    if (matches.isNotEmpty) {
+      final RegExpMatch match = matches.elementAt(0);
+      baseRoute = match.group(1)!;
+      destination = match.group(2)!.replaceFirst('/', '');
     }
-    if (baseRoute == routePaths[route.login]) {
-      return LoginPage();
-    }
-    if (baseRoute == routePaths[route.media]) {
-      return MediaPage();
-    }
-    if (baseRoute == routePaths[route.documents]) {
-      return DocumentsPage();
-    }
-    if (baseRoute == routePaths[route.policy]) {
-      return PolicyPage();
-    }
-    if (baseRoute == routePaths[route.terms]) {
-      return TermsPage();
-    }
-    if (baseRoute == routePaths[route.error]) {
-      return ErrorPage();
-    }
-    if (baseRoute == routePaths[route.home]) {
-      return HomePage();
-    }
-    return MediaPage();
+
+    return RoutingData(
+      queryParameters: uriData.queryParameters,
+      route: uriData.path,
+      baseRoute: baseRoute,
+      destination: destination,
+    );
   }
 }

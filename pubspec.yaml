@@ -18,49 +18,55 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.1+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  envify: ^2.0.0
-  reorderables: ^0.3.2
-  page_transition: ^1.1.7+3
-  mime: ^0.9.7
-  bloc: ^6.1.0
-  flutter_bloc: ^6.1.1
-  flutter_spinkit: ^4.1.2+1
-  responsive_builder: ^0.1.2
-  google_sign_in: ^4.5.4
-  provider: ^4.3.2+2
-  cached_network_image: ^2.3.2+1
-  googleapis: ^0.55.0
-  file_picker: ^2.1.0
-  flutter_auth_buttons: ^0.10.0
-  timeline_list: ^0.0.5
-  flutter_material_pickers: ^1.8.0
-  date_field: ^0.3.3
+  # not null safety
+  floating_action_bubble: 1.1.2
+  # not null safety
   emojis: ^0.9.3
-  shared_preferences: ^0.5.12+4
-  image: ^2.1.18
-  sleek_circular_slider: ^1.1.0
-  path_provider: ^1.6.21
-  http_retry: ^0.1.1+3
-  url_launcher_web: ^0.1.0
-  rxdart: ^0.24.1
-  buy_me_a_coffee_widget: ^1.0.1
-  percent_indicator: ^2.1.8
-  url_launcher: ^5.7.10
+  font_awesome_flutter: ^9.0.0
+  envify: ^2.0.0
+  reorderables: ^0.4.1
+  page_transition: ^2.0.1-nullsafety.0
+  mime: ^1.0.0
+  bloc: ^7.0.0
+  url_strategy: ^0.2.0
+  flutter_bloc: ^7.0.0
+  flutter_spinkit: ^5.0.0
+  storybook_flutter: ^0.5.0+1
+  responsive_builder: ^0.4.1
+  google_sign_in: ^5.0.2
+  provider: ^5.0.0
+  cached_network_image: ^3.0.0
+  googleapis: ^2.0.0
+  file_picker: ^3.0.1
+  auth_buttons: ^1.0.1
+  timeline_list: ^0.0.5
+  flutter_material_pickers: ^2.1.1
+  date_field: ^2.0.1
+  shared_preferences: ^2.0.5
+  image: ^3.0.2
+  sleek_circular_slider: ^2.0.0
+  path_provider: ^2.0.1
+  http_retry: ^0.2.0
+  url_launcher_web: ^2.0.0
+  rxdart: ^0.26.0
+  percent_indicator: ^3.0.1
+  url_launcher: ^6.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   lint: ^1.0.0
+  import_sorter: ^4.5.0
   build_web_compilers: ^2.0.0
-  bloc_test: ^7.1.0
-  mockito: ^4.1.3
+  bloc_test: ^8.0.0
+  mockito: ^5.0.4
   envify_generator: any
   build_runner: any
 
