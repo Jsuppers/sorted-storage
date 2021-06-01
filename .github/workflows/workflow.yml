@@ -20,11 +20,11 @@ jobs:
       - run: echo GOOGLE_API_KEY=${{secrets.GOOGLE_API_KEY}} > .env
       - run: flutter pub run build_runner build
       - run: flutter build web --no-sound-null-safety
-      - run: flutter test --coverage
-      - uses: codecov/codecov-action@v1.0.2
-        with:
-          token: ${{secrets.CODECOV_TOKEN}}
-          file: ./coverage/lcov.info
+#      - run: flutter test --coverage
+#      - uses: codecov/codecov-action@v1.0.2
+#        with:
+#          token: ${{secrets.CODECOV_TOKEN}}
+#          file: ./coverage/lcov.info
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:
