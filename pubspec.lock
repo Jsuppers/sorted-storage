@@ -256,12 +256,10 @@ packages:
   emojis:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "8b7ea9e476a80401f206eaba02d5af87aea3814a"
-      url: "git://github.com/Parkar99/emojis.git"
-    source: git
-    version: "0.9.0"
+      name: emojis
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.3"
   envify:
     dependency: "direct main"
     description:
@@ -314,12 +312,10 @@ packages:
   floating_action_bubble:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "524ce316049a4f61f5b5664a1a1b1447385f990a"
-      url: "git://github.com/hovadur/floating_action_bubble.git"
-    source: git
-    version: "1.2.0-nullsafety.0"
+      name: floating_action_bubble
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.2"
   flutter:
     dependency: "direct main"
     description: flutter

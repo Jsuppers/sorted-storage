@@ -17,7 +17,8 @@ from [Google credentials](https://console.cloud.google.com/apis/credentials) (cr
 <br/> **recommended** restrict the api key
 2. Generate envify file: <br/> ```flutter pub run build_runner build```
 3. Google sign in only allows port 5000 from localhost so we need to run flutter web as follows: <br/>
-```flutter run -d chrome --web-hostname localhost --web-port 5000```
+```flutter run -d chrome --web-hostname localhost --web-port 5000 --no-sound-null-safety```
+4. we also need to add the --no-sound-null-safety flag until all libraries update to null safety
 
 ### Testing
 1. ```flutter test --coverage```

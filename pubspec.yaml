@@ -24,12 +24,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  floating_action_bubble:
-    git:
-      url: git://github.com/hovadur/floating_action_bubble.git
-  emojis:
-    git:
-      url: git://github.com/Parkar99/emojis.git
+  # not null safety
+  floating_action_bubble: 1.1.2
+  # not null safety
+  emojis: ^0.9.3
   font_awesome_flutter: ^9.0.0
   envify: ^2.0.0
   reorderables: ^0.4.1
