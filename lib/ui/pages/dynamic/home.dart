@@ -56,13 +56,6 @@ class FolderView extends StatefulWidget {
 class _FolderViewState extends State<FolderView> {
   Folder? folder;
 
-  String _shortenText(String text) {
-    if (text.length <= 20) {
-      return text;
-    }
-    return '${text.substring(0, 17)}...';
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
@@ -93,7 +86,8 @@ class _FolderViewState extends State<FolderView> {
                     child: SizedBox(
                         width: 30, child: Center(child: Text(subFolder.emoji))),
                   ),
-                  Text(_shortenText(subFolder.title)),
+                  Text(subFolder.title,
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
                   PopUpOptions(folder: subFolder),
                 ],
               ),

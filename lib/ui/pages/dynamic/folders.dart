@@ -16,6 +16,7 @@ import 'package:web/app/blocs/navigation/navigation_event.dart';
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/dialog_service.dart';
+import 'package:web/ui/layouts/basic/basic.dart';
 import 'package:web/ui/layouts/timeline/timeline.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -130,7 +131,14 @@ class _FoldersPageState extends State<FoldersPage> {
 
   Widget getLayout(double width, double height) {
     final FolderLayout? type = folder!.metadata.getLayout();
-    if (type == null || type == FolderLayout.basic) {
+    if (type == FolderLayout.basic) {
+      return BasicLayout(
+        key: Key(key),
+        folder: folder!,
+        width: width,
+        height: height,
+      );
+    } else {
       return TimelineLayout(
         key: Key(key),
         folder: folder!,
@@ -138,6 +146,5 @@ class _FoldersPageState extends State<FoldersPage> {
         height: height,
       );
     }
-    return Container();
   }
 }

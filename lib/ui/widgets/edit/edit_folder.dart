@@ -78,7 +78,7 @@ class _EditFolderState extends State<EditFolder> {
                 cloudCopyFolder = newFolder;
                 folder = Folder.clone(newFolder);
               }
-              Folder.sortFolders(folder?.subFolders);
+              Folder.sortFoldersByTimestamp(folder?.subFolders);
               folderID = folder!.id;
             });
           }
@@ -206,7 +206,8 @@ class _EditFolderContentState extends State<EditFolderContent> {
       folder: folder,
     ));
 
-    if (!widget.folder!.parent!.isRootFolder) {
+    if (widget.folder?.parent == null ||
+        widget.folder?.parent?.isRootFolder == false) {
       output.add(Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: SizedBox(
@@ -231,7 +232,8 @@ class _EditFolderContentState extends State<EditFolderContent> {
       ));
     }
 
-    if (widget.folder!.parent!.isRootFolder || folder.subFolders.isEmpty) {
+    if (widget.folder!.parent?.isRootFolder == true ||
+        folder.subFolders.isEmpty) {
       return output;
     }
     for (int i = 0; i < folder.subFolders.length; i++) {
@@ -330,7 +332,7 @@ class _TimelineEventCardState extends State<EventCard> {
 
   Widget timeStamp() {
     // root folder uses the timestamp to order it's content
-    if (widget.folder.parent!.isRootFolder) {
+    if (widget.folder.parent?.isRootFolder == true) {
       return Container();
     }
     return Column(
@@ -368,7 +370,7 @@ class _TimelineEventCardState extends State<EventCard> {
   }
 
   List<Widget> innerContent(List<FolderImage> cards) {
-    if (widget.folder.parent!.isRootFolder) {
+    if (widget.folder.parent?.isRootFolder == true) {
       return <Widget>[];
     }
     return [

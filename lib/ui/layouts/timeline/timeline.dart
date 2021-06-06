@@ -43,7 +43,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
-    Folder.sortFolders(widget.folder.subFolders);
+    Folder.sortFoldersByTimestamp(widget.folder.subFolders);
     for (final Folder subFolder in widget.folder.subFolders) {
       final Widget display = TimelineCard(
         width: widget.width,

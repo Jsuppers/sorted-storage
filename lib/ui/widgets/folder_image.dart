@@ -75,12 +75,21 @@ class RetryMediaWidget extends StatefulWidget {
 
 class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
+  late double width;
+  late double height;
+
+  @override
+  void initState() {
+    super.initState();
+    width = widget.locked ? 150 : 70;
+    height = widget.locked ? 150 : 70;
+  }
 
   Widget _backgroundImage(
       String imageKey, FileData media, ImageProvider? image) {
     return Container(
-      height: 150.0,
-      width: 150.0,
+      height: width,
+      width: height,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(6)),
         image: image == null
@@ -176,15 +185,15 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
       child: showPlaceholder
           ? _backgroundImage(widget.media.id, widget.media, null)
           : SizedBox(
-              height: widget.locked == false ? 180 : 250.0,
-              width: widget.locked == false ? 80 : 150.0,
+              height: height + 100,
+              width: width,
               child: widget.media.thumbnailURL == null
                   ? StaticLoadingLogo()
                   : Column(
                       children: [
                         SizedBox(
-                          height: widget.locked == false ? 80 : 150.0,
-                          width: widget.locked == false ? 80 : 150.0,
+                          height: height,
+                          width: width,
                           child: CachedNetworkImage(
                             imageUrl: widget.media.thumbnailURL!,
                             placeholder: (BuildContext context, String url) =>

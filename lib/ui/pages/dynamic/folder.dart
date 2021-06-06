@@ -12,6 +12,7 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
+import 'package:web/ui/layouts/basic/basic.dart';
 import 'package:web/ui/layouts/timeline/timeline_card.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/loading.dart';
@@ -86,13 +87,18 @@ class _ViewPageState extends State<FolderPage> {
 
   Widget getLayout(double width, double height) {
     final FolderLayout? type = folder!.metadata.getLayout();
-    if (type == null || type == FolderLayout.basic) {
+    if (type == FolderLayout.basic) {
+      return BasicLayout(
+        folder: folder!,
+        width: width,
+        height: height,
+      );
+    } else {
       return TimelineCard(
         folder: folder!,
         width: width,
         height: height,
       );
     }
-    return Container();
   }
 }
