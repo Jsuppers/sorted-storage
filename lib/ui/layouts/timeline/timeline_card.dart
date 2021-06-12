@@ -56,40 +56,23 @@ class _TimelineCardState extends State<TimelineCard> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FolderStorageBloc, FolderStorageState?>(
-      listener: (BuildContext context, FolderStorageState? state) {
-        if (state == null) {
-          return;
-        }
-        if (state.type == FolderStorageType.refresh &&
-            state.folderID == folder?.parent?.id &&
-            state.data != null) {
-          Folder? refreshFolder = state.data as Folder?;
-          if (refreshFolder != null && refreshFolder.id == folder!.id) {
-            setState(() {
-              key = DateTime.now().toString();
-            });
-          }
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 20.0),
-        child: Card(
-          child: Column(
-            children: <Widget>[
-              EventCard(
-                key: Key(key),
-                controls: folder?.amOwner != null && folder!.amOwner == true
-                    ? PopUpOptions(
-                        folder: widget.folder,
-                      )
-                    : Container(),
-                width: widget.width,
-                height: widget.height,
-                folder: folder!,
-              ),
-            ],
-          ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20.0),
+      child: Card(
+        child: Column(
+          children: <Widget>[
+            EventCard(
+              key: Key(key),
+              controls: folder?.amOwner != null && folder!.amOwner == true
+                  ? PopUpOptions(
+                      folder: folder,
+                    )
+                  : Container(),
+              width: widget.width,
+              height: widget.height,
+              folder: folder!,
+            ),
+          ],
         ),
       ),
     );

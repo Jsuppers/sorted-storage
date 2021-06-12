@@ -32,6 +32,10 @@ class FolderNameData {
   static String toFileName(Folder folder) {
     return '${folder.emoji} ${folder.title}';
   }
+
+  static String toFileNameFromEmojiAndTitle(String emoji, String title) {
+    return '$emoji $title';
+  }
 }
 
 /// content for a folder

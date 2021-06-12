@@ -116,7 +116,7 @@ class _TimelineEventCardState extends State<EventCard> {
         folder: folder!.subFolders[i],
         controls: folder?.amOwner != null && folder!.amOwner == true
             ? PopUpOptions(
-                folder: widget.folder,
+                folder: folder!.subFolders[i],
               )
             : Container(),
       ));
@@ -148,6 +148,10 @@ class _TimelineEventCardState extends State<EventCard> {
         listener: (BuildContext context, FolderStorageState? state) {
           if (state == null) {
             return;
+          }
+          if (state.type == FolderStorageType.refresh &&
+              state.folderID == folder?.id) {
+            setState(() {});
           }
           if (state.type == FolderStorageType.getFolder &&
               state.folderID == folder!.id) {

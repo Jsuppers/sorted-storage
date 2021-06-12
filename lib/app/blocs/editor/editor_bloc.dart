@@ -20,7 +20,6 @@ import 'package:web/app/models/media_progress.dart';
 import 'package:web/app/models/timeline_data.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/cloud_provider/storage_service.dart';
-import 'package:web/app/services/timeline_service.dart';
 
 /// LocalStoriesBloc handles all the local changes of the timeline. This allows
 /// the user to easily edit and reset the state of the timeline
@@ -62,12 +61,6 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         break;
       case EditorType.updateName:
         _updateName(event);
-        break;
-      case EditorType.updateTimestamp:
-        await _updateTimestamp(event);
-        break;
-      case EditorType.updateImageMetadata:
-        _updateImageMetadata(event);
         break;
       case EditorType.updateMetadata:
         _updateMetadata(event);
@@ -164,11 +157,8 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         folder.id!, fileData, streamController.stream);
 
     if (imageID != null) {
-      final Folder? eventData =
-          TimelineService.getFolderWithID(folder.id!, folder.parent);
       fileData.id = imageID;
       fileData.retrieveThumbnail = true;
-      eventData!.files.putIfAbsent(imageID, () => fileData);
       folder.files.putIfAbsent(imageID, () => fileData);
 
       add(EditorEvent(EditorType.uploadStatus,
@@ -193,79 +183,37 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
         return _storage.deleteResource(update.imageID);
       },
       (_) {
-        final Folder eventData = TimelineService.getFolderWithID(
-            update.folder.id!, update.folder.parent)!;
-        eventData.files.remove(update.imageID);
         update.folder.files.remove(update.imageID);
       },
     );
   }
 
   void _updateName(EditorEvent event) {
-    final Folder folder = event.data as Folder;
-    final String fileName = FolderNameData.toFileName(folder);
+    final UpdateFilenameEvent update = event.data as UpdateFilenameEvent;
     _syncData(
       event,
       () async {
-        return _storage.updateFileName(folder.id!, fileName);
+        return _storage.updateFileName(update.folder.id!, update.filename);
       },
       (_) {
-        final Folder eventData =
-            TimelineService.getFolderWithID(folder.id!, folder.parent)!;
-        eventData.emoji = folder.emoji;
-        eventData.title = folder.title;
-      },
-    );
-  }
-
-  Future<void> _updateTimestamp(EditorEvent event) async {
-    final Folder folder = event.data as Folder;
-    final String folderID = folder.id!;
-    _syncData(
-      event,
-      () async {
-        return _storage.updateMetadata(
-            fileId: folderID, metadata: folder.metadata);
-      },
-      (_) {
-        final Folder? eventData =
-            TimelineService.getFolderWithID(folderID, folder.parent);
-        if (eventData != null) {
-          eventData.metadata.setTimestamp(folder.metadata.getTimestamp());
-        }
-      },
-    );
-  }
-
-  void _updateImageMetadata(EditorEvent event) {
-    final UpdateImageMetaDataEvent update =
-        event.data as UpdateImageMetaDataEvent;
-    _syncData(
-      event,
-      () async {
-        return _storage.updateMetadata(
-            fileId: update.media.id, metadata: update.media.metadata);
-      },
-      (_) {
-        final Folder? cloudCopy = TimelineService.getFolderWithID(
-            update.folder.id!, update.folder.parent);
-        cloudCopy?.files.update(update.media.id, (_) => update.media);
+        FolderNameData folderNameData =
+            FolderNameData.fromFileName(update.filename);
+        update.folder.emoji = folderNameData.emoji;
+        update.folder.title = folderNameData.title;
       },
     );
   }
 
   void _updateMetadata(EditorEvent event) {
-    final Folder folder = event.data as Folder;
+    final UpdateMetadataEvent update = event.data as UpdateMetadataEvent;
     _syncData(
       event,
       () async {
         return _storage.updateMetadata(
-            fileId: folder.id!, metadata: folder.metadata);
+            fileId: update.data.id as String, metadata: update.metadata);
       },
       (_) {
-        final Folder? cloudCopy = TimelineService.getFolderWithID(
-            folder.id!, _folderStorageBloc.rootFolder);
-        cloudCopy?.metadata = folder.metadata;
+        update.data.metadata = update.metadata;
       },
     );
   }
@@ -284,11 +232,9 @@ class EditorBloc extends Bloc<EditorEvent, EditorState?> {
       },
       (double? newPosition) {
         if (update.media == true) {
-          final Folder? cloudCopy = TimelineService.getFolderWithID(
-              update.folder!.id!, update.folder!.parent);
-          if (cloudCopy != null) {
-            final FileData? file =
-                cloudCopy.files[update.items[update.currentIndex].imageKey];
+          if (update.folder != null) {
+            final FileData? file = update
+                .folder!.files[update.items[update.currentIndex].imageKey];
             if (file != null) {
               file.metadata.setOrder(newPosition);
             }

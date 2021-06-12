@@ -28,6 +28,7 @@ import 'package:web/constants.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/edit/edit_header.dart';
 import 'package:web/ui/widgets/folder_image.dart';
+import 'package:web/ui/widgets/folders_list.dart';
 import 'package:web/ui/widgets/icon_button.dart';
 import 'package:web/ui/widgets/loading.dart';
 
@@ -37,6 +38,9 @@ class EditFolder extends StatefulWidget {
   const EditFolder({Key? key, this.folder, this.parent}) : super(key: key);
 
   final Folder? folder;
+
+  /// we have a parent folder here instead of folder.parent because folder
+  /// can be null, which will create a new folder in this parent
   final Folder? parent;
 
   @override
@@ -45,8 +49,6 @@ class EditFolder extends StatefulWidget {
 
 class _EditFolderState extends State<EditFolder> {
   Folder? folder;
-  Folder? cloudCopyFolder;
-  String? folderID;
   bool error = false;
 
   @override
@@ -56,9 +58,7 @@ class _EditFolderState extends State<EditFolder> {
       BlocProvider.of<EditorBloc>(context)
           .add(EditorEvent(EditorType.createFolder, data: widget.parent));
     } else {
-      cloudCopyFolder = widget.folder;
-      folder = Folder.clone(cloudCopyFolder!);
-      folderID = cloudCopyFolder!.id;
+      folder = widget.folder;
     }
   }
 
@@ -70,16 +70,13 @@ class _EditFolderState extends State<EditFolder> {
           if (state?.error != null) {
             setState(() => error = true);
           } else if (state?.data != null) {
-            final Folder newFolder = state?.data as Folder;
             setState(() {
+              final Folder newFolder = state?.data as Folder;
               if (folder != null) {
-                folder!.subFolders.add(Folder.clone(newFolder));
+                Folder.sortFoldersByTimestamp(folder?.subFolders);
               } else {
-                cloudCopyFolder = newFolder;
-                folder = Folder.clone(newFolder);
+                folder = newFolder;
               }
-              Folder.sortFoldersByTimestamp(folder?.subFolders);
-              folderID = folder!.id;
             });
           }
         }
@@ -112,7 +109,6 @@ class _EditFolderState extends State<EditFolder> {
               width: info.screenSize.width,
               height: info.screenSize.height,
               folder: folder,
-              cloudCopy: cloudCopyFolder,
             ));
       }),
     );
@@ -127,7 +123,6 @@ class EditFolderContent extends StatefulWidget {
     required this.width,
     required this.height,
     required this.folder,
-    required this.cloudCopy,
   }) : super(key: key);
 
   // ignore: public_member_api_docs
@@ -138,8 +133,6 @@ class EditFolderContent extends StatefulWidget {
 
   // ignore: public_member_api_docs
   final Folder? folder;
-  // ignore: public_member_api_docs
-  final Folder? cloudCopy;
 
   @override
   _EditFolderContentState createState() => _EditFolderContentState();
@@ -147,10 +140,18 @@ class EditFolderContent extends StatefulWidget {
 
 class _EditFolderContentState extends State<EditFolderContent> {
   SavingState? savingState;
+  Folder? folder;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    folder = widget.folder;
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.folder == null) {
+    if (folder == null) {
       return const FullPageLoadingLogo(backgroundColor: Colors.white);
     }
 
@@ -164,7 +165,7 @@ class _EditFolderContentState extends State<EditFolderContent> {
         title: EditHeader(
           savingState: savingState,
           width: widget.width,
-          folder: widget.folder,
+          folder: folder,
         ),
       ),
       SliverToBoxAdapter(
@@ -188,7 +189,7 @@ class _EditFolderContentState extends State<EditFolderContent> {
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: getCards(widget.folder!, 0),
+              children: getCards(0),
             ),
           ),
         ),
@@ -196,49 +197,57 @@ class _EditFolderContentState extends State<EditFolderContent> {
     ]);
   }
 
-  List<Widget> getCards(Folder folder, int depth) {
-    List<Widget> output = [];
+  List<Widget> getCards(int depth) {
+    final List<Widget> output = <Widget>[];
     output.add(EventCard(
       savingState: savingState,
       controls: Container(),
       width: widget.width,
       height: widget.height,
-      folder: folder,
+      folder: folder!,
     ));
 
-    if (widget.folder?.parent == null ||
-        widget.folder?.parent?.isRootFolder == false) {
+    if (folder!.parent == null || folder!.parent!.isRootFolder == false) {
       output.add(Padding(
         padding: const EdgeInsets.only(bottom: 10),
-        child: SizedBox(
-          height: 40,
-          width: 140,
-          child: ButtonWithIcon(
-              text: 'add folder',
-              icon: Icons.add,
-              onPressed: () async {
-                if (savingState == SavingState.saving) {
-                  return;
-                }
-                BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                    EditorType.createFolder,
-                    data: widget.cloudCopy));
-              },
-              width: Constants.minScreenWidth,
-              backgroundColor: Colors.white,
-              textColor: Colors.black,
-              iconColor: Colors.black),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Folders', style: myThemeData.textTheme.headline4),
+            SizedBox(
+              height: 40,
+              width: 140,
+              child: ButtonWithIcon(
+                  text: 'add folder',
+                  icon: Icons.add,
+                  onPressed: () async {
+                    if (savingState == SavingState.saving) {
+                      return;
+                    }
+                    BlocProvider.of<EditorBloc>(context).add(
+                        EditorEvent(EditorType.createFolder, data: folder));
+                  },
+                  width: Constants.minScreenWidth,
+                  backgroundColor: Colors.white,
+                  textColor: Colors.black,
+                  iconColor: Colors.black),
+            ),
+          ],
         ),
       ));
     }
 
-    if (widget.folder!.parent?.isRootFolder == true ||
-        folder.subFolders.isEmpty) {
+    if (folder!.parent?.isRootFolder == true || folder!.subFolders.isEmpty) {
       return output;
     }
-    for (int i = 0; i < folder.subFolders.length; i++) {
-      output.addAll(getCards(folder.subFolders[i], depth + 1));
-    }
+    output.add(FoldersList(
+      subFolders: folder!.subFolders,
+      subFolderClick: (subFolder) {
+        setState(() {
+          folder = subFolder;
+        });
+      },
+    ));
     return output;
   }
 }
@@ -278,6 +287,7 @@ class _TimelineEventCardState extends State<EventCard> {
   TextEditingController descriptionController = TextEditingController();
   late DateTime selectedDate;
   late String formattedDate;
+  late Map<String, dynamic> editingMetaData;
   Timer? _debounce;
 
   @override
@@ -289,6 +299,7 @@ class _TimelineEventCardState extends State<EventCard> {
   @override
   void initState() {
     super.initState();
+    editingMetaData = Map<String, dynamic>.from(widget.folder.metadata);
     if (widget.folder.metadata.getTimestamp() != null) {
       selectedDate = DateTime.fromMillisecondsSinceEpoch(
           widget.folder.metadata.getTimestamp()!.toInt());
@@ -359,9 +370,13 @@ class _TimelineEventCardState extends State<EventCard> {
             ),
             initialValue: selectedDate,
             onDateSelected: (DateTime date) {
-              widget.folder.metadata.setTimestamp(date.millisecondsSinceEpoch);
-              BlocProvider.of<EditorBloc>(context).add(
-                  EditorEvent(EditorType.updateTimestamp, data: widget.folder));
+              editingMetaData.setTimestamp(date.millisecondsSinceEpoch);
+              final UpdateMetadataEvent update = UpdateMetadataEvent(
+                data: widget.folder,
+                metadata: editingMetaData,
+              );
+              BlocProvider.of<EditorBloc>(context)
+                  .add(EditorEvent(EditorType.updateMetadata, data: update));
             },
           ),
         ),
@@ -374,36 +389,6 @@ class _TimelineEventCardState extends State<EventCard> {
       return <Widget>[];
     }
     return [
-      const SizedBox(height: 10),
-      ReordableImages(cards: cards, folder: widget.folder),
-      const SizedBox(height: 10),
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          children: <Widget>[
-            SizedBox(
-              height: 40,
-              width: 140,
-              child: ButtonWithIcon(
-                  text: 'add file',
-                  icon: Icons.file_upload,
-                  onPressed: () async {
-                    if (widget.savingState == SavingState.saving) {
-                      return;
-                    }
-                    DialogService.imageUploadDialog(
-                      context,
-                      folder: widget.folder,
-                    );
-                  },
-                  width: Constants.minScreenWidth,
-                  backgroundColor: Colors.white,
-                  textColor: Colors.black,
-                  iconColor: Colors.black),
-            ),
-          ],
-        ),
-      ),
       const SizedBox(height: 10),
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -422,15 +407,50 @@ class _TimelineEventCardState extends State<EventCard> {
               onChanged: (String content) {
                 if (_debounce?.isActive ?? false) _debounce?.cancel();
                 _debounce = Timer(const Duration(milliseconds: 500), () {
-                  widget.folder.metadata.setDescription(content);
-                  BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                      EditorType.updateMetadata,
-                      data: widget.folder));
+                  editingMetaData.setDescription(content);
+                  final UpdateMetadataEvent update = UpdateMetadataEvent(
+                    data: widget.folder,
+                    metadata: editingMetaData,
+                  );
+                  BlocProvider.of<EditorBloc>(context).add(
+                      EditorEvent(EditorType.updateMetadata, data: update));
                 });
               },
               maxLines: null),
         ],
       ),
+      const SizedBox(height: 10),
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text('Files', style: myThemeData.textTheme.headline4),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            children: <Widget>[
+              SizedBox(
+                height: 40,
+                width: 140,
+                child: ButtonWithIcon(
+                    text: 'add file',
+                    icon: Icons.file_upload,
+                    onPressed: () async {
+                      if (widget.savingState == SavingState.saving) {
+                        return;
+                      }
+                      DialogService.imageUploadDialog(
+                        context,
+                        folder: widget.folder,
+                      );
+                    },
+                    width: Constants.minScreenWidth,
+                    backgroundColor: Colors.white,
+                    textColor: Colors.black,
+                    iconColor: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      ]),
+      ReordableImages(cards: cards, folder: widget.folder),
       const SizedBox(height: 10),
     ];
   }
@@ -495,10 +515,13 @@ class _TimelineEventCardState extends State<EventCard> {
                     onChanged: (String content) {
                       if (_debounce?.isActive ?? false) _debounce?.cancel();
                       _debounce = Timer(const Duration(milliseconds: 500), () {
-                        widget.folder.title = content;
-                        BlocProvider.of<EditorBloc>(context).add(EditorEvent(
-                            EditorType.updateName,
-                            data: widget.folder));
+                        final String fileName =
+                            FolderNameData.toFileNameFromEmojiAndTitle(
+                                widget.folder.emoji, content);
+                        final UpdateFilenameEvent update = UpdateFilenameEvent(
+                            filename: fileName, folder: widget.folder);
+                        BlocProvider.of<EditorBloc>(context).add(
+                            EditorEvent(EditorType.updateName, data: update));
                       });
                     }),
               ],

@@ -255,6 +255,14 @@ class ImageDescription extends StatefulWidget {
 class _ImageDescriptionState extends State<ImageDescription> {
   TextEditingController descriptionController = TextEditingController();
   Timer? _debounce;
+  late Map<String, dynamic> editingMetaData;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    editingMetaData = Map<String, dynamic>.from(widget.folder.metadata);
+  }
 
   @override
   void dispose() {
@@ -281,11 +289,13 @@ class _ImageDescriptionState extends State<ImageDescription> {
         onChanged: (String content) {
           if (_debounce?.isActive ?? false) _debounce?.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () {
-            widget.media.metadata.setDescription(content);
-            UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(
-                folder: widget.folder, media: widget.media);
+            editingMetaData.setDescription(content);
+            final UpdateMetadataEvent update = UpdateMetadataEvent(
+              data: widget.media,
+              metadata: editingMetaData,
+            );
             BlocProvider.of<EditorBloc>(context)
-                .add(EditorEvent(EditorType.updateImageMetadata, data: update));
+                .add(EditorEvent(EditorType.updateMetadata, data: update));
           });
         },
         maxLines: null);

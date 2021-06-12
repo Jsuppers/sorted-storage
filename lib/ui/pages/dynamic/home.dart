@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:web/app/extensions/string.dart';
 
 // Project imports:
 import 'package:web/app/blocs/editor/editor_bloc.dart';
@@ -86,8 +87,7 @@ class _FolderViewState extends State<FolderView> {
                     child: SizedBox(
                         width: 30, child: Center(child: Text(subFolder.emoji))),
                   ),
-                  Text(subFolder.title,
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(subFolder.title.ellipseOverflow(20), maxLines: 1),
                   PopUpOptions(folder: subFolder),
                 ],
               ),
