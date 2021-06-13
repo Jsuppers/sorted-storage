@@ -1,6 +1,10 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Project imports:
+import 'package:web/app/models/page_content.dart';
+import 'package:web/ui/pages/template/page_template.dart';
+
 /// Policy page
 class PolicyPage extends StatelessWidget {
   @override
@@ -9,27 +13,13 @@ class PolicyPage extends StatelessWidget {
     return FutureBuilder<String>(
         future: DefaultAssetBundle.of(context).loadString(file),
         builder: (BuildContext context, AsyncSnapshot<String> document) {
-          return Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Card(
-                child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: RichText(
-                text: TextSpan(
-                  style: DefaultTextStyle.of(context).style,
-                  children: <TextSpan>[
-                    TextSpan(
-                      text: document.data,
-                      style: TextStyle(
-                          color: Colors.black.withOpacity(0.6),
-                          fontSize: 14,
-                          fontWeight: FontWeight.normal),
-                    ),
-                  ],
-                ),
-              ),
-            )),
-          );
+          final List<PageItemContent> content = <PageItemContent>[
+            PageItemContent(
+              title: 'Privacy Policy',
+              text: document.data ?? '',
+            )
+          ];
+          return Card(child: PageTemplate(content));
         });
   }
 }

@@ -34,8 +34,9 @@ class FoldersPage extends StatefulWidget {
 
 class _FoldersPageState extends State<FoldersPage> {
   Folder? folder;
-  bool error = false;
+  String? error;
   late String key;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
@@ -58,15 +59,18 @@ class _FoldersPageState extends State<FoldersPage> {
           if (state.type == FolderStorageType.refresh &&
               state.folderID == widget.folderID &&
               state.data == null) {
-            setState(() {
-              key = DateTime.now().toString();
-            });
+
           }
           if (state.type == FolderStorageType.getFolder &&
               state.folderID == widget.folderID) {
-            setState(() {
-              folder = state.data as Folder;
-            });
+            if (state.error != null) {
+              BlocProvider.of<NavigationBloc>(context)
+                  .add(NavigateToErrorEvent());
+            } else {
+              setState(() {
+                folder = state.data as Folder;
+              });
+            }
           }
         },
         child: folder == null
@@ -116,11 +120,14 @@ class _FoldersPageState extends State<FoldersPage> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: getLayout(
-                          constraints.screenSize.width,
-                          constraints.screenSize.height,
+                      Scrollbar(
+                        controller: scrollController,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: getLayout(
+                            constraints.screenSize.width,
+                            constraints.screenSize.height,
+                          ),
                         ),
                       ),
                     ],
@@ -140,6 +147,7 @@ class _FoldersPageState extends State<FoldersPage> {
       );
     } else {
       return TimelineLayout(
+        scrollController: scrollController,
         key: Key(key),
         folder: folder!,
         width: width,

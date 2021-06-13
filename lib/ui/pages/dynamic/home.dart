@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reorderables/reorderables.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:web/app/extensions/string.dart';
 
 // Project imports:
 import 'package:web/app/blocs/editor/editor_bloc.dart';
@@ -18,9 +17,11 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/extensions/string.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
+import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -42,9 +43,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(alignment: Alignment.topLeft, child: FolderView()),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(alignment: Alignment.topLeft, child: FolderView()),
+      ),
     );
   }
 }
@@ -185,7 +188,7 @@ class _FolderViewState extends State<FolderView> {
                   ),
                 ),
               ),
-            )
+            ),
         ],
       );
     }));
