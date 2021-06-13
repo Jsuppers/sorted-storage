@@ -17,9 +17,11 @@ import 'package:web/app/blocs/folder_storage/folder_storage_state.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
 import 'package:web/app/blocs/navigation/navigation_event.dart';
+import 'package:web/app/extensions/string.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/models/update_position.dart';
 import 'package:web/app/services/dialog_service.dart';
+import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 import 'package:web/ui/theme/theme.dart';
 import 'package:web/ui/widgets/icon_button.dart';
@@ -41,9 +43,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(alignment: Alignment.topLeft, child: FolderView()),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(alignment: Alignment.topLeft, child: FolderView()),
+      ),
     );
   }
 }
@@ -55,13 +59,6 @@ class FolderView extends StatefulWidget {
 
 class _FolderViewState extends State<FolderView> {
   Folder? folder;
-
-  String _shortenText(String text) {
-    if (text.length <= 20) {
-      return text;
-    }
-    return '${text.substring(0, 17)}...';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +90,7 @@ class _FolderViewState extends State<FolderView> {
                     child: SizedBox(
                         width: 30, child: Center(child: Text(subFolder.emoji))),
                   ),
-                  Text(_shortenText(subFolder.title)),
+                  Text(subFolder.title.ellipseOverflow(20), maxLines: 1),
                   PopUpOptions(folder: subFolder),
                 ],
               ),
@@ -191,7 +188,7 @@ class _FolderViewState extends State<FolderView> {
                   ),
                 ),
               ),
-            )
+            ),
         ],
       );
     }));

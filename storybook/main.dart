@@ -10,10 +10,13 @@ import 'package:web/app/blocs/folder_storage/folder_storage_bloc.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_event.dart';
 import 'package:web/app/blocs/folder_storage/folder_storage_type.dart';
 import 'package:web/app/blocs/navigation/navigation_bloc.dart';
+import 'package:web/app/models/file_data.dart';
 import 'package:web/app/models/folder.dart';
 import 'package:web/app/services/cloud_provider/google/google_drive.dart';
 import 'package:web/app/services/cloud_provider/storage_service.dart';
+import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/user.dart' as usr;
+import 'package:web/ui/layouts/basic/basic.dart';
 import 'package:web/ui/layouts/timeline/timeline.dart';
 
 Future<void> main() async {
@@ -91,7 +94,7 @@ class _MyAppState extends State<MyApp> {
                       return Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: TimelineLayout(
-                          folder: exampleFolderSingle(0),
+                          folder: exampleFolderSingle(0, 0),
                           width: constraints.localWidgetSize.width,
                           height: constraints.localWidgetSize.height,
                         ),
@@ -104,7 +107,7 @@ class _MyAppState extends State<MyApp> {
                       return Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: TimelineLayout(
-                          folder: exampleFolderSingle(1),
+                          folder: exampleFolderSingle(1, 5),
                           width: constraints.localWidgetSize.width,
                           height: constraints.localWidgetSize.height,
                         ),
@@ -117,7 +120,46 @@ class _MyAppState extends State<MyApp> {
                       return Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: TimelineLayout(
-                          folder: exampleFolderSingle(10),
+                          folder: exampleFolderSingle(10, 5),
+                          width: constraints.localWidgetSize.width,
+                          height: constraints.localWidgetSize.height,
+                        ),
+                      );
+                    })),
+            Story(
+                name: 'Basic empty',
+                builder: (_, k) => ResponsiveBuilder(builder:
+                        (BuildContext context, SizingInformation constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: BasicLayout(
+                          folder: exampleFolderSingle(0, 5),
+                          width: constraints.localWidgetSize.width,
+                          height: constraints.localWidgetSize.height,
+                        ),
+                      );
+                    })),
+            Story(
+                name: 'Basic one',
+                builder: (_, k) => ResponsiveBuilder(builder:
+                        (BuildContext context, SizingInformation constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: BasicLayout(
+                          folder: exampleFolderSingle(1, 5),
+                          width: constraints.localWidgetSize.width,
+                          height: constraints.localWidgetSize.height,
+                        ),
+                      );
+                    })),
+            Story(
+                name: 'Basic ten',
+                builder: (_, k) => ResponsiveBuilder(builder:
+                        (BuildContext context, SizingInformation constraints) {
+                      return Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: BasicLayout(
+                          folder: exampleFolderSingle(10, 5),
                           width: constraints.localWidgetSize.width,
                           height: constraints.localWidgetSize.height,
                         ),
@@ -129,18 +171,34 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Folder exampleFolderSingle(int children) {
+  Folder exampleFolderSingle(int children, int files) {
     final List<Folder> subFolders = <Folder>[];
+    Map<String, dynamic> metadata = <String, dynamic>{};
+    Map<String, FileData> folderFiles = <String, FileData>{};
+    for (int i = 0; i < files; i++) {
+      folderFiles.putIfAbsent(
+          i.toString(),
+          () => FileData(
+                thumbnailURL: 'https://robohash.org/' + i.toString(),
+                id: i.toString(),
+                name: 'this is folder ' + i.toString(),
+              ));
+    }
+
+    metadata.setDescription('A description');
     for (int i = 0; i < children; i++) {
       subFolders.add(Folder(
-        title: 'Folder $i',
+        title: 'Long text folder example  $i',
         emoji: Emojis.rocket,
+        metadata: metadata,
         loaded: true,
       ));
     }
     return Folder(
       title: 'Example Title',
       emoji: Emojis.rocket,
+      metadata: metadata,
+      files: folderFiles,
       subFolders: subFolders,
       loaded: true,
     );

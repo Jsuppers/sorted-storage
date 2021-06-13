@@ -87,8 +87,6 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController _scrollController = ScrollController();
-
     return Scaffold(
       body: ResponsiveBuilder(
         builder: (BuildContext context, SizingInformation sizingInformation) =>
@@ -96,25 +94,7 @@ class _ContentState extends State<Content> with SingleTickerProviderStateMixin {
           width: sizingInformation.screenSize.width,
           height: sizingInformation.screenSize.height,
           decoration: myBackgroundDecoration,
-          child: Scrollbar(
-            controller: _scrollController,
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: widget.widget,
-                ),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20.0),
-                        child: Footer(sizingInformation.screenSize.width)),
-                  ),
-                )
-              ],
-            ),
-          ),
+          child: widget.widget,
         ),
       ),
       floatingActionButton: CustomActionButton(),

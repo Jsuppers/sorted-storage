@@ -35,6 +35,9 @@ class GoogleDrive implements StorageService {
 
   @override
   Stream<usr.User?> userChange() {
+    /// initialize the app with a non authenticated user
+    _newUser();
+
     return _googleSignIn.onCurrentUserChanged.map((GoogleSignInAccount? user) {
       if (user == null) {
         return null;

@@ -114,11 +114,17 @@ class EmojiPickerState extends State<EmojiPicker> {
           height: 40,
           onPressed: () {
             if (widget.folder != null) {
-              widget.folder!.emoji = element;
+              final String fileName =
+                  FolderNameData.toFileNameFromEmojiAndTitle(
+                element,
+                widget.folder!.title,
+              );
+              final UpdateFilenameEvent update = UpdateFilenameEvent(
+                  filename: fileName, folder: widget.folder!);
               BlocProvider.of<EditorBloc>(context).add(EditorEvent(
                   EditorType.updateName,
                   refreshUI: true,
-                  data: widget.folder));
+                  data: update));
               BlocProvider.of<NavigationBloc>(context).add(NavigatorPopEvent());
             }
           },

@@ -21,15 +21,17 @@ class NavBarLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        BlocProvider.of<NavigationBloc>(context).add(NavigateToHomeEvent());
-      },
-      child: SizedBox(
-        height: height,
-        child: Image.asset(showText
-            ? 'assets/images/logo_tiny.png'
-            : 'assets/images/logo_no_text.png'),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () =>
+            BlocProvider.of<NavigationBloc>(context).add(NavigateToHomeEvent()),
+        child: SizedBox(
+          height: height,
+          child: Image.asset(showText
+              ? 'assets/images/logo_tiny.png'
+              : 'assets/images/logo_no_text.png'),
+        ),
       ),
     );
   }

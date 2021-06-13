@@ -35,15 +35,21 @@ class EditorEvent {
   final String? error;
 }
 
-class UpdateImagesEvent {
-  UpdateImagesEvent({required this.images, required this.folder});
-  Map<String, FileData> images;
+class UpdateFilenameEvent {
+  UpdateFilenameEvent({required this.filename, required this.folder});
+  String filename;
   Folder folder;
 }
 
-class UpdateImageMetaDataEvent {
-  UpdateImageMetaDataEvent({required this.media, required this.folder});
-  FileData media;
+class UpdateMetadataEvent {
+  UpdateMetadataEvent({required this.metadata, required this.data});
+  Map<String, dynamic> metadata;
+  dynamic data;
+}
+
+class UpdateImagesEvent {
+  UpdateImagesEvent({required this.images, required this.folder});
+  Map<String, FileData> images;
   Folder folder;
 }
 

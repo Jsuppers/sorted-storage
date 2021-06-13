@@ -29,40 +29,62 @@ class LoginPage extends StatelessWidget {
         }
         return ResponsiveBuilder(
             builder: (BuildContext context, SizingInformation constraints) {
-          return SizedBox(
-            height: constraints.screenSize.height / 2,
-            child: Center(
-              child: SizedBox(
-                height: 205,
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: <Widget>[
-                        const NavBarLogo(height: 40),
-                        const SizedBox(
-                          width: 100,
-                          height: 20,
-                          child: Divider(thickness: 1),
-                        ),
-                        GoogleAuthButton(
-                          onPressed: () {
-                            BlocProvider.of<AuthenticationBloc>(context)
-                                .add(AuthenticationSignInEvent());
-                          },
-                          darkMode: true,
-                        ),
-                        const SizedBox(
-                          width: 100,
-                          height: 20,
-                          child: Divider(thickness: 1),
-                        ),
-                        Text('By signing up you agree to our',
-                            style: myThemeData.textTheme.caption),
-                        const SizedBox(height: 5),
-                        Text('Privacy Policy and Terms of Conditions',
-                            style: myThemeData.textTheme.caption)
-                      ],
+          return SingleChildScrollView(
+            child: SizedBox(
+              height: constraints.screenSize.height / 2,
+              child: Center(
+                child: SizedBox(
+                  height: 225,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: <Widget>[
+                          const NavBarLogo(height: 40),
+                          const SizedBox(
+                            width: 100,
+                            height: 20,
+                            child: Divider(thickness: 1),
+                          ),
+                          GoogleAuthButton(
+                            onPressed: () {
+                              BlocProvider.of<AuthenticationBloc>(context)
+                                  .add(AuthenticationSignInEvent());
+                            },
+                            darkMode: true,
+                          ),
+                          const SizedBox(
+                            width: 100,
+                            height: 20,
+                            child: Divider(thickness: 1),
+                          ),
+                          Text('By signing up you agree to our',
+                              style: myThemeData.textTheme.caption),
+                          const SizedBox(height: 5),
+                          SizedBox(
+                            width: 300,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                    onTap: () =>
+                                        BlocProvider.of<NavigationBloc>(context)
+                                            .add(NavigateToPrivacyEvent()),
+                                    child: Text('Privacy Policy',
+                                        style: myThemeData.textTheme.caption)),
+                                Text(' and ',
+                                    style: myThemeData.textTheme.caption),
+                                InkWell(
+                                    onTap: () =>
+                                        BlocProvider.of<NavigationBloc>(context)
+                                            .add(NavigateToPrivacyEvent()),
+                                    child: Text('Terms of Conditions',
+                                        style: myThemeData.textTheme.caption)),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:web/app/models/page_content.dart';
+import 'package:web/ui/footer/footer.dart';
 import 'package:web/ui/navigation/navigation_bar/navigation_login.dart';
+import 'package:web/ui/navigation/navigation_bar/navigation_logo.dart';
 
 /// template for displaying a page
 class PageTemplate extends StatelessWidget {
@@ -14,11 +16,18 @@ class PageTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ScrollController _scrollController = ScrollController();
+
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return Column(
-          children: _createContent(constraints),
-        );
+        return SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              children: [
+                ..._createContent(constraints),
+                Footer(),
+              ],
+            ));
       },
     );
   }
@@ -37,10 +46,14 @@ class PageTemplate extends StatelessWidget {
 
     final List<Widget> children = <Widget>[
       Padding(
-        padding: const EdgeInsets.all(20.0),
-        child:
-            Align(alignment: Alignment.centerRight, child: NavigationLogin()),
-      )
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              NavBarLogo(height: 35),
+              NavigationLogin(),
+            ],
+          ))
     ];
     for (final PageItemContent content in _contentList) {
       if (borderless) {
@@ -100,7 +113,7 @@ class _BorderlessContent extends StatelessWidget {
     } else {
       children.addAll(<Widget>[
         _TextWidget(width: widthText, content: content),
-        _ImageWidget(imageUri: content.imageURL, width: widthImage)
+        _ImageWidget(imageUri: content.imageURL!, width: widthImage)
       ]);
     }
 
@@ -142,7 +155,7 @@ class _BorderedContent extends StatelessWidget {
       );
     } else {
       children.addAll(<Widget>[
-        _ImageWidget(imageUri: content.imageURL, width: widthImage),
+        _ImageWidget(imageUri: content.imageURL!, width: widthImage),
         _TextWidget(width: widthText, content: content)
       ]);
     }

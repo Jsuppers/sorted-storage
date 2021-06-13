@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:web/app/extensions/metadata.dart';
 import 'package:web/app/models/folder.dart';
+import 'package:web/constants.dart';
 import 'package:web/ui/layouts/timeline/timeline_card.dart';
 
 class _TimeLineEventEntry {
@@ -23,6 +24,7 @@ class TimelineLayout extends StatefulWidget {
     required this.width,
     required this.height,
     required this.folder,
+    required this.scrollController,
   }) : super(key: key);
 
   // ignore: public_member_api_docs
@@ -32,6 +34,8 @@ class TimelineLayout extends StatefulWidget {
   final double height;
 
   final Folder folder;
+
+  final ScrollController scrollController;
 
   @override
   State<StatefulWidget> createState() => _TimelineLayoutState();
@@ -43,7 +47,7 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     final List<Widget> children = <Widget>[];
     final List<_TimeLineEventEntry> timeLineEvents = <_TimeLineEventEntry>[];
 
-    Folder.sortFolders(widget.folder.subFolders);
+    Folder.sortFoldersByTimestamp(widget.folder.subFolders);
     for (final Folder subFolder in widget.folder.subFolders) {
       final Widget display = TimelineCard(
         width: widget.width,
@@ -60,8 +64,9 @@ class _TimelineLayoutState extends State<TimelineLayout> {
     }
     if (children.isNotEmpty) {
       return SizedBox(
-          height: widget.height,
+          height: widget.height - Constants.headerSize,
           child: ListView.builder(
+            controller: widget.scrollController,
             itemCount: children.length,
             itemBuilder: (BuildContext context, int index) {
               return children[index];

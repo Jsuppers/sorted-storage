@@ -68,9 +68,17 @@ class DialogService {
         return EditFolderDialog(folder: folder, parent: parent);
       },
     ).then((_) {
-      // update the ui with any changes made in the edit dialog
-      cloudBloc.add(FolderStorageEvent(FolderStorageType.refresh,
-          folderID: parent?.id, data: folder));
+      // if folder is defined we tell any listeners to update
+      if (folder != null &&
+          folder.parent != null &&
+          folder.parent!.subFolders.contains(folder)) {
+        cloudBloc.add(FolderStorageEvent(FolderStorageType.refresh,
+            folderID: folder.id, data: folder));
+      } else if (parent != null) {
+        // if no folder is defined it is a new folder,
+        cloudBloc.add(FolderStorageEvent(FolderStorageType.refresh,
+            folderID: parent.id, data: parent));
+      }
     });
   }
 

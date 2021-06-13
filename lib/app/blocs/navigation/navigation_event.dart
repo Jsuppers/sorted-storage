@@ -50,6 +50,15 @@ class NavigateToMediaEvent extends NavigationEvent {
 }
 
 /// event to navigate to the media page
+class NavigateToErrorEvent extends NavigationEvent {
+  /// constructor which sets route to the media page
+  NavigateToErrorEvent()
+      : super(
+      route: BaseRoute.error.toRouteString(),
+      requiresAuthentication: true);
+}
+
+/// event to navigate to the media page
 class NavigateToFolderEvent extends NavigationEvent {
   /// constructor which sets route to the media page
   NavigateToFolderEvent()

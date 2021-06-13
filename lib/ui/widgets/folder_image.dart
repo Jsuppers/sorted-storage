@@ -75,12 +75,21 @@ class RetryMediaWidget extends StatefulWidget {
 
 class _RetryMediaWidgetState extends State<RetryMediaWidget> {
   bool showPlaceholder = false;
+  late double width;
+  late double height;
+
+  @override
+  void initState() {
+    super.initState();
+    width = widget.locked ? 150 : 70;
+    height = widget.locked ? 150 : 70;
+  }
 
   Widget _backgroundImage(
       String imageKey, FileData media, ImageProvider? image) {
     return Container(
-      height: 150.0,
-      width: 150.0,
+      height: width,
+      width: height,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(6)),
         image: image == null
@@ -176,15 +185,15 @@ class _RetryMediaWidgetState extends State<RetryMediaWidget> {
       child: showPlaceholder
           ? _backgroundImage(widget.media.id, widget.media, null)
           : SizedBox(
-              height: widget.locked == false ? 180 : 250.0,
-              width: widget.locked == false ? 80 : 150.0,
+              height: height + 100,
+              width: width,
               child: widget.media.thumbnailURL == null
                   ? StaticLoadingLogo()
                   : Column(
                       children: [
                         SizedBox(
-                          height: widget.locked == false ? 80 : 150.0,
-                          width: widget.locked == false ? 80 : 150.0,
+                          height: height,
+                          width: width,
                           child: CachedNetworkImage(
                             imageUrl: widget.media.thumbnailURL!,
                             placeholder: (BuildContext context, String url) =>
@@ -246,6 +255,14 @@ class ImageDescription extends StatefulWidget {
 class _ImageDescriptionState extends State<ImageDescription> {
   TextEditingController descriptionController = TextEditingController();
   Timer? _debounce;
+  late Map<String, dynamic> editingMetaData;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    editingMetaData = Map<String, dynamic>.from(widget.folder.metadata);
+  }
 
   @override
   void dispose() {
@@ -272,11 +289,13 @@ class _ImageDescriptionState extends State<ImageDescription> {
         onChanged: (String content) {
           if (_debounce?.isActive ?? false) _debounce?.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () {
-            widget.media.metadata.setDescription(content);
-            UpdateImageMetaDataEvent update = UpdateImageMetaDataEvent(
-                folder: widget.folder, media: widget.media);
+            editingMetaData.setDescription(content);
+            final UpdateMetadataEvent update = UpdateMetadataEvent(
+              data: widget.media,
+              metadata: editingMetaData,
+            );
             BlocProvider.of<EditorBloc>(context)
-                .add(EditorEvent(EditorType.updateImageMetadata, data: update));
+                .add(EditorEvent(EditorType.updateMetadata, data: update));
           });
         },
         maxLines: null);

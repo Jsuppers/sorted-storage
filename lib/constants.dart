@@ -29,4 +29,7 @@ class Constants {
 
   /// maximum size of a filename (for the ui so it doesn't overflow)
   static const int maxFileName = 30;
+
+  /// size of the header
+  static const int headerSize = 90;
 }

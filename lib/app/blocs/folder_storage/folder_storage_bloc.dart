@@ -1,5 +1,6 @@
 // Dart imports:
 import 'dart:async';
+import 'dart:developer';
 
 // Package imports:
 import 'package:emojis/emojis.dart';
@@ -54,18 +55,25 @@ class FolderStorageBloc extends Bloc<FolderStorageEvent, FolderStorageState?> {
 
   Future<FolderStorageState> _getFolder(FolderStorageEvent event) async {
     Folder? folder = event.data as Folder?;
+    String? error;
+    try {
     if (folder == null && cache.containsKey(event.folderID)) {
       folder = cache[event.folderID];
     }
     if (folder != null) {
       await storage.updateFolder(event.folderID!, folder: folder);
     } else {
+
       folder = await storage.getFolder(event.folderID!,
           folderName: '${Emojis.smilingFace} New Folder');
     }
     cache.putIfAbsent(folder!.id!, () => folder);
+
+    } catch (e) {
+      error = 'Could not retrieve data, are you share this folder exists and is shared?';
+    }
     return FolderStorageState(FolderStorageType.getFolder,
-        data: folder, folderID: event.folderID);
+        data: folder, folderID: event.folderID, error: error);
   }
 
   FolderStorageState _refresh(FolderStorageEvent event) {

@@ -70,10 +70,11 @@ class RouteConfiguration {
       case BaseRoute.home:
         return PageContent(page: HomePage(), requiresAuthentication: true);
       case BaseRoute.folders:
-        return PageContent(
-            page: FoldersPage(destination), requiresAuthentication: true);
+        return PageContent(page: FoldersPage(destination));
       case BaseRoute.folder:
         return PageContent(page: FolderPage(destination));
+
+      /// similar to to folders page except it doesn't have the /folders prefix
       case BaseRoute.show:
         return PageContent(page: FoldersPage(baseRoute.replaceFirst('/', '')));
     }

@@ -4,6 +4,9 @@ import 'package:web/app/models/file_data.dart';
 
 enum FolderLayout {
   /// standard and default layout which shows the folders in a timeline layout
+  timeline,
+
+  /// basic layout of folders and description
   basic,
 
   /// a custom layout
@@ -28,6 +31,10 @@ class FolderNameData {
 
   static String toFileName(Folder folder) {
     return '${folder.emoji} ${folder.title}';
+  }
+
+  static String toFileNameFromEmojiAndTitle(String emoji, String title) {
+    return '$emoji $title';
   }
 }
 
@@ -81,13 +88,24 @@ class Folder {
     );
   }
 
-  static void sortFolders(List<Folder>? folders) {
+  static void sortFoldersByTimestamp(List<Folder>? folders) {
     if (folders == null) {
       return;
     }
     folders.sort((Folder a, Folder b) {
       final int first = a.metadata.getTimestamp() ?? 0;
       final int second = b.metadata.getTimestamp() ?? 0;
+      return first.compareTo(second);
+    });
+  }
+
+  static void sortFoldersByOrder(List<Folder>? folders) {
+    if (folders == null) {
+      return;
+    }
+    folders.sort((Folder a, Folder b) {
+      final double first = a.metadata.getOrder() ?? 0;
+      final double second = b.metadata.getOrder() ?? 0;
       return first.compareTo(second);
     });
   }

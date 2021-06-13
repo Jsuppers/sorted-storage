@@ -4,7 +4,7 @@ class PageItemContent {
   PageItemContent(
       {required this.title,
       required this.text,
-      required this.imageURL,
+      this.imageURL,
       this.callToActionButtonText,
       this.callToActionCallback});
 
@@ -15,7 +15,7 @@ class PageItemContent {
   String text;
 
   /// URL for the image
-  String imageURL;
+  String? imageURL;
 
   /// text for the call to action button
   String? callToActionButtonText;
