@@ -14,11 +14,13 @@
 *.iml
 *.ipr
 *.iws
+.idea/
 
 # Visual Studio Code related
 .classpath
 .project
 .settings/
+.vscode/
 
 # Flutter repo-specific
 /bin/cache/
