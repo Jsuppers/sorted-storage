@@ -7,10 +7,16 @@ import 'package:hive/hive.dart';
 // Project imports:
 import 'package:sorted_storage/themes/colors.dart';
 
-abstract class StorageTheme {
-  static final _box = Hive.box('themes');
+class StorageTheme {
+  factory StorageTheme({Box? themeBox}) {
+    return StorageTheme._(themeBox ?? Hive.box('themes'));
+  }
 
-  static ThemeData light({required TextTheme textTheme}) {
+  const StorageTheme._(this._themeBox);
+
+  final Box _themeBox;
+
+  ThemeData light({required TextTheme textTheme}) {
     return ThemeData.light().copyWith(
       appBarTheme: _appBarTheme,
       textTheme: textTheme.apply(
@@ -20,7 +26,7 @@ abstract class StorageTheme {
     );
   }
 
-  static ThemeData dark({required TextTheme textTheme}) {
+  ThemeData dark({required TextTheme textTheme}) {
     return ThemeData.dark().copyWith(
       appBarTheme: _appBarTheme,
       textTheme: textTheme.apply(
@@ -31,9 +37,17 @@ abstract class StorageTheme {
     );
   }
 
-  static ThemeMode get themeMode {
-    final _themeModeValue = _box.get('themeMode', defaultValue: 0);
-    switch (_themeModeValue) {
+  ThemeMode get themeMode {
+    final _themeModeValue = _themeBox.get('themeMode', defaultValue: 0);
+    return mapValueToThemeMode(_themeModeValue);
+  }
+
+  set themeMode(ThemeMode mode) {
+    _themeBox.put('themeMode', mapThemeModeToValue(mode));
+  }
+
+  ThemeMode mapValueToThemeMode(int themeModeValue) {
+    switch (themeModeValue) {
       case 1:
         return ThemeMode.light;
       case 2:
@@ -44,25 +58,18 @@ abstract class StorageTheme {
     }
   }
 
-  static set themeMode(ThemeMode mode) {
-    late final int _themeModeValue;
-
+  int mapThemeModeToValue(ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
-        _themeModeValue = 0;
-        break;
+        return 0;
       case ThemeMode.light:
-        _themeModeValue = 1;
-        break;
+        return 1;
       case ThemeMode.dark:
-        _themeModeValue = 2;
-        break;
+        return 2;
     }
-
-    _box.put('themeMode', _themeModeValue);
   }
 
-  static AppBarTheme get _appBarTheme {
+  AppBarTheme get _appBarTheme {
     return const AppBarTheme(color: StorageColors.blue);
   }
 }

@@ -8,10 +8,10 @@ import 'package:bloc/bloc.dart';
 import 'package:sorted_storage/themes/theme.dart';
 
 class ThemeModeCubit extends Cubit<ThemeMode> {
-  ThemeModeCubit() : super(StorageTheme.themeMode);
+  ThemeModeCubit() : super(StorageTheme().themeMode);
 
   void toggleTheme(ThemeMode themeMode) {
-    StorageTheme.themeMode = themeMode;
+    StorageTheme().themeMode = themeMode;
     emit(themeMode);
   }
 }

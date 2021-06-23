@@ -14,27 +14,27 @@ class App extends StatelessWidget {
     return ResponsiveLayoutBuilder(
       small: (context, child) => AppView(
         lightTheme:
-            StorageTheme.light(textTheme: StorageTextTheme.smallTextTheme),
+            StorageTheme().light(textTheme: StorageTextTheme.smallTextTheme),
         darkTheme:
-            StorageTheme.dark(textTheme: StorageTextTheme.smallTextTheme),
+            StorageTheme().dark(textTheme: StorageTextTheme.smallTextTheme),
       ),
       medium: (context, child) => AppView(
         lightTheme:
-            StorageTheme.light(textTheme: StorageTextTheme.mediumTextTheme),
+            StorageTheme().light(textTheme: StorageTextTheme.mediumTextTheme),
         darkTheme:
-            StorageTheme.dark(textTheme: StorageTextTheme.mediumTextTheme),
+            StorageTheme().dark(textTheme: StorageTextTheme.mediumTextTheme),
       ),
       large: (context, child) => AppView(
         lightTheme:
-            StorageTheme.light(textTheme: StorageTextTheme.largeTextTheme),
+            StorageTheme().light(textTheme: StorageTextTheme.largeTextTheme),
         darkTheme:
-            StorageTheme.dark(textTheme: StorageTextTheme.largeTextTheme),
+            StorageTheme().dark(textTheme: StorageTextTheme.largeTextTheme),
       ),
       xLarge: (context, child) => AppView(
         lightTheme:
-            StorageTheme.light(textTheme: StorageTextTheme.xLargeTextTheme),
+            StorageTheme().light(textTheme: StorageTextTheme.xLargeTextTheme),
         darkTheme:
-            StorageTheme.dark(textTheme: StorageTextTheme.xLargeTextTheme),
+            StorageTheme().dark(textTheme: StorageTextTheme.xLargeTextTheme),
       ),
     );
   }
@@ -55,8 +55,8 @@ class AppView extends StatelessWidget {
     return MaterialApp(
       title: 'Sorted Storage',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      theme: lightTheme,
+      darkTheme: darkTheme,
       themeMode: ThemeMode.system,
       builder: (_, child) {
         return ScrollConfiguration(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Project imports:
 import 'package:sorted_storage/app/app.dart';
@@ -13,14 +15,17 @@ import 'package:sorted_storage/widgets/helpers/helpers.dart';
 import 'helpers/helpers.dart';
 
 void main() {
+  setUpAll(() async {
+    await Hive.initFlutter();
+    await Hive.openBox('themes');
+  });
+
   group('App', () {
     testWidgets('renders LandingPage', (tester) async {
       await tester.pumpWidget(const App());
       expect(find.byType(LandingPage), findsOneWidget);
     });
-  });
 
-  group('App', () {
     testWidgets('uses small theme on small devices', (tester) async {
       tester.setSmallDisplaySize();
 
@@ -30,12 +35,12 @@ void main() {
 
       expect(
         _materialApp.theme,
-        StorageTheme.light(textTheme: StorageTextTheme.smallTextTheme),
+        StorageTheme().light(textTheme: StorageTextTheme.smallTextTheme),
       );
 
       expect(
         _materialApp.darkTheme,
-        StorageTheme.dark(textTheme: StorageTextTheme.smallTextTheme),
+        StorageTheme().dark(textTheme: StorageTextTheme.smallTextTheme),
       );
     });
 
@@ -48,12 +53,12 @@ void main() {
 
       expect(
         _materialApp.theme,
-        StorageTheme.light(textTheme: StorageTextTheme.mediumTextTheme),
+        StorageTheme().light(textTheme: StorageTextTheme.mediumTextTheme),
       );
 
       expect(
         _materialApp.darkTheme,
-        StorageTheme.dark(textTheme: StorageTextTheme.mediumTextTheme),
+        StorageTheme().dark(textTheme: StorageTextTheme.mediumTextTheme),
       );
     });
 
@@ -66,12 +71,12 @@ void main() {
 
       expect(
         _materialApp.theme,
-        StorageTheme.light(textTheme: StorageTextTheme.largeTextTheme),
+        StorageTheme().light(textTheme: StorageTextTheme.largeTextTheme),
       );
 
       expect(
         _materialApp.darkTheme,
-        StorageTheme.dark(textTheme: StorageTextTheme.largeTextTheme),
+        StorageTheme().dark(textTheme: StorageTextTheme.largeTextTheme),
       );
     });
 
@@ -84,12 +89,12 @@ void main() {
 
       expect(
         _materialApp.theme,
-        StorageTheme.light(textTheme: StorageTextTheme.xLargeTextTheme),
+        StorageTheme().light(textTheme: StorageTextTheme.xLargeTextTheme),
       );
 
       expect(
         _materialApp.darkTheme,
-        StorageTheme.dark(textTheme: StorageTextTheme.xLargeTextTheme),
+        StorageTheme().dark(textTheme: StorageTextTheme.xLargeTextTheme),
       );
     });
 
