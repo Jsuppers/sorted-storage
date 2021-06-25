@@ -7,7 +7,17 @@ class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate([
+                const Center(child: Text('Landing Page')),
+              ]),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.sortedStorage">
+    package="com.sortedstorage.app">
    <application
         android:label="Sorted Storage"
         android:icon="@mipmap/ic_launcher">

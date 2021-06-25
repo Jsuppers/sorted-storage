@@ -1,7 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
+
+// Project imports:
 import 'package:sorted_storage/themes/themes.dart';
 
 class MockHiveBox extends Mock implements Box {}

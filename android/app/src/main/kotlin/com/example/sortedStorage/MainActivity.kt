@@ -1,4 +1,4 @@
-package com.example.sortedStorage
+package com.sortedstorage.app
 
 import io.flutter.embedding.android.FlutterActivity
 
