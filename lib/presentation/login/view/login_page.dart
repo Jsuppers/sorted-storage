@@ -35,7 +35,7 @@ class LoginPage extends StatelessWidget {
             ),
             Column(
               children: [
-                SizedBox(height: _size.height * 0.3 + 100),
+                SizedBox(height: _size.height * 0.4 + AppSpacings.fortyEight),
                 Text(
                   'The best place to sort, store, and share your files!',
                   style: StorageTextStyle.subtitle2,
@@ -46,18 +46,24 @@ class LoginPage extends StatelessWidget {
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: AppSpacings.twelve),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Image.asset('assets/images/google-play-badge.png'),
-                        SizedBox(width: AppSpacings.sixteen),
-                        Image.asset('assets/images/app-store-badge.png'),
+                        Image.asset(
+                          'assets/images/google-play-badge.png',
+                          height: 100,
+                        ),
+                        Image.asset(
+                          'assets/images/app-store-badge.png',
+                          height: 70,
+                        ),
                       ],
                     ),
                   ),
                 const Spacer(),
                 Padding(
                   padding: EdgeInsets.symmetric(
-                    vertical: AppSpacings.eight,
-                    horizontal: AppSpacings.twelve,
+                    vertical: AppSpacings.twelve,
+                    horizontal: AppSpacings.sixteen,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -20,7 +20,7 @@ class GoogleAuthButton extends StatelessWidget {
     final _isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return RawMaterialButton(
-      clipBehavior: Clip.hardEdge,
+      clipBehavior: Clip.antiAlias,
       fillColor: _isDarkMode ? _darkBackgroundColor : StorageColors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       elevation: 1,
@@ -29,10 +29,9 @@ class GoogleAuthButton extends StatelessWidget {
           context.read<AuthenticationRepository>().signInWithGoogle(),
       child: SizedBox(
         height: 40,
-        width: 200,
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(width: 6),
             Ink(
               color:
                   _isDarkMode ? StorageColors.white : StorageColors.transparent,
@@ -45,7 +44,7 @@ class GoogleAuthButton extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: 18),
             Text(
               'Sign in with Google',
               style: TextStyle(
@@ -55,7 +54,7 @@ class GoogleAuthButton extends StatelessWidget {
                 color: _isDarkMode ? StorageColors.white : _darkTextColor,
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: 24),
           ],
         ),
       ),
