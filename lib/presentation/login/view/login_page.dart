@@ -22,7 +22,14 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Image.asset('assets/images/login_background.png'),
+            Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/login_background.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
             Padding(
               padding: EdgeInsets.only(top: _size.height * 0.1),
               child: Align(
