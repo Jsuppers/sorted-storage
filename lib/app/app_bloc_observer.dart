@@ -3,6 +3,8 @@ import 'dart:developer';
 
 // Package imports:
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
+import 'package:sorted_storage/utils/services/crashlytics/crashlytics.dart';
 
 class AppBlocObserver extends BlocObserver {
   @override
@@ -13,7 +15,11 @@ class AppBlocObserver extends BlocObserver {
 
   @override
   void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
-    log('onError(${bloc.runtimeType}, $error, $stackTrace)');
+    if (!kReleaseMode) {
+      log('onError(${bloc.runtimeType}, $error, $stackTrace)');
+    } else {
+      CrashReporter().log(exception: error, stackTrace: stackTrace);
+    }
     super.onError(bloc, error, stackTrace);
   }
 }

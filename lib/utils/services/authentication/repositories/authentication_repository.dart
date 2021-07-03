@@ -31,8 +31,9 @@ class AuthenticationRepository {
 
         await _firebaseAuth.signInWithCredential(_authCredential);
       }
-    } on Exception catch (_) {
-      // TODO: Add error and exception handling
+    } on Exception catch (e) {
+      // TODO: Add handling of exceptions
+      print(e);
     }
   }
 
