@@ -8,11 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:sorted_storage/themes/colors.dart';
 
 class StorageTheme {
-  factory StorageTheme({Box? themeBox}) {
-    return StorageTheme._(themeBox ?? Hive.box('themes'));
-  }
-
-  const StorageTheme._(this._themeBox);
+  StorageTheme({Box? themeBox}) : _themeBox = themeBox ?? Hive.box('themes');
 
   final Box _themeBox;
 

@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
-import 'package:sorted_storage/presentation/landing/view/lading_page.dart';
+import 'package:sorted_storage/presentation/home/view/home_page.dart';
 import 'package:sorted_storage/presentation/login/view/login_page.dart';
 import 'package:sorted_storage/themes/themes.dart';
 import 'package:sorted_storage/utils/services/authentication/repositories/authentication_repository.dart';
@@ -85,7 +85,7 @@ class AppView extends StatelessWidget {
           if (snapshot.data == null) {
             return const LoginPage();
           } else {
-            return const LandingPage();
+            return const HomePage();
           }
         },
       ),

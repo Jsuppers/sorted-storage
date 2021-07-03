@@ -23,6 +23,7 @@ class LoginPage extends StatelessWidget {
         child: Stack(
           children: [
             Container(
+              key: const Key('login_page_background'),
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/login_background.png'),
@@ -31,6 +32,7 @@ class LoginPage extends StatelessWidget {
               ),
             ),
             Padding(
+              key: const Key('login_page_logo'),
               padding: EdgeInsets.only(top: _size.height * 0.1),
               child: Align(
                 alignment: Alignment.topCenter,
@@ -73,6 +75,7 @@ class LoginPage extends StatelessWidget {
                     horizontal: AppSpacings.sixteen,
                   ),
                   child: Row(
+                    key: const Key('login_page_legal_consents_row'),
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(

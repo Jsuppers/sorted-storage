@@ -4,8 +4,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' hide User;
 
 class AuthenticationRepository {
+  AuthenticationRepository({FirebaseAuth? firebaseAuth})
+      : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+
   /// Instance of firebase auth
-  final _firebaseAuth = FirebaseAuth.instance;
+  late final FirebaseAuth _firebaseAuth;
 
   /// Returns a Stream of the user's current authentication state
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
