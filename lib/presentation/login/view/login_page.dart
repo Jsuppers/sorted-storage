@@ -3,19 +3,36 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:sorted_storage/constants/constants.dart';
 import 'package:sorted_storage/layout/layout.dart';
+import 'package:sorted_storage/presentation/login/bloc/login_bloc.dart';
 import 'package:sorted_storage/presentation/login/components/components.dart';
+import 'package:sorted_storage/themes/colors.dart';
 import 'package:sorted_storage/themes/themes.dart';
+import 'package:sorted_storage/utils/services/authentication/authentication.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => LoginBloc(AuthenticationRepository()),
+      child: const LoginView(),
+    );
+  }
+}
+
+class LoginView extends StatelessWidget {
+  const LoginView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _theme = Theme.of(context);
     final _size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -50,7 +67,26 @@ class LoginPage extends StatelessWidget {
                   style: StorageTextStyle.subtitle2,
                 ),
                 SizedBox(height: AppSpacings.fortyEight),
-                const GoogleAuthButton(),
+                GoogleAuthButton(
+                  onPressed: () => context
+                      .read<LoginBloc>()
+                      .add(const LoginGoogleAuthButtonPressed()),
+                ),
+                BlocBuilder<LoginBloc, LoginState>(
+                  builder: (context, state) {
+                    if (state is LoginFailure) {
+                      return Padding(
+                        padding: EdgeInsets.all(AppSpacings.eight),
+                        child: Text(
+                          state.errorText,
+                          style: _theme.textTheme.subtitle1!
+                              .copyWith(color: StorageColors.red),
+                        ),
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
                 if (kIsWeb)
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: AppSpacings.twelve),

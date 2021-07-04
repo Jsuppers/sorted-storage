@@ -1,18 +1,16 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-// Package imports:
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 // Project imports:
 import 'package:sorted_storage/themes/themes.dart';
-import 'package:sorted_storage/utils/services/authentication/authentication.dart';
 
 class GoogleAuthButton extends StatelessWidget {
-  const GoogleAuthButton({Key? key}) : super(key: key);
+  const GoogleAuthButton({Key? key, required this.onPressed}) : super(key: key);
 
   static const _darkBackgroundColor = Color(0xFF4285F4);
   static const _darkTextColor = Color(0xCC000000);
+
+  final Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +22,7 @@ class GoogleAuthButton extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       elevation: 1,
       highlightElevation: 0,
-      onPressed: () =>
-          context.read<AuthenticationRepository>().signInWithGoogle(),
+      onPressed: onPressed,
       child: SizedBox(
         height: 40,
         child: Row(

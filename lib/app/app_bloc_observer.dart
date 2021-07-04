@@ -1,9 +1,13 @@
 // Dart imports:
 import 'dart:developer';
 
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+
+// Project imports:
 import 'package:sorted_storage/utils/services/crashlytics/crashlytics.dart';
 
 class AppBlocObserver extends BlocObserver {

@@ -34,4 +34,7 @@ abstract class StorageColors {
 
   /// Light Orange
   static const lightOrange = Color(0xFFFA8429);
+
+  /// Red
+  static const red = Color(0xFFF01A21);
 }

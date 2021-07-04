@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 // Package imports:
 import 'package:bloc/bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -28,6 +29,10 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox('themes');
   final _authenticationRepository = AuthenticationRepository();
+
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+  await FirebaseCrashlytics.instance
+      .setUserIdentifier(_authenticationRepository.uid ?? 'Unregistered user');
 
   runZonedGuarded(
     () => runApp(App(authenticationRepository: _authenticationRepository)),
