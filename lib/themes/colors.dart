@@ -21,7 +21,7 @@ abstract class StorageColors {
   static const black25 = Color(0x40000000);
 
   /// Grey
-  static const grey = Color(0xFF263238);
+  static const grey = Color(0xFF2B2F43);
 
   /// Blue
   static const blue = Color(0xFF0077C2);
@@ -37,4 +37,13 @@ abstract class StorageColors {
 
   /// Red
   static const red = Color(0xFFF01A21);
+
+  /// Neon Red
+  static const neonRed = Color(0xFFE02366);
+
+  /// Neon Blue
+  static const neonBlue = Color(0xFF248AE2);
+
+  /// Green
+  static const green = Color(0xFF48A253);
 }

@@ -6,7 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
-import 'package:sorted_storage/presentation/home/view/home_page.dart';
+import 'package:sorted_storage/presentation/landing/bloc/landing_navigation_bloc.dart';
+import 'package:sorted_storage/presentation/landing/repositories/repositories.dart';
+import 'package:sorted_storage/presentation/landing/view/landing_page.dart';
 import 'package:sorted_storage/presentation/login/view/login_page.dart';
 import 'package:sorted_storage/themes/themes.dart';
 import 'package:sorted_storage/utils/services/authentication/repositories/authentication_repository.dart';
@@ -60,34 +62,45 @@ class AppView extends StatelessWidget {
     Key? key,
     required this.lightTheme,
     required this.darkTheme,
+    this.landingFabRepository,
   }) : super(key: key);
 
   final ThemeData lightTheme;
   final ThemeData darkTheme;
+  final LandingFabRepository? landingFabRepository;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sorted Storage',
-      debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: ThemeMode.system,
-      builder: (_, child) {
-        return ScrollConfiguration(
-          behavior: const RemoveScrollGlow(),
-          child: child!,
-        );
-      },
-      home: StreamBuilder<User?>(
-        stream: context.read<AuthenticationRepository>().authStateChanges,
-        builder: (_, snapshot) {
-          if (snapshot.data == null) {
-            return const LoginPage();
-          } else {
-            return const HomePage();
-          }
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(
+          value: LandingNavigationBloc(
+            landingFabRepository ?? LandingFabRepository(),
+          ),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Sorted Storage',
+        debugShowCheckedModeBanner: false,
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: ThemeMode.system,
+        builder: (_, child) {
+          return ScrollConfiguration(
+            behavior: const RemoveScrollGlow(),
+            child: child!,
+          );
         },
+        home: StreamBuilder<User?>(
+          stream: context.read<AuthenticationRepository>().authStateChanges,
+          builder: (_, snapshot) {
+            if (snapshot.data == null) {
+              return const LoginPage();
+            } else {
+              return const LandingPage();
+            }
+          },
+        ),
       ),
     );
   }
