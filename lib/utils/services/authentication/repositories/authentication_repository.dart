@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' hide User;
-import 'package:sorted_storage/constants/user_constants.dart';
 
 // Project imports:
+import 'package:sorted_storage/constants/user_constants.dart';
 import 'package:sorted_storage/utils/services/authentication/authentication.dart';
 import 'package:sorted_storage/utils/services/crashlytics/crashlytics.dart';
 

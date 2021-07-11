@@ -1,6 +1,11 @@
-import 'package:eva_icons_flutter/eva_icons_flutter.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// Project imports:
 import 'package:sorted_storage/layout/spacings.dart';
 import 'package:sorted_storage/presentation/landing/bloc/landing_navigation_bloc.dart';
 import 'package:sorted_storage/presentation/profile/bloc/profile_bloc.dart';
