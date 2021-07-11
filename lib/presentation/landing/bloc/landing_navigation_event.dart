@@ -18,6 +18,10 @@ class LandingNavigationProfileButtonPressed extends LandingNavigationEvent {
   const LandingNavigationProfileButtonPressed();
 }
 
+class LandingNavigationProfileBackButtonPressed extends LandingNavigationEvent {
+  const LandingNavigationProfileBackButtonPressed();
+}
+
 class LandingNavigationDonateButtonPressed extends LandingNavigationEvent {
   const LandingNavigationDonateButtonPressed();
 }

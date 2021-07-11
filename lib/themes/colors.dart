@@ -14,14 +14,23 @@ abstract class StorageColors {
   /// White
   static const white = Color(0xFFFFFFFF);
 
+  /// White Pink
+  static const whitePink = Color(0xFFC9B9CF);
+
   /// Black
   static const black = Color(0xFF000000);
+
+  /// Black with 50% Opacity
+  static const black50 = Color(0x80000000);
 
   /// Black with 25% Opacity
   static const black25 = Color(0x40000000);
 
   /// Grey
-  static const grey = Color(0xFF2B2F43);
+  static const blueGrey = Color(0xFF2B2F43);
+
+  /// Grey with 50% Opacity
+  static const blueGrey50 = Color(0x802B2F43);
 
   /// Blue
   static const blue = Color(0xFF0077C2);

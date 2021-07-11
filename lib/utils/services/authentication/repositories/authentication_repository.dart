@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' hide User;
+import 'package:sorted_storage/constants/user_constants.dart';
 
 // Project imports:
 import 'package:sorted_storage/utils/services/authentication/authentication.dart';
@@ -59,11 +60,13 @@ class AuthenticationRepository {
   String? get uid => _firebaseAuth.currentUser?.uid;
 
   /// Returns the username of the authenticated user
-  String? get username => _firebaseAuth.currentUser?.displayName;
+  String get username =>
+      _firebaseAuth.currentUser?.displayName ?? UserConstants.username;
 
   /// Returns the email of the authenticated user
   String? get email => _firebaseAuth.currentUser?.email;
 
   /// Returns a link to the profile picture of an authenticated user
-  String? get photoUrl => _firebaseAuth.currentUser?.photoURL;
+  String get photoUrl =>
+      _firebaseAuth.currentUser?.photoURL ?? UserConstants.imageLink;
 }

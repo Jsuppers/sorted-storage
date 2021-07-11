@@ -22,7 +22,8 @@ class LandingNavigationBloc extends Bloc<LandingNavigationEvent, int> {
   ) async* {
     if (event is LandingNavigationFloatingActionButtonPressed) {
       landingFabRepository.toggleButton(event.context);
-    } else if (event is LandingNavigationHomeButtonPressed) {
+    } else if (event is LandingNavigationHomeButtonPressed ||
+        event is LandingNavigationProfileBackButtonPressed) {
       landingFabRepository.hideButtons();
       yield 0;
     } else if (event is LandingNavigationProfileButtonPressed) {

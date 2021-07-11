@@ -42,7 +42,7 @@ class _LandingPageState extends State<LandingPage> {
         backgroundColor: Colors.white,
         child: const Icon(
           Icons.sentiment_satisfied,
-          color: StorageColors.grey,
+          color: StorageColors.blueGrey,
         ),
       ),
     );

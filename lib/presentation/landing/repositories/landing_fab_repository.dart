@@ -17,9 +17,13 @@ class LandingFabRepository {
     if (_overlayEntry.mounted) {
       _overlayEntry.remove();
     } else {
-      _overlayState!.insert(_overlayEntry);
+      _overlayState?.insert(_overlayEntry);
     }
   }
 
-  void hideButtons() => _overlayEntry.remove();
+  void hideButtons() {
+    if (_overlayEntry.mounted) {
+      _overlayEntry.remove();
+    }
+  }
 }

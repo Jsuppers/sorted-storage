@@ -29,7 +29,7 @@ class StorageTheme {
         bodyColor: StorageColors.white,
         displayColor: StorageColors.white,
       ),
-      scaffoldBackgroundColor: StorageColors.grey,
+      scaffoldBackgroundColor: StorageColors.blueGrey,
     );
   }
 
