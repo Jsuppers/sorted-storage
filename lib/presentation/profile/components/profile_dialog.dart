@@ -2,12 +2,10 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
 import 'package:sorted_storage/layout/spacings.dart';
-import 'package:sorted_storage/presentation/landing/bloc/landing_navigation_bloc.dart';
 import 'package:sorted_storage/presentation/profile/bloc/profile_bloc.dart';
 import 'package:sorted_storage/themes/colors.dart';
 import 'package:sorted_storage/utils/services/authentication/authentication.dart';
@@ -64,7 +62,8 @@ class ProfileDialog extends StatelessWidget {
                 ],
               ),
               SizedBox(height: AppSpacings.thirtyTwo),
-              // TODO: Replace this with dashboard showing free space, total storage space, etc.
+              // TODO: Replace this with dashboard showing free space,
+              // total storage space, etc.
               const Placeholder(
                 fallbackHeight: 120,
               ),

@@ -14,6 +14,9 @@ import 'package:sorted_storage/themes/themes.dart';
 import 'package:sorted_storage/utils/services/authentication/authentication.dart';
 import 'package:sorted_storage/widgets/helpers/helpers.dart';
 
+class MockAuthenticationRepository extends Mock
+    implements AuthenticationRepository {}
+
 class MockThemeBox extends Mock implements Box {}
 
 extension PumpApp on WidgetTester {
@@ -43,7 +46,7 @@ class _App extends StatelessWidget {
     AuthenticationRepository? authenticationRepository,
   })  : _storageTheme = storageTheme ?? StorageTheme(themeBox: MockThemeBox()),
         _authenticationRepository =
-            authenticationRepository ?? AuthenticationRepository(),
+            authenticationRepository ?? MockAuthenticationRepository(),
         super(key: key);
 
   final Widget child;
@@ -117,7 +120,7 @@ class _AppView extends StatelessWidget {
           child: child!,
         );
       },
-      home: child,
+      home: Scaffold(body: child),
     );
   }
 }
