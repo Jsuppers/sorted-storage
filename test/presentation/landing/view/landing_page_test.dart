@@ -15,7 +15,8 @@ import 'package:sorted_storage/presentation/landing/view/landing_page.dart';
 import 'package:sorted_storage/presentation/profile/view/profile_page.dart';
 import '../../../helpers/helpers.dart';
 
-class MockLandingNavigationBloc extends MockBloc<LandingNavigationEvent, int>
+class MockLandingNavigationBloc
+    extends MockBloc<LandingNavigationEvent, LandingNavigationState>
     implements LandingNavigationBloc {}
 
 class LandingNavigationEventFake extends Fake
@@ -26,6 +27,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(LandingNavigationEventFake());
+    registerFallbackValue(const LandingNavigationPageChangeSuccess(0));
   });
 
   setUp(() {
@@ -33,7 +35,8 @@ void main() {
   });
 
   testWidgets('renders landing page', (tester) async {
-    when(() => _landingNavigationBloc.state).thenReturn(0);
+    when(() => _landingNavigationBloc.state)
+        .thenReturn(const LandingNavigationPageChangeSuccess(0));
     await tester.pumpApp(
       BlocProvider.value(
         value: _landingNavigationBloc,
@@ -46,7 +49,8 @@ void main() {
 
   group('renders the correct pages depending on the state', () {
     testWidgets('renders profile page', (tester) async {
-      when(() => _landingNavigationBloc.state).thenReturn(1);
+      when(() => _landingNavigationBloc.state)
+          .thenReturn(const LandingNavigationPageChangeSuccess(1));
       await tester.pumpApp(
         BlocProvider.value(
           value: _landingNavigationBloc,
@@ -57,7 +61,8 @@ void main() {
     });
 
     testWidgets('renders about page', (tester) async {
-      when(() => _landingNavigationBloc.state).thenReturn(2);
+      when(() => _landingNavigationBloc.state)
+          .thenReturn(const LandingNavigationPageChangeSuccess(2));
       await tester.pumpApp(
         BlocProvider.value(
           value: _landingNavigationBloc,
