@@ -3,4 +3,5 @@ abstract class LinkConstants {
       'https://raw.githubusercontent.com/Jsuppers/sorted-storage/main/assets/docs/privacy.txt';
   static const termsAndConditions =
       'https://raw.githubusercontent.com/Jsuppers/sorted-storage/main/assets/docs/terms.txt';
+  static const donationPage = 'https://www.buymeacoffee.com/joris';
 }

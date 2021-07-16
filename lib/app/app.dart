@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Project imports:
 import 'package:sorted_storage/presentation/landing/bloc/landing_navigation_bloc.dart';
-import 'package:sorted_storage/presentation/landing/repositories/repositories.dart';
 import 'package:sorted_storage/presentation/landing/view/landing_page.dart';
 import 'package:sorted_storage/presentation/login/view/login_page.dart';
 import 'package:sorted_storage/themes/themes.dart';
@@ -62,21 +61,17 @@ class AppView extends StatelessWidget {
     Key? key,
     required this.lightTheme,
     required this.darkTheme,
-    this.landingFabRepository,
   }) : super(key: key);
 
   final ThemeData lightTheme;
   final ThemeData darkTheme;
-  final LandingFabRepository? landingFabRepository;
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
-          value: LandingNavigationBloc(
-            landingFabRepository ?? LandingFabRepository(),
-          ),
+          value: LandingNavigationBloc(),
         ),
       ],
       child: MaterialApp(

@@ -1,37 +1,31 @@
 // Dart imports:
 import 'dart:async';
 
-// Flutter imports:
-import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:bloc/bloc.dart';
 
-// Project imports:
-import 'package:sorted_storage/presentation/landing/repositories/repositories.dart';
-
 part 'landing_navigation_event.dart';
+part 'landing_navigation_state.dart';
 
-class LandingNavigationBloc extends Bloc<LandingNavigationEvent, int> {
-  LandingNavigationBloc(this.landingFabRepository) : super(0);
-  final LandingFabRepository landingFabRepository;
+class LandingNavigationBloc
+    extends Bloc<LandingNavigationEvent, LandingNavigationState> {
+  LandingNavigationBloc() : super(const LandingNavigationPageChangeSuccess(0));
 
   @override
-  Stream<int> mapEventToState(
+  Stream<LandingNavigationState> mapEventToState(
     LandingNavigationEvent event,
   ) async* {
     if (event is LandingNavigationFloatingActionButtonPressed) {
-      landingFabRepository.toggleButton(event.context);
+      yield const LandingNavigationFloatingActionButtonToggledInProgress();
     } else if (event is LandingNavigationHomeButtonPressed ||
         event is LandingNavigationProfileBackButtonPressed) {
-      landingFabRepository.hideButtons();
-      yield 0;
+      yield const LandingNavigationPageChangeSuccess(0);
     } else if (event is LandingNavigationProfileButtonPressed) {
-      landingFabRepository.hideButtons();
-      yield 1;
+      yield const LandingNavigationPageChangeSuccess(1);
     } else if (event is LandingNavigationDonateButtonPressed) {
+      yield const LandingNavigationOpenDonationPageInProgress();
     } else if (event is LandingNavigationAboutButtonPressed) {
-      yield 2;
+      yield const LandingNavigationPageChangeSuccess(2);
     }
   }
 }

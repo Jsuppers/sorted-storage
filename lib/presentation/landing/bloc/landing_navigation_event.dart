@@ -6,8 +6,7 @@ abstract class LandingNavigationEvent {
 
 class LandingNavigationFloatingActionButtonPressed
     extends LandingNavigationEvent {
-  const LandingNavigationFloatingActionButtonPressed(this.context);
-  final BuildContext context;
+  const LandingNavigationFloatingActionButtonPressed();
 }
 
 class LandingNavigationHomeButtonPressed extends LandingNavigationEvent {
