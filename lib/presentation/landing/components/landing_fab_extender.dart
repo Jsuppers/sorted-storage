@@ -21,6 +21,7 @@ class LandingFabExtender extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           LandingFabExtenderButton(
+            key: const Key('landing_fab_extender_donate_button'),
             icon: const Icon(Icons.favorite),
             title: 'Donate',
             color: StorageColors.neonRed,
@@ -29,6 +30,7 @@ class LandingFabExtender extends StatelessWidget {
                 .add(const LandingNavigationDonateButtonPressed()),
           ),
           LandingFabExtenderButton(
+            key: const Key('landing_fab_extender_profile_button'),
             icon: const Icon(Icons.person),
             title: 'Profile',
             color: StorageColors.green,
@@ -37,6 +39,7 @@ class LandingFabExtender extends StatelessWidget {
                 .add(const LandingNavigationProfileButtonPressed()),
           ),
           LandingFabExtenderButton(
+            key: const Key('landing_fab_extender_home_button'),
             icon: const Icon(Icons.home),
             title: 'Home',
             color: StorageColors.neonBlue,

@@ -16,7 +16,7 @@ class LandingNavigationBloc
     LandingNavigationEvent event,
   ) async* {
     if (event is LandingNavigationFloatingActionButtonPressed) {
-      yield const LandingNavigationFloatingActionButtonToggledInProgress();
+      yield LandingNavigationFloatingActionButtonToggledInProgress();
     } else if (event is LandingNavigationHomeButtonPressed ||
         event is LandingNavigationProfileBackButtonPressed) {
       yield const LandingNavigationPageChangeSuccess(0);

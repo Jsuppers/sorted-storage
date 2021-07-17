@@ -25,7 +25,7 @@ void main() {
         act: (LandingNavigationBloc bloc) =>
             bloc.add(const LandingNavigationFloatingActionButtonPressed()),
         expect: () =>
-            [const LandingNavigationFloatingActionButtonToggledInProgress()],
+            [isA<LandingNavigationFloatingActionButtonToggledInProgress>()],
       );
     });
 

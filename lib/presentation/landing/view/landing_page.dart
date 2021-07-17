@@ -32,6 +32,9 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<LandingNavigationBloc, LandingNavigationState>(
+        listenWhen: (previous, current) =>
+            previous != current ||
+            current is LandingNavigationFloatingActionButtonToggledInProgress,
         listener: (context, state) {
           if (state is LandingNavigationPageChangeSuccess &&
               _overlayEntry.mounted) {
@@ -63,6 +66,7 @@ class _LandingPageState extends State<LandingPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        key: const Key('landing_page_floating_action_button'),
         onPressed: () => context
             .read<LandingNavigationBloc>()
             .add(const LandingNavigationFloatingActionButtonPressed()),
