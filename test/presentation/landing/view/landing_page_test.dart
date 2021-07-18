@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -83,12 +82,9 @@ void main() {
         await tester.pump();
         expect(find.byType(LandingFabExtender), findsOneWidget);
 
-        await tester.pumpAndSettle();
-
         await tester
             .tap(find.byKey(const Key('landing_page_floating_action_button')));
-        await tester.pumpAndSettle();
-        await tester.pumpAndSettle();
+        await tester.pump();
         expect(find.byType(LandingFabExtender), findsNothing);
       });
     });

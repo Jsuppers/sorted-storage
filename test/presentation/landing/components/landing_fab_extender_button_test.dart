@@ -1,7 +1,12 @@
-import 'package:bloc_test/bloc_test.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+// Project imports:
 import 'package:sorted_storage/presentation/landing/bloc/landing_navigation_bloc.dart';
 import 'package:sorted_storage/presentation/landing/components/components.dart';
 import '../../../helpers/helpers.dart';

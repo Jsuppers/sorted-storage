@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sorted_storage/constants/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
+import 'package:sorted_storage/constants/constants.dart';
 import 'package:sorted_storage/presentation/about/view/about_page.dart';
 import 'package:sorted_storage/presentation/home/view/home_page.dart';
 import 'package:sorted_storage/presentation/landing/bloc/landing_navigation_bloc.dart';
 import 'package:sorted_storage/presentation/landing/components/components.dart';
 import 'package:sorted_storage/presentation/profile/view/profile_page.dart';
 import 'package:sorted_storage/themes/colors.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
