@@ -12,7 +12,7 @@ import 'package:sorted_storage/presentation/profile/bloc/profile_bloc.dart';
 import 'package:sorted_storage/presentation/profile/components/profile_dialog.dart';
 import 'package:sorted_storage/presentation/profile/components/search_bar.dart';
 import 'package:sorted_storage/widgets/buttons/circular_back_button.dart';
-import 'package:sorted_storage/widgets/dialogs/custom_dialog.dart';
+import 'package:sorted_storage/widgets/dialogs/dialogs.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key, this.profileBloc}) : super(key: key);

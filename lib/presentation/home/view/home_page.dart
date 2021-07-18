@@ -35,6 +35,7 @@ class HomePage extends StatelessWidget {
                       ),
                       const Spacer(),
                       InkWell(
+                        key: const Key('home_page_about_button'),
                         customBorder: const StadiumBorder(),
                         onTap: () => context
                             .read<LandingNavigationBloc>()
