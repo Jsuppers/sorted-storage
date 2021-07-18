@@ -7,6 +7,10 @@ abstract class ProfileEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class ProfileDialogShowed extends ProfileEvent {
+  const ProfileDialogShowed();
+}
+
 class ProfileLogoutButtonPressed extends ProfileEvent {
   const ProfileLogoutButtonPressed();
 }

@@ -38,41 +38,57 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                SizedBox(height: AppSpacings.eight),
-                Row(
-                  children: [
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: AppSpacings.eight),
-                      child: CircularBackButton(
-                        onTap: () => context.read<LandingNavigationBloc>().add(
-                            const LandingNavigationProfileBackButtonPressed()),
-                      ),
-                    ),
-                    const Expanded(child: SearchBar()),
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: AppSpacings.eight),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () => null,
-                        child: Padding(
-                          padding: EdgeInsets.all(AppSpacings.twelve),
-                          child: const Icon(EvaIcons.folderAdd),
+      child: BlocListener<ProfileBloc, ProfileState>(
+        listenWhen: (_, current) => current is ProfileDialogShowedSuccess,
+        listener: (context, state) async {
+          await showCustomDialog(
+            context: context,
+            child: BlocProvider.value(
+              value: context.read<ProfileBloc>(),
+              child: const ProfileDialog(),
+            ),
+          );
+        },
+        child: CustomScrollView(
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  SizedBox(height: AppSpacings.eight),
+                  Row(
+                    children: [
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: AppSpacings.eight),
+                        child: CircularBackButton(
+                          key: const Key('profile_view_back_button'),
+                          onTap: () =>
+                              context.read<LandingNavigationBloc>().add(
+                                    // ignore: lines_longer_than_80_chars
+                                    const LandingNavigationProfileBackButtonPressed(),
+                                  ),
                         ),
                       ),
-                    ),
-                  ],
-                )
-              ],
+                      const Expanded(child: SearchBar()),
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: AppSpacings.eight),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => null,
+                          child: Padding(
+                            padding: EdgeInsets.all(AppSpacings.twelve),
+                            child: const Icon(EvaIcons.folderAdd),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -81,13 +97,7 @@ class _ProfileViewState extends State<ProfileView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
-      await showCustomDialog(
-        context: context,
-        child: BlocProvider.value(
-          value: context.read<ProfileBloc>(),
-          child: const ProfileDialog(),
-        ),
-      );
+      context.read<ProfileBloc>().add(const ProfileDialogShowed());
     });
   }
 }

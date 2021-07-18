@@ -19,6 +19,7 @@ class ProfileDialog extends StatelessWidget {
     final _mediaQuery = MediaQuery.of(context);
 
     return BlocListener<ProfileBloc, ProfileState>(
+      listenWhen: (_, current) => current is! ProfileDialogShowed,
       listener: (context, state) {
         if (state is ProfileLogoutSuccess) {
           Navigator.of(context).pop();
@@ -72,6 +73,7 @@ class ProfileDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   OutlinedButton.icon(
+                    key: const Key('profile_dialog_logout_button'),
                     onPressed: () => context
                         .read<ProfileBloc>()
                         .add(const ProfileLogoutButtonPressed()),
@@ -86,6 +88,7 @@ class ProfileDialog extends StatelessWidget {
                     label: const Text('Logout'),
                   ),
                   ElevatedButton(
+                    key: const Key('profile_dialog_close_button'),
                     onPressed: () => context
                         .read<ProfileBloc>()
                         .add(const ProfileCloseButtonPressed()),

@@ -15,7 +15,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Stream<ProfileState> mapEventToState(
     ProfileEvent event,
   ) async* {
-    if (event is ProfileCloseButtonPressed) {
+    if (event is ProfileDialogShowed) {
+      yield const ProfileDialogShowedSuccess();
+    } else if (event is ProfileCloseButtonPressed) {
       yield const ProfileDialogCloseSuccess();
     } else if (event is ProfileLogoutButtonPressed) {
       yield const ProfileLogoutSuccess();

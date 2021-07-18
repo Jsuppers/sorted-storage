@@ -70,9 +70,11 @@ void main() {
       });
 
       testWidgets('toggles floating action button when tapped', (tester) async {
+        final _landingNavigationBloc = LandingNavigationBloc();
+
         await tester.pumpApp(
           BlocProvider.value(
-            value: LandingNavigationBloc(),
+            value: _landingNavigationBloc,
             child: const LandingPage(),
           ),
         );

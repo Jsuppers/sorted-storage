@@ -11,6 +11,10 @@ class ProfileInitial extends ProfileState {
   const ProfileInitial();
 }
 
+class ProfileDialogShowedSuccess extends ProfileState {
+  const ProfileDialogShowedSuccess();
+}
+
 class ProfileLogoutSuccess extends ProfileState {
   const ProfileLogoutSuccess();
 }
