@@ -75,7 +75,7 @@ class _ProfileViewState extends State<ProfileView> {
                             EdgeInsets.symmetric(horizontal: AppSpacings.eight),
                         child: InkWell(
                           customBorder: const CircleBorder(),
-                          onTap: () => null,
+                          onTap: createNewFolder,
                           child: Padding(
                             padding: EdgeInsets.all(AppSpacings.twelve),
                             child: const Icon(EvaIcons.folderAdd),
@@ -91,6 +91,10 @@ class _ProfileViewState extends State<ProfileView> {
         ),
       ),
     );
+  }
+
+  void createNewFolder() {
+    // TODO: create a new folder with this folder as parent
   }
 
   @override

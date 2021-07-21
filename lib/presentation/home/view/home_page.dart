@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
                       SizedBox(width: AppSpacings.twelve),
                       InkWell(
                         customBorder: const CircleBorder(),
-                        onTap: () => null,
+                        onTap: createNewFolder,
                         child: Padding(
                           padding: EdgeInsets.all(AppSpacings.twelve),
                           child: const Icon(EvaIcons.folderAdd),
@@ -61,5 +61,9 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void createNewFolder() {
+    // TODO: create a new folder with this folder as parent
   }
 }
